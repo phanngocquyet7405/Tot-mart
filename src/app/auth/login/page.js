@@ -5,17 +5,43 @@ import AuthCard from "@/app/components/auth/auth_card"
 import FormInput from "@/app/components/auth/form_input"
 import AuthButton from "@/app/components/auth/auth_button"
 import { Lock } from "lucide-react"
-import { useState } from "react"
+import { useState,useContext } from "react"
+import { AppContext } from "@/app/context/AppContext"
+import { useRouter } from "next/navigation"
+import  {loginApi}  from "@/app/services/api/authService"
 
-export default function LoginPage() {
+export default function LoginPage({onSwitchToRegister}) {
 
-    const [email, setEmail] =useState('');
-    const [password, setPassword] = useState('');
+    const [formData, setFormData] = useState({email: "", password: ""});
     const [rememberMe, setRememberMe] = useState(false);
+    const {setUser, refreshUser} = useContext(AppContext);
+    const router = useRouter();
 
-    const handleOnsubmit = (e) => {
+    const [error, setError] = useState("");
+    const [loading ,setLoading] = useState(false);
+
+    const handleOnsubmit = async(e) => {
         e.preventDefault();
-        console.log('login submitted:', {email,password,rememberMe});
+        setLoading(true);
+        setError("");
+
+        try {
+            const response = await loginApi(formData);
+            localStorage.setItem("token", response.token);
+            if (refreshUser) {
+                await refreshUser();
+            }
+            router.push("/");
+        }catch (error){
+            if (error.response && error.response.data && error.response.data.message) {
+                setError(error.response.data.message);
+            }else {
+                console.log("Something went wrong.",error);
+                setError("Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.");
+            }
+        }finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -29,6 +55,12 @@ export default function LoginPage() {
                     <p className="text-sm text-[#f0dca4]">Enter your credentials to access your account</p>
                 </div>
 
+                {error && (
+                    <div className="mt-4 p-2 text-sm text-center text-red-600 bg-red-50 border border-red-200 rounded">
+                        {error}
+                    </div>
+                )}
+
                 {/* Form*/}
                 <form onSubmit={handleOnsubmit} className="space-y-4">
                     <FormInput
@@ -36,17 +68,17 @@ export default function LoginPage() {
                     type="email"
                     id="email"
                     placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData,email:e.target.value})}
                     required
                     />
                     <FormInput
                     Label="Password"
                     type="password"
                     id="password"
-                    placeholder="enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData,password:e.target.value})}
                     required
                     />
 
@@ -68,18 +100,22 @@ export default function LoginPage() {
                     </div>
 
                     {/** Button */}
-                    <AuthButton type="submit">
-                        Login
+                    <AuthButton type="submit" disabled={loading}>
+                        {loading ? "Logging in..." : "Login"}
                     </AuthButton>
 
                 </form>
                     {/* Switch to Signup */}
                     <div className="text-center">
                         <p className="text-sm text-[#f0dca4]">
-                            Do not have an account?
+                            Do not have an account?{''}
                             <button
-                            type="button"
-                            className="text-[#f0dca4] hover:text-[#e7cc8f] transition-colors ml-1">
+                                type="button"
+                                onClick={(e) => {
+                                e.preventDefault();
+                                onSwitchToRegister();
+                                }}
+                                className="text-[#e2b12b] hover:text-[#e7cc8f] transition-colors ml-1 font-semibold">
                                 Register
                             </button>
                         </p>
