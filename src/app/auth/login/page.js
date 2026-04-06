@@ -10,6 +10,7 @@ import { AppContext } from "@/app/context/AppContext"
 import { useRouter } from "next/navigation"
 import  {loginApi}  from "@/app/services/api/authService"
 
+
 export default function LoginPage({onSwitchToRegister}) {
 
     const [formData, setFormData] = useState({email: "", password: ""});
@@ -26,7 +27,8 @@ export default function LoginPage({onSwitchToRegister}) {
         setError("");
 
         try {
-            const response = await loginApi(formData);
+            const response = await loginApi(formData.email, formData.password);
+            console.log(response)
             localStorage.setItem("token", response.token);
             if (refreshUser) {
                 await refreshUser();
@@ -101,7 +103,8 @@ export default function LoginPage({onSwitchToRegister}) {
 
                     {/** Button */}
                     <AuthButton type="submit" disabled={loading}>
-                        {loading ? "Logging in..." : "Login"}
+                        {loading ? "Logging in..." : "Login"
+}
                     </AuthButton>
 
                 </form>

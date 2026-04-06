@@ -17,7 +17,7 @@ export default function MainHeader() {
           {/* LEFT: Logo & CTA */}
           <div className="flex items-center space-x-6">
             {/* Logo Tốt Box */}
-            <Link href="/" className="shrink-0 block">
+            <Link href="/homepage" className="shrink-0 block">
               <div className="flex items-center">
                 <Image 
                   src="/assets/logo.png" 

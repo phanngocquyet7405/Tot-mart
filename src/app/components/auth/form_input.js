@@ -18,7 +18,7 @@ export default function FormInput({
             <input
             type={type}
             id={id}
-            value={value}
+            name={value}
             onChange={onChange}
             placeholder={placeholder}
             required={required}
