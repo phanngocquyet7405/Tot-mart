@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 
-import NavMenu from "../components/nav_menu";
-import AnnouncementBar from "../components/AnnouncementBar";
-import MainHeader from "../components/main_header";
+import NavMenu from "../components/ui/nav_menu";
+import AnnouncementBar from "../components/ui/AnnouncementBar";
+import MainHeader from "../components/ui/main_header";
 import HeroSection from "../components/hero_section_page/hero_section";
-import FeaturedProducts from "../components/product/featured_products";
-import Footer from "../components/footer";
+import FeaturedProducts from "../components/layout/product/featured_products";
+import Footer from "../components/ui/footer";
 
 import { MOCK_PRODUCTS } from "@/app/data_clone/mockProducts";
-import TotmartLanding from "../components/totmart_landing";
+import TotmartLanding from "../components/layout/totmart_landing";
 
 export default function HomePage() {
     return (
@@ -19,11 +19,9 @@ export default function HomePage() {
             <div className="sticky top-0 bg-white shadow-sm z-1000">
                 <AnnouncementBar />
                 <MainHeader />
-                <Link href="/products" className="block hover:opacity-90 transition-opacity">
                     <div className="cursor-pointer">
                         <NavMenu />
                     </div>
-                </Link>
             </div>
 
             {/* Hero Section */}

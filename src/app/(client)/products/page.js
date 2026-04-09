@@ -1,13 +1,13 @@
 'use client'
 
 import React, { useState } from "react"
-import AnnouncementBar from "../components/AnnouncementBar"
-import MainHeader from "../components/main_header"
-import NavMenu from "../components/nav_menu"
-import TotMartSupport from "../components/totmart_suppport"
-import SideBar from "../components/SideBar"
-import ProductsGrid from "../components/product/products_grid"
-import Footer from "../components/footer"
+import AnnouncementBar from "../components/ui/AnnouncementBar"
+import MainHeader from "../components/ui/main_header"
+import NavMenu from "../components/ui/nav_menu"
+import TotMartSupport from "../components/layout/totmart_suppport"
+import SideBar from "../components/ui/SideBar"
+import ProductsGrid from "../components/layout/product/products_grid"
+import Footer from "../components/ui/footer"
 import HeroSectionProduct from "../components/hero_section_page/hero_section_products"
 import Link from "next/link"
 
