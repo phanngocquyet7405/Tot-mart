@@ -4,7 +4,7 @@ import DropMenu from "./drop_menu";
 import {
   getAllCategoriesApi,
   getAllBrandsApi,
-} from "../../../api/productServices";
+} from "../../../services/api/productServices";
 
 export default function NavMenu() {
   const [activeDropDown, setActiveDropdown] = useState(null);
