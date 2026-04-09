@@ -12,7 +12,7 @@ export default function HeroSection() {
           <div className="w-full lg:w-2/3 relative rounded-4xl overflow-hidden shadow-sm group min-h-125 lg:min-h-155 flex items-end">
             <div className="absolute inset-0 transition-transform duration-1000 group-hover:scale-105">
               <Image 
-                src="/assets/test_hero.jpg" 
+                src="/assets/h1.png" 
                 alt="Set the Table for Spring"
                 fill
                 style={{ objectFit: 'cover' }}

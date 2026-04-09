@@ -1,17 +1,16 @@
 'use client'
 
-import { UserPen } from "lucide-react"
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import AuthContainer from "@/app/components/auth/auth_container"
-import AuthCard from "@/app/components/auth/auth_card"
-import FormInput from "@/app/components/auth/form_input"
-import AuthButton from "@/app/components/auth/auth_button"
-import { registerApi } from "@/app/services/api/authService" 
+import { UserPen, Loader2 } from "lucide-react"
 
-export default function RegisterPage({ onSwitchToLogin }) {
-    const router = useRouter();
-    
+import AuthContainer from "@/app/(client)/components/ui/auth/auth_container"
+import AuthCard from "@/app/(client)/components/ui/auth/auth_card"
+import FormInput from "@/app/(client)/components/ui/auth/form_input"
+import AuthButton from "@/app/(client)/components/ui/auth/auth_button"
+import { registerApi } from "../../api/authService" 
+
+export default function RegisterPage() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -19,19 +18,36 @@ export default function RegisterPage({ onSwitchToLogin }) {
         confirmPassword: ''
     });
 
+
+    const router = useRouter();
+
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // Xử lý thay đổi input tập trung
+    const handleChange = useCallback((e) => {
+        const { id, value } = e.target;
+        setFormData(prev => ({ ...prev, [id]: value }));
+        if (error) setError(""); // Xóa lỗi khi người dùng bắt đầu sửa
+    }, [error]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError("");
+        if (loading) return;
 
+        // Validation cơ bản tại client
         if (formData.password !== formData.confirmPassword) {
             setError("Mật khẩu xác nhận không khớp!");
             return;
         }
 
+        if (formData.password.length < 6) {
+            setError("Mật khẩu phải có ít nhất 6 ký tự!");
+            return;
+        }
+
         setLoading(true);
+        setError("");
 
         try {
             await registerApi({
@@ -40,14 +56,12 @@ export default function RegisterPage({ onSwitchToLogin }) {
                 password: formData.password
             });
 
-            alert("Đăng ký thành công! Hãy đăng nhập.");
-            onSwitchToLogin();
+            router.push("/auth/login");
         } catch (err) {
-            if (err.response?.data?.message) {
-                setError(err.response.data.message);
-            } else {
-                setError("Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.");
-            }
+            const errorMessage = err.response?.data?.message 
+                || "Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.";
+                console.error("Register :",err)
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -57,15 +71,15 @@ export default function RegisterPage({ onSwitchToLogin }) {
         <AuthContainer>
             <AuthCard>
                 <div className="text-center space-y-2">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-[#f0dca4] rounded-2xl mb-2">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-[#f0dca4] rounded-2xl mb-2 shadow-sm">
                         <UserPen className="w-8 h-8 text-white" />
                     </div>
                     <h2 className="text-2xl font-bold text-[#f0dca4]">Create an Account</h2>
-                    <p className="text-sm text-[#f0dca4]">Get started with your free account</p>
+                    <p className="text-sm text-[#f0dca4]/80">Get started with your free account</p>
                 </div>
 
                 {error && (
-                    <div className="mt-4 p-2 text-sm text-center text-red-600 bg-red-50 border border-red-200 rounded">
+                    <div className="mt-4 p-3 text-sm text-center text-red-600 bg-red-50 border border-red-200 rounded-lg animate-in fade-in duration-300">
                         {error}
                     </div>
                 )}
@@ -75,10 +89,11 @@ export default function RegisterPage({ onSwitchToLogin }) {
                         Label="Full Name"
                         type="text"
                         id="name"
-                        placeholder="Full Name"
+                        placeholder="Enter your full name"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={handleChange}
                         required
+                        disabled={loading}
                     />
                     <FormInput
                         Label="Email"
@@ -86,17 +101,19 @@ export default function RegisterPage({ onSwitchToLogin }) {
                         id="email"
                         placeholder="name@example.com"
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        onChange={handleChange}
                         required
+                        disabled={loading}
                     />
                     <FormInput
                         Label="Password"
                         type="password"
                         id="password"
-                        placeholder="Enter your password"
+                        placeholder="Create a password"
                         value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        onChange={handleChange}
                         required
+                        disabled={loading}
                     />
                     <FormInput
                         Label="Confirm Password"
@@ -104,25 +121,31 @@ export default function RegisterPage({ onSwitchToLogin }) {
                         id="confirmPassword"
                         placeholder="Confirm your password"
                         value={formData.confirmPassword}
-                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                        onChange={handleChange}
                         required
+                        disabled={loading}
                     />
 
                     <AuthButton type="submit" disabled={loading}>
-                        {loading ? "Creating account..." : "Register"}
+                        {loading ? (
+                            <div className="flex items-center justify-center space-x-2">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>Creating account...</span>
+                            </div>
+                        ) : (
+                            "Register"
+                        )}
                     </AuthButton>
                 </form>
+
 
                 <div className="text-center mt-6">
                     <p className="text-sm text-[#f0dca4]">
                         Already have an account?{' '}
                         <button
                             type="button"
-                            onClick={(e) => {
-                            e.preventDefault();
-                            onSwitchToLogin();
-                            }}
-                            className="text-[#e2b12b] hover:text-[#e7cc8f] transition-colors ml-1 font-semibold"
+                            onClick={() => router.push("/auth/login")}
+                            className="text-[#e2b12b] hover:text-[#e7cc8f] transition-colors font-bold underline-offset-4 hover:underline"
                         >
                             Login
                         </button>

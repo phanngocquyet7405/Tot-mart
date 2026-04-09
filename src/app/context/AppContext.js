@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useState, useEffect, useCallback } from "react";
-import {axiosConfig} from "@/app/util/axiosConfig";
-// import { API_ENDPOINTS } from "../api/apiEndpoint"; 
+import {axiosConfig} from "../api/axiosConfig";
+import { API_ENDPOINTS } from "../api/apiEndpoints";
 
 export const AppContext = createContext();
 
@@ -18,12 +18,25 @@ export const AppContextProvider = ({ children }) => {
         }
 
         try {
-            const response = await axiosConfig.get(API_ENDPOINTS.AUTH.PROFILE); 
-            setUser(response || response.user || response.data);
+            // SỬA TẠI ĐÂY: Tách biệt lệnh lấy data và lệnh set state
+            const response = await axiosConfig.get(API_ENDPOINTS.USERS.GET_ALL); 
+            
+            // Log ra để kiểm tra dữ liệu thực tế từ BE
+            console.log("Dữ liệu User nhận được:", response);
+
+            // Tùy vào cấu trúc BE trả về, thường là response.data hoặc chính response
+            const userData = response.data || response;
+            setUser(userData); 
+
         } catch (error) {
             console.error("auth error:", error);
-            localStorage.removeItem("token");
-            setUser(null);
+            
+            // CHỈ xóa token khi lỗi 401 (Hết hạn). 
+            // Nếu lỗi 404 (Sai link) thì ĐỪNG xóa, để người dùng vẫn còn token.
+            if (error.response?.status === 401) {
+                localStorage.removeItem("token");
+                setUser(null);
+            }
         } finally {
             setIsLoading(false);
         }
