@@ -41,15 +41,12 @@ axiosConfig.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
-        // Luôn xóa token cũ để tránh các request sau lại bị lỗi
         localStorage.removeItem("token");
 
-        // CHỈ REDIRECT KHI CẦN THIẾT
         const currentPath = window.location.pathname;
         const isAuthPage =
           currentPath === "/login" || currentPath === "/register";
 
-        // Danh sách các trang "nhạy cảm" bắt buộc phải có login mới được ở lại
         const mustLoginPages = ["/checkout", "/profile", "/order-history"];
         const isProtectedPage = mustLoginPages.some((path) =>
           currentPath.startsWith(path),

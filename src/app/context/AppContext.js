@@ -1,70 +1,71 @@
-'use client';
-
+"use client";
 import { createContext, useState, useEffect, useCallback } from "react";
-import {axiosConfig} from "../api/axiosConfig";
-import { API_ENDPOINTS } from "../api/apiEndpoints";
+import { jwtDecode } from "jwt-decode";
 
 export const AppContext = createContext();
 
 export const AppContextProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-    const fetchUserProfile = useCallback(async () => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            setIsLoading(false);
-            return;
-        }
+  const fetchUserProfile = useCallback(() => {
+    const token = localStorage.getItem("token");
 
-        try {
-            // SỬA TẠI ĐÂY: Tách biệt lệnh lấy data và lệnh set state
-            const response = await axiosConfig.get(API_ENDPOINTS.USERS.GET_ALL); 
-            
-            // Log ra để kiểm tra dữ liệu thực tế từ BE
-            console.log("Dữ liệu User nhận được:", response);
+    if (!token) {
+      setUser(null);
+      setIsLoading(false);
+      return;
+    }
 
-            // Tùy vào cấu trúc BE trả về, thường là response.data hoặc chính response
-            const userData = response.data || response;
-            setUser(userData); 
+    try {
+      // 1. Giải mã token thay vì gọi API POST /home/login
+      const decoded = jwtDecode(token);
 
-        } catch (error) {
-            console.error("auth error:", error);
-            
-            // CHỈ xóa token khi lỗi 401 (Hết hạn). 
-            // Nếu lỗi 404 (Sai link) thì ĐỪNG xóa, để người dùng vẫn còn token.
-            if (error.response?.status === 401) {
-                localStorage.removeItem("token");
-                setUser(null);
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+      // 2. Kiểm tra token hết hạn chưa (exp là giây)
+      const isExpired = decoded.exp * 1000 < Date.now();
+      if (isExpired) {
+        logout();
+        return;
+      }
 
+      // 3. Mapping thông tin từ token vào state (Dựa trên Payload Backend: userId, name, email, role)
+      const userData = {
+        _id: decoded.userId,
+        name: decoded.name,
+        email: decoded.email,
+        role: decoded.role,
+      };
 
-    useEffect(() => {
-        fetchUserProfile();
-    }, [fetchUserProfile]);
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      console.error("Lỗi xác thực Token:", error);
+      logout();
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-    
-    const logout = () => {
-        localStorage.removeItem("token");
-        setUser(null);
-        window.location.href = "/login";
-    };
+  useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
 
-    const contextValue = {
-        user,
-        setUser,
-        isLoading,
-        logout,
-        refreshUser: fetchUserProfile
-    };
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    window.location.href = "/login";
+  };
 
-    return (
-        <AppContext.Provider value={contextValue}>
-            {children}
-        </AppContext.Provider>
-    );
+  const contextValue = {
+    user,
+    setUser,
+    isLoading,
+    logout,
+    refreshUser: fetchUserProfile,
+  };
+
+  return (
+    <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
+  );
 };
