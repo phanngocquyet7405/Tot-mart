@@ -1,8 +1,6 @@
 "use client";
-
 import { createContext, useState, useEffect, useCallback } from "react";
-import { axiosConfig } from "../services/api/axiosConfig";
-import { API_ENDPOINTS } from "../services/api/apiEndpoints";
+import { jwtDecode } from "jwt-decode";
 
 export const AppContext = createContext();
 
@@ -10,32 +8,39 @@ export const AppContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchUserProfile = useCallback(async () => {
+  const fetchUserProfile = useCallback(() => {
     const token = localStorage.getItem("token");
+
     if (!token) {
+      setUser(null);
       setIsLoading(false);
       return;
     }
 
     try {
-      // SỬA TẠI ĐÂY: Tách biệt lệnh lấy data và lệnh set state
-      const response = await axiosConfig.get(API_ENDPOINTS.USERS.GET_ALL);
+      // 1. Giải mã token thay vì gọi API POST /home/login
+      const decoded = jwtDecode(token);
 
-      // Log ra để kiểm tra dữ liệu thực tế từ BE
-      console.log("Dữ liệu User nhận được:", response);
-
-      // Tùy vào cấu trúc BE trả về, thường là response.data hoặc chính response
-      const userData = response.data || response;
-      setUser(userData);
-    } catch (error) {
-      console.error("auth error:", error);
-
-      // CHỈ xóa token khi lỗi 401 (Hết hạn).
-      // Nếu lỗi 404 (Sai link) thì ĐỪNG xóa, để người dùng vẫn còn token.
-      if (error.response?.status === 401) {
-        localStorage.removeItem("token");
-        setUser(null);
+      // 2. Kiểm tra token hết hạn chưa (exp là giây)
+      const isExpired = decoded.exp * 1000 < Date.now();
+      if (isExpired) {
+        logout();
+        return;
       }
+
+      // 3. Mapping thông tin từ token vào state (Dựa trên Payload Backend: userId, name, email, role)
+      const userData = {
+        _id: decoded.userId,
+        name: decoded.name,
+        email: decoded.email,
+        role: decoded.role,
+      };
+
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      console.error("Lỗi xác thực Token:", error);
+      logout();
     } finally {
       setIsLoading(false);
     }
@@ -47,6 +52,7 @@ export const AppContextProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
     window.location.href = "/login";
   };

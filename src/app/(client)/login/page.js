@@ -2,7 +2,8 @@
 
 import { useState, useContext, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, Loader2 } from "lucide-react"; // Thêm Loader icon
+import { jwtDecode } from "jwt-decode";
+import { Lock, Loader2 } from "lucide-react";
 
 import AuthContainer from "@/app/(client)/components/ui/auth/auth_container";
 import AuthCard from "@/app/(client)/components/ui/auth/auth_card";
@@ -38,34 +39,30 @@ export default function LoginPage() {
 
     try {
       const res = await loginApi(formData.email, formData.password);
-
-      // Kiểm tra xem token nằm ở đâu (res.token hay res.data.token)
-      const token = res.token || res.data?.token;
+      const token = res.token;
 
       if (token) {
+        // 1. Lưu token vào Storage
         localStorage.setItem("token", token);
-        console.log("Token đã được lưu vào Storage");
-      } else {
-        console.error("Cấu trúc trả về không có token:", res);
-      }
 
-      if (rememberMe) {
-        localStorage.setItem("rememberedEmail", formData.email);
-      } else {
-        localStorage.removeItem("rememberedEmail");
-      }
+        // 2. Giải mã để lấy Role ngay lập tức
+        const decoded = jwtDecode(token);
 
-      if (refreshUser) {
-        await refreshUser();
-      }
+        // 3. Gọi refreshUser để AppContext cập nhật lại state 'user' từ token mới
+        const userData = refreshUser();
 
-      router.push("/homepage");
+        // 4. Lấy role từ dữ liệu vừa giải mã để điều hướng
+        const userRole = decoded.role;
+        console.log("Role người dùng:", userRole);
+
+        if (userRole === "admin") {
+          router.push("/dashboard");
+        } else {
+          router.push("/homepage");
+        }
+      }
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.message ||
-        "Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.";
-      setError(errorMessage);
-      console.error("Login Error:", err);
+      setError(err.response?.data?.message || "Lỗi đăng nhập");
     } finally {
       setLoading(false);
     }
@@ -151,7 +148,7 @@ export default function LoginPage() {
             Do not have an account?{" "}
             <button
               type="button"
-              onClick={() => router.push("/auth/register")}
+              onClick={() => router.push("/register")}
               className="text-[#e2b12b] hover:text-[#e7cc8f] transition-colors font-bold underline-offset-4 hover:underline"
             >
               Register
