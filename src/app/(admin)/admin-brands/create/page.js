@@ -97,7 +97,7 @@ export default function CreateBrandPage() {
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
         {/* Back */}
         <Link
-          href="/admin/brands"
+          href="/admin-brands"
           className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors mb-8"
         >
           <ArrowLeft size={15} />
@@ -195,7 +195,7 @@ export default function CreateBrandPage() {
 
           <div className="flex gap-3 pt-2 border-t border-zinc-800">
             <Link
-              href="/admin/brands"
+              href="/admin-brands"
               className="flex-1 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-center text-sm font-medium text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
             >
               Hủy
