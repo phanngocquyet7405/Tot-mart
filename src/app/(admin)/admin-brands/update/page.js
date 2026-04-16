@@ -102,7 +102,7 @@ export default function UpdateBrandPage() {
       };
       await updateBrandApi(brandId, payload);
       setSuccess(true);
-      setTimeout(() => router.push("/admin/brands"), 1500);
+      setTimeout(() => router.push("/admin-brands"), 1500);
     } catch (err) {
       const msg = err?.response?.data?.message || "Cập nhật thất bại.";
       setErrors({ submit: msg });
