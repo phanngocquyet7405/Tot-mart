@@ -1,22 +1,22 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft,
   Upload,
   X,
   ImageIcon,
-  Bold,
-  Italic,
-  Link as LinkIcon,
-  List,
-  ListOrdered,
-  Clock,
-  User,
+  Loader2,
+  Save,
+  Edit2,
+  Search,
+  Package,
+  ChevronRight,
 } from "lucide-react";
+
+// Shadcn UI & Utils
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,495 +28,452 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Toggle } from "@/components/ui/toggle";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
-const categories = [
-  { id: "1", name: "Electronics" },
-  { id: "2", name: "Accessories" },
-  { id: "3", name: "Gaming" },
-  { id: "4", name: "Storage" },
-  { id: "5", name: "Audio" },
-];
+// API Services
+import {
+  updateProductApi,
+  getAllCategoriesApi,
+  getAllBrandsApi,
+  getAllProductsApi,
+} from "@/app/services/api/productServices";
 
-const brands = [
-  { id: "1", name: "AudioMax" },
-  { id: "2", name: "TechWear" },
-  { id: "3", name: "DeskPro" },
-  { id: "4", name: "ConnectX" },
-  { id: "5", name: "GameZone" },
-];
+export default function UpdateProductPage() {
+  const router = useRouter();
+  const params = useParams();
 
-// Mock audit logs
-const mockAuditLogs = [
-  {
-    id: "1",
-    user: "admin@totbox.com",
-    action: "Updated price",
-    timestamp: "2024-01-15 14:32:00",
-    changes: "$149.99 → $129.99",
-  },
-  {
-    id: "2",
-    user: "john@totbox.com",
-    action: "Updated quantity",
-    timestamp: "2024-01-14 10:15:00",
-    changes: "50 → 45",
-  },
-  {
-    id: "3",
-    user: "admin@totbox.com",
-    action: "Updated description",
-    timestamp: "2024-01-12 09:45:00",
-  },
-  {
-    id: "4",
-    user: "admin@totbox.com",
-    action: "Created product",
-    timestamp: "2024-01-10 16:20:00",
-  },
-];
+  // States hệ thống
+  const [viewMode, setViewMode] = useState(params?.id ? "edit" : "list");
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-function UpdateProductContent() {
-  const searchParams = useSearchParams();
-  const productId = searchParams.get("id");
+  // States Form
+  const [currentId, setCurrentId] = useState(params?.id);
+  const [formData, setFormData] = useState({
+    name: "",
+    price: "",
+    stock: "",
+    category: "",
+    brand: "",
+    description: "",
+    sku: "",
+  });
 
-  const [productName, setProductName] = useState(
-    "Wireless Bluetooth Headphones",
-  );
-  const [price, setPrice] = useState("149.99");
-  const [quantity, setQuantity] = useState("45");
-  const [category, setCategory] = useState("1");
-  const [brand, setBrand] = useState("1");
-  const [sku, setSku] = useState("WBH-001");
-  const [description, setDescription] = useState(
-    "High-quality wireless Bluetooth headphones with active noise cancellation, 30-hour battery life, and premium comfort for all-day listening.",
-  );
-  const [images, setImages] = useState([
-    { id: "1", url: "/placeholder.svg?height=100&width=100", isMain: true },
-    { id: "2", url: "/placeholder.svg?height=100&width=100", isMain: false },
-  ]);
-  const [isDragging, setIsDragging] = useState(false);
+  const [existingImages, setExistingImages] = useState([]);
+  const [newImages, setNewImages] = useState([]);
+  const fileInputRef = useRef(null);
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
+  // --- 1. Load Data ---
+  useEffect(() => {
+    const initData = async () => {
+      try {
+        setLoading(true);
+        const [catRes, brandRes, prodRes] = await Promise.all([
+          getAllCategoriesApi(),
+          getAllBrandsApi(),
+          getAllProductsApi(),
+        ]);
 
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
+        setCategories(catRes.data || []);
+        setBrands(brandRes.data || []);
+        const allProducts = prodRes.data?.data ?? prodRes.data ?? [];
+        setProducts(allProducts);
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const newImages = [
-      {
-        id: `img-${Date.now()}`,
-        url: "/placeholder.svg?height=100&width=100",
-        isMain: images.length === 0,
-      },
-    ];
-    setImages([...images, ...newImages]);
-  };
-
-  const handleFileInput = () => {
-    const newImage = {
-      id: `img-${Date.now()}`,
-      url: "/placeholder.svg?height=100&width=100",
-      isMain: images.length === 0,
+        if (currentId) {
+          const product = allProducts.find(
+            (p) => String(p.id || p._id) === String(currentId),
+          );
+          if (product) fillForm(product);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Lỗi khi tải dữ liệu");
+      } finally {
+        setLoading(false);
+      }
     };
-    setImages([...images, newImage]);
+    initData();
+  }, [currentId]);
+
+  const fillForm = (product) => {
+    setFormData({
+      name: product.name || "",
+      price: product.price || "",
+      stock: product.quantity || product.stock || "",
+      category:
+        product.categoryId || product.category?._id || product.category || "",
+      brand: product.brandId || product.brand?._id || product.brand || "",
+      description: product.description || "",
+      sku: product.sku || "",
+    });
+
+    // Đồng bộ logic lấy URL ảnh
+    const imgs = product.images || (product.image ? [product.image] : []);
+    const formattedImgs = imgs
+      .map((img) => (typeof img === "string" ? img : img.url))
+      .filter((url) => url && url.trim() !== "");
+
+    setExistingImages(formattedImgs);
   };
 
-  const setMainImage = (imageId) => {
-    setImages(
-      images.map((img) => ({
-        ...img,
-        isMain: img.id === imageId,
-      })),
-    );
-  };
-
-  const removeImage = (imageId) => {
-    const filtered = images.filter((img) => img.id !== imageId);
-    if (filtered.length > 0 && !filtered.some((img) => img.isMain)) {
-      filtered[0].isMain = true;
+  const handleSelectProduct = (id) => {
+    const product = products.find((p) => String(p.id || p._id) === String(id));
+    if (product) {
+      setCurrentId(id);
+      fillForm(product);
+      setViewMode("edit");
+      window.history.pushState(null, "", `/admin-products/update?id=${id}`);
     }
-    setImages(filtered);
   };
 
-  const selectedCategory = categories.find((c) => c.id === category);
-  const selectedBrand = brands.find((b) => b.id === brand);
+  const handleFileChange = (files) => {
+    if (!files) return;
+    const validFiles = Array.from(files).map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+    setNewImages((prev) => [...prev, ...validFiles]);
+  };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/products">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Update Product</h1>
-          <p className="text-muted-foreground">
-            Edit product details {productId && `(ID: ${productId})`}
-          </p>
-        </div>
+  const removeExistingImage = (url) => {
+    setExistingImages((prev) => prev.filter((img) => img !== url));
+  };
+
+  const handleUpdate = async (e) => {
+    if (e) e.preventDefault();
+    setIsSubmitting(true);
+
+    const submitData = new FormData();
+    Object.entries(formData).forEach(([key, value]) =>
+      submitData.append(key, value),
+    );
+    submitData.append("existingImages", JSON.stringify(existingImages));
+    newImages.forEach((img) => submitData.append("images", img.file));
+
+    try {
+      const res = await updateProductApi(currentId, submitData);
+      if (res.success || res.status === 200) {
+        toast.success("Cập nhật thành công");
+        setViewMode("list");
+      }
+    } catch (error) {
+      toast.error("Cập nhật thất bại");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
+    );
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Product Form - Left Column */}
-        <div className="space-y-6 lg:col-span-2">
-          <Tabs defaultValue="details">
-            <TabsList className="mb-4">
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="audit">Audit Logs</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="details" className="space-y-6">
-              {/* Basic Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Basic Information</CardTitle>
-                  <CardDescription>
-                    Update the basic details of your product
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="product-name">Product Name</Label>
-                    <Input
-                      id="product-name"
-                      placeholder="Enter product name"
-                      value={productName}
-                      onChange={(e) => setProductName(e.target.value)}
-                    />
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="price">Price ($)</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        placeholder="0.00"
-                        value={price}
-                        onChange={(e) => setPrice(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="quantity">Quantity</Label>
-                      <Input
-                        id="quantity"
-                        type="number"
-                        placeholder="0"
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="category">Category</Label>
-                      <Select value={category} onValueChange={setCategory}>
-                        <SelectTrigger id="category">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id}>
-                              {cat.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="brand">Brand</Label>
-                      <Select value={brand} onValueChange={setBrand}>
-                        <SelectTrigger id="brand">
-                          <SelectValue placeholder="Select brand" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {brands.map((b) => (
-                            <SelectItem key={b.id} value={b.id}>
-                              {b.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="sku">SKU</Label>
-                    <Input
-                      id="sku"
-                      placeholder="Enter SKU"
-                      value={sku}
-                      onChange={(e) => setSku(e.target.value)}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Images */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Product Images</CardTitle>
-                  <CardDescription>
-                    Manage product images. Click on an image to set it as the
-                    main image.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div
-                    className={cn(
-                      "flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors",
-                      isDragging
-                        ? "border-primary bg-primary/5"
-                        : "border-muted-foreground/25 hover:border-primary/50",
-                    )}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                      <Upload className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <p className="mt-4 text-sm font-medium">
-                      Drag and drop images here
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      or click to browse
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-4"
-                      onClick={handleFileInput}
-                    >
-                      Select Images
-                    </Button>
-                  </div>
-
-                  {images.length > 0 && (
-                    <div className="grid grid-cols-4 gap-4 sm:grid-cols-6">
-                      {images.map((image) => (
-                        <div
-                          key={image.id}
-                          className={cn(
-                            "group relative aspect-square cursor-pointer rounded-lg border-2 overflow-hidden transition-all",
-                            image.isMain
-                              ? "border-primary ring-2 ring-primary ring-offset-2"
-                              : "border-transparent hover:border-muted-foreground/50",
-                          )}
-                          onClick={() => setMainImage(image.id)}
-                        >
-                          <Image
-                            src={image.url}
-                            alt="Product"
-                            fill
-                            className="object-cover"
-                          />
-                          {image.isMain && (
-                            <div className="absolute bottom-1 left-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-medium text-primary-foreground">
-                              Main
-                            </div>
-                          )}
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeImage(image.id);
-                            }}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Description */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Product Description</CardTitle>
-                  <CardDescription>
-                    Update the product description
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex flex-wrap items-center gap-1 rounded-lg border bg-muted/50 p-1">
-                    <Toggle size="sm" aria-label="Bold">
-                      <Bold className="h-4 w-4" />
-                    </Toggle>
-                    <Toggle size="sm" aria-label="Italic">
-                      <Italic className="h-4 w-4" />
-                    </Toggle>
-                    <Separator orientation="vertical" className="mx-1 h-6" />
-                    <Toggle size="sm" aria-label="Bullet List">
-                      <List className="h-4 w-4" />
-                    </Toggle>
-                    <Toggle size="sm" aria-label="Numbered List">
-                      <ListOrdered className="h-4 w-4" />
-                    </Toggle>
-                    <Separator orientation="vertical" className="mx-1 h-6" />
-                    <Toggle size="sm" aria-label="Insert Link">
-                      <LinkIcon className="h-4 w-4" />
-                    </Toggle>
-                  </div>
-                  <Textarea
-                    placeholder="Enter product description..."
-                    className="min-h-50 resize-none"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="audit">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Audit History</CardTitle>
-                  <CardDescription>
-                    View the edit history for this product
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {mockAuditLogs.map((log, index) => (
-                      <div
-                        key={log.id}
-                        className={cn(
-                          "flex gap-4 pb-4",
-                          index !== mockAuditLogs.length - 1 && "border-b",
-                        )}
-                      >
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium">{log.action}</p>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              {log.timestamp}
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            by {log.user}
-                          </p>
-                          {log.changes && (
-                            <p className="text-sm text-muted-foreground">
-                              {log.changes}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" asChild>
-              <Link href="/products">Cancel</Link>
-            </Button>
-            <Button>Update Product</Button>
+  // --- GIAO DIỆN 1: DANH SÁCH SẢN PHẨM ---
+  if (viewMode === "list") {
+    return (
+      <div className="container mx-auto max-w-4xl p-4 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Quản lý sản phẩm
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Nhấp để chọn sản phẩm cần cập nhật
+            </p>
+          </div>
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Tìm sản phẩm..."
+              className="pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
         </div>
 
-        {/* Preview - Right Column */}
-        <div className="lg:col-span-1">
-          <Card className="sticky top-24">
-            <CardHeader>
-              <CardTitle>Preview</CardTitle>
-              <CardDescription>How your product will appear</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="aspect-square relative rounded-lg border bg-muted overflow-hidden">
-                {images.length > 0 ? (
-                  <Image
-                    src={images.find((img) => img.isMain)?.url || images[0].url}
-                    alt="Preview"
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <ImageIcon className="h-12 w-12 text-muted-foreground/50" />
+        <div className="grid gap-3">
+          {products
+            .filter((p) =>
+              p.name.toLowerCase().includes(searchTerm.toLowerCase()),
+            )
+            .map((p) => (
+              <div
+                key={p.id || p._id}
+                onClick={() => handleSelectProduct(p.id || p._id)}
+                className="flex items-center justify-between p-3 bg-white border rounded-2xl hover:border-primary hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]"
+              >
+                <div className="flex items-center gap-4">
+                  {/* Áp dụng chuẩn hiển thị từ ProductList */}
+                  <div className="relative w-14 h-14 shrink-0">
+                    <Image
+                      src={
+                        p.images && p.images[0]?.url
+                          ? p.images[0].url
+                          : "/placeholder.svg"
+                      }
+                      alt={p.name || "product"}
+                      fill
+                      sizes="56px"
+                      className="rounded-md object-cover border"
+                    />
                   </div>
-                )}
+                  <div>
+                    <h3 className="font-semibold text-sm md:text-base line-clamp-1">
+                      {p.name}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-primary font-bold text-sm">
+                        ${Number(p.price).toLocaleString()}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        | Kho: {p.quantity || p.stock || 0}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="rounded-full h-10 w-10 shrink-0 group-hover:bg-primary group-hover:text-white transition-colors"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </Button>
               </div>
-              <div className="space-y-2">
-                <h3 className="font-semibold text-lg line-clamp-2">
-                  {productName || "Product Name"}
-                </h3>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  {selectedBrand && <span>{selectedBrand.name}</span>}
-                  {selectedBrand && selectedCategory && <span>•</span>}
-                  {selectedCategory && <span>{selectedCategory.name}</span>}
-                </div>
-                <p className="text-2xl font-bold text-primary">
-                  ${price || "0.00"}
-                </p>
-                <div className="flex items-center gap-1 text-sm">
-                  <span
-                    className={cn(
-                      "font-medium",
-                      parseInt(quantity || "0") > 0
-                        ? "text-primary"
-                        : "text-destructive",
-                    )}
+            ))}
+        </div>
+      </div>
+    );
+  }
+
+  // --- GIAO DIỆN 2: FORM CHỈNH SỬA ---
+  return (
+    <div className="container mx-auto max-w-7xl p-4 md:p-6">
+      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <Button
+            variant="ghost"
+            className="pl-0 text-muted-foreground hover:text-primary"
+            onClick={() => setViewMode("list")}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Quay lại danh sách
+          </Button>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Chỉnh sửa sản phẩm
+          </h1>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setViewMode("list")}>
+            Hủy
+          </Button>
+          <Button onClick={handleUpdate} disabled={isSubmitting}>
+            {isSubmitting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            Lưu thay đổi
+          </Button>
+        </div>
+      </div>
+
+      <Tabs defaultValue="general" className="space-y-6">
+        <TabsList className="grid w-full max-w-xs grid-cols-2">
+          <TabsTrigger value="general">Thông tin</TabsTrigger>
+          <TabsTrigger value="images">Hình ảnh</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Thông tin cơ bản</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Tên sản phẩm *</Label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Giá bán ($)</Label>
+                      <Input
+                        type="number"
+                        value={formData.price}
+                        onChange={(e) =>
+                          setFormData({ ...formData, price: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Số lượng tồn</Label>
+                      <Input
+                        type="number"
+                        value={formData.stock}
+                        onChange={(e) =>
+                          setFormData({ ...formData, stock: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Mô tả chi tiết</Label>
+                    <Textarea
+                      className="min-h-37.5"
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Phân loại</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Danh mục</Label>
+                    <Select
+                      value={String(formData.category)}
+                      onValueChange={(v) =>
+                        setFormData({ ...formData, category: v })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn danh mục" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((c) => (
+                          <SelectItem
+                            key={c.id || c._id}
+                            value={String(c.id || c._id)}
+                          >
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Preview Card đồng bộ style */}
+              <Card className="bg-muted/30 border-dashed">
+                <CardContent className="pt-6 space-y-4">
+                  <div className="aspect-square relative rounded-xl overflow-hidden border bg-white">
+                    <Image
+                      src={
+                        newImages[0]?.preview ||
+                        existingImages[0] ||
+                        "/placeholder.svg"
+                      }
+                      fill
+                      alt="preview"
+                      className="object-cover"
+                    />
+                  </div>
+                  <h3 className="font-bold truncate">
+                    {formData.name || "Tên sản phẩm"}
+                  </h3>
+                  <p className="text-2xl font-bold text-primary">
+                    ${formData.price || "0"}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="images">
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed rounded-2xl p-12 text-center hover:bg-muted/50 cursor-pointer transition-colors"
+              >
+                <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                <p>Click để tải lên hình ảnh mới</p>
+                <input
+                  type="file"
+                  multiple
+                  hidden
+                  ref={fileInputRef}
+                  onChange={(e) => handleFileChange(e.target.files)}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {/* Ảnh hiện có */}
+                {existingImages.map((url, idx) => (
+                  <div
+                    key={`existing-${idx}`}
+                    className="relative aspect-square rounded-xl overflow-hidden border"
                   >
-                    {parseInt(quantity || "0") > 0
-                      ? "In Stock"
-                      : "Out of Stock"}
-                  </span>
-                  {parseInt(quantity || "0") > 0 && (
-                    <span className="text-muted-foreground">
-                      ({quantity} units)
-                    </span>
-                  )}
-                </div>
-                {description && (
-                  <>
-                    <Separator className="my-3" />
-                    <p className="text-sm text-muted-foreground line-clamp-4">
-                      {description}
-                    </p>
-                  </>
-                )}
+                    <Image
+                      src={url}
+                      fill
+                      alt="existing"
+                      className="object-cover"
+                      unoptimized
+                    />
+                    <button
+                      onClick={() => removeExistingImage(url)}
+                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-lg hover:bg-red-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+                {/* Ảnh mới chọn */}
+                {newImages.map((img, idx) => (
+                  <div
+                    key={`new-${idx}`}
+                    className="relative aspect-square rounded-xl overflow-hidden border-2 border-primary"
+                  >
+                    <Image
+                      src={img.preview}
+                      fill
+                      alt="new"
+                      className="object-cover"
+                    />
+                    <button
+                      onClick={() =>
+                        setNewImages((prev) => prev.filter((_, i) => i !== idx))
+                      }
+                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
-  );
-}
-
-export default function UpdateProductPage() {
-  return (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <UpdateProductContent />
-    </Suspense>
   );
 }

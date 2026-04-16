@@ -28,7 +28,7 @@ export default function RegisterPage() {
     (e) => {
       const { id, value } = e.target;
       setFormData((prev) => ({ ...prev, [id]: value }));
-      if (error) setError(""); // Xóa lỗi khi người dùng bắt đầu sửa
+      if (error) setError("");
     },
     [error],
   );
@@ -37,7 +37,6 @@ export default function RegisterPage() {
     e.preventDefault();
     if (loading) return;
 
-    // Validation cơ bản tại client
     if (formData.password !== formData.confirmPassword) {
       setError("Mật khẩu xác nhận không khớp!");
       return;
@@ -58,7 +57,7 @@ export default function RegisterPage() {
         password: formData.password,
       });
 
-      router.push("/auth/login");
+      router.push("/login");
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
