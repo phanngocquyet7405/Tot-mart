@@ -1,4 +1,5 @@
-export const BASE_URL = "https://totmartapi.onrender.com/api";
+export const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://totmartapi.onrender.com/api";
 
 export const API_ENDPOINTS = {
   // Nhóm Health & Auth (nằm trong prefix /home)
