@@ -20,13 +20,17 @@ export const API_ENDPOINTS = {
     ADDRESS: {
       ADD: (id) => `/users/update-address/${id}`,
       EDIT: (userId, addressId) => `/users/edit-address/${userId}/${addressId}`,
-      DELETE: (userId, addressId) => `/users/delete-address/${userId}/${addressId}`,
+      DELETE: (userId, addressId) =>
+        `/users/delete-address/${userId}/${addressId}`,
     },
   },
 
   // Products
   PRODUCTS: {
-    CREATE: "/products/create-product",
+    CREATE: "/products/create-product/",
+    GET_ALL: "/products/get-all-products/",
+    UPDATE: (id) => `/products/update-product/${id}`,
+    DELETE: (id) => `/products/delete-product/${id}`,
   },
 
   // Brands

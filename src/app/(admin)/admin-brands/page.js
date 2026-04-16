@@ -1,28 +1,25 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Image as ImageIcon,
-  Loader2,
-} from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import {
-  getAllBrandsApi,
-  deleteBrandApi,
-} from "@/app/services/api/productServices";
-import BrandModal from "../components/brands/BrandModal";
+  Plus,
+  Search,
+  RefreshCw,
+  Tag,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Globe,
+  ExternalLink,
+  ArrowUpDown,
+} from "lucide-react";
 
+// Shadcn UI Components
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -31,23 +28,47 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+// Services
+import {
+  getAllBrandsApi,
+  deleteBrandApi,
+} from "@/app/services/api/productServices";
+
+// Components local
+import DeleteBrandModal from "../components/brands/DeleteBrandModal";
 
 export default function BrandsPage() {
   const [brands, setBrands] = useState([]);
+  const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const fetchBrands = async () => {
+  // Fetch dữ liệu
+  const fetchBrands = async (silent = false) => {
+    if (!silent) setIsLoading(true);
+    else setIsRefreshing(true);
+    setError(null);
     try {
-      setIsLoading(true);
-      const response = await getAllBrandsApi();
-      const data = response.brands || response.data || response || [];
+      const res = await getAllBrandsApi();
+      const data = res?.brands || res?.data || res || [];
       setBrands(data);
-    } catch (error) {
-      console.error("Lỗi khi tải danh sách thương hiệu:", error);
+    } catch (err) {
+      setError("Không thể tải danh sách thương hiệu. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -55,142 +76,217 @@ export default function BrandsPage() {
     fetchBrands();
   }, []);
 
+  // Logic lọc dữ liệu tối ưu
+  const filteredBrands = useMemo(() => {
+    const q = search.toLowerCase();
+    return brands.filter((b) => b.name?.toLowerCase().includes(q));
+  }, [search, brands]);
+
+  // Xử lý xóa
   const handleDelete = async (id) => {
-    if (
-      window.confirm(
-        "Bạn có chắc chắn muốn xóa thương hiệu này? Hành động này không thể hoàn tác.",
-      )
-    ) {
-      try {
-        await deleteBrandApi(id);
-        fetchBrands();
-      } catch (error) {
-        console.error("Lỗi khi xóa thương hiệu:", error);
-        alert("Có lỗi xảy ra khi xóa thương hiệu.");
-      }
+    setIsDeleting(true);
+    try {
+      await deleteBrandApi(id);
+      setBrands((prev) => prev.filter((b) => b._id !== id));
+      setDeleteTarget(null);
+      // Bạn có thể thêm Toast ở đây
+    } catch {
+      alert("Xóa thất bại. Vui lòng thử lại.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  const handleOpenEdit = (brand) => {
-    setSelectedBrand(brand);
-    setIsModalOpen(true);
-  };
-
-  const handleOpenCreate = () => {
-    setSelectedBrand(null);
-    setIsModalOpen(true);
-  };
-
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Quản lý Thương hiệu
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Xem, thêm, sửa và xóa các thương hiệu sản phẩm.
-          </p>
+    <div className="space-y-6 p-6">
+      {/* Header Section */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        {/* GIỮ LẠI PHẦN NÀY THEO YÊU CẦU */}
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+            <Tag size={18} className="text-indigo-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              Thương hiệu
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {brands.length} thương hiệu trong hệ thống
+            </p>
+          </div>
         </div>
-        <Button onClick={handleOpenCreate} className="flex items-center">
-          <Plus className="w-4 h-4 mr-2" />
-          Thêm thương hiệu
-        </Button>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => fetchBrands(true)}
+            disabled={isRefreshing}
+          >
+            <RefreshCw
+              size={16}
+              className={isRefreshing ? "animate-spin" : ""}
+            />
+          </Button>
+          <Button asChild className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+            <Link href="/admin-brands/create">
+              <Plus size={16} />
+              Thêm thương hiệu
+            </Link>
+          </Button>
+        </div>
       </div>
 
+      {/* Main Content Card */}
       <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <CardHeader className="pb-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle className="text-lg">Danh sách thương hiệu</CardTitle>
+            <div className="relative flex-1 sm:w-64 sm:flex-none">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Tìm thương hiệu..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
             </div>
-          ) : brands.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
-              <ImageIcon className="w-12 h-12 mb-4 text-muted/50" />
-              <p>Chưa có thương hiệu nào. Hãy tạo mới!</p>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500/20 border-t-indigo-500" />
+              <p className="text-sm text-muted-foreground font-medium">
+                Đang tải dữ liệu...
+              </p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center border rounded-lg bg-destructive/5 border-destructive/20">
+              <p className="text-sm text-destructive mb-4">{error}</p>
+              <Button variant="outline" onClick={() => fetchBrands()}>
+                Thử lại
+              </Button>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-25">Logo</TableHead>
-                  <TableHead>Tên thương hiệu</TableHead>
-                  <TableHead>Mô tả</TableHead>
-                  <TableHead>Website</TableHead>
-                  <TableHead className="text-right">Thao tác</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {brands.map((brand) => (
-                  <TableRow key={brand._id}>
-                    <TableCell>
-                      {brand.logo ? (
-                        <Image
-                          src={brand.logo}
-                          alt={brand.name}
-                          width={40}
-                          height={40}
-                          className="w-10 h-10 object-contain rounded-md border bg-white"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center border">
-                          <ImageIcon className="w-5 h-5 text-muted-foreground" />
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">{brand.name}</TableCell>
-                    <TableCell className="text-muted-foreground max-w-xs truncate">
-                      {brand.description || "—"}
-                    </TableCell>
-                    <TableCell>
-                      {brand.website ? (
-                        <a
-                          href={brand.website}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-primary hover:underline"
-                        >
-                          Truy cập
-                        </a>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleOpenEdit(brand)}
-                          title="Chỉnh sửa"
-                        >
-                          <Pencil className="w-4 h-4 text-muted-foreground hover:text-primary" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(brand._id)}
-                          title="Xóa"
-                          className="hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-20">Logo</TableHead>
+                    <TableHead>
+                      <div className="flex items-center gap-1 cursor-pointer">
+                        Tên thương hiệu <ArrowUpDown size={14} />
                       </div>
-                    </TableCell>
+                    </TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      Mô tả
+                    </TableHead>
+                    <TableHead>Website</TableHead>
+                    <TableHead className="text-right">Hành động</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredBrands.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={5}
+                        className="h-32 text-center text-muted-foreground"
+                      >
+                        Không tìm thấy thương hiệu nào.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredBrands.map((brand) => (
+                      <TableRow key={brand._id}>
+                        <TableCell>
+                          <div className="h-10 w-10 relative rounded-lg border bg-white p-1 overflow-hidden">
+                            {brand.logo ? (
+                              <Image
+                                src={brand.logo}
+                                alt={brand.name}
+                                fill
+                                className="object-contain"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center bg-zinc-100 text-xs font-bold text-zinc-500">
+                                {brand.name?.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <div>{brand.name}</div>
+                          <div className="text-xs text-muted-foreground font-normal">
+                            /{brand.slug}
+                          </div>
+                        </TableCell>
+                        <TableCell className="max-w-50 truncate hidden md:table-cell text-muted-foreground">
+                          {brand.description || "—"}
+                        </TableCell>
+                        <TableCell>
+                          {brand.website ? (
+                            <a
+                              href={brand.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-indigo-500 hover:underline text-xs"
+                            >
+                              <Globe size={12} />
+                              <span className="max-w-30 truncate">
+                                {brand.website.replace(/^https?:\/\//, "")}
+                              </span>
+                              <ExternalLink size={10} />
+                            </a>
+                          ) : (
+                            "—"
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal size={16} />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Tùy chọn</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem asChild>
+                                <Link
+                                  href={`/admin-brands/update?id=${brand._id}`}
+                                  className="cursor-pointer"
+                                >
+                                  <Pencil size={14} className="mr-2" /> Sửa
+                                  thông tin
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive cursor-pointer"
+                                onClick={() => setDeleteTarget(brand)}
+                              >
+                                <Trash2 size={14} className="mr-2" /> Xóa thương
+                                hiệu
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Render Modal */}
-      <BrandModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        initialData={selectedBrand}
-        onSuccess={fetchBrands}
+      {/* Delete Modal */}
+      <DeleteBrandModal
+        brand={deleteTarget}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+        isLoading={isDeleting}
       />
     </div>
   );

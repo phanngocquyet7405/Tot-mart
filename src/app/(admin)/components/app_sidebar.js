@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -49,63 +49,71 @@ const menuItems = [
     href: "/dashboard",
   },
   {
-    title: "E-Commerce",
+    title: "Quản lý sản phẩm",
     icon: ShoppingCart,
     submenu: [
-      { title: "Product List", icon: Package, href: "/admin-products" },
+      { title: "Danh sách sản phẩm", icon: Package, href: "/admin-products" },
       {
-        title: "Add New Product",
+        title: "Thêm sản phẩm",
         icon: PlusCircle,
         href: "/admin-products/create",
       },
-      { title: "Update Product", icon: Pencil, href: "/admin-products/update" },
-      { title: "Delete Product", icon: Trash2, href: "/admin-products/delete" },
+      {
+        title: "Cập nhật sản phẩm",
+        icon: Pencil,
+        href: "/admin-products/update",
+      },
+      { title: "Xoá sản phẩm", icon: Trash2, href: "/admin-products/delete" },
     ],
   },
   {
-    title: "Users Management",
+    title: "Quản lý người dùng",
     icon: Users,
-    href: "/users",
+    href: "/admin-users/",
   },
   {
-    title: "Brands Management",
+    title: "Quản lý thương hiệu",
     icon: Tags,
     submenu: [
-      { title: "Brands List", icon: Album, href: "/admin-brands" },
+      { title: "Danh sách thương hiệu", icon: Album, href: "/admin-brands" },
       {
-        title: "Add New Brand",
+        title: "Thêm thương hiệu",
         icon: LayersPlus,
         href: "/admin-brands/create",
       },
       {
-        title: "Update Brand",
+        title: "Cập nhật thương hiệu",
         icon: Pencil,
         href: "/admin-brands/update",
       },
       {
-        title: "Delete Brand",
+        title: "Xoá thương hiệu",
         icon: Trash2,
         href: "/admin-brands/delete",
       },
     ],
   },
   {
-    title: "Categories Management",
+    title: "Quản lý loại sản phẩm",
     icon: FolderTree,
     submenu: [
-      { title: "Categories List", icon: Album, href: "/admin-categories" },
       {
-        title: "Add New Category",
+        title: "Danh sách loại sản phẩm",
+        icon: Album,
+        href: "/admin-categories",
+      },
+      {
+        title: "Thêm loại sản phẩm",
         icon: LayersPlus,
         href: "/admin-categories/create",
       },
       {
-        title: "Update Category",
+        title: "Cập nhật loại sản phẩm",
         icon: Pencil,
         href: "/admin-categories/update",
       },
       {
-        title: "Delete Category",
+        title: "xoá loại sản phẩm",
         icon: Trash2,
         href: "/admin-categories/delete",
       },
@@ -119,8 +127,14 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
+  const router = useRouter();
   const pathname = usePathname();
   const [openMenus, setOpenMenus] = useState(["E-Commerce"]);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    router.push("/login");
+  };
 
   const toggleMenu = (title) => {
     setOpenMenus((prev) =>
@@ -221,7 +235,10 @@ export function AppSidebar() {
         <SidebarSeparator className="mb-2" />
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+            <SidebarMenuButton
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={handleLogout}
+            >
               <LogOut className="h-4 w-4" />
               Logout
             </SidebarMenuButton>
