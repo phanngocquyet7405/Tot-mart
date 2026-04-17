@@ -53,6 +53,10 @@ export const getAllProductsApi = () => {
   return axiosConfig.get(API_ENDPOINTS.PRODUCTS.GET_ALL);
 };
 
+export const getProductByIdApi = (id) => {
+  return axiosConfig.get(API_ENDPOINTS.PRODUCTS.GET_BY_ID(id));
+};
+
 // UPDATE (multipart)
 export const updateProductApi = (id, formData) => {
   return axiosConfig.put(API_ENDPOINTS.PRODUCTS.UPDATE(id), formData, {

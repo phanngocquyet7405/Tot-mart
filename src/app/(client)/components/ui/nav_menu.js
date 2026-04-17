@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link"; // Import Link để chuyển trang
 import DropMenu from "./drop_menu";
 import {
   getAllCategoriesApi,
@@ -8,77 +9,8 @@ import {
 
 export default function NavMenu() {
   const [activeDropDown, setActiveDropdown] = useState(null);
-
-  // 1. Khởi tạo dữ liệu giả đầy đủ các nhóm để test UI
-  const [categories, setCategories] = useState([
-    {
-      name: "Thực phẩm chức năng",
-      parentGroup: "food-beverage",
-      subCategories: [],
-    },
-    { name: "Đồ uống", parentGroup: "food-beverage", subCategories: [] },
-    {
-      name: "Rau củ quả hữu cơ",
-      parentGroup: "food-beverage",
-      subCategories: [],
-    },
-    {
-      name: "Ngũ cốc",
-      parentGroup: "food-beverage",
-      subCategories: [
-        { name: "Ngũ cốc", slug: "food-beverage/cereal" },
-        { name: "Mỳ", slug: "food-beverage/noodle" },
-        { name: "Các loại hạt", slug: "food-beverage/nuts" },
-      ],
-    },
-    {
-      name: "Sữa & Chế phẩm",
-      parentGroup: "food-beverage",
-      subCategories: [
-        { name: "Sữa tươi", slug: "food-beverage/milk" },
-        { name: "Sữa chua", slug: "food-beverage/yogurt" },
-        { name: "Phô mai", slug: "food-beverage/cheese" },
-      ],
-    },
-    {
-      name: "Thực phẩm chế biến",
-      parentGroup: "food-beverage",
-      subCategories: [{ name: "Đồ ăn vặt", slug: "food-beverage/snack" }],
-    },
-
-    {
-      name: "Trang trí nội thất",
-      parentGroup: "home-living",
-      subCategories: [
-        { name: "Gỗ, mây, tre", slug: "home-living/wood-rattan" },
-        { name: "Vật liệu tái chế", slug: "home-living/recycled-materials" },
-      ],
-    },
-    {
-      name: "Mỹ phẩm & Sức khỏe",
-      parentGroup: "home-living",
-      subCategories: [
-        { name: "Chăm sóc cá nhân", slug: "home-living/personal-care" },
-      ],
-    },
-
-    {
-      name: "Thời trang nam",
-      parentGroup: "fashion",
-      subCategories: [{ name: "Áo thun", slug: "fashion/tshirt" }],
-    },
-
-    {
-      name: "Quà tặng",
-      parentGroup: "gift",
-      subCategories: [{ name: "Quà doanh nghiệp", slug: "gift/corporate" }],
-    },
-  ]);
-
-  const [brands, setBrands] = useState([
-    { name: "Nike", slug: "nike" },
-    { name: "Adidas", slug: "adidas" },
-  ]);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,21 +22,22 @@ export default function NavMenu() {
         const categoriesData = catRes?.data || catRes;
         const brandsData = brandRes?.data || brandRes;
 
-        // Chỉ cập nhật nếu API có trả về dữ liệu thật
-        if (Array.isArray(categoriesData) && categoriesData.length > 0) {
-          setCategories(categoriesData);
-        }
-        if (Array.isArray(brandsData) && brandsData.length > 0) {
-          setBrands(brandsData);
-        }
+        if (Array.isArray(categoriesData)) setCategories(categoriesData);
+        if (Array.isArray(brandsData)) setBrands(brandsData);
       } catch (error) {
-        console.error("Lỗi khi tải Menu (Đang dùng dữ liệu giả):", error);
+        console.error("Lỗi khi tải Menu:", error);
       }
     };
     fetchData();
   }, []);
 
   const navItems = [
+    {
+      id: "products",
+      label: "Sản Phẩm",
+      hasDropdown: false,
+      href: "/products",
+    },
     { id: "food-beverage", label: "Thực Phẩm & Đồ Uống", hasDropdown: true },
     { id: "home-living", label: "Gia Đình", hasDropdown: true },
     { id: "fashion", label: "Thời Trang", hasDropdown: true },
@@ -125,6 +58,7 @@ export default function NavMenu() {
         .filter((cat) => cat?.parentGroup === groupName)
         .map((cat) => ({
           title: cat.name,
+          titleHref: `/category/${cat.slug || cat._id}`,
           links:
             cat.subCategories?.map((sub) => ({
               label: sub.name,
@@ -137,6 +71,7 @@ export default function NavMenu() {
       brand: [
         {
           title: "Tất cả thương hiệu",
+          titleHref: "/brands",
           links: brands.map((b) => ({
             label: b.name,
             href: `/brands/${b.slug || b._id}`,
@@ -152,7 +87,6 @@ export default function NavMenu() {
 
   return (
     <nav
-      /* SỬA TẠI ĐÂY: z-90 đổi thành z-[100] để luôn nằm trên banner */
       className="w-full bg-white border-b border-gray-100 relative z-100"
       onMouseLeave={() => setActiveDropdown(null)}
     >
@@ -166,27 +100,32 @@ export default function NavMenu() {
                 item.hasDropdown && setActiveDropdown(item.id)
               }
             >
-              <button
-                className={`text-[13px] uppercase tracking-widest font-medium transition-all duration-300 flex items-center gap-1.5
-                ${activeDropDown === item.id ? "text-orange-500" : "text-gray-600 hover:text-gray-900"}`}
+              <Link
+                href={item.href || "#"}
+                className="flex items-center gap-1.5 no-underline"
               >
-                {item.label}
-                {item.hasDropdown && (
-                  <svg
-                    className={`w-3 h-3 transition-transform duration-300 ${activeDropDown === item.id ? "rotate-180" : ""}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                )}
-              </button>
+                <button
+                  className={`text-[13px] uppercase tracking-widest font-medium transition-all duration-300 flex items-center gap-1.5
+                  ${activeDropDown === item.id ? "text-orange-500" : "text-gray-600 hover:text-gray-900"}`}
+                >
+                  {item.label}
+                  {item.hasDropdown && (
+                    <svg
+                      className={`w-3 h-3 transition-transform duration-300 ${activeDropDown === item.id ? "rotate-180" : ""}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </Link>
               <span
                 className={`absolute bottom-0 left-0 h-0.5 bg-orange-500 transition-all duration-300 ${activeDropDown === item.id ? "w-full" : "w-0"}`}
               />
@@ -195,7 +134,6 @@ export default function NavMenu() {
         </div>
       </div>
 
-      {/* Dropdown Menu - Đảm bảo component này có position absolute */}
       <DropMenu
         isVisible={!!activeDropDown}
         items={dynamicMenuItems[activeDropDown] || []}

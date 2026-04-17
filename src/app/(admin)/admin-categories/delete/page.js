@@ -26,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import DeleteCategory from "./DeleteCategory"; // Giả sử file Component của bạn ở cùng thư mục
+import DeleteCategory from "../../components/categories/delete_category";
 import { getAllCategoriesApi } from "@/app/services/api/productServices";
 import { toast } from "sonner";
 import Image from "next/image";

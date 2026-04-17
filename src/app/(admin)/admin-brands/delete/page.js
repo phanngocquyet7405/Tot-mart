@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, AlertTriangle, Trash2 } from "lucide-react";
+import { ArrowLeft, AlertTriangle, Trash2, Loader2 } from "lucide-react";
 import {
   getAllBrandsApi,
   deleteBrandApi,
 } from "@/app/services/api/productServices";
 import Image from "next/image";
 
-export default function DeleteBrandPage() {
+// 1. Component chứa logic chính
+function DeleteBrandContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const brandId = searchParams.get("id");
@@ -63,7 +64,7 @@ export default function DeleteBrandPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-700 border-t-red-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-red-500" />
       </div>
     );
   }
@@ -92,7 +93,7 @@ export default function DeleteBrandPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-950">
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-3xl">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-3xl text-emerald-500">
             ✓
           </div>
           <p className="text-lg font-semibold text-white">
@@ -138,15 +139,16 @@ export default function DeleteBrandPage() {
               </p>
             </div>
 
-            {/* Brand info card */}
             <div className="w-full rounded-xl border border-zinc-700 bg-zinc-800/60 p-4 flex items-center gap-4 text-left">
               {brand?.logo ? (
-                <Image
-                  src={brand.logo}
-                  alt={brand.name}
-                  className="h-12 w-12 rounded-lg object-contain bg-white p-1 shrink-0"
-                  onError={(e) => (e.target.style.display = "none")}
-                />
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white p-1">
+                  <Image
+                    src={brand.logo}
+                    alt={brand.name}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
               ) : (
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-zinc-700 text-lg font-bold text-zinc-300">
                   {brand?.name?.charAt(0)?.toUpperCase()}
@@ -159,11 +161,6 @@ export default function DeleteBrandPage() {
                 {brand?.description && (
                   <p className="text-xs text-zinc-500 truncate mt-0.5">
                     {brand.description}
-                  </p>
-                )}
-                {brand?.slug && (
-                  <p className="text-xs text-zinc-600 mt-0.5">
-                    slug: {brand.slug}
                   </p>
                 )}
               </div>
@@ -189,7 +186,7 @@ export default function DeleteBrandPage() {
               >
                 {isDeleting ? (
                   <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Đang xóa...
                   </>
                 ) : (
@@ -204,5 +201,20 @@ export default function DeleteBrandPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// 2. Export mặc định kèm Suspense Boundary
+export default function DeleteBrandPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-zinc-950">
+          <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
+        </div>
+      }
+    >
+      <DeleteBrandContent />
+    </Suspense>
   );
 }

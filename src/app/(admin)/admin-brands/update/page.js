@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -10,6 +10,7 @@ import {
   ImageIcon,
   Save,
   Pencil,
+  Loader2,
 } from "lucide-react";
 import {
   getAllBrandsApi,
@@ -30,7 +31,8 @@ function FormField({ label, icon: Icon, error, children }) {
   );
 }
 
-export default function UpdateBrandPage() {
+// 1. Tách logic chính vào Component này
+function UpdateBrandContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const brandId = searchParams.get("id");
@@ -119,14 +121,14 @@ export default function UpdateBrandPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-700 border-t-indigo-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
       </div>
     );
   }
 
   if (notFound) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-950 text-center">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-950 text-center px-4">
         <span className="text-5xl">🔍</span>
         <h2 className="text-xl font-semibold text-white">
           Không tìm thấy thương hiệu
@@ -148,7 +150,7 @@ export default function UpdateBrandPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-950">
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-3xl">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-3xl text-emerald-500">
             ✓
           </div>
           <p className="text-lg font-semibold text-white">
@@ -227,13 +229,15 @@ export default function UpdateBrandPage() {
             />
             {form.logo && !errors.logo && (
               <div className="mt-2 flex items-center gap-3 rounded-lg bg-zinc-800 p-2">
-                <Image
-                  src={form.logo}
-                  alt="Logo preview"
-                  className="h-10 w-10 rounded object-contain bg-white p-0.5"
-                  fill
-                  onError={(e) => (e.target.style.display = "none")}
-                />
+                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-white p-0.5">
+                  <Image
+                    src={form.logo}
+                    alt="Logo preview"
+                    fill
+                    className="object-contain"
+                    onError={(e) => (e.target.style.display = "none")}
+                  />
+                </div>
                 <span className="text-xs text-zinc-400">Preview logo</span>
               </div>
             )}
@@ -253,7 +257,7 @@ export default function UpdateBrandPage() {
             >
               {isSubmitting ? (
                 <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   Đang lưu...
                 </>
               ) : (
@@ -273,5 +277,19 @@ export default function UpdateBrandPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function UpdateBrandPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-zinc-950">
+          <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
+        </div>
+      }
+    >
+      <UpdateBrandContent />
+    </Suspense>
   );
 }
