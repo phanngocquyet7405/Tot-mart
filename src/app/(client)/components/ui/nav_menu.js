@@ -1,142 +1,112 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import Link from "next/link"; // Import Link để chuyển trang
+import Link from "next/link";
 import DropMenu from "./drop_menu";
-import {
-  getAllCategoriesApi,
-  getAllBrandsApi,
-} from "../../../services/api/productServices";
+import { getAllCategoriesApi } from "../../../services/api/productServices";
 
 export default function NavMenu() {
   const [activeDropDown, setActiveDropdown] = useState(null);
   const [categories, setCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catRes, brandRes] = await Promise.all([
-          getAllCategoriesApi(),
-          getAllBrandsApi(),
-        ]);
-        const categoriesData = catRes?.data || catRes;
-        const brandsData = brandRes?.data || brandRes;
-
-        if (Array.isArray(categoriesData)) setCategories(categoriesData);
-        if (Array.isArray(brandsData)) setBrands(brandsData);
+        const res = await getAllCategoriesApi();
+        // Lấy mảng data từ response của bạn
+        setCategories(res?.data?.data || res?.data || []);
       } catch (error) {
-        console.error("Lỗi khi tải Menu:", error);
+        console.error("Lỗi tải menu:", error);
       }
     };
     fetchData();
   }, []);
 
-  const navItems = [
-    {
-      id: "products",
-      label: "Sản Phẩm",
-      hasDropdown: false,
-      href: "/products",
-    },
-    { id: "food-beverage", label: "Thực Phẩm & Đồ Uống", hasDropdown: true },
-    { id: "home-living", label: "Gia Đình", hasDropdown: true },
-    { id: "fashion", label: "Thời Trang", hasDropdown: true },
-    { id: "brand", label: "Thương Hiệu", hasDropdown: true },
-    { id: "gift", label: "Quà Tặng", hasDropdown: true },
-    {
-      id: "collection",
-      label: "Bộ Sưu Tập",
-      hasDropdown: false,
-      href: "#collections",
-    },
-  ];
+  const menuData = useMemo(() => {
+    if (!categories.length) return { roots: [], tree: {} };
 
-  const dynamicMenuItems = useMemo(() => {
-    const mapByGroup = (groupName) => {
-      if (!Array.isArray(categories)) return [];
-      return categories
-        .filter((cat) => cat?.parentGroup === groupName)
-        .map((cat) => ({
-          title: cat.name,
-          titleHref: `/category/${cat.slug || cat._id}`,
-          links:
-            cat.subCategories?.map((sub) => ({
-              label: sub.name,
-              href: `/category/${sub.slug}`,
-            })) || [],
-        }));
-    };
+    const activeCats = categories.filter((cat) => cat.isActive !== false);
 
-    return {
-      brand: [
-        {
-          title: "Tất cả thương hiệu",
-          titleHref: "/brands",
-          links: brands.map((b) => ({
-            label: b.name,
-            href: `/brands/${b.slug || b._id}`,
-          })),
-        },
-      ],
-      "food-beverage": mapByGroup("food-beverage"),
-      "home-living": mapByGroup("home-living"),
-      fashion: mapByGroup("fashion"),
-      gift: mapByGroup("gift"),
-    };
-  }, [categories, brands]);
+    const allChildIds = new Set();
+    activeCats.forEach((cat) => {
+      (cat.childrenIds || []).forEach((child) => {
+        const id = typeof child === "string" ? child : child?.categoryId;
+        if (id) allChildIds.add(id.toString());
+      });
+    });
+
+    const rootCategories = activeCats.filter(
+      (cat) => !allChildIds.has(cat._id.toString()),
+    );
+
+    const tree = {};
+    rootCategories.forEach((root) => {
+      tree[root._id] = (root.childrenIds || [])
+        .map((child) => {
+          const targetId =
+            typeof child === "string" ? child : child?.categoryId;
+          const childDoc = activeCats.find(
+            (c) => c._id.toString() === targetId?.toString(),
+          );
+
+          if (!childDoc) return null;
+
+          return {
+            title: childDoc.name,
+            titleHref: `/category/${childDoc.slug || childDoc._id}`,
+            links: (childDoc.childrenIds || [])
+              .map((gChild) => {
+                const gTargetId =
+                  typeof gChild === "string" ? gChild : gChild?.categoryId;
+                const gChildDoc = activeCats.find(
+                  (c) => c._id.toString() === gTargetId?.toString(),
+                );
+
+                return gChildDoc
+                  ? {
+                      label: gChildDoc.name,
+                      href: `/category/${gChildDoc.slug || gChildDoc._id}`,
+                    }
+                  : null;
+              })
+              .filter(Boolean),
+          };
+        })
+        .filter(Boolean);
+    });
+
+    return { roots: rootCategories, tree };
+  }, [categories]);
 
   return (
     <nav
-      className="w-full bg-white border-b border-gray-100 relative z-100"
+      className="w-full bg-white border-b relative z-50"
       onMouseLeave={() => setActiveDropdown(null)}
     >
-      <div className="max-w-7xl mx-auto px-8">
-        <div className="hidden lg:flex items-center justify-center space-x-10">
-          {navItems.map((item) => (
-            <div
-              key={item.id}
-              className="relative py-5 group cursor-pointer"
-              onMouseEnter={() =>
-                item.hasDropdown && setActiveDropdown(item.id)
-              }
+      <div className="max-w-7xl mx-auto flex justify-center space-x-6">
+        {menuData.roots.map((root) => (
+          <div
+            key={root._id}
+            className="relative py-5 cursor-pointer group"
+            onMouseEnter={() => setActiveDropdown(root._id)}
+          >
+            <Link
+              href={`/category/${root.slug || root._id}`}
+              className={`font-bold uppercase text-[12px] transition-colors ${
+                activeDropDown === root._id
+                  ? "text-orange-600"
+                  : "text-zinc-600"
+              } hover:text-orange-600`}
             >
-              <Link
-                href={item.href || "#"}
-                className="flex items-center gap-1.5 no-underline"
-              >
-                <button
-                  className={`text-[13px] uppercase tracking-widest font-medium transition-all duration-300 flex items-center gap-1.5
-                  ${activeDropDown === item.id ? "text-orange-500" : "text-gray-600 hover:text-gray-900"}`}
-                >
-                  {item.label}
-                  {item.hasDropdown && (
-                    <svg
-                      className={`w-3 h-3 transition-transform duration-300 ${activeDropDown === item.id ? "rotate-180" : ""}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  )}
-                </button>
-              </Link>
-              <span
-                className={`absolute bottom-0 left-0 h-0.5 bg-orange-500 transition-all duration-300 ${activeDropDown === item.id ? "w-full" : "w-0"}`}
-              />
-            </div>
-          ))}
-        </div>
+              {root.name}
+            </Link>
+          </div>
+        ))}
       </div>
 
+      {/* DropMenu hiển thị danh mục con và cháu */}
       <DropMenu
         isVisible={!!activeDropDown}
-        items={dynamicMenuItems[activeDropDown] || []}
+        items={menuData.tree[activeDropDown] || []}
         onMouseEnter={() => setActiveDropdown(activeDropDown)}
         onMouseLeave={() => setActiveDropdown(null)}
       />

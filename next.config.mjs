@@ -8,7 +8,6 @@ const nextConfig = {
         hostname: "res.cloudinary.com",
         pathname: "/**",
       },
-      // Thêm cấu hình cho v0 và Unsplash (vì v0 thường lấy ảnh từ đây)
       {
         protocol: "https",
         hostname: "images.unsplash.com",
@@ -16,9 +15,20 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "v0.blob.com",
+        hostname: "v0.blob.com", // Lưu ý: v0 thường dùng v0.blob.com hoặc tên miền tương tự
         pathname: "/**",
       },
+      // Thêm domain đang gây lỗi để test
+      {
+        protocol: "https",
+        hostname: "example.com",
+        pathname: "/**",
+      },
+      // Nếu bạn muốn cho phép TOÀN BỘ internet (cẩn thận về bảo mật)
+      // {
+      //   protocol: "https",
+      //   hostname: "**",
+      // },
     ],
   },
 };
