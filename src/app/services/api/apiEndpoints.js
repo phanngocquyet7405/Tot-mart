@@ -2,7 +2,6 @@ export const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://totmartapi.onrender.com/api";
 
 export const API_ENDPOINTS = {
-  // Nhóm Health & Auth (nằm trong prefix /home)
   AUTH: {
     HEALTH: "/home/health",
     LOGIN: "/home/login",
@@ -17,7 +16,6 @@ export const API_ENDPOINTS = {
     LOCK: (id) => `/users/lock-user/${id}`,
     UNLOCK: (id) => `/users/unlock-user/${id}`,
     DELETE: (id) => `/users/delete-user/${id}`,
-    // Quản lý địa chỉ
     ADDRESS: {
       ADD: (id) => `/users/update-address/${id}`,
       EDIT: (userId, addressId) => `/users/edit-address/${userId}/${addressId}`,
@@ -26,7 +24,6 @@ export const API_ENDPOINTS = {
     },
   },
 
-  // Products
   PRODUCTS: {
     CREATE: "/products/create-product",
     GET_ALL: "/products/get-all-products",
@@ -35,7 +32,6 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/products/delete-product/${id}`,
   },
 
-  // Brands
   BRANDS: {
     CREATE: "/brands/create-brand",
     GET_ALL: "/brands/get-all-brands",
@@ -43,11 +39,18 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/brands/delete-brand/${id}`,
   },
 
-  // Nhóm Danh mục
   CATEGORIES: {
     CREATE: "/categories/create-category",
     GET_ALL: "/categories/get-all-categories",
+    GET_BY_ID: (id) => `/categories/get-category-by-id/${id}`,
+    GET_PRODUCTS: (id) => `/categories/get-products-by-category/${id}`,
+    GET_ROOT: "/categories/get-root-categories",
     UPDATE: (id) => `/categories/update-category/${id}`,
     DELETE: (id) => `/categories/delete-category/${id}`,
+  },
+
+  BOXES: {
+    CREATE: "/boxes/create-box",
+    GET_ALL: "/boxes/get-all-box",
   },
 };

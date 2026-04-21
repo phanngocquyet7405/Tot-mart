@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Tag, Globe, FileText, ImageIcon, Plus } from "lucide-react";
 import { createBrandApi } from "@/app/services/api/productServices";
-import Image from "next/image";
 
 function FormField({ label, icon: Icon, required, error, children }) {
   return (
@@ -60,7 +60,7 @@ export default function CreateBrandPage() {
 
       await createBrandApi(payload);
       setSuccess(true);
-      setTimeout(() => router.push("/admin-brands/create"), 1500);
+      setTimeout(() => router.push("/admin-brands"), 1500);
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
@@ -95,7 +95,6 @@ export default function CreateBrandPage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
-        {/* Back */}
         <Link
           href="/admin-brands"
           className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors mb-8"
@@ -104,7 +103,6 @@ export default function CreateBrandPage() {
           Quay lại danh sách
         </Link>
 
-        {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20">
             <Plus size={18} className="text-indigo-400" />
@@ -117,7 +115,6 @@ export default function CreateBrandPage() {
           </div>
         </div>
 
-        {/* Form */}
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 flex flex-col gap-5">
           {errors.submit && (
             <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
@@ -168,11 +165,16 @@ export default function CreateBrandPage() {
             />
             {form.logo && !errors.logo && (
               <div className="mt-2 flex items-center gap-3 rounded-lg bg-zinc-800 p-2">
+                {/* Dùng thẻ img truyền thống để tránh lỗi Hostname không cấu hình */}
                 <Image
                   src={form.logo}
                   alt="Logo preview"
+                  width={16}
+                  height={16}
                   className="h-10 w-10 rounded object-contain bg-white p-0.5"
-                  onError={(e) => (e.target.style.display = "none")}
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
                 />
                 <span className="text-xs text-zinc-400">Preview logo</span>
               </div>
