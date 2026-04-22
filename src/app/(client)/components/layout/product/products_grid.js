@@ -1,10 +1,16 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { ProductCard } from "./product_card";
-import { getAllProductsApi } from "@/app/services/api/productServices";
+import {
+  getAllProductsApi,
+  getProductsByCategoryApi,
+} from "@/app/services/api/productServices";
+import { useCart } from "@/app/context/CartContext"; // Thêm dòng này
 
-export default function ProductsGrid() {
-  const [products, setProducts] = useState([]); // Khởi tạo mảng rỗng
+export default function ProductsGrid({ categoryId, brandSlug }) {
+  const { addToCart } = useCart(); // Lấy hàm addToCart
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -12,15 +18,12 @@ export default function ProductsGrid() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await getAllProductsApi();
+        let response = categoryId
+          ? await getProductsByCategoryApi(categoryId)
+          : await getAllProductsApi();
 
-        // Kiểm tra cấu trúc dữ liệu trả về từ axiosConfig của bạn
-        // Thông thường là response.data hoặc trực tiếp response nếu bạn đã xử lý ở axiosConfig
-        const data = response?.data || response;
-
-        if (Array.isArray(data)) {
-          setProducts(data);
-        }
+        const data = response?.data?.data || response?.data || response;
+        if (Array.isArray(data)) setProducts(data);
       } catch (err) {
         console.error("Lỗi khi lấy sản phẩm:", err);
         setError("Không thể tải danh sách sản phẩm.");
@@ -28,54 +31,59 @@ export default function ProductsGrid() {
         setLoading(false);
       }
     };
-
     fetchProducts();
-  }, []);
+  }, [categoryId, brandSlug]);
 
   if (loading)
-    return <div className="py-10 text-center">Đang tải sản phẩm...</div>;
+    return (
+      <div className="py-20 text-center text-gray-500 italic">
+        Đang tải sản phẩm...
+      </div>
+    );
   if (error)
-    return <div className="py-10 text-center text-red-500">{error}</div>;
+    return (
+      <div className="py-20 text-center text-red-500 font-medium">{error}</div>
+    );
 
   return (
-    <div>
-      <div className="flex justify-between items-center border-b pb-4">
+    <div className="w-full">
+      <div className="flex justify-between items-center border-b border-gray-200 pb-4 mb-8">
         <div>
-          <h2 className="text-xl font-bold">Tên Sản Phẩm</h2>
-          <p className="text-gray-600 text-sm">
-            Số lượng: {products.length} kết quả
+          <h2 className="text-xl font-bold text-gray-800 uppercase tracking-tight">
+            {categoryId ? "Sản phẩm theo danh mục" : "Tất cả sản phẩm"}
+          </h2>
+          <p className="text-gray-500 text-sm mt-1">
+            Tìm thấy {products.length} kết quả
           </p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <label htmlFor="sort" className="font-medium">
-            Sort by:
+        <div className="flex items-center gap-3">
+          <label htmlFor="sort" className="text-sm font-semibold text-gray-700">
+            Sắp xếp:
           </label>
           <select
             id="sort"
-            className="border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
           >
             <option value="newest">Mới nhất</option>
             <option value="price-asc">Giá: Thấp đến Cao</option>
             <option value="price-desc">Giá: Cao đến Thấp</option>
-            <option value="popular">Bán chạy nhất</option>
           </select>
         </div>
       </div>
 
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
         {products.length > 0 ? (
           products.map((product) => (
             <ProductCard
-              key={product._id || product.id} // Sử dụng _id của MongoDB hoặc id
+              key={product._id || product.id}
               product={product}
-              onAddToCart={(p) => console.log("Thêm vào giỏ:", p.name)}
+              onAddToCart={(p) => addToCart(p)}
               onToggleWishlist={(p) => console.log("Yêu thích:", p.name)}
             />
           ))
         ) : (
-          <div className="col-span-full text-center py-10 text-gray-500">
-            Không tìm thấy sản phẩm nào.
+          <div className="col-span-full text-center py-20 bg-gray-50 rounded-sm border border-dashed border-gray-300 text-gray-500">
+            Hiện chưa có sản phẩm nào trong danh mục này.
           </div>
         )}
       </div>

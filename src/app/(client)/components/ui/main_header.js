@@ -14,11 +14,9 @@ import Image from "next/image";
 import SearchBar from "./search_bar";
 import CartBox from "./cart_box";
 import CartDrawer from "../Cart_component/cart_drawer";
-
-// API Service
 import { userService } from "@/app/services/api/userService";
+import { useCart } from "@/app/context/CartContext"; // Thêm dòng này
 
-// Shadcn UI Components
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,34 +26,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function MainHeader() {
+  const { cartCount, cartTotal } = useCart(); // Lấy data từ CartContext
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
-  const [cartCount, setCartCount] = useState(0);
-  const [cartTotal, setCartTotal] = useState(0);
 
-  // Quan trọng: userData khởi tạo là null
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
       const storedUserId = localStorage.getItem("userId");
-
       if (!storedUserId) {
         setUserData(null);
         setLoading(false);
         return;
       }
-
       try {
         const response = await userService.getUserById(storedUserId);
-
-        /** * LOGIC FIX: Kiểm tra kỹ cấu trúc response của bạn.
-         * Nếu backend trả về { data: { role: 'user', ... } } thì dùng response.data
-         * Nếu backend trả về { role: 'user', ... } thì dùng response
-         */
         const data = response.data || response;
-
         if (data && data.role) {
           setUserData(data);
         } else {
@@ -64,20 +52,17 @@ export default function MainHeader() {
       } catch (error) {
         console.error("Failed to fetch user:", error);
         setUserData(null);
-        // Nếu lỗi 401/403 (hết hạn token), có thể xóa userId tại đây
-        // localStorage.removeItem("userId");
       } finally {
         setLoading(false);
       }
     };
-
     fetchUser();
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("userId");
     localStorage.removeItem("token");
-    setUserData(null); // Cập nhật state để giao diện đổi ngay lập tức
+    setUserData(null);
     window.location.href = "/login";
   };
 
@@ -85,7 +70,6 @@ export default function MainHeader() {
     <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-1000">
       <div className="max-w-7xl mx-auto px-8 py-4">
         <div className="flex items-center justify-between gap-8">
-          {/* LEFT: Logo & CTA */}
           <div className="flex items-center space-x-6">
             <Link href="/homepage" className="shrink-0 block">
               <Image
@@ -102,20 +86,15 @@ export default function MainHeader() {
             </div>
           </div>
 
-          {/* CENTER: Search Bar */}
           <div className="flex-1 max-w-xl hidden md:block">
             <SearchBar />
           </div>
 
-          {/* RIGHT: Utility Icons & Auth */}
           <div className="flex items-center space-x-6">
-            {/* Auth Section */}
             <div className="flex items-center min-w-30 justify-end">
               {loading ? (
-                /* Skeleton khi đang load */
                 <div className="w-24 h-9 bg-gray-100 animate-pulse rounded-md" />
               ) : !userData ? (
-                /* HIỂN THỊ NÚT CHO KHÁCH (GUEST) */
                 <div className="flex items-center gap-4 animate-in fade-in duration-500">
                   <Link
                     href="/login"
@@ -131,7 +110,6 @@ export default function MainHeader() {
                   </Link>
                 </div>
               ) : (
-                /* HIỂN THỊ ICON ACCOUNT KHI CÓ ROLE (USER/ADMIN) */
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-2 group outline-none animate-in fade-in duration-500">
@@ -160,7 +138,6 @@ export default function MainHeader() {
                     className="w-52 z-1100 shadow-xl border-gray-100 p-1 animate-in slide-in-from-top-2 duration-200"
                   >
                     {userData.role === "admin" ? (
-                      /* DROPDOWN ADMIN */
                       <DropdownMenuItem
                         asChild
                         className="py-2.5 cursor-pointer rounded-md focus:bg-blue-50 focus:text-blue-700"
@@ -174,7 +151,6 @@ export default function MainHeader() {
                         </Link>
                       </DropdownMenuItem>
                     ) : (
-                      /* DROPDOWN USER */
                       <DropdownMenuItem
                         asChild
                         className="py-2.5 cursor-pointer rounded-md focus:bg-green-50 focus:text-green-700"
@@ -188,9 +164,7 @@ export default function MainHeader() {
                         </Link>
                       </DropdownMenuItem>
                     )}
-
                     <DropdownMenuSeparator className="my-1" />
-
                     <DropdownMenuItem
                       onClick={handleLogout}
                       className="py-2.5 text-red-600 font-bold cursor-pointer rounded-md focus:bg-red-50 focus:text-red-700"
@@ -203,7 +177,6 @@ export default function MainHeader() {
               )}
             </div>
 
-            {/* Icons: Wishlist & Cart */}
             <div className="flex items-center gap-2 border-l pl-6 border-gray-100">
               <Link
                 href="/wishlist"
@@ -216,7 +189,6 @@ export default function MainHeader() {
                   </span>
                 )}
               </Link>
-
               <div
                 onClick={() => setIsCartOpen(true)}
                 className="cursor-pointer"
@@ -227,7 +199,6 @@ export default function MainHeader() {
           </div>
         </div>
       </div>
-
       <CartDrawer open={isCartOpen} setOpen={setIsCartOpen} />
     </header>
   );

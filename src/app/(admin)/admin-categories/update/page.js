@@ -86,7 +86,6 @@ function UpdateCategoryContent() {
     try {
       setIsSubmitting(true);
 
-      // Tối ưu Payload: Chuyển mảng Object (nếu có) thành mảng ID chuỗi tinh khiết
       const cleanChildrenIds = (formData.childrenIds || []).map((item) =>
         typeof item === "object" ? item._id : item,
       );
