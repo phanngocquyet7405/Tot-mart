@@ -1,6 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { AppContextProvider } from "./context/AppContext";
+// 1. Import CartProvider từ đường dẫn file bạn đã tạo
+import { CartProvider } from "@/app/context/CartContext";
 import "./globals.css";
 
 // Cấu hình font
@@ -9,10 +11,8 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 /**
  * Metadata cho ứng dụng.
- * Next.js sẽ tự động đọc object này để chèn vào thẻ <head>.
  */
 export const metadata = {
-  // title: "TotMart - Curated Subscription Boxes"
   title: "Chill with Q....",
   description:
     "Discover curated subscription boxes filled with handpicked products from artisan makers. Subscribe to TotMart for monthly surprises.",
@@ -39,11 +39,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      {/* Bạn có thể thêm biến font vào className nếu muốn sử dụng font Geist */}
       <body className="font-sans antialiased">
-        <AppContextProvider>{children}</AppContextProvider>
+        {/* 2. Bọc CartProvider xung quanh children */}
+        <AppContextProvider>
+          <CartProvider>{children}</CartProvider>
+        </AppContextProvider>
 
-        {/* Chỉ bật Analytics khi chạy trên môi trường production */}
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>

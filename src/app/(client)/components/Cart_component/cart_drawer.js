@@ -1,25 +1,23 @@
-'use client'
-import { useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { X } from "lucide-react"
-import CartItem from "./cart_item"
-import CategoryItem from "../Category_component/category_item"
+"use client";
+import { useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
+import CartItem from "./cart_item";
+import CategoryItem from "../Category_component/category_item";
+import { useCart } from "@/app/context/CartContext";
 
 export default function CartDrawer({ open, setOpen }) {
-  const products = [
-    { name: "Mystery Pack", price: 19.99, old: 29.99, image: "/assets/product1.png" },
-    { name: "Snack Attack", price: 29.99, image: "/assets/product2.png" },
-    { name: "Strawberry Milk", price: 3.99, image: "/assets/product3.png" },
-    // ... các sản phẩm khác của bạn
-  ];
+  const { cartItems, cartTotal } = useCart(); // Lấy dữ liệu giỏ hàng
 
   useEffect(() => {
     if (open) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
-    return () => { document.body.style.overflow = 'unset'; };
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [open]);
 
   return (
@@ -27,14 +25,16 @@ export default function CartDrawer({ open, setOpen }) {
       {open && (
         <>
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/40 z-1001"
             onClick={() => setOpen(false)}
           />
 
           <motion.div
-            initial={{ x: "100%" }} 
-            animate={{ x: 0 }} 
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="fixed right-0 top-0 h-full w-full md:w-2/3 bg-[#f6f2ea] z-1002 flex flex-col shadow-2xl"
@@ -42,52 +42,77 @@ export default function CartDrawer({ open, setOpen }) {
             {/* Header */}
             <div className="p-6 flex justify-between items-center border-b border-gray-200 bg-white shrink-0">
               <h2 className="text-2xl font-bold text-gray-900">Your Cart</h2>
-              <button onClick={() => setOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <button
+                onClick={() => setOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
                 <X size={24} />
               </button>
             </div>
 
             {/* Nội dung chính */}
             <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
-              
-              {/* CỘT TRÁI: Customers Also Loved */}
+              {/* CỘT TRÁI: Hiển thị giỏ hàng */}
               <div className="w-full md:w-1/2 p-8 border-r border-gray-200 overflow-y-auto bg-white/50">
-                <h3 className="text-xl font-bold mb-6 text-gray-800">Customers Also Loved</h3>
+                <h3 className="text-xl font-bold mb-6 text-gray-800">
+                  Your Items
+                </h3>
                 <div className="space-y-4">
-                  {products.map((p, i) => (
-                    <CartItem key={i} product={p} />
-                  ))}
+                  {cartItems.length > 0 ? (
+                    cartItems.map((p, i) => (
+                      <CartItem key={p._id || p.id || i} product={p} />
+                    ))
+                  ) : (
+                    <p className="text-gray-500 italic">
+                      Your cart is currently empty.
+                    </p>
+                  )}
                 </div>
               </div>
 
-              {/* CỘT PHẢI: Popular Categories & Discover Button */}
+              {/* CỘT PHẢI: Popular Categories & Checkout */}
               <div className="w-full md:w-1/2 p-8 overflow-y-auto bg-[#fdfbf7]">
                 <div className="mb-10 text-center md:text-left h-full flex flex-col">
-                    <p className="text-gray-500 font-medium italic mb-8">Your cart is currently empty.</p>
-                    
-                    <h3 className="text-xl font-bold mb-6 text-gray-800">Popular Categories</h3>
-                    
-                    <div className="space-y-3 mb-10">
-                        <CategoryItem label="Sweets" />
-                        <CategoryItem label="Snacks" />
-                        <CategoryItem label="Drinks" />
-                    </div>
+                  <h3 className="text-xl font-bold mb-6 text-gray-800">
+                    Popular Categories
+                  </h3>
 
-                    <div className="mt-auto md:mt-0">
-                        <button className="bg-[#1a4d2e] text-white py-4 rounded-xl w-full font-bold shadow-lg hover:bg-[#143d24] transition-all active:scale-[0.98]">
-                            DISCOVER MORE
-                        </button>
-                        <p className="text-center text-xs text-gray-400 mt-4">
-                            Free shipping on orders over $50
-                        </p>
+                  <div className="space-y-3 mb-10">
+                    <CategoryItem label="Sweets" />
+                    <CategoryItem label="Snacks" />
+                    <CategoryItem label="Drinks" />
+                  </div>
+
+                  <div className="mt-auto md:mt-0 pt-6 border-t border-gray-200">
+                    <div className="flex justify-between items-center mb-6">
+                      <span className="text-gray-600 font-medium">
+                        Subtotal:
+                      </span>
+                      <span className="text-2xl font-bold text-gray-900">
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(cartTotal)}
+                      </span>
                     </div>
+                    <button
+                      disabled={cartItems.length === 0}
+                      className="bg-[#1a4d2e] text-white py-4 rounded-xl w-full font-bold shadow-lg hover:bg-[#143d24] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      PROCEED TO CHECKOUT
+                    </button>
+                    <p className="text-center text-xs text-gray-400 mt-4">
+                      Free shipping on orders over $50
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Footer sau thêm tổng tiền) */}
             <div className="p-4 bg-white border-t border-gray-100 shrink-0 flex justify-center items-center">
-               <span className="text-gray-400 text-sm">TotMart - Quality Selection</span>
+              <span className="text-gray-400 text-sm">
+                TotMart - Quality Selection
+              </span>
             </div>
           </motion.div>
         </>
