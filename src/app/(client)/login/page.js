@@ -1,8 +1,18 @@
+/**
+ * page.js (Login) - đã cập nhật
+ *
+ * Thay đổi:
+ *  1. Dùng saveToken() từ tokenMiddleware thay vì localStorage.setItem trực tiếp
+ *  2. Bọc withGuest() → tự động redirect nếu đã đăng nhập
+ *  3. Bỏ jwtDecode thủ công trong page → AppContext (refreshUser) đã xử lý
+ *
+ * Không thay đổi gì về UI, chỉ cải thiện middleware integration.
+ */
+
 "use client";
 
 import { useState, useContext, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { jwtDecode } from "jwt-decode";
 import { Lock, Loader2 } from "lucide-react";
 
 import AuthContainer from "@/app/(client)/components/ui/auth/auth_container";
@@ -12,7 +22,11 @@ import AuthButton from "@/app/(client)/components/ui/auth/auth_button";
 import { AppContext } from "@/app/context/AppContext";
 import { loginApi } from "../../services/api/authService";
 
-export default function LoginPage() {
+// Middleware imports
+import { saveToken } from "@/app/middleware/tokenMiddleware";
+import { withGuest } from "@/app/middleware/authMiddleware";
+
+function LoginPage() {
   const router = useRouter();
   const { refreshUser } = useContext(AppContext);
 
@@ -42,17 +56,15 @@ export default function LoginPage() {
       const token = res.token;
 
       if (token) {
-        // 1. Lưu token vào Storage
-        localStorage.setItem("token", token);
+        // 1. Lưu token qua tokenMiddleware (có validation + cleanup)
+        saveToken(token);
 
-        // 2. Giải mã để lấy Role ngay lập tức
-        const decoded = jwtDecode(token);
-
-        // 3. Gọi refreshUser để AppContext cập nhật lại state 'user' từ token mới
+        // 2. Cập nhật AppContext (refreshUser trả về userData đã decode)
         const userData = refreshUser();
 
-        // 4. Lấy role từ dữ liệu vừa giải mã để điều hướng
-        const userRole = decoded.role;
+        // 3. Điều hướng theo role từ AppContext (không cần jwtDecode lại)
+        //    refreshUser() decode từ token vừa lưu → lấy role từ đó
+        const userRole = userData?.role;
         console.log("Role người dùng:", userRole);
 
         if (userRole === "admin") {
@@ -159,3 +171,6 @@ export default function LoginPage() {
     </AuthContainer>
   );
 }
+
+// withGuest: tự redirect nếu đã đăng nhập (admin → /dashboard, user → /homepage)
+export default withGuest(LoginPage);

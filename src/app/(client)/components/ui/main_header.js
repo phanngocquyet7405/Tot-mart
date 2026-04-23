@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useContext } from "react";
 import {
   User,
   Heart,
@@ -14,8 +14,8 @@ import Image from "next/image";
 import SearchBar from "./search_bar";
 import CartBox from "./cart_box";
 import CartDrawer from "../Cart_component/cart_drawer";
-import { userService } from "@/app/services/api/userService";
-import { useCart } from "@/app/context/CartContext"; // Thêm dòng này
+import { useCart } from "@/app/context/CartContext";
+import { AppContext } from "@/app/context/AppContext";
 
 import {
   DropdownMenu,
@@ -26,44 +26,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function MainHeader() {
-  const { cartCount, cartTotal } = useCart(); // Lấy data từ CartContext
+  const { cartCount, cartTotal, isMounted } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [wishlistCount, setWishlistCount] = useState(0);
+  const [wishlistCount] = useState(0);
 
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const storedUserId = localStorage.getItem("userId");
-      if (!storedUserId) {
-        setUserData(null);
-        setLoading(false);
-        return;
-      }
-      try {
-        const response = await userService.getUserById(storedUserId);
-        const data = response.data || response;
-        if (data && data.role) {
-          setUserData(data);
-        } else {
-          setUserData(null);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-        setUserData(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, []);
+  /**
+   * Fix 1: Bỏ useEffect gọi userService.getUserById(localStorage.getItem("userId"))
+   *   - localStorage.getItem("userId") luôn trả null (không lưu userId, chỉ lưu token)
+   *   - Gọi API không cần thiết khi AppContext đã có user từ token
+   *
+   * Fix 2: Dùng AppContext thay thế
+   *   - user và isLoading đã được xử lý đúng trong AppContext (decode JWT, check expire)
+   *   - isLoading = true khi chưa mount → tránh flash nội dung
+   */
+  const { user: userData, isLoading: loading, logout } = useContext(AppContext);
 
   const handleLogout = () => {
-    localStorage.removeItem("userId");
-    localStorage.removeItem("token");
-    setUserData(null);
-    window.location.href = "/login";
+    logout(); // AppContext.logout() dọn token + redirect /login
   };
 
   return (
@@ -124,8 +103,9 @@ export default function MainHeader() {
                             ? "Administrator"
                             : "My Account"}
                         </span>
+                        {/* userData từ JWT: { _id, name, email, role, avatar } */}
                         <span className="text-[10px] text-gray-500 flex items-center gap-0.5">
-                          {userData.fullName || userData.username || "User"}
+                          {userData.name || "User"}
                           <ChevronDown className="w-3 h-3" />
                         </span>
                       </div>
@@ -189,11 +169,16 @@ export default function MainHeader() {
                   </span>
                 )}
               </Link>
+
+              {/* CartBox chỉ render số lượng thật sau khi isMounted = true */}
               <div
                 onClick={() => setIsCartOpen(true)}
                 className="cursor-pointer"
               >
-                <CartBox itemCount={cartCount} totalAmount={cartTotal} />
+                <CartBox
+                  itemCount={isMounted ? cartCount : 0}
+                  totalAmount={isMounted ? cartTotal : 0}
+                />
               </div>
             </div>
           </div>
