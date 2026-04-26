@@ -13,7 +13,6 @@ import {
   Bold,
   Italic,
   List,
-  ListOrdered,
   Link as LinkIcon,
 } from "lucide-react";
 
@@ -69,7 +68,7 @@ export default function AddProductPage() {
   });
 
   // State Hình ảnh
-  const [images, setImages] = useState([]); // Array các object: { id, file, preview, isMain }
+  const [images, setImages] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -84,7 +83,7 @@ export default function AddProductPage() {
         setCategories(catRes.data || []);
         setBrands(brandRes.data || []);
       } catch (error) {
-        toast.error("Không thể tải dữ liệu danh mục/thương hiệu");
+        toast.error("Không thể tải dữ liệu danh mục hoặc thương hiệu");
       } finally {
         setIsInitialLoading(false);
       }
@@ -92,18 +91,35 @@ export default function AddProductPage() {
     fetchData();
   }, []);
 
-  // --- 2. Xử lý Hình ảnh ---
+  // --- 2. Cleanup Preview URLs (Tránh Memory Leak) ---
+  useEffect(() => {
+    return () => {
+      images.forEach((img) => URL.revokeObjectURL(img.preview));
+    };
+  }, [images]);
+
+  // --- 3. Xử lý Hình ảnh ---
   const processFiles = (files) => {
+    // Validate số lượng
     if (images.length + files.length > 10) {
-      toast.error("Tối đa 10 hình ảnh");
+      toast.error("Tối đa chỉ được tải lên 10 hình ảnh");
       return;
     }
 
-    const newImages = files.map((file) => ({
+    // Validate định dạng và dung lượng (Max 2MB)
+    const validFiles = files.filter((file) => {
+      const isImage = file.type.startsWith("image/");
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isImage) toast.error(`${file.name} không phải là ảnh hợp lệ`);
+      if (!isLt2M) toast.error(`${file.name} vượt quá 2MB`);
+      return isImage && isLt2M;
+    });
+
+    const newImages = validFiles.map((file) => ({
       id: Math.random().toString(36).substr(2, 9),
       file: file,
       preview: URL.createObjectURL(file),
-      isMain: images.length === 0,
+      isMain: images.length === 0, // Ảnh đầu tiên tự động là ảnh chính
     }));
 
     setImages((prev) => [...prev, ...newImages]);
@@ -117,6 +133,9 @@ export default function AddProductPage() {
 
   const removeImage = (id) => {
     setImages((prev) => {
+      const target = prev.find((img) => img.id === id);
+      if (target) URL.revokeObjectURL(target.preview);
+
       const filtered = prev.filter((img) => img.id !== id);
       if (filtered.length > 0 && !filtered.some((img) => img.isMain)) {
         filtered[0].isMain = true;
@@ -129,28 +148,29 @@ export default function AddProductPage() {
     setImages(images.map((img) => ({ ...img, isMain: img.id === id })));
   };
 
-  // --- 3. Submit Data ---
+  // --- 4. Submit Data ---
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (
-      !form.name ||
-      !form.price ||
-      !form.category ||
-      !form.brand ||
-      images.length === 0
-    ) {
-      return toast.error("Vui lòng điền đủ thông tin và thêm ít nhất 1 ảnh");
+    if (e) e.preventDefault();
+
+    if (!form.name || !form.price || !form.category || !form.brand) {
+      return toast.error("Vui lòng nhập đầy đủ các trường bắt buộc (*)");
+    }
+    if (images.length === 0) {
+      return toast.error("Vui lòng tải lên ít nhất một hình ảnh");
     }
 
     setIsSubmitting(true);
     const formData = new FormData();
 
-    // Append thông tin text
-    Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+    // Append text fields
+    Object.entries(form).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
 
-    // Sắp xếp ảnh Main lên đầu để BE xử lý làm thumbnail
     const sortedImages = [...images].sort((a, b) => (a.isMain ? -1 : 1));
-    sortedImages.forEach((img) => formData.append("images", img.file));
+    sortedImages.forEach((img) => {
+      formData.append("images", img.file);
+    });
 
     try {
       const res = await createProductApi(formData);
@@ -159,7 +179,9 @@ export default function AddProductPage() {
         router.push("/admin-products/");
       }
     } catch (error) {
-      toast.error("Lỗi khi tạo sản phẩm");
+      const errorMsg = error.response?.data?.message || "Lỗi khi lưu sản phẩm";
+      toast.error(errorMsg);
+      console.error("Submit Error:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -203,17 +225,17 @@ export default function AddProductPage() {
                   id="name"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Nhập tên sản phẩm..."
+                  placeholder="Ví dụ: iPhone 15 Pro Max..."
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="sku">Mã SKU</Label>
+                  <Label htmlFor="sku">Mã SKU (Nếu có)</Label>
                   <Input
                     id="sku"
                     value={form.sku}
                     onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                    placeholder="Ví dụ: IP15-PRO-BLK"
+                    placeholder="IP15-PM-BLK"
                   />
                 </div>
                 <div className="space-y-2">
@@ -221,6 +243,7 @@ export default function AddProductPage() {
                   <Input
                     id="stock"
                     type="number"
+                    min="0"
                     value={form.stock}
                     onChange={(e) =>
                       setForm({ ...form, stock: e.target.value })
@@ -236,7 +259,7 @@ export default function AddProductPage() {
             <CardHeader>
               <CardTitle>Hình ảnh sản phẩm</CardTitle>
               <CardDescription>
-                Click vào ảnh để đặt làm ảnh đại diện chính.
+                Chọn ảnh đẹp nhất làm ảnh chính (có viền xanh).
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -257,7 +280,7 @@ export default function AddProductPage() {
               >
                 <Upload className="h-10 w-10 text-muted-foreground mb-2" />
                 <p className="text-sm font-medium">
-                  Kéo thả ảnh vào đây hoặc click để chọn
+                  Kéo thả hoặc click để chọn ảnh
                 </p>
                 <input
                   type="file"
@@ -286,7 +309,7 @@ export default function AddProductPage() {
                     >
                       <Image
                         src={img.preview}
-                        alt="Product"
+                        alt="Preview"
                         fill
                         className="object-cover"
                       />
@@ -313,7 +336,7 @@ export default function AddProductPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Mô tả sản phẩm</CardTitle>
+              <CardTitle>Mô tả chi tiết</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-1 rounded-md border bg-muted/50 p-1 w-fit">
@@ -336,7 +359,7 @@ export default function AddProductPage() {
                 onChange={(e) =>
                   setForm({ ...form, description: e.target.value })
                 }
-                placeholder="Mô tả chi tiết sản phẩm..."
+                placeholder="Mô tả các đặc điểm nổi bật của sản phẩm..."
                 className="min-h-50 resize-none"
               />
             </CardContent>
@@ -355,6 +378,8 @@ export default function AddProductPage() {
                 <Input
                   id="price"
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
                   placeholder="0.00"
@@ -415,6 +440,7 @@ export default function AddProductPage() {
                 <Button
                   variant="ghost"
                   className="w-full mt-2"
+                  disabled={isSubmitting}
                   onClick={() => router.push("/admin-products/")}
                 >
                   Hủy bỏ
@@ -423,11 +449,11 @@ export default function AddProductPage() {
             </CardContent>
           </Card>
 
-          {/* Preview View */}
-          <Card className="bg-muted/30 border-dashed overflow-hidden">
+          {/* Preview Card */}
+          <Card className="bg-muted/30 border-dashed overflow-hidden hidden lg:block">
             <CardHeader className="py-3 bg-muted/50 border-b">
-              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Xem trước
+              <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-center">
+                Xem trước hiển thị
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">

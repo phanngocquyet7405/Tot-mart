@@ -84,7 +84,7 @@ export default function NavMenu() {
     const activeBrands = brands.filter((b) => b.isActive !== false);
     const brandLinks = activeBrands.map((b) => ({
       label: b.name,
-      href: `/brand/${b.slug || b._id}`,
+      href: `/brands/${b.slug || b._id}`,
     }));
     const brandColumns = [];
     for (let i = 0; i < brandLinks.length; i += 8) {
@@ -95,11 +95,10 @@ export default function NavMenu() {
       });
     }
 
-    // --- 3. Xử lý Products (Copy logic từ Brand) ---
     const activeProducts = products.filter((p) => p.isActive !== false);
     const productLinks = activeProducts.map((p) => ({
       label: p.name,
-      href: `/product/${p.slug || p._id}`, // Link tới chi tiết sản phẩm
+      href: `/products/${p.slug || p._id}`,
     }));
 
     const productColumns = [];
@@ -126,7 +125,6 @@ export default function NavMenu() {
       onMouseLeave={() => setActiveDropdown(null)}
     >
       <div className="max-w-7xl mx-auto flex justify-center space-x-8">
-        {/* Danh mục root */}
         {menuData.roots.map((root) => (
           <div
             key={root._id}

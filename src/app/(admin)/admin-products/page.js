@@ -69,10 +69,10 @@ export default function ProductListPage() {
     category: "all",
     brand: "all",
     minPrice: 0,
-    maxPrice: Infinity,
+    maxPrice: 1000000000,
   });
 
-  // 1. Hàm lấy dữ liệu
+  // 1. Hàm fetch dữ liệu
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -92,22 +92,25 @@ export default function ProductListPage() {
       setBrands(Array.isArray(brandData) ? brandData : []);
     } catch (err) {
       console.error("Fetch error:", err);
-      setError("Không thể tải danh sách sản phẩm.");
+      setError(
+        "Không thể tải danh sách sản phẩm. Vui lòng kiểm tra kết nối API.",
+      );
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // 2. QUAN TRỌNG: Thêm useEffect này để kích hoạt load dữ liệu
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
+  // 2. Logic Lọc và Sắp xếp
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = products.filter((p) => {
       const matchSearch = p.name
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase());
+
       const pCatId = p.category?._id || p.category;
       const pBrandId = p.brand?._id || p.brand;
 
@@ -117,6 +120,7 @@ export default function ProductListPage() {
       const matchBrand =
         activeFilters.brand === "all" ||
         String(pBrandId) === activeFilters.brand;
+
       const price = Number(p.price ?? 0);
       const matchPrice =
         price >= activeFilters.minPrice && price <= activeFilters.maxPrice;
@@ -136,6 +140,7 @@ export default function ProductListPage() {
     return filtered;
   }, [products, searchQuery, sortField, sortDirection, activeFilters]);
 
+  // 3. Xử lý xóa
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
@@ -144,28 +149,39 @@ export default function ProductListPage() {
         toast.success(`Đã xóa "${productToDelete.name}"`);
       } else {
         await Promise.all(selectedIds.map((id) => deleteProductApi(id)));
-        toast.success(`Đã xóa ${selectedIds.length} sản phẩm`);
+        toast.success(`Đã xóa ${selectedIds.length} sản phẩm thành công`);
       }
       setSelectedIds([]);
       setDeleteDialogOpen(false);
       fetchData();
     } catch (err) {
-      toast.error("Lỗi khi xóa sản phẩm");
+      toast.error("Lỗi hệ thống khi xóa sản phẩm");
     } finally {
       setIsDeleting(false);
       setProductToDelete(null);
     }
   };
 
-  const getStatusBadge = (qty) => {
-    if (qty <= 0) return <Badge variant="destructive">Hết hàng</Badge>;
-    if (qty <= 10)
+  // 4. Helper hiển thị trạng thái kho (Khớp với p.stock)
+  const getStatusBadge = (stock) => {
+    if (stock <= 0) return <Badge variant="destructive">Hết hàng</Badge>;
+    if (stock <= 10)
       return (
-        <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
-          Sắp hết
+        <Badge
+          variant="outline"
+          className="bg-amber-50 text-amber-600 border-amber-200"
+        >
+          Sắp hết ({stock})
         </Badge>
       );
-    return <Badge className="bg-green-100 text-green-700">Còn hàng</Badge>;
+    return (
+      <Badge
+        variant="secondary"
+        className="bg-emerald-50 text-emerald-600 border-emerald-200 font-normal"
+      >
+        Còn hàng ({stock})
+      </Badge>
+    );
   };
 
   return (
@@ -178,13 +194,13 @@ export default function ProductListPage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Sản phẩm</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Sản phẩm</h1>
             <p className="text-sm text-muted-foreground">
-              Quản lý kho hàng trên Cloudinary
+              Quản lý danh sách và tồn kho sản phẩm
             </p>
           </div>
         </div>
-        <Button asChild>
+        <Button asChild className="bg-indigo-600 hover:bg-indigo-700">
           <Link href="/admin-products/create">
             <Plus className="mr-2 h-4 w-4" /> Thêm mới
           </Link>
@@ -197,35 +213,39 @@ export default function ProductListPage() {
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Tìm sản phẩm..."
+                placeholder="Tìm tên sản phẩm..."
                 className="pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline" onClick={() => setFilterOpen(true)}>
-              <Filter className="mr-2 h-4 w-4" /> Lọc
+            <Button
+              variant="outline"
+              onClick={() => setFilterOpen(true)}
+              className="w-fit"
+            >
+              <Filter className="mr-2 h-4 w-4" /> Lọc nâng cao
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex flex-col items-center py-20 italic text-muted-foreground">
-              <Loader2 className="h-8 w-8 animate-spin mb-2" />
-              <p>Đang tải dữ liệu từ máy chủ...</p>
+            <div className="flex flex-col items-center py-20 text-muted-foreground">
+              <Loader2 className="h-8 w-8 animate-spin mb-3 text-indigo-600" />
+              <p className="text-sm animate-pulse">Đang đồng bộ dữ liệu...</p>
             </div>
           ) : error ? (
-            <div className="text-center py-20">
-              <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-2" />
-              <p>{error}</p>
-              <Button onClick={fetchData} className="mt-4">
-                Thử lại
+            <div className="text-center py-20 border-2 border-dashed rounded-lg">
+              <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-3" />
+              <p className="font-medium">{error}</p>
+              <Button onClick={fetchData} variant="link" className="mt-2">
+                Thử tải lại trang
               </Button>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="rounded-md border overflow-hidden">
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-muted/50">
                   <TableRow>
                     <TableHead className="w-12">
                       <Checkbox
@@ -246,25 +266,39 @@ export default function ProductListPage() {
                     </TableHead>
                     <TableHead>Ảnh</TableHead>
                     <TableHead
-                      className="cursor-pointer"
-                      onClick={() => setSortField("name")}
+                      className="cursor-pointer hover:text-indigo-600 transition-colors"
+                      onClick={() => {
+                        setSortField("name");
+                        setSortDirection((prev) =>
+                          prev === "asc" ? "desc" : "asc",
+                        );
+                      }}
                     >
-                      Tên sản phẩm <ArrowUpDown className="inline h-3 w-3" />
+                      Tên sản phẩm{" "}
+                      <ArrowUpDown className="inline h-3 w-3 ml-1" />
                     </TableHead>
                     <TableHead
                       className="text-right cursor-pointer"
-                      onClick={() => setSortField("price")}
+                      onClick={() => {
+                        setSortField("price");
+                        setSortDirection((prev) =>
+                          prev === "asc" ? "desc" : "asc",
+                        );
+                      }}
                     >
-                      Giá <ArrowUpDown className="inline h-3 w-3" />
+                      Giá <ArrowUpDown className="inline h-3 w-3 ml-1" />
                     </TableHead>
-                    <TableHead className="text-right">Kho</TableHead>
+                    <TableHead className="text-right">Tồn kho</TableHead>
                     <TableHead>Trạng thái</TableHead>
                     <TableHead className="w-12"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredAndSortedProducts.map((p) => (
-                    <TableRow key={p._id}>
+                    <TableRow
+                      key={p._id}
+                      className="hover:bg-muted/30 transition-colors"
+                    >
                       <TableCell>
                         <Checkbox
                           checked={selectedIds.includes(p._id)}
@@ -278,28 +312,33 @@ export default function ProductListPage() {
                         />
                       </TableCell>
                       <TableCell>
-                        <div className="relative w-11 h-11">
+                        <div className="relative w-12 h-12">
                           <Image
                             src={
                               p.images && p.images[0]?.url
                                 ? p.images[0].url
                                 : "/placeholder.svg"
                             }
-                            alt={p.name || "product"}
+                            alt={p.name}
                             fill
-                            sizes="44px"
-                            className="rounded-md object-cover border"
+                            unoptimized
+                            className="rounded-lg object-cover border bg-white"
                           />
                         </div>
                       </TableCell>
-                      <TableCell className="font-medium">{p.name}</TableCell>
-                      <TableCell className="text-right">
-                        ${Number(p.price).toLocaleString()}
+                      <TableCell className="font-medium max-w-50 truncate">
+                        {p.name}
+                      </TableCell>
+                      <TableCell className="text-right font-semibold">
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(p.price)}
                       </TableCell>
                       <TableCell className="text-right">
-                        {p.quantity || 0}
+                        {p.stock ?? 0}
                       </TableCell>
-                      <TableCell>{getStatusBadge(p.quantity || 0)}</TableCell>
+                      <TableCell>{getStatusBadge(p.stock ?? 0)}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -307,14 +346,17 @@ export default function ProductListPage() {
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end" className="w-36">
                             <DropdownMenuItem asChild>
-                              <Link href={`/admin-products/update?id=${p._id}`}>
+                              <Link
+                                href={`/admin-products/update?id=${p._id}`}
+                                className="cursor-pointer"
+                              >
                                 <Pencil className="mr-2 h-4 w-4" /> Sửa
                               </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              className="text-destructive"
+                              className="text-destructive focus:bg-destructive/10 cursor-pointer"
                               onClick={() => {
                                 setProductToDelete(p);
                                 setDeleteDialogOpen(true);
@@ -331,9 +373,9 @@ export default function ProductListPage() {
                     <TableRow>
                       <TableCell
                         colSpan={7}
-                        className="text-center py-10 text-muted-foreground"
+                        className="text-center py-12 text-muted-foreground"
                       >
-                        Không tìm thấy sản phẩm nào.
+                        Không có dữ liệu phù hợp với bộ lọc.
                       </TableCell>
                     </TableRow>
                   )}
@@ -344,6 +386,7 @@ export default function ProductListPage() {
         </CardContent>
       </Card>
 
+      {/* Các Component hỗ trợ */}
       <BulkActionsBar
         selectedCount={selectedIds.length}
         onClearSelection={() => setSelectedIds([])}
@@ -352,6 +395,7 @@ export default function ProductListPage() {
           setDeleteDialogOpen(true);
         }}
       />
+
       <AdvancedFilterDrawer
         open={filterOpen}
         onOpenChange={setFilterOpen}
@@ -362,10 +406,11 @@ export default function ProductListPage() {
             category: f.category || "all",
             brand: f.brand || "all",
             minPrice: f.minPrice ?? 0,
-            maxPrice: f.maxPrice ?? Infinity,
+            maxPrice: f.maxPrice ?? 1000000000,
           })
         }
       />
+
       <DeleteProductDialog
         open={deleteDialogOpen}
         onOpenChange={(open) => !isDeleting && setDeleteDialogOpen(open)}

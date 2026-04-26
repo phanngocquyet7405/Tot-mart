@@ -12,6 +12,13 @@ export default function UsersManagement() {
   const [search, setSearch] = useState("");
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setRefreshTrigger((prev) => prev + 1);
+    setTimeout(() => setIsRefreshing(false), 1000);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -46,7 +53,7 @@ export default function UsersManagement() {
                 size={16}
               />
               <Input
-                placeholder="Tìm tên, email hoặc số điện thoại..."
+                placeholder="Tìm tên, email, SĐT hoặc vai trò..."
                 className="pl-9"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -56,9 +63,13 @@ export default function UsersManagement() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => setRefreshTrigger((prev) => prev + 1)}
+                onClick={handleRefresh}
+                title="Tải lại danh sách"
               >
-                <RefreshCw size={16} />
+                <RefreshCw
+                  size={16}
+                  className={isRefreshing ? "animate-spin" : ""}
+                />
               </Button>
             </div>
           </div>

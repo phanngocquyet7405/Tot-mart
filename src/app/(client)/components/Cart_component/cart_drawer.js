@@ -1,20 +1,36 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import {
+  X,
+  ChevronLeft,
+  ChevronRight,
+  PlusCircle,
+  ShoppingCart,
+} from "lucide-react";
 import CartItem from "./cart_item";
-import CategoryItem from "../Category_component/category_item";
+import Image from "next/image";
 import { useCart } from "@/app/context/CartContext";
 
 export default function CartDrawer({ open, setOpen }) {
-  const { cartItems, cartTotal } = useCart(); // Lấy dữ liệu giỏ hàng
+  const { cartItems, cartTotal, addToCart } = useCart();
+  const [showSuggestions, setShowSuggestions] = useState(true);
+
+  // Giả lập danh sách sản phẩm yêu thích/gợi ý
+  const suggestions = [
+    { id: "s1", name: "SFC Plum Soda", price: 50000, image: "/soda.jpg" },
+    { id: "s2", name: "Glico Pretz Sticks", price: 35000, image: "/pretz.jpg" },
+    {
+      id: "s3",
+      name: "Coca-Cola Strawberry",
+      price: 45000,
+      image: "/coke.jpg",
+    },
+  ];
 
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    if (open) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "unset";
     return () => {
       document.body.style.overflow = "unset";
     };
@@ -24,95 +40,171 @@ export default function CartDrawer({ open, setOpen }) {
     <AnimatePresence>
       {open && (
         <>
+          {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 z-1001"
+            className="fixed inset-0 bg-black/60 z-1001 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
 
+          {/* Main Drawer Container */}
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed right-0 top-0 h-full w-full md:w-2/3 bg-[#f6f2ea] z-1002 flex flex-col shadow-2xl"
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed right-0 top-0 h-full z-1002 flex"
           >
-            {/* Header */}
-            <div className="p-6 flex justify-between items-center border-b border-gray-200 bg-white shrink-0">
-              <h2 className="text-2xl font-bold text-gray-900">Your Cart</h2>
+            {/* CỘT TRÁI: Customers Also Loved (Có thể thu gọn) */}
+            <motion.div
+              animate={{ width: showSuggestions ? "320px" : "40px" }}
+              className="h-full bg-[#E5E1D8] border-r border-gray-300 relative overflow-hidden hidden md:flex flex-col shadow-inner"
+            >
+              {/* Nút Toggle thu gọn giống Bokksu */}
               <button
-                onClick={() => setOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                onClick={() => setShowSuggestions(!showSuggestions)}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#E5E1D8] p-1 border-y border-l border-gray-400 rounded-l-md hover:bg-white transition-colors"
               >
-                <X size={24} />
+                {showSuggestions ? (
+                  <ChevronRight size={18} />
+                ) : (
+                  <ChevronLeft size={18} />
+                )}
               </button>
-            </div>
 
-            {/* Nội dung chính */}
-            <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
-              {/* CỘT TRÁI: Hiển thị giỏ hàng */}
-              <div className="w-full md:w-1/2 p-8 border-r border-gray-200 overflow-y-auto bg-white/50">
-                <h3 className="text-xl font-bold mb-6 text-gray-800">
-                  Your Items
-                </h3>
-                <div className="space-y-4">
-                  {cartItems.length > 0 ? (
-                    cartItems.map((p, i) => (
-                      <CartItem key={p._id || p.id || i} product={p} />
-                    ))
-                  ) : (
-                    <p className="text-gray-500 italic">
-                      Your cart is currently empty.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* CỘT PHẢI: Popular Categories & Checkout */}
-              <div className="w-full md:w-1/2 p-8 overflow-y-auto bg-[#fdfbf7]">
-                <div className="mb-10 text-center md:text-left h-full flex flex-col">
-                  <h3 className="text-xl font-bold mb-6 text-gray-800">
-                    Popular Categories
-                  </h3>
-
-                  <div className="space-y-3 mb-10">
-                    <CategoryItem label="Sweets" />
-                    <CategoryItem label="Snacks" />
-                    <CategoryItem label="Drinks" />
-                  </div>
-
-                  <div className="mt-auto md:mt-0 pt-6 border-t border-gray-200">
-                    <div className="flex justify-between items-center mb-6">
-                      <span className="text-gray-600 font-medium">
-                        Subtotal:
-                      </span>
-                      <span className="text-2xl font-bold text-gray-900">
-                        {new Intl.NumberFormat("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }).format(cartTotal)}
-                      </span>
+              <AnimatePresence>
+                {showSuggestions ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="p-6 w-[320px]"
+                  >
+                    <div className="flex justify-between items-center mb-8">
+                      <h3 className="text-xl font-serif text-gray-800">
+                        Customers Also Loved
+                      </h3>
+                      <button
+                        onClick={() => setShowSuggestions(false)}
+                        className="md:hidden"
+                      >
+                        <X size={20} />
+                      </button>
                     </div>
-                    <button
-                      disabled={cartItems.length === 0}
-                      className="bg-[#1a4d2e] text-white py-4 rounded-xl w-full font-bold shadow-lg hover:bg-[#143d24] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+
+                    <div className="space-y-4">
+                      {suggestions.map((item) => (
+                        <div
+                          key={item.id}
+                          className="bg-white rounded-xl p-3 flex gap-4 items-center shadow-sm relative group"
+                        >
+                          <button
+                            onClick={() => addToCart(item)}
+                            className="absolute -left-2 -top-2 bg-emerald-800 text-white rounded-full p-1 shadow-md hover:scale-110 transition-transform"
+                          >
+                            <PlusCircle size={20} />
+                          </button>
+                          <div className="w-16 h-16 relative bg-gray-50 rounded-lg overflow-hidden shrink-0">
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              fill
+                              className="object-contain p-1"
+                            />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-800 line-clamp-1">
+                              {item.name}
+                            </p>
+                            <p className="text-sm font-bold text-orange-700">
+                              ₫{item.price.toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center">
+                    <p
+                      className="vertical-text font-serif text-gray-600 uppercase tracking-widest text-sm"
+                      style={{ writingMode: "vertical-rl" }}
                     >
-                      PROCEED TO CHECKOUT
-                    </button>
-                    <p className="text-center text-xs text-gray-400 mt-4">
-                      Free shipping on orders over $50
+                      Customers Also Loved
                     </p>
                   </div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* CỘT PHẢI: Market Items (Giỏ hàng chính) */}
+            <div className="h-full w-screen md:w-125 bg-white flex flex-col shadow-2xl">
+              {/* Header */}
+              <div className="p-6 border-b flex justify-between items-center bg-white shrink-0">
+                <h2 className="text-2xl font-serif font-bold text-gray-900 tracking-tight">
+                  Market Items
+                </h2>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium text-gray-500">
+                    {cartItems.length} item(s)
+                  </span>
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
                 </div>
               </div>
-            </div>
 
-            <div className="p-4 bg-white border-t border-gray-100 shrink-0 flex justify-center items-center">
-              <span className="text-gray-400 text-sm">
-                TotMart - Quality Selection
-              </span>
+              {/* Danh sách sản phẩm trong giỏ */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/50">
+                {cartItems.length > 0 ? (
+                  cartItems.map((p, i) => (
+                    <CartItem key={p._id || p.id || i} product={p} />
+                  ))
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-4">
+                    <ShoppingCart size={48} strokeWidth={1} />
+                    <p className="italic">Giỏ hàng của bạn đang trống.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Thanh toán */}
+              <div className="p-8 border-t bg-white shrink-0 shadow-[0_-10px_20px_-15px_rgba(0,0,0,0.1)]">
+                <div className="space-y-3 mb-6">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Subtotal</span>
+                    <span className="font-bold text-gray-900 uppercase">
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(cartTotal)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-emerald-700 font-medium">
+                    <span>You Saved</span>
+                    <span>₫0</span>
+                  </div>
+                </div>
+
+                <button
+                  disabled={cartItems.length === 0}
+                  className="bg-[#1a4d2e] text-white py-4 rounded-md w-full font-bold shadow-lg hover:bg-emerald-900 transition-all active:scale-[0.98] disabled:opacity-50"
+                >
+                  PROCEED TO CHECKOUT
+                </button>
+
+                <button
+                  onClick={() => setOpen(false)}
+                  className="w-full mt-4 text-center text-sm font-medium text-gray-500 underline hover:text-black transition-colors"
+                >
+                  Continue Without Checkout+
+                </button>
+              </div>
             </div>
           </motion.div>
         </>
