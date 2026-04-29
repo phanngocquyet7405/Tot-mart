@@ -59,7 +59,7 @@ export default function NavMenu() {
           if (!childDoc) return null;
           return {
             title: childDoc.name,
-            titleHref: `/category/${childDoc.slug || childDoc._id}`,
+            titleHref: `/categories/${childDoc.slug || childDoc._id}`,
             links: (childDoc.childrenIds || [])
               .map((gChild) => {
                 const gTargetId =
@@ -70,7 +70,7 @@ export default function NavMenu() {
                 return gChildDoc
                   ? {
                       label: gChildDoc.name,
-                      href: `/category/${gChildDoc.slug || gChildDoc._id}`,
+                      href: `/categories/${gChildDoc.slug || gChildDoc._id}`,
                     }
                   : null;
               })
@@ -132,7 +132,7 @@ export default function NavMenu() {
             onMouseEnter={() => setActiveDropdown(root._id)}
           >
             <Link
-              href={`/category/${root.slug || root._id}`}
+              href={`/categories/${root.slug || root._id}`}
               className={`font-bold uppercase text-[12px] transition-colors ${
                 activeDropDown === root._id
                   ? "text-orange-600"

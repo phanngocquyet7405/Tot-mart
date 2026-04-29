@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useContext, useState } from "react";
+import { useLayoutEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { AppContext } from "@/app/context/AppContext";
 import { checkTokenValid, getTokenRole } from "./tokenMiddleware";
@@ -33,12 +33,20 @@ export function withAdmin(WrappedComponent) {
       }
     }, [user, isLoading, router]);
 
-    if (isLoading || !user || !checkTokenValid() || user.role !== "admin") {
+    // Đang load → spinner (hợp lý vì chưa biết role)
+    if (isLoading) {
       return (
         <div className="flex h-screen items-center justify-center bg-white">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
       );
+    }
+
+    // FIX: Trả null thay vì spinner khi đang redirect
+    // Spinner cũ render rồi mới redirect → gây flash spinner → flash trắng → trang mới
+    // Null render không có gì → redirect ngay → không flash
+    if (!user || !checkTokenValid() || user.role !== "admin") {
+      return null;
     }
 
     return <WrappedComponent {...props} />;
@@ -48,7 +56,7 @@ export function withAdmin(WrappedComponent) {
   return AdminGuard;
 }
 
-// ─── withRole (Sửa lỗi Dependency) ──────────────────────────────────────────────
+// ─── withRole ────────────────────────────────────────────────────────────────
 export function withRole(WrappedComponent, allowedRoles = [], options = {}) {
   const { redirectTo = "/homepage" } = options;
 
@@ -68,7 +76,8 @@ export function withRole(WrappedComponent, allowedRoles = [], options = {}) {
       if (user && !allowedRoles.includes(user.role)) {
         router.replace(`${redirectTo}?error=forbidden`);
       }
-      // Loại bỏ 'redirectTo' và 'allowedRoles' khỏi array vì chúng thuộc scope cha của factory
+      // allowedRoles và redirectTo không cần trong dep array vì chúng là
+      // giá trị cố định từ factory function, không thay đổi theo lifecycle
     }, [user, isLoading, router]);
 
     if (

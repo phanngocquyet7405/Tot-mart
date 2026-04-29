@@ -24,6 +24,21 @@ export const API_ENDPOINTS = {
     },
   },
 
+  CART: {
+    GET_ALL: "/cart/get-all-cart",
+    GET_BY_USER: (id) => `/cart/get-cart/${id}`,
+    ADD: "/cart/add-to-cart",
+    UPDATE: (id) => `/cart/update-cart/${id}`,
+    DELETE: (id) => `/cart/delete-from-cart/${id}`,
+
+    SUBSCRIBE: {
+      ADD: "/cart/add-subcribe-plan-to-cart",
+      UPDATE: "/cart/update-subcribe-cart",
+      DELETE: (id) => `/cart/delete-from-subcribe-cart/${id}`,
+      GET_BY_USER: (id) => `/cart/get-subcribe-cart/${id}`,
+    },
+  },
+
   PRODUCTS: {
     CREATE: "/products/create-product",
     GET_ALL: "/products/get-all-products",
@@ -50,7 +65,22 @@ export const API_ENDPOINTS = {
   },
 
   BOXES: {
-    CREATE: "/boxes/create-box",
-    GET_ALL: "/boxes/get-all-box",
+    GET_ALL: "/box",
+    GET_BY_ID: (id) => `/box/${id}`,
+    GET_PRODUCTS: (id) => `/box/${id}/products`,
+    GET_OFFERS: "/box/offers",
+    CREATE: "/box",
+    UPDATE: (id) => `/box/${id}`,
+    DELETE: (id) => `/box/${id}`,
+  },
+
+  SUBSCRIBE_PLANS: {
+    CREATE: "/subscribe-plan/create-subcribe-plan",
+    GET_ALL: "/subscribe-plan/get-all-subcribe-plans",
+    GET_BY_ID: (id) => `/subscribe-plan/${id}`,
+    GET_BY_USER: (userId) => `/subscribe-plan/user/${userId}`,
+    CANCEL: (id) => `/subscribe-plan/${id}/cancel`,
+    CANCEL_IMMEDIATELY: (id) => `/subscribe-plan/${id}/cancel-immediately`,
+    PROCESS_DELIVERIES: "/subscribe-plan/process-deliveries",
   },
 };

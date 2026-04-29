@@ -1,6 +1,7 @@
 import { handleExpiredToken, checkTokenValid } from "./tokenMiddleware";
 import { API_ENDPOINTS } from "../services/api/apiEndpoints";
 import axios from "axios";
+import logger from "../util/Logger";
 
 const PUBLIC_ENDPOINTS = [
   API_ENDPOINTS.AUTH.LOGIN,
@@ -26,18 +27,18 @@ export function setupAxiosMiddleware(axiosInstance) {
 
   axiosInstance.interceptors.request.use(
     (config) => {
+      console.log("DEBUG: [Axios Request] URL:", config.url);
+      console.log("DEBUG: [Axios Request] Data:", config.data);
+
       if (typeof window === "undefined") return config; // SSR: bỏ qua
 
       const shouldSkipToken = isPublicEndpoint(config.url);
 
       if (!shouldSkipToken) {
-        // Kiểm tra token còn hạn trước khi gửi
         const tokenOk = checkTokenValid();
 
         if (!tokenOk) {
-          // Token hết hạn → dừng request, redirect luôn
           handleExpiredToken();
-          // Cancel request bằng cách throw CanceledError
           const cancelToken = new axios.CanceledError(
             "Token expired before request",
           );
@@ -54,6 +55,7 @@ export function setupAxiosMiddleware(axiosInstance) {
     },
     (error) => Promise.reject(error),
   );
+
   axiosInstance.interceptors.response.use(
     (response) => response.data,
 
@@ -68,18 +70,17 @@ export function setupAxiosMiddleware(axiosInstance) {
 
       switch (status) {
         case 401:
-          console.warn(`[401] Unauthorized tại ${requestUrl}: ${message}`);
+          logger.warn(`[401] Unauthorized tại ${requestUrl}:`, message);
           if (typeof window !== "undefined") {
             handleExpiredToken();
           }
           break;
 
         case 403:
-          console.warn(`[403] Forbidden tại ${requestUrl}: ${message}`);
+          logger.warn(`[403] Forbidden tại ${requestUrl}:`, message);
           if (typeof window !== "undefined") {
             const isLocked = message.toLowerCase().includes("locked");
             if (isLocked) {
-              // Tài khoản bị khóa → logout hoàn toàn
               localStorage.removeItem("token");
               localStorage.removeItem("user");
               window.location.href = "/login?error=account_locked";
@@ -93,28 +94,28 @@ export function setupAxiosMiddleware(axiosInstance) {
           break;
 
         case 404:
-          console.warn(`[404] Not Found tại ${requestUrl}: ${message}`);
+          logger.warn(`[404] Not Found tại ${requestUrl}:`, message);
           break;
 
         case 422:
-          console.warn(
+          logger.warn(
             `[422] Validation Error tại ${requestUrl}:`,
             error.response?.data,
           );
           break;
 
         case 500:
-          console.error(`[500] Server Error tại ${requestUrl}: ${message}`);
+          logger.error(`[500] Server Error tại ${requestUrl}:`, message);
           break;
 
         default:
           if (!status) {
             if (error.code === "ECONNABORTED") {
-              console.error(
+              logger.error(
                 "[Timeout] Request quá thời gian, vui lòng thử lại.",
               );
             } else {
-              console.error(
+              logger.error(
                 "[Network Error] Không thể kết nối server. Kiểm tra internet.",
               );
             }

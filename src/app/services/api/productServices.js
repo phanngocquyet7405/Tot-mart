@@ -81,3 +81,39 @@ export const createBoxApi = (formData) => {
 export const getAllBoxesApi = () => {
   return axiosConfig.get(API_ENDPOINTS.BOXES.GET_ALL);
 };
+
+// --- GIỎ HÀNG (CART) ---
+// ==========================================
+export const getCartByUserApi = (userId) => {
+  return axiosConfig.get(API_ENDPOINTS.CART.GET_BY_USER(userId));
+};
+
+export const addToCartApi = (data) => {
+  return axiosConfig.post(API_ENDPOINTS.CART.ADD, data);
+};
+
+export const updateCartItemApi = (cartId, data) => {
+  return axiosConfig.put(API_ENDPOINTS.CART.UPDATE(cartId), data);
+};
+
+export const deleteFromCartApi = (cartId, data) => {
+  // Axios delete gửi dữ liệu trong body thì phải bọc qua config `data`
+  return axiosConfig.delete(API_ENDPOINTS.CART.DELETE(cartId), { data });
+};
+
+// --- GIỎ HÀNG ĐĂNG KÝ (SUBSCRIBE CART) ---
+export const getSubscribeCartByUserApi = (userId) => {
+  return axiosConfig.get(API_ENDPOINTS.CART.SUBSCRIBE.GET_BY_USER(userId));
+};
+
+export const addSubscribePlanToCartApi = (data) => {
+  return axiosConfig.post(API_ENDPOINTS.CART.SUBSCRIBE.ADD, data);
+};
+
+export const updateSubscribeCartApi = (data) => {
+  return axiosConfig.put(API_ENDPOINTS.CART.SUBSCRIBE.UPDATE, data);
+};
+
+export const deleteFromSubscribeCartApi = (id, data) => {
+  return axiosConfig.delete(API_ENDPOINTS.CART.SUBSCRIBE.DELETE(id), { data });
+};
