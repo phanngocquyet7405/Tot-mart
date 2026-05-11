@@ -1,37 +1,137 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
-const announcements = [
-  "Free shipping on orders over $50! Use code FREESHIP",
-  "New Spring Collection Now Available - Shop Now!",
-  "Subscribe & Save 20% on Your First Box",
+const ANNOUNCEMENTS = [
+  {
+    text: "Miễn phí vận chuyển cho đơn từ 500K",
+    cta: "Mua ngay →",
+    href: "/homepage",
+  },
+  {
+    text: "Bộ sưu tập Xuân Hè mới vừa ra mắt — Giới hạn số lượng",
+    cta: "Khám phá →",
+    href: "/totmartbox",
+  },
+  {
+    text: "Tiết kiệm 20% với gói Subscribe — Dùng mã HELLO150",
+    cta: "Đăng ký →",
+    href: "/products/Subscriber",
+  },
 ];
 
+const BAR_H = 40; // px — single source of truth
+
 export default function AnnouncementBarBox() {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [idx, setIdx] = useState(0);
+  const [dismissed, setDismissed] = useState(false);
+  const [fading, setFading] = useState(false);
+  const timerRef = useRef(null);
+
+  /* Expose --ann-h so nav + layout can read it */
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--ann-h",
+      dismissed ? "0px" : `${BAR_H}px`,
+    );
+  }, [dismissed]);
+
+  const goto = (next) => {
+    setFading(true);
+    setTimeout(() => {
+      setIdx((next + ANNOUNCEMENTS.length) % ANNOUNCEMENTS.length);
+      setFading(false);
+    }, 220);
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % announcements.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
+    if (dismissed) return;
+    timerRef.current = setInterval(() => goto(idx + 1), 5000);
+    return () => clearInterval(timerRef.current);
+  }, [idx, dismissed]);
+
+  if (dismissed) return null;
+
+  const { text, cta, href } = ANNOUNCEMENTS[idx];
 
   return (
-    <div className="bg-black text-white text-[11px] font-bold uppercase tracking-widest h-10 relative overflow-hidden flex items-center justify-center">
-      {announcements.map((text, index) => (
-        <div
-          key={index}
-          className={`w-full absolute inset-0 flex items-center justify-center transition-all duration-700 ease-in-out px-4 text-center ${
-            index === currentIndex
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-2"
-          }`}
+    <div
+      className="w-full bg-stone-900 text-white overflow-hidden"
+      style={{ height: BAR_H }}
+    >
+      <div className="h-full max-w-7xl mx-auto px-3 sm:px-6 flex items-center gap-2">
+        {/* Prev */}
+        <button
+          onClick={() => {
+            clearInterval(timerRef.current);
+            goto(idx - 1);
+          }}
+          className="shrink-0 w-6 h-6 flex items-center justify-center text-stone-500 hover:text-white rounded-full hover:bg-white/10 transition-all"
+          aria-label="Trước"
         >
-          {text}
+          <ChevronLeft size={14} />
+        </button>
+
+        {/* Message */}
+        <div
+          className="flex-1 flex items-center justify-center gap-2 sm:gap-3 min-w-0"
+          style={{ opacity: fading ? 0 : 1, transition: "opacity 0.22s" }}
+        >
+          <p className="text-[11px] sm:text-xs font-medium text-stone-200 truncate leading-none">
+            {text}
+          </p>
+          <Link
+            href={href}
+            className="shrink-0 text-[11px] sm:text-xs font-bold text-amber-400 hover:text-amber-300 whitespace-nowrap transition-colors"
+          >
+            {cta}
+          </Link>
         </div>
-      ))}
+
+        {/* Dot indicators */}
+        <div className="hidden sm:flex items-center gap-1 shrink-0">
+          {ANNOUNCEMENTS.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                clearInterval(timerRef.current);
+                goto(i);
+              }}
+              aria-label={`Thông báo ${i + 1}`}
+              style={{
+                width: i === idx ? 14 : 5,
+                height: 5,
+                borderRadius: 99,
+                background: i === idx ? "#f59e0b" : "rgba(255,255,255,0.2)",
+                transition: "all 0.3s",
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Next */}
+        <button
+          onClick={() => {
+            clearInterval(timerRef.current);
+            goto(idx + 1);
+          }}
+          className="shrink-0 w-6 h-6 flex items-center justify-center text-stone-500 hover:text-white rounded-full hover:bg-white/10 transition-all"
+          aria-label="Tiếp theo"
+        >
+          <ChevronRight size={14} />
+        </button>
+
+        {/* Dismiss */}
+        <button
+          onClick={() => setDismissed(true)}
+          className="shrink-0 w-6 h-6 flex items-center justify-center text-stone-600 hover:text-white rounded-full hover:bg-white/10 transition-all"
+          aria-label="Đóng"
+        >
+          <X size={12} />
+        </button>
+      </div>
     </div>
   );
 }

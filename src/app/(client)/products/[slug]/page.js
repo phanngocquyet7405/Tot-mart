@@ -18,9 +18,18 @@ import {
   ThumbsUp,
   Award,
   RefreshCw,
+  Zap,
+  Package,
+  RotateCcw,
+  BadgeCheck,
+  Copy,
+  MessageSquarePlus,
+  Send,
+  Flame,
+  Clock,
+  MapPin,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,7 +39,10 @@ import NavMenu from "../../components/ui/nav_menu";
 import AnnouncementBar from "../../components/ui/AnnouncementBar";
 import Footer from "../../components/ui/footer";
 
-import { getProductByIdApi } from "@/app/services/api/productServices";
+import {
+  getProductByIdApi,
+  getProductsByCategoryApi,
+} from "@/app/services/api/productServices";
 import { useCart } from "@/app/context/CartContext";
 
 // ─────────────────────────────────────────────
@@ -42,12 +54,12 @@ function Toast({ toasts, removeToast }) {
       {toasts.map((t) => (
         <div
           key={t.id}
-          className={`pointer-events-auto flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl border text-sm font-semibold animate-slide-in-right
+          className={`pointer-events-auto flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-semibold animate-slide-in-right
             ${t.type === "success" ? "bg-[#1e3040] text-white border-[#1e3040]" : ""}
             ${t.type === "wishlist" ? "bg-rose-50 text-rose-700 border-rose-200" : ""}
             ${t.type === "info" ? "bg-white text-gray-800 border-gray-200" : ""}`}
         >
-          {t.icon && <span className="text-base">{t.icon}</span>}
+          {t.icon && <span className="shrink-0 text-current">{t.icon}</span>}
           <span>{t.message}</span>
           <button
             onClick={() => removeToast(t.id)}
@@ -183,11 +195,11 @@ function StarRating({
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`${size} transition-colors ${
+          className={`${size} transition-all ${
             star <= display
               ? "fill-yellow-400 text-yellow-400"
               : "text-gray-200 fill-gray-200"
-          } ${interactive ? "cursor-pointer hover:scale-110 transition-transform" : ""}`}
+          } ${interactive ? "cursor-pointer hover:scale-110" : ""}`}
           onMouseEnter={() => interactive && setHovered(star)}
           onMouseLeave={() => interactive && setHovered(null)}
           onClick={() => interactive && onChange?.(star)}
@@ -298,7 +310,7 @@ function ReviewsSection() {
     <div className="py-10">
       {/* Summary */}
       <div className="flex flex-col md:flex-row gap-10 mb-10 p-8 bg-gray-50 rounded-2xl">
-        <div className="flex flex-col items-center justify-center min-w-35">
+        <div className="flex flex-col items-center justify-center min-w-120px">
           <span className="text-6xl font-black text-[#1e3040]">
             {avgRating}
           </span>
@@ -327,26 +339,27 @@ function ReviewsSection() {
           ))}
         </div>
 
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col justify-center gap-3">
           {submitted && (
-            <div className="mb-3 flex items-center gap-2 text-green-600 text-sm font-medium">
+            <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
               <Check className="w-4 h-4" /> Cảm ơn bạn đã đánh giá!
             </div>
           )}
-          <Button
+          <button
             onClick={() => setShowForm((v) => !v)}
-            className="bg-[#1e3040] hover:bg-[#4a7c44] text-white text-xs font-bold uppercase tracking-widest rounded-xl px-6 py-3"
+            className="flex items-center gap-2 bg-[#1e3040] hover:bg-[#4a7c44] text-white text-xs font-bold uppercase tracking-widest rounded-xl px-6 py-3 transition-colors duration-300"
           >
+            <MessageSquarePlus className="w-4 h-4" />
             {showForm ? "Hủy" : "Viết đánh giá"}
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Write Review Form */}
       {showForm && (
         <div className="mb-8 p-6 border border-gray-200 rounded-2xl bg-white space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-          <h4 className="font-bold text-[#1e3040] text-sm uppercase tracking-widest">
-            Đánh giá của bạn
+          <h4 className="font-bold text-[#1e3040] text-sm uppercase tracking-widest flex items-center gap-2">
+            <MessageSquarePlus className="w-4 h-4" /> Đánh giá của bạn
           </h4>
           <div>
             <p className="text-xs text-gray-500 mb-2">Chọn số sao *</p>
@@ -363,7 +376,7 @@ function ReviewsSection() {
             onChange={(e) =>
               setNewReview((p) => ({ ...p, author: e.target.value }))
             }
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3040]/20 focus:border-[#1e3040]"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3040]/20 focus:border-[#1e3040] transition-all"
           />
           <input
             placeholder="Tiêu đề (tuỳ chọn)"
@@ -371,7 +384,7 @@ function ReviewsSection() {
             onChange={(e) =>
               setNewReview((p) => ({ ...p, title: e.target.value }))
             }
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3040]/20 focus:border-[#1e3040]"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3040]/20 focus:border-[#1e3040] transition-all"
           />
           <textarea
             placeholder="Chia sẻ trải nghiệm của bạn... *"
@@ -380,17 +393,17 @@ function ReviewsSection() {
               setNewReview((p) => ({ ...p, content: e.target.value }))
             }
             rows={4}
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3040]/20 focus:border-[#1e3040] resize-none"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3040]/20 focus:border-[#1e3040] resize-none transition-all"
           />
-          <Button
+          <button
             onClick={handleSubmit}
             disabled={
               !newReview.rating || !newReview.content || !newReview.author
             }
-            className="bg-[#1e3040] hover:bg-[#4a7c44] text-white text-xs font-bold uppercase tracking-widest disabled:opacity-40"
+            className="flex items-center gap-2 bg-[#1e3040] hover:bg-[#4a7c44] text-white text-xs font-bold uppercase tracking-widest px-6 py-3 rounded-xl disabled:opacity-40 transition-colors duration-300"
           >
-            Gửi đánh giá
-          </Button>
+            <Send className="w-3.5 h-3.5" /> Gửi đánh giá
+          </button>
         </div>
       )}
 
@@ -413,11 +426,13 @@ function ReviewsSection() {
                     </span>
                     {review.verified && (
                       <span className="flex items-center gap-1 text-[10px] text-green-600 font-bold uppercase tracking-wide bg-green-50 px-2 py-0.5 rounded-full">
-                        <Award className="w-3 h-3" /> Đã mua
+                        <BadgeCheck className="w-3 h-3" /> Đã mua
                       </span>
                     )}
                   </div>
-                  <span className="text-xs text-gray-400">{review.date}</span>
+                  <span className="text-xs text-gray-400 flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {review.date}
+                  </span>
                 </div>
                 <StarRating rating={review.rating} size="w-3.5 h-3.5" />
                 {review.title && (
@@ -436,8 +451,8 @@ function ReviewsSection() {
                       : "text-gray-400 hover:text-gray-600"
                   }`}
                 >
-                  <ThumbsUp className="w-3.5 h-3.5" />
-                  Hữu ích ({review.helpful})
+                  <ThumbsUp className="w-3.5 h-3.5" /> Hữu ích ({review.helpful}
+                  )
                 </button>
               </div>
             </div>
@@ -476,11 +491,11 @@ function RelatedProductCard({ product, onAddToCart }) {
         >
           {isAdding ? (
             <>
-              <Check className="w-3 h-3" /> Added!
+              <Check className="w-3 h-3" /> Đã thêm!
             </>
           ) : (
             <>
-              <ShoppingCart className="w-3 h-3" /> Add to Cart
+              <ShoppingCart className="w-3 h-3" /> Thêm vào giỏ
             </>
           )}
         </button>
@@ -499,6 +514,39 @@ function RelatedProductCard({ product, onAddToCart }) {
 }
 
 // ─────────────────────────────────────────────
+// Static Data
+// ─────────────────────────────────────────────
+const TRUST_BADGES = [
+  { icon: Truck, label: "Giao hàng nhanh" },
+  { icon: ShieldCheck, label: "Thanh toán an toàn" },
+  { icon: RotateCcw, label: "Đổi trả 7 ngày" },
+  { icon: Award, label: "100% Chính hãng" },
+];
+
+const SHIPPING_INFO = [
+  {
+    icon: Truck,
+    title: "Giao hàng tiêu chuẩn",
+    desc: "Miễn phí cho đơn hàng trên 500.000đ. Thời gian 2–4 ngày.",
+  },
+  {
+    icon: Zap,
+    title: "Giao hàng nhanh",
+    desc: "Giao trong ngày tại nội thành. Phí 30.000đ.",
+  },
+  {
+    icon: RefreshCw,
+    title: "Đổi trả dễ dàng",
+    desc: "Hỗ trợ đổi trả trong vòng 7 ngày nếu sản phẩm lỗi.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Đảm bảo chất lượng",
+    desc: "Hoàn tiền 100% nếu sản phẩm không đúng mô tả.",
+  },
+];
+
+// ─────────────────────────────────────────────
 // MAIN PAGE
 // ─────────────────────────────────────────────
 export default function ProductDetailPage({ params: paramsPromise }) {
@@ -506,12 +554,13 @@ export default function ProductDetailPage({ params: paramsPromise }) {
   const slug = params?.slug || "";
   const productId = slug.includes("-") ? slug.split("-").pop() : slug;
 
-  const { addToCart, cartItems } = useCart();
+  const { addToCart } = useCart();
   const { toasts, addToast, removeToast } = useToast();
 
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [relatedLoading, setRelatedLoading] = useState(false); // ✅ State mới
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [showStickyBar, setShowStickyBar] = useState(false);
@@ -523,7 +572,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
   const imageContainerRef = useRef(null);
   const mainAddToCartRef = useRef(null);
 
-  // ── Fetch Product ──
+  // ✅ useEffect 1: Fetch sản phẩm chính
   useEffect(() => {
     const fetchProduct = async () => {
       if (!productId) return;
@@ -547,40 +596,35 @@ export default function ProductDetailPage({ params: paramsPromise }) {
     fetchProduct();
   }, [productId]);
 
-  // ── Mock Related Products ──
+  // ✅ useEffect 2: Fetch sản phẩm liên quan từ API theo danh mục
   useEffect(() => {
     if (!product) return;
-    setRelatedProducts([
-      {
-        _id: "r1",
-        name: "Bánh quy bơ thượng hạng",
-        price: 75000,
-        images: [{ url: "/placeholder.svg" }],
-        category: product.category,
-      },
-      {
-        _id: "r2",
-        name: "Kẹo dẻo trái cây tổng hợp",
-        price: 45000,
-        images: [{ url: "/placeholder.svg" }],
-        category: product.category,
-      },
-      {
-        _id: "r3",
-        name: "Snack rong biển Hàn Quốc",
-        price: 38000,
-        images: [{ url: "/placeholder.svg" }],
-        category: product.category,
-      },
-      {
-        _id: "r4",
-        name: "Chocolate đen 72% cacao",
-        price: 120000,
-        images: [{ url: "/placeholder.svg" }],
-        category: product.category,
-      },
-    ]);
-  }, [product]);
+
+    const fetchRelated = async () => {
+      const categoryId = product.category?._id || product.category?.id;
+      if (!categoryId) return;
+
+      try {
+        setRelatedLoading(true);
+        const res = await getProductsByCategoryApi(categoryId);
+        const data = res?.data || res;
+
+        const currentId = product._id || product.id;
+        const items = Array.isArray(data)
+          ? data.filter((p) => (p._id || p.id) !== currentId).slice(0, 4)
+          : [];
+
+        setRelatedProducts(items);
+      } catch (error) {
+        console.error("Error fetching related products:", error);
+        setRelatedProducts([]);
+      } finally {
+        setRelatedLoading(false);
+      }
+    };
+
+    fetchRelated();
+  }, [product]); // ✅ Chỉ chạy khi product thay đổi, KHÔNG có mock useEffect nào khác
 
   // ── Sticky scroll listener ──
   useEffect(() => {
@@ -594,7 +638,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // ── Image Zoom (CSS background-position trick) ──
+  // ── Image Zoom ──
   const handleMouseMove = useCallback((e) => {
     if (!imageContainerRef.current) return;
     const { left, top, width, height } =
@@ -609,18 +653,15 @@ export default function ProductDetailPage({ params: paramsPromise }) {
     [],
   );
 
-  // ── Add to Cart (respects quantity) ──
+  // ── Add to Cart ──
   const handleAddToCartWithQty = useCallback(() => {
     if (!product) return;
     setAddingToCart(true);
-    // addToCart increments by 1 each call — call it `quantity` times
-    for (let i = 0; i < quantity; i++) {
-      addToCart(product);
-    }
+    for (let i = 0; i < quantity; i++) addToCart(product);
     addToast({
       message: `${quantity} × "${product.name}" đã vào giỏ hàng`,
       type: "success",
-      icon: "🛒",
+      icon: <ShoppingCart className="w-4 h-4" />,
     });
     setTimeout(() => setAddingToCart(false), 1500);
   }, [product, quantity, addToCart, addToast]);
@@ -638,7 +679,11 @@ export default function ProductDetailPage({ params: paramsPromise }) {
         JSON.stringify(wishlist.filter((i) => i !== id)),
       );
       setIsWishlisted(false);
-      addToast({ message: "Đã bỏ khỏi yêu thích", type: "info", icon: "💔" });
+      addToast({
+        message: "Đã bỏ khỏi yêu thích",
+        type: "info",
+        icon: <Heart className="w-4 h-4" />,
+      });
     } else {
       wishlist.push(id);
       localStorage.setItem("totmart_wishlist", JSON.stringify(wishlist));
@@ -646,7 +691,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
       addToast({
         message: "Đã thêm vào yêu thích!",
         type: "wishlist",
-        icon: "❤️",
+        icon: <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />,
       });
     }
   }, [product, isWishlisted, addToast]);
@@ -660,7 +705,11 @@ export default function ProductDetailPage({ params: paramsPromise }) {
       });
     } catch {
       await navigator.clipboard.writeText(window.location.href);
-      addToast({ message: "Đã sao chép link!", type: "info", icon: "🔗" });
+      addToast({
+        message: "Đã sao chép link!",
+        type: "info",
+        icon: <Copy className="w-4 h-4" />,
+      });
     }
   }, [product, addToast]);
 
@@ -683,7 +732,10 @@ export default function ProductDetailPage({ params: paramsPromise }) {
   if (!product)
     return (
       <div className="h-screen flex items-center justify-center">
-        <p className="text-gray-500 font-medium">Sản phẩm không tồn tại.</p>
+        <div className="flex flex-col items-center gap-3 text-gray-500">
+          <Package className="w-10 h-10 text-gray-300" />
+          <p className="font-medium">Sản phẩm không tồn tại.</p>
+        </div>
       </div>
     );
 
@@ -699,7 +751,6 @@ export default function ProductDetailPage({ params: paramsPromise }) {
   // ─────────────── RENDER ───────────────
   return (
     <div className="min-h-screen bg-white">
-      {/* Global keyframe for toast */}
       <style jsx global>{`
         @keyframes slide-in-right {
           from {
@@ -717,10 +768,8 @@ export default function ProductDetailPage({ params: paramsPromise }) {
         }
       `}</style>
 
-      {/* Toast Notifications */}
       <Toast toasts={toasts} removeToast={removeToast} />
 
-      {/* Image Zoom Modal */}
       {zoomOpen && (
         <ImageZoomModal
           images={product.images}
@@ -729,7 +778,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
         />
       )}
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="sticky top-0 bg-white shadow-sm z-100">
         <AnnouncementBar />
         <MainHeader />
@@ -738,8 +787,12 @@ export default function ProductDetailPage({ params: paramsPromise }) {
 
       <main className="max-w-7xl mx-auto px-4 py-6 lg:py-10">
         {/* Breadcrumb */}
-        <nav className="text-[10px] uppercase tracking-[0.15em] text-gray-400 mb-8">
-          Home / {product.category?.name || "Collections"} /{" "}
+        <nav className="text-[10px] uppercase tracking-[0.15em] text-gray-400 mb-8 flex items-center gap-1.5">
+          <MapPin className="w-3 h-3" />
+          Home
+          <ChevronRight className="w-3 h-3" />
+          {product.category?.name || "Collections"}
+          <ChevronRight className="w-3 h-3" />
           <span className="text-black font-bold">{product.name}</span>
         </nav>
 
@@ -770,14 +823,13 @@ export default function ProductDetailPage({ params: paramsPromise }) {
               ))}
             </div>
 
-            {/* Main Image + CSS Zoom */}
+            {/* Main Image + Zoom */}
             <div
               ref={imageContainerRef}
-              className="flex-1 relative aspect-square bg-gray-50 border border-gray-100 rounded-xl overflow-hidden group cursor-zoom-in"
+              className="flex-1 relative aspect-square bg-gray-50 border border-gray-100 rounded-2xl overflow-hidden group cursor-zoom-in"
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
             >
-              {/* Base image */}
               <Image
                 src={currentImageUrl}
                 alt={product.name}
@@ -786,7 +838,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
                 priority
               />
 
-              {/* Zoom overlay (CSS background trick) */}
+              {/* Zoom overlay */}
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
@@ -800,8 +852,8 @@ export default function ProductDetailPage({ params: paramsPromise }) {
 
               {/* Discount badge */}
               {discountPct && (
-                <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-md">
-                  -{discountPct}%
+                <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-md flex items-center gap-1">
+                  <Flame className="w-3 h-3" /> -{discountPct}%
                 </div>
               )}
 
@@ -813,11 +865,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
                   aria-label="Wishlist"
                 >
                   <Heart
-                    className={`w-5 h-5 transition-colors ${
-                      isWishlisted
-                        ? "fill-rose-500 text-rose-500"
-                        : "text-gray-400"
-                    }`}
+                    className={`w-5 h-5 transition-colors ${isWishlisted ? "fill-rose-500 text-rose-500" : "text-gray-400"}`}
                   />
                 </button>
                 <button
@@ -836,9 +884,10 @@ export default function ProductDetailPage({ params: paramsPromise }) {
                 </button>
               </div>
 
-              {/* Zoom hint tooltip */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-gray-500 bg-white/85 backdrop-blur-sm px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-medium tracking-wide whitespace-nowrap pointer-events-none shadow-sm">
-                Di chuột để zoom · Click 🔍 để phóng to
+              {/* Zoom hint */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-[10px] text-gray-500 bg-white/85 backdrop-blur-sm px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-medium tracking-wide whitespace-nowrap pointer-events-none shadow-sm">
+                <ZoomIn className="w-3 h-3" /> Di chuột để zoom · Click để phóng
+                to
               </div>
             </div>
           </div>
@@ -847,12 +896,12 @@ export default function ProductDetailPage({ params: paramsPromise }) {
           <div className="lg:col-span-5 flex flex-col">
             {/* Badges */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
-              <Badge className="bg-red-50 text-red-600 border-red-100 font-bold tracking-widest text-[10px]">
-                BESTSELLER
+              <Badge className="bg-red-50 text-red-600 border-red-100 font-bold tracking-widest text-[10px] flex items-center gap-1">
+                <Flame className="w-3 h-3" /> BESTSELLER
               </Badge>
               {product.stock > 0 && product.stock < 10 && (
-                <Badge className="bg-amber-50 text-amber-600 border-amber-100 font-bold text-[10px]">
-                  Còn {product.stock} sản phẩm
+                <Badge className="bg-amber-50 text-amber-600 border-amber-100 font-bold text-[10px] flex items-center gap-1">
+                  <Package className="w-3 h-3" /> Còn {product.stock} sản phẩm
                 </Badge>
               )}
             </div>
@@ -883,13 +932,12 @@ export default function ProductDetailPage({ params: paramsPromise }) {
                 </span>
               )}
               {discountPct && (
-                <span className="text-sm font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-lg">
-                  -{discountPct}%
+                <span className="text-sm font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                  <Flame className="w-3 h-3" /> -{discountPct}%
                 </span>
               )}
             </div>
 
-            {/* Short desc */}
             {product.description && (
               <p className="text-sm text-gray-600 leading-relaxed mb-5 line-clamp-3">
                 {product.description}
@@ -904,7 +952,6 @@ export default function ProductDetailPage({ params: paramsPromise }) {
                 Số lượng
               </p>
               <div className="flex gap-3">
-                {/* Quantity stepper */}
                 <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
                   <button
                     onClick={() => updateQuantity(-1)}
@@ -924,7 +971,6 @@ export default function ProductDetailPage({ params: paramsPromise }) {
                   </button>
                 </div>
 
-                {/* Add to Cart button */}
                 <button
                   ref={mainAddToCartRef}
                   onClick={handleAddToCartWithQty}
@@ -937,19 +983,16 @@ export default function ProductDetailPage({ params: paramsPromise }) {
                 >
                   {addingToCart ? (
                     <>
-                      <Check className="w-4 h-4" />
-                      Đã thêm!
+                      <Check className="w-4 h-4" /> Đã thêm!
                     </>
                   ) : (
                     <>
-                      <ShoppingCart className="w-4 h-4" />
-                      Thêm vào giỏ
+                      <ShoppingCart className="w-4 h-4" /> Thêm vào giỏ
                     </>
                   )}
                 </button>
               </div>
 
-              {/* Wishlist button */}
               <button
                 onClick={toggleWishlist}
                 className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
@@ -959,9 +1002,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
                 }`}
               >
                 <Heart
-                  className={`w-4 h-4 transition-all ${
-                    isWishlisted ? "fill-rose-500 text-rose-500" : ""
-                  }`}
+                  className={`w-4 h-4 transition-all ${isWishlisted ? "fill-rose-500 text-rose-500" : ""}`}
                 />
                 {isWishlisted ? "Đã yêu thích" : "Thêm vào yêu thích"}
               </button>
@@ -969,29 +1010,12 @@ export default function ProductDetailPage({ params: paramsPromise }) {
 
             {/* Trust badges */}
             <div className="grid grid-cols-2 gap-3 mt-1">
-              {[
-                {
-                  icon: <Truck className="w-4 h-4" />,
-                  label: "Giao hàng nhanh",
-                },
-                {
-                  icon: <ShieldCheck className="w-4 h-4" />,
-                  label: "Thanh toán an toàn",
-                },
-                {
-                  icon: <RefreshCw className="w-4 h-4" />,
-                  label: "Đổi trả 7 ngày",
-                },
-                {
-                  icon: <Award className="w-4 h-4" />,
-                  label: "100% Chính hãng",
-                },
-              ].map(({ icon, label }) => (
+              {TRUST_BADGES.map(({ icon: Icon, label }) => (
                 <div
                   key={label}
                   className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl text-[11px] font-bold text-gray-600 uppercase tracking-tight"
                 >
-                  <span className="text-green-600">{icon}</span>
+                  <Icon className="w-4 h-4 text-green-600 shrink-0" />
                   {label}
                 </div>
               ))}
@@ -1021,7 +1045,6 @@ export default function ProductDetailPage({ params: paramsPromise }) {
               ))}
             </TabsList>
 
-            {/* Details Tab */}
             <TabsContent
               value="details"
               className="py-8 animate-in fade-in duration-500"
@@ -1030,50 +1053,33 @@ export default function ProductDetailPage({ params: paramsPromise }) {
                 <p className="mb-6 text-base">
                   {product.description || "Không có mô tả cho sản phẩm này."}
                 </p>
-                <div className="mt-4 text-sm font-medium border-l-4 border-[#1e3040] pl-4 py-2 bg-gray-50 rounded-r-xl">
-                  <span className="text-gray-400 uppercase text-[10px] block mb-1">
-                    Danh mục / Thương hiệu
-                  </span>
-                  <span className="text-[#1e3040] font-bold">
-                    {product.category?.name}
-                  </span>{" "}
-                  •{" "}
-                  <span className="text-[#1e3040] font-bold">
-                    {product.brand?.name}
-                  </span>
+                <div className="mt-4 text-sm font-medium border-l-4 border-[#1e3040] pl-4 py-2 bg-gray-50 rounded-r-xl flex items-center gap-3">
+                  <Package className="w-4 h-4 text-[#1e3040] shrink-0" />
+                  <div>
+                    <span className="text-gray-400 uppercase text-[10px] block mb-0.5">
+                      Danh mục / Thương hiệu
+                    </span>
+                    <span className="text-[#1e3040] font-bold">
+                      {product.category?.name}
+                    </span>
+                    {" · "}
+                    <span className="text-[#1e3040] font-bold">
+                      {product.brand?.name}
+                    </span>
+                  </div>
                 </div>
               </div>
             </TabsContent>
 
-            {/* Shipping Tab */}
             <TabsContent value="shipping" className="py-8 space-y-4">
-              {[
-                {
-                  icon: "🚚",
-                  title: "Giao hàng tiêu chuẩn",
-                  desc: "Miễn phí cho đơn hàng trên 500.000đ. Thời gian 2-4 ngày.",
-                },
-                {
-                  icon: "⚡",
-                  title: "Giao hàng nhanh",
-                  desc: "Giao trong ngày tại nội thành. Phí 30.000đ.",
-                },
-                {
-                  icon: "🔄",
-                  title: "Đổi trả dễ dàng",
-                  desc: "Hỗ trợ đổi trả trong vòng 7 ngày nếu sản phẩm lỗi.",
-                },
-                {
-                  icon: "🛡️",
-                  title: "Đảm bảo chất lượng",
-                  desc: "Hoàn tiền 100% nếu sản phẩm không đúng mô tả.",
-                },
-              ].map(({ icon, title, desc }) => (
+              {SHIPPING_INFO.map(({ icon: Icon, title, desc }) => (
                 <div
                   key={title}
                   className="flex gap-4 p-4 bg-gray-50 rounded-xl"
                 >
-                  <span className="text-2xl">{icon}</span>
+                  <div className="w-10 h-10 rounded-xl bg-[#1e3040]/10 flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5 text-[#1e3040]" />
+                  </div>
                   <div>
                     <p className="font-bold text-[#1e3040] text-sm">{title}</p>
                     <p className="text-gray-500 text-sm mt-0.5">{desc}</p>
@@ -1082,7 +1088,6 @@ export default function ProductDetailPage({ params: paramsPromise }) {
               ))}
             </TabsContent>
 
-            {/* Reviews Tab */}
             <TabsContent
               value="reviews"
               className="animate-in fade-in duration-500"
@@ -1095,29 +1100,58 @@ export default function ProductDetailPage({ params: paramsPromise }) {
         {/* ══════════════ RELATED PRODUCTS ══════════════ */}
         <div className="mb-20">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-serif text-[#1e3040]">
+            <h2 className="text-2xl font-serif text-[#1e3040] flex items-center gap-2">
+              <Package className="w-6 h-6" />
               Sản phẩm liên quan
             </h2>
-            <button className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-[#1e3040] transition-colors border-b border-current pb-0.5">
-              Xem tất cả
+            <button className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-[#1e3040] transition-colors border-b border-current pb-0.5 flex items-center gap-1">
+              Xem tất cả <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {relatedProducts.map((rp) => (
-              <RelatedProductCard
-                key={rp._id}
-                product={rp}
-                onAddToCart={(p) => {
-                  addToCart(p);
-                  addToast({
-                    message: `Đã thêm "${p.name}" vào giỏ`,
-                    type: "success",
-                    icon: "🛒",
-                  });
-                }}
-              />
-            ))}
-          </div>
+
+          {/* Skeleton loading */}
+          {relatedLoading && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="aspect-square bg-gray-100 rounded-xl mb-3" />
+                  <div className="h-3 bg-gray-100 rounded w-1/2 mb-2" />
+                  <div className="h-4 bg-gray-100 rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-gray-100 rounded w-1/3" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!relatedLoading && relatedProducts.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+              <Package className="w-10 h-10 mb-3 text-gray-200" />
+              <p className="text-sm font-medium">
+                Không có sản phẩm liên quan.
+              </p>
+            </div>
+          )}
+
+          {/* Products grid */}
+          {!relatedLoading && relatedProducts.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {relatedProducts.map((rp) => (
+                <RelatedProductCard
+                  key={rp._id || rp.id}
+                  product={rp}
+                  onAddToCart={(p) => {
+                    addToCart(p);
+                    addToast({
+                      message: `Đã thêm "${p.name}" vào giỏ`,
+                      type: "success",
+                      icon: <ShoppingCart className="w-4 h-4" />,
+                    });
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </main>
 
@@ -1155,9 +1189,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
               className="p-2 border border-gray-200 rounded-lg hover:bg-rose-50 transition-colors"
             >
               <Heart
-                className={`w-4 h-4 ${
-                  isWishlisted ? "fill-rose-500 text-rose-500" : "text-gray-400"
-                }`}
+                className={`w-4 h-4 ${isWishlisted ? "fill-rose-500 text-rose-500" : "text-gray-400"}`}
               />
             </button>
             <button
@@ -1174,7 +1206,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
               ) : (
                 <ShoppingCart className="w-3.5 h-3.5" />
               )}
-              {addingToCart ? "Added!" : "Add To Cart"}
+              {addingToCart ? "Đã thêm!" : "Thêm vào giỏ"}
             </button>
           </div>
         </div>

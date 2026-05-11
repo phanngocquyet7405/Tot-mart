@@ -139,6 +139,7 @@ export default function TotBoxProductChoosePlan() {
 
   return (
     <section
+      id="choose-plan"
       className="w-full py-12 md:py-20"
       style={{ background: "#FFFAF8" }}
     >
@@ -313,7 +314,7 @@ export default function TotBoxProductChoosePlan() {
                 </p>
               </div>
               <Button className="w-full md:w-auto bg-[#C85C3C] hover:bg-[#B14B2D] text-white px-10 py-7 rounded-2xl text-lg font-bold transition-all hover:translate-y-0.5">
-                Subscribe Now <ChevronRight className="ml-2 w-5 h-5" />
+                SELECT THIS PLAN <ChevronRight className="ml-2 w-5 h-5" />
               </Button>
             </div>
 

@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
     REGISTER: "/users/register",
     GET_ALL: "/users/get-all-users",
     GET_BY_ID: (id) => `/users/get-user-by-id/${id}`,
+    GET_ME: "/users/me",
     UPDATE: (id) => `/users/update-user/${id}`,
     LOCK: (id) => `/users/lock-user/${id}`,
     UNLOCK: (id) => `/users/unlock-user/${id}`,
@@ -65,13 +66,13 @@ export const API_ENDPOINTS = {
   },
 
   BOXES: {
-    GET_ALL: "/box",
-    GET_BY_ID: (id) => `/box/${id}`,
-    GET_PRODUCTS: (id) => `/box/${id}/products`,
-    GET_OFFERS: "/box/offers",
-    CREATE: "/box",
-    UPDATE: (id) => `/box/${id}`,
-    DELETE: (id) => `/box/${id}`,
+    GET_ALL: "/boxes/get-all-boxes",
+    GET_BY_ID: (id) => `/boxes/get-box-by-id/${id}`,
+    GET_PRODUCTS: (id) => `/boxes/get-products-in-box/${id}`,
+    GET_OFFERS: "/boxes/get-box-offer-discount-coupons",
+    CREATE: "/boxes/create-box",
+    UPDATE: (id) => `/box/update-box/${id}`,
+    DELETE: (id) => `/boxes/delete-box/${id}`,
   },
 
   SUBSCRIBE_PLANS: {

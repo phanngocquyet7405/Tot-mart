@@ -27,6 +27,14 @@ export function ProductShowcase() {
     );
   };
 
+  // Hàm xử lý cuộn xuống phần ChoosePlan
+  const handleScrollToChoosePlan = () => {
+    const element = document.getElementById("choose-plan");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <section className="py-20 lg:py-32 bg-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -151,15 +159,11 @@ export function ProductShowcase() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="flex-1 text-lg py-6">
-                Subscribe Now
-              </Button>
               <Button
-                size="lg"
-                variant="outline"
-                className="flex-1 text-lg py-6"
+                onClick={handleScrollToChoosePlan}
+                className="w-full md:w-auto bg-[#C85C3C] hover:bg-[#B14B2D] text-white px-10 py-7 rounded-2xl text-lg font-bold transition-all hover:translate-y-0.5 flex items-center justify-center cursor-pointer shadow-lg"
               >
-                One-Time Purchase
+                Subscribe Now <ChevronRight className="ml-2 w-5 h-5" />
               </Button>
             </div>
           </div>

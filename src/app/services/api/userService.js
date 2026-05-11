@@ -2,24 +2,31 @@ import { axiosConfig } from "./axiosConfig";
 import { API_ENDPOINTS } from "./apiEndpoints";
 
 export const userService = {
-  /** Lấy danh sách người dùng (có phân trang) */
+  /** * Lấy thông tin cá nhân của chính mình (dựa trên Token)
+   * Thay vì truyền ID từ frontend, backend sẽ tự giải mã token để lấy ID.
+   */
+  getMe: () => axiosConfig.get(API_ENDPOINTS.USERS.GET_ME),
+
+  /** Lấy danh sách người dùng (Admin) */
   getAllUsers: (page = 1, limit = 10) =>
     axiosConfig.get(API_ENDPOINTS.USERS.GET_ALL, {
       params: { page, limit },
     }),
 
-  /** Lấy thông tin 1 người dùng theo ID */
+  /** Lấy thông tin 1 người dùng theo ID (Admin) */
   getUserById: (id) => axiosConfig.get(API_ENDPOINTS.USERS.GET_BY_ID(id)),
 
-  /** Tạo người dùng mới (dùng cho trang admin thêm user) */
-  createUser: (data) => axiosConfig.post(API_ENDPOINTS.USERS.CREATE, data),
+  /** Đăng ký người dùng mới */
+  createUser: (data) => axiosConfig.post(API_ENDPOINTS.USERS.REGISTER, data),
 
   /** Cập nhật thông tin người dùng */
   updateUser: (id, data) =>
     axiosConfig.put(API_ENDPOINTS.USERS.UPDATE(id), data),
 
-  /** Khóa người dùng */
-  lockUser: (id) => axiosConfig.patch(API_ENDPOINTS.USERS.LOCK(id)),
+  /** * Khóa người dùng
+   * Lưu ý: Backend router đang để routers.delete('/lock-user/:_id', ...)
+   */
+  lockUser: (id) => axiosConfig.delete(API_ENDPOINTS.USERS.LOCK(id)),
 
   /** Mở khóa người dùng */
   unlockUser: (id) => axiosConfig.patch(API_ENDPOINTS.USERS.UNLOCK(id)),
@@ -27,7 +34,7 @@ export const userService = {
   /** Xóa vĩnh viễn người dùng */
   deleteUser: (id) => axiosConfig.delete(API_ENDPOINTS.USERS.DELETE(id)),
 
-  /** Thêm địa chỉ mới cho người dùng */
+  /** Thêm địa chỉ mới */
   addAddress: (userId, addressData) =>
     axiosConfig.post(API_ENDPOINTS.USERS.ADDRESS.ADD(userId), addressData),
 

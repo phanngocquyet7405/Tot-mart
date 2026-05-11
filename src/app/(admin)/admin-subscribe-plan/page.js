@@ -1,3 +1,4 @@
+// page.js
 "use client";
 
 import { useState, useEffect } from "react";
@@ -56,7 +57,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-// ✅ Thay thế import cũ bằng Named Exports từ subscribePlanService
 import {
   getAllPlansApi,
   cancelPlanApi,
@@ -98,6 +98,18 @@ const PLAN_TYPE_LABELS = {
   "6_month": "6 tháng",
   "12_month": "12 tháng",
 };
+
+// ✅ Chuyển SortIcon ra ngoài component render chính
+function SortIcon({ col, sortKey, sortDir }) {
+  if (sortKey === col) {
+    return sortDir === "asc" ? (
+      <ChevronUp size={12} className="inline ml-1" />
+    ) : (
+      <ChevronDown size={12} className="inline ml-1" />
+    );
+  }
+  return <ChevronUp size={12} className="inline ml-1 opacity-20" />;
+}
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 function StatusBadge({ status, cancelAtPeriodEnd }) {
@@ -263,14 +275,13 @@ export default function SubscribePlanManagement() {
   const [sortDir, setSortDir] = useState("desc");
 
   const [detailPlan, setDetailPlan] = useState(null);
-  const [cancelTarget, setCancelTarget] = useState(null); // { plan, mode: 'end' | 'immediate' }
+  const [cancelTarget, setCancelTarget] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isTriggeringDelivery, setIsTriggeringDelivery] = useState(false);
 
   const fetchPlans = async () => {
     setIsLoading(true);
     try {
-      // ✅ Cập nhật: Sử dụng getAllPlansApi
       const res = await getAllPlansApi();
       const data = res.data?.data || [];
       setPlans(Array.isArray(data) ? data : []);
@@ -313,27 +324,14 @@ export default function SubscribePlanManagement() {
     }
   };
 
-  const SortIcon = ({ col }) =>
-    sortKey === col ? (
-      sortDir === "asc" ? (
-        <ChevronUp size={12} className="inline ml-1" />
-      ) : (
-        <ChevronDown size={12} className="inline ml-1" />
-      )
-    ) : (
-      <ChevronUp size={12} className="inline ml-1 opacity-20" />
-    );
-
   const handleCancel = async () => {
     if (!cancelTarget) return;
     setIsProcessing(true);
     try {
       if (cancelTarget.mode === "immediate") {
-        // ✅ Cập nhật: Sử dụng cancelImmediatelyApi
         await cancelImmediatelyApi(cancelTarget.plan._id);
         toast.success("Đã hủy gói ngay lập tức");
       } else {
-        // ✅ Cập nhật: Sử dụng cancelPlanApi
         await cancelPlanApi(cancelTarget.plan._id);
         toast.success("Gói sẽ bị hủy vào cuối kỳ hiện tại");
       }
@@ -349,7 +347,6 @@ export default function SubscribePlanManagement() {
   const handleTriggerDelivery = async () => {
     setIsTriggeringDelivery(true);
     try {
-      // ✅ Cập nhật: Sử dụng triggerDeliveryApi
       await triggerDeliveryApi();
       toast.success("Đã kích hoạt xử lý giao hàng thủ công");
     } catch (err) {
@@ -458,7 +455,6 @@ export default function SubscribePlanManagement() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              {/* Filter by status */}
               <div className="flex gap-1.5">
                 {["all", "active", "cancelled", "expired"].map((s) => (
                   <Button
@@ -508,21 +504,39 @@ export default function SubscribePlanManagement() {
                       className="cursor-pointer"
                       onClick={() => toggleSort("name")}
                     >
-                      Tên gói <SortIcon col="name" />
+                      {/* ✅ Gọi SortIcon mới với props đầy đủ */}
+                      Tên gói{" "}
+                      <SortIcon
+                        col="name"
+                        sortKey={sortKey}
+                        sortDir={sortDir}
+                      />
                     </TableHead>
                     <TableHead>Người dùng</TableHead>
                     <TableHead
                       className="cursor-pointer"
                       onClick={() => toggleSort("planType")}
                     >
-                      Loại gói <SortIcon col="planType" />
+                      {/* ✅ Gọi SortIcon mới với props đầy đủ */}
+                      Loại gói{" "}
+                      <SortIcon
+                        col="planType"
+                        sortKey={sortKey}
+                        sortDir={sortDir}
+                      />
                     </TableHead>
                     <TableHead>Tiến độ</TableHead>
                     <TableHead
                       className="cursor-pointer"
                       onClick={() => toggleSort("price")}
                     >
-                      Giá <SortIcon col="price" />
+                      {/* ✅ Gọi SortIcon mới với props đầy đủ */}
+                      Giá{" "}
+                      <SortIcon
+                        col="price"
+                        sortKey={sortKey}
+                        sortDir={sortDir}
+                      />
                     </TableHead>
                     <TableHead>Giao tiếp theo</TableHead>
                     <TableHead>Trạng thái</TableHead>
@@ -558,14 +572,12 @@ export default function SubscribePlanManagement() {
                           key={plan._id}
                           className="group hover:bg-muted/20"
                         >
-                          {/* Tên */}
                           <TableCell>
                             <p className="font-medium">{plan.name}</p>
                             <p className="text-xs text-muted-foreground">
                               ID: {plan._id?.slice(-6)}
                             </p>
                           </TableCell>
-                          {/* User */}
                           <TableCell>
                             <p className="text-sm font-medium">
                               {plan.userId?.name || "—"}
@@ -574,7 +586,6 @@ export default function SubscribePlanManagement() {
                               {plan.userId?.email || ""}
                             </p>
                           </TableCell>
-                          {/* Loại gói */}
                           <TableCell>
                             <Badge
                               variant="outline"
@@ -583,7 +594,6 @@ export default function SubscribePlanManagement() {
                               {PLAN_TYPE_LABELS[plan.planType] || plan.planType}
                             </Badge>
                           </TableCell>
-                          {/* Tiến độ */}
                           <TableCell>
                             <div className="space-y-1 min-w-25">
                               <div className="flex justify-between text-xs">
@@ -601,7 +611,6 @@ export default function SubscribePlanManagement() {
                               </div>
                             </div>
                           </TableCell>
-                          {/* Giá */}
                           <TableCell>
                             <p className="font-medium">
                               {formatCurrency(plan.price)}
@@ -612,7 +621,6 @@ export default function SubscribePlanManagement() {
                               </p>
                             )}
                           </TableCell>
-                          {/* Giao tiếp theo */}
                           <TableCell>
                             {plan.nextDeliveries ? (
                               <div>
@@ -629,14 +637,12 @@ export default function SubscribePlanManagement() {
                               </span>
                             )}
                           </TableCell>
-                          {/* Trạng thái */}
                           <TableCell>
                             <StatusBadge
                               status={plan.status}
                               cancelAtPeriodEnd={plan.cancelAtPeriodEnd}
                             />
                           </TableCell>
-                          {/* Actions */}
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>

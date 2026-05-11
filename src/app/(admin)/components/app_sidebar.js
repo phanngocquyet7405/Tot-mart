@@ -13,12 +13,11 @@ import {
   LogOut,
   Package,
   PlusCircle,
-  Pencil,
-  Trash2,
-  ChevronDown,
   Box,
   Album,
   LayersPlus,
+  CreditCard,
+  Boxes,
 } from "lucide-react";
 import {
   Sidebar,
@@ -39,6 +38,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
@@ -66,6 +66,26 @@ const menuItems = [
     submenu: [
       { title: "Danh sách", icon: Album, href: "/admin-categories" },
       { title: "Thêm mới", icon: LayersPlus, href: "/admin-categories/create" },
+    ],
+  },
+  {
+    title: "Hộp",
+    icon: Boxes,
+    submenu: [
+      { title: "Danh sách", icon: Album, href: "/admin-box" },
+      { title: "Thêm mới", icon: LayersPlus, href: "/admin-box/create" },
+    ],
+  },
+  {
+    title: "Gói đăng ký",
+    icon: CreditCard,
+    submenu: [
+      { title: "Danh sách", icon: Album, href: "/admin-subscribe-plan" },
+      {
+        title: "Thêm mới",
+        icon: LayersPlus,
+        href: "/admin-subscribe-plan/create",
+      },
     ],
   },
   { title: "Hồ sơ cá nhân", icon: User, href: "/profile" },
