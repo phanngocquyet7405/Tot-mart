@@ -1,32 +1,33 @@
 import { axiosConfig } from "./axiosConfig";
 import { API_ENDPOINTS } from "./apiEndpoints";
 
-export const createPlanApi = (data) => {
-  return axiosConfig.post(API_ENDPOINTS.SUBSCRIBE_PLANS.CREATE, data);
-};
+export const planApi = {
+  // Tạo mới gói
+  create: (data) =>
+    axiosConfig.post(API_ENDPOINTS.SUBSCRIBE_PLANS.CREATE, data),
 
-export const getAllPlansApi = () => {
-  return axiosConfig.get(API_ENDPOINTS.SUBSCRIBE_PLANS.GET_ALL);
-};
+  // Lấy tất cả danh sách
+  getAll: () => axiosConfig.get(API_ENDPOINTS.SUBSCRIBE_PLANS.GET_ALL),
 
-export const getPlanByIdApi = (id) => {
-  return axiosConfig.get(API_ENDPOINTS.SUBSCRIBE_PLANS.GET_BY_ID(id));
-};
+  // Lấy chi tiết theo ID
+  getById: (id) => axiosConfig.get(API_ENDPOINTS.SUBSCRIBE_PLANS.GET_BY_ID(id)),
 
-export const getPlansByUserApi = (userId) => {
-  return axiosConfig.get(API_ENDPOINTS.SUBSCRIBE_PLANS.GET_BY_USER(userId));
-};
+  // Lấy danh sách theo User
+  getByUser: (userId) =>
+    axiosConfig.get(API_ENDPOINTS.SUBSCRIBE_PLANS.GET_BY_USER(userId)),
 
-export const cancelPlanApi = (id) => {
-  return axiosConfig.patch(API_ENDPOINTS.SUBSCRIBE_PLANS.CANCEL(id));
-};
+  // Huỷ vào cuối kỳ (Patch)
+  cancel: (id) => axiosConfig.patch(API_ENDPOINTS.SUBSCRIBE_PLANS.CANCEL(id)),
 
-export const cancelImmediatelyApi = (id) => {
-  return axiosConfig.patch(
-    API_ENDPOINTS.SUBSCRIBE_PLANS.CANCEL_IMMEDIATELY(id),
-  );
-};
+  // Huỷ ngay lập tức (Patch)
+  cancelImmediately: (id) =>
+    axiosConfig.patch(API_ENDPOINTS.SUBSCRIBE_PLANS.CANCEL_IMMEDIATELY(id)),
 
-export const triggerDeliveryApi = () => {
-  return axiosConfig.post(API_ENDPOINTS.SUBSCRIBE_PLANS.PROCESS_DELIVERIES);
+  // Xoá vĩnh viễn (Delete)
+  // Đảm bảo API_ENDPOINTS của bạn có định nghĩa DELETE(id)
+  delete: (id) => axiosConfig.delete(API_ENDPOINTS.SUBSCRIBE_PLANS.DELETE(id)),
+
+  // Kích hoạt giao hàng thủ công
+  triggerDelivery: () =>
+    axiosConfig.post(API_ENDPOINTS.SUBSCRIBE_PLANS.PROCESS_DELIVERIES),
 };

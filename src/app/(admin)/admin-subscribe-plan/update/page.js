@@ -2,66 +2,77 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import {
-  Button,
-  Card,
-  CardBody,
-  Input,
-  Select,
-  Badge,
-  FormSection,
-  PageHeader,
-  Breadcrumb,
-  Alert,
-  Spinner,
-  fmtPrice,
-  PLAN_LABELS,
-  STATUS_CONFIG,
-} from "@/components/ui";
-import { planApi, boxApi } from "@/lib/api";
-import { Save } from "lucide-react";
+import { AlertCircle, Save } from "lucide-react";
+import { toast } from "sonner";
+import { Card, CardContent } from "@/components/ui/card";
+import { getAllBoxesApi } from "@/app/services/api/boxService";
+import { planApi } from "@/app/services/api/subscribePlanService";
+
+const fmtPrice = (val) =>
+  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+    val,
+  );
+
+const PLAN_LABELS = {
+  "1_month": "1 Tháng",
+  "3_months": "3 Tháng",
+  "6_months": "6 Tháng",
+};
 
 export default function UpdateSubscribePlanPage() {
   const router = useRouter();
   const { id } = useParams();
 
   const [form, setForm] = useState(null);
-  const [address, setAddress] = useState(null);
+  const [address, setAddress] = useState({});
   const [boxes, setBoxes] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const [apiError, setApiError] = useState(null);
-  const [success, setSuccess] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   useEffect(() => {
-    Promise.all([planApi.getById(id), boxApi.getAll()])
-      .then(([planRes, boxRes]) => {
+    async function fetchData() {
+      try {
+        const [planRes, boxRes] = await Promise.all([
+          planApi.getById(id),
+          getAllBoxesApi(),
+        ]);
         const plan = planRes.data;
         setForm({
-          name: plan.name,
-          userId: plan.userId,
-          boxId: plan.boxId,
-          planType: plan.planType,
-          totalDeliveries: plan.totalDeliveries,
+          name: plan.name || "",
+          userId: plan.userId || "",
+          boxId: plan.boxId || "",
+          planType: plan.planType || "1_month",
+          totalDeliveries: plan.totalDeliveries || 1,
           discountPercent: plan.discountPercent || 0,
-          status: plan.status,
-          cancelAtPeriodEnd: plan.cancelAtPeriodEnd,
+          status: plan.status || "active",
+          cancelAtPeriodEnd: plan.cancelAtPeriodEnd || false,
         });
-        setAddress({ ...(plan.shippingAddress || {}) });
-        setBoxes(boxRes.data || []);
-      })
-      .catch((e) => setApiError(e.message))
-      .finally(() => setFetching(false));
+        setAddress(plan.shippingAddress || {});
+        if (boxRes.data?.boxes) setBoxes(boxRes.data.boxes);
+        else if (boxRes.data) setBoxes(boxRes.data);
+      } catch (err) {
+        setApiError(err.response?.data?.message || err.message);
+      } finally {
+        setFetching(false);
+      }
+    }
+    fetchData();
   }, [id]);
 
-  const set = (f, v) => {
-    setForm((p) => ({ ...p, [f]: v }));
-    setErrors((e) => ({ ...e, [f]: undefined }));
+  const set = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    if (errors[field])
+      setErrors((prev) => {
+        const n = { ...prev };
+        delete n[field];
+        return n;
+      });
   };
-  const setAddr = (f, v) => {
-    setAddress((p) => ({ ...p, [f]: v }));
-  };
+
+  const setAddr = (field, value) =>
+    setAddress((prev) => ({ ...prev, [field]: value }));
 
   const selectedBox = boxes.find((b) => b._id === form?.boxId);
   const computedPrice =
@@ -71,9 +82,10 @@ export default function UpdateSubscribePlanPage() {
 
   const validate = () => {
     const e = {};
-    if (!form.name?.trim()) e.name = "Bắt buộc";
-    if (!form.boxId) e.boxId = "Vui lòng chọn box";
-    if (form.totalDeliveries < 1) e.totalDeliveries = "Tối thiểu 1";
+    if (!form.name?.trim()) e.name = "Tên gói không được để trống";
+    if (!form.boxId) e.boxId = "Vui lòng chọn một loại box";
+    if (form.totalDeliveries < 1)
+      e.totalDeliveries = "Số lần giao ít nhất là 1";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -81,13 +93,15 @@ export default function UpdateSubscribePlanPage() {
   const handleSubmit = async () => {
     if (!validate()) return;
     setLoading(true);
-    setApiError(null);
+    setApiError("");
     try {
       await planApi.update(id, { ...form, shippingAddress: address });
-      setSuccess(true);
-      setTimeout(() => router.push("/admin/subscribe-plans"), 1200);
-    } catch (e) {
-      setApiError(e.message);
+      toast.success("Cập nhật thành công!");
+      router.push("/admin-subscribe-plan");
+    } catch (err) {
+      const errMsg = err.response?.data?.message || err.message;
+      setApiError(errMsg);
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -96,237 +110,288 @@ export default function UpdateSubscribePlanPage() {
   if (fetching) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <div className="flex items-center gap-3 text-gray-400">
-          <Spinner size={20} />
-          <span className="text-sm">Đang tải thông tin gói...</span>
-        </div>
+        <span className="text-sm text-gray-400">Đang tải thông tin gói...</span>
       </div>
     );
   }
 
-  const statusCfg = form ? STATUS_CONFIG[form.status] : null;
+  if (!form) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+        <span className="text-sm text-red-500">
+          Không tìm thấy dữ liệu gói đăng ký
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6">
       <div className="max-w-3xl mx-auto">
-        <Breadcrumb
-          items={[
-            { label: "Admin", href: "/admin" },
-            { label: "Subscribe Plans", href: "/admin/subscribe-plans" },
-            { label: "Chỉnh sửa" },
-          ]}
-        />
-
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              Chỉnh sửa Subscribe Plan
-            </h1>
-            {form && (
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {form.name}
-                </p>
-                {statusCfg && (
-                  <Badge color={statusCfg.color}>{statusCfg.label}</Badge>
-                )}
-                {form.cancelAtPeriodEnd && (
-                  <Badge color="amber">Huỷ cuối kỳ</Badge>
-                )}
-              </div>
-            )}
-          </div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            Chỉnh sửa Subscribe Plan
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">ID: {id?.slice(-6)}</p>
         </div>
 
         {apiError && (
-          <Alert type="error" className="mb-5">
-            <span>{apiError}</span>
-          </Alert>
-        )}
-        {success && (
-          <Alert type="success" className="mb-5">
-            <span>Cập nhật thành công! Đang chuyển hướng...</span>
-          </Alert>
+          <div className="mb-5 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 flex items-start gap-2 text-sm">
+            <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+            <span className="whitespace-pre-wrap">{apiError}</span>
+          </div>
         )}
 
-        {!form ? (
-          <Alert type="error">
-            <span>Không tìm thấy gói đăng ký</span>
-          </Alert>
-        ) : (
-          <Card>
-            <CardBody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {/* Thông tin gói */}
-              <FormSection
-                title="Thông tin gói"
-                description="Tên, khách hàng và loại gói"
-              >
-                <Input
-                  label="Tên gói *"
-                  value={form.name}
-                  error={errors.name}
-                  onChange={(e) => set("name", e.target.value)}
-                />
-                <Input
-                  label="User ID"
-                  value={form.userId}
-                  onChange={(e) => set("userId", e.target.value)}
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <Select
-                    label="Loại gói"
+        <Card>
+          <CardContent className="p-6 space-y-6">
+            {/* Thông tin cơ bản */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                Thông tin cơ bản
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Tên gói *
+                  </label>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => set("name", e.target.value)}
+                    className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${errors.name ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
+                  />
+                  {errors.name && (
+                    <span className="text-xs text-red-500">{errors.name}</span>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    User ID
+                  </label>
+                  <input
+                    type="text"
+                    value={form.userId}
+                    disabled
+                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 opacity-70"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Tần suất
+                  </label>
+                  <select
                     value={form.planType}
                     onChange={(e) => set("planType", e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
                     {Object.entries(PLAN_LABELS).map(([v, l]) => (
                       <option key={v} value={v}>
                         {l}
                       </option>
                     ))}
-                  </Select>
-                  <Input
-                    label="Số lần giao hàng"
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Tổng số lần giao
+                  </label>
+                  <input
                     type="number"
                     min={1}
                     value={form.totalDeliveries}
-                    error={errors.totalDeliveries}
                     onChange={(e) => set("totalDeliveries", +e.target.value)}
+                    className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${errors.totalDeliveries ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
                   />
+                  {errors.totalDeliveries && (
+                    <span className="text-xs text-red-500">
+                      {errors.totalDeliveries}
+                    </span>
+                  )}
                 </div>
-              </FormSection>
+              </div>
+            </div>
 
-              {/* Box & Giá */}
-              <FormSection
-                title="Box & Giá"
-                description="Box đang đăng ký và giảm giá"
-              >
-                <Select
-                  label="Box *"
+            {/* Box & Giá */}
+            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                Cấu hình sản phẩm & Giá
+              </h3>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Chọn Box *
+                </label>
+                <select
                   value={form.boxId}
-                  error={errors.boxId}
                   onChange={(e) => set("boxId", e.target.value)}
+                  className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${errors.boxId ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
                 >
                   <option value="">— Chọn box —</option>
                   {boxes.map((b) => (
                     <option key={b._id} value={b._id}>
-                      {b.name} —{" "}
-                      {new Intl.NumberFormat("vi-VN").format(b.value)} ₫
+                      {b.name} ({fmtPrice(b.value)})
                     </option>
                   ))}
-                </Select>
-                <Input
-                  label="Giảm giá (%)"
+                </select>
+                {errors.boxId && (
+                  <span className="text-xs text-red-500">{errors.boxId}</span>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Chiết khấu (%)
+                </label>
+                <input
                   type="number"
                   min={0}
                   max={100}
                   value={form.discountPercent}
                   onChange={(e) => set("discountPercent", +e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
-
-                {selectedBox && computedPrice > 0 && (
-                  <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 px-4 py-3">
-                    <div className="flex justify-between text-sm font-semibold">
-                      <span className="text-blue-700 dark:text-blue-300">
-                        Giá mỗi lần giao
-                      </span>
-                      <span className="text-blue-800 dark:text-blue-200">
-                        {fmtPrice(computedPrice)}
-                      </span>
+              </div>
+              {selectedBox && (
+                <div className="p-4 rounded-xl border border-blue-100 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-900/30">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase">
+                        Giá áp dụng
+                      </p>
+                      <p className="text-lg font-black text-blue-700 dark:text-blue-300">
+                        {fmtPrice(computedPrice)}{" "}
+                        <span className="text-xs font-normal">/ lần giao</span>
+                      </p>
+                    </div>
+                    <div className="text-right text-xs text-gray-500">
+                      Giá gốc: <del>{fmtPrice(selectedBox.value)}</del>
                     </div>
                   </div>
-                )}
-              </FormSection>
+                </div>
+              )}
+            </div>
 
-              {/* Trạng thái */}
-              <FormSection
-                title="Trạng thái"
-                description="Trạng thái hiện tại của gói"
-              >
-                <Select
-                  label="Trạng thái"
+            {/* Trạng thái */}
+            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                Trạng thái & Gia hạn
+              </h3>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Trạng thái
+                </label>
+                <select
                   value={form.status}
                   onChange={(e) => set("status", e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="active">Đang hoạt động</option>
                   <option value="cancelled">Đã huỷ</option>
                   <option value="expired">Hết hạn</option>
-                </Select>
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={form.cancelAtPeriodEnd}
-                    onChange={(e) => set("cancelAtPeriodEnd", e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Huỷ vào cuối kỳ thanh toán
+                </select>
+              </div>
+              <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                <input
+                  type="checkbox"
+                  checked={form.cancelAtPeriodEnd}
+                  onChange={(e) => set("cancelAtPeriodEnd", e.target.checked)}
+                  className="w-5 h-5 rounded border-gray-300"
+                />
+                <div>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    Huỷ vào cuối kỳ
                   </span>
-                </label>
-              </FormSection>
-
-              {/* Địa chỉ giao hàng */}
-              {address && (
-                <FormSection
-                  title="Địa chỉ giao hàng"
-                  description="Cập nhật địa chỉ nhận hàng"
-                >
-                  <Input
-                    label="Địa chỉ"
-                    value={address.address || ""}
-                    onChange={(e) => setAddr("address", e.target.value)}
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <Input
-                      label="Quận / Huyện"
-                      value={address.district || ""}
-                      onChange={(e) => setAddr("district", e.target.value)}
-                    />
-                    <Input
-                      label="Thành phố"
-                      value={address.city || ""}
-                      onChange={(e) => setAddr("city", e.target.value)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <Input
-                      label="Quốc gia"
-                      value={address.country || ""}
-                      onChange={(e) => setAddr("country", e.target.value)}
-                    />
-                    <Input
-                      label="Mã bưu chính"
-                      value={address.zipCode || ""}
-                      onChange={(e) => setAddr("zipCode", e.target.value)}
-                    />
-                    <Input
-                      label="Số điện thoại"
-                      type="tel"
-                      value={address.phone || ""}
-                      onChange={(e) => setAddr("phone", e.target.value)}
-                    />
-                  </div>
-                </FormSection>
-              )}
-            </CardBody>
-
-            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex justify-between bg-gray-50/50 dark:bg-gray-800/20 rounded-b-xl">
-              <Button
-                variant="outline"
-                onClick={() => router.push("/admin/subscribe-plans")}
-              >
-                Huỷ
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleSubmit}
-                loading={loading}
-              >
-                <Save size={14} />
-                {loading ? "Đang lưu..." : "Lưu thay đổi"}
-              </Button>
+                  <p className="text-xs text-gray-500">
+                    Gói sẽ không tự động gia hạn sau khi hết kỳ thanh toán.
+                  </p>
+                </div>
+              </label>
             </div>
-          </Card>
-        )}
+
+            {/* Địa chỉ */}
+            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                Địa chỉ giao hàng
+              </h3>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Số nhà, tên đường
+                </label>
+                <input
+                  type="text"
+                  value={address.address || ""}
+                  onChange={(e) => setAddr("address", e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Quận / Huyện
+                  </label>
+                  <input
+                    type="text"
+                    value={address.district || ""}
+                    onChange={(e) => setAddr("district", e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Thành phố
+                  </label>
+                  <input
+                    type="text"
+                    value={address.city || ""}
+                    onChange={(e) => setAddr("city", e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Số điện thoại
+                  </label>
+                  <input
+                    type="tel"
+                    value={address.phone || ""}
+                    onChange={(e) => setAddr("phone", e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Mã bưu chính
+                  </label>
+                  <input
+                    type="text"
+                    value={address.zipCode || ""}
+                    onChange={(e) => setAddr("zipCode", e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+
+          <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex justify-between bg-gray-50/50 dark:bg-gray-800/20 rounded-b-xl">
+            <button
+              onClick={() => router.back()}
+              className="px-4 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              Huỷ bỏ
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+            >
+              <Save size={14} />
+              {loading ? "Đang xử lý..." : "Cập nhật ngay"}
+            </button>
+          </div>
+        </Card>
       </div>
     </div>
   );
