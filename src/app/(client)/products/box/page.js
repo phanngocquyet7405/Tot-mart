@@ -9,7 +9,7 @@ import NavMenu from "../components/ui/nav_menu";
 import AnnouncementBar from "../components/ui/AnnouncementBar";
 import MainHeader from "../components/ui/main_header";
 import HeroSection from "../components/ui/hero_section";
-import FeaturedProducts from "../components/layout/product/featured_products";
+import FeaturedProducts from "@/app/(client)/components/ui/featured_products";
 import Footer from "../components/ui/footer";
 import CartDrawer from "@/app/(client)/components/Cart_component/cart_drawer";
 
