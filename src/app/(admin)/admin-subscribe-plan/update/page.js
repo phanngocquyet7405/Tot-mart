@@ -1,10 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { AlertCircle, Save } from "lucide-react";
+import {
+  AlertCircle,
+  Save,
+  ArrowLeft,
+  Package,
+  MapPin,
+  CreditCard,
+} from "lucide-react";
 import { toast } from "sonner";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAllBoxesApi } from "@/app/services/api/boxService";
 import { planApi } from "@/app/services/api/subscribePlanService";
 
@@ -50,8 +57,7 @@ export default function UpdateSubscribePlanPage() {
           cancelAtPeriodEnd: plan.cancelAtPeriodEnd || false,
         });
         setAddress(plan.shippingAddress || {});
-        if (boxRes.data?.boxes) setBoxes(boxRes.data.boxes);
-        else if (boxRes.data) setBoxes(boxRes.data);
+        setBoxes(boxRes.data?.boxes || boxRes.data || []);
       } catch (err) {
         setApiError(err.response?.data?.message || err.message);
       } finally {
@@ -61,337 +67,259 @@ export default function UpdateSubscribePlanPage() {
     fetchData();
   }, [id]);
 
+  const selectedBox = useMemo(
+    () => boxes.find((b) => b._id === form?.boxId),
+    [boxes, form?.boxId],
+  );
+  const computedPrice = useMemo(
+    () =>
+      selectedBox
+        ? selectedBox.value * (1 - (form.discountPercent || 0) / 100)
+        : 0,
+    [selectedBox, form?.discountPercent],
+  );
+
   const set = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field])
       setErrors((prev) => {
-        const n = { ...prev };
-        delete n[field];
-        return n;
+        const { [field]: _, ...rest } = prev;
+        return rest;
       });
   };
 
-  const setAddr = (field, value) =>
-    setAddress((prev) => ({ ...prev, [field]: value }));
-
-  const selectedBox = boxes.find((b) => b._id === form?.boxId);
-  const computedPrice =
-    selectedBox && form
-      ? selectedBox.value * (1 - (form.discountPercent || 0) / 100)
-      : 0;
-
-  const validate = () => {
-    const e = {};
-    if (!form.name?.trim()) e.name = "Tên gói không được để trống";
-    if (!form.boxId) e.boxId = "Vui lòng chọn một loại box";
-    if (form.totalDeliveries < 1)
-      e.totalDeliveries = "Số lần giao ít nhất là 1";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
   const handleSubmit = async () => {
-    if (!validate()) return;
+    if (!form.name?.trim()) return setErrors({ name: "Tên gói là bắt buộc" });
     setLoading(true);
-    setApiError("");
     try {
       await planApi.update(id, { ...form, shippingAddress: address });
-      toast.success("Cập nhật thành công!");
+      toast.success("Cập nhật thông tin gói thành công!");
       router.push("/admin-subscribe-plan");
     } catch (err) {
-      const errMsg = err.response?.data?.message || err.message;
-      setApiError(errMsg);
-      toast.error(errMsg);
+      setApiError(err.response?.data?.message || "Lỗi cập nhật");
+      toast.error("Không thể cập nhật");
     } finally {
       setLoading(false);
     }
   };
 
-  if (fetching) {
+  if (fetching)
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <span className="text-sm text-gray-400">Đang tải thông tin gói...</span>
+      <div className="p-20 text-center animate-pulse text-gray-400">
+        Đang tải dữ liệu gói...
       </div>
     );
-  }
-
-  if (!form) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <span className="text-sm text-red-500">
-          Không tìm thấy dữ liệu gói đăng ký
-        </span>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6">
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-            Chỉnh sửa Subscribe Plan
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">ID: {id?.slice(-6)}</p>
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-gray-950 p-4 md:p-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition-colors"
+          >
+            <ArrowLeft size={16} /> Quay lại
+          </button>
+          <div className="text-right">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Cấu hình gói đăng ký
+            </h1>
+            <p className="text-xs text-gray-500 font-mono">UUID: {id}</p>
+          </div>
         </div>
 
         {apiError && (
-          <div className="mb-5 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 flex items-start gap-2 text-sm">
-            <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-            <span className="whitespace-pre-wrap">{apiError}</span>
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex gap-3 items-center">
+            <AlertCircle size={20} /> {apiError}
           </div>
         )}
 
-        <Card>
-          <CardContent className="p-6 space-y-6">
-            {/* Thông tin cơ bản */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Thông tin cơ bản
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                    Tên gói *
-                  </label>
-                  <input
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => set("name", e.target.value)}
-                    className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${errors.name ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
-                  />
-                  {errors.name && (
-                    <span className="text-xs text-red-500">{errors.name}</span>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                    User ID
-                  </label>
-                  <input
-                    type="text"
-                    value={form.userId}
-                    disabled
-                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 opacity-70"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                    Tần suất
-                  </label>
-                  <select
-                    value={form.planType}
-                    onChange={(e) => set("planType", e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    {Object.entries(PLAN_LABELS).map(([v, l]) => (
-                      <option key={v} value={v}>
-                        {l}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                    Tổng số lần giao
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={form.totalDeliveries}
-                    onChange={(e) => set("totalDeliveries", +e.target.value)}
-                    className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${errors.totalDeliveries ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
-                  />
-                  {errors.totalDeliveries && (
-                    <span className="text-xs text-red-500">
-                      {errors.totalDeliveries}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Box & Giá */}
-            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Cấu hình sản phẩm & Giá
-              </h3>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Chọn Box *
-                </label>
-                <select
-                  value={form.boxId}
-                  onChange={(e) => set("boxId", e.target.value)}
-                  className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${errors.boxId ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
-                >
-                  <option value="">— Chọn box —</option>
-                  {boxes.map((b) => (
-                    <option key={b._id} value={b._id}>
-                      {b.name} ({fmtPrice(b.value)})
-                    </option>
-                  ))}
-                </select>
-                {errors.boxId && (
-                  <span className="text-xs text-red-500">{errors.boxId}</span>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Chiết khấu (%)
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={form.discountPercent}
-                  onChange={(e) => set("discountPercent", +e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              {selectedBox && (
-                <div className="p-4 rounded-xl border border-blue-100 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-900/30">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase">
-                        Giá áp dụng
-                      </p>
-                      <p className="text-lg font-black text-blue-700 dark:text-blue-300">
-                        {fmtPrice(computedPrice)}{" "}
-                        <span className="text-xs font-normal">/ lần giao</span>
-                      </p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Main Info */}
+            <Card className="shadow-sm border-gray-200/60">
+              <CardHeader className="border-b border-gray-50 bg-gray-50/30">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Package size={18} className="text-blue-500" /> Thông tin sản
+                  phẩm
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase">
+                      Tên gói hiển thị
+                    </label>
+                    <input
+                      value={form.name}
+                      onChange={(e) => set("name", e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-600 uppercase">
+                        Loại Box
+                      </label>
+                      <select
+                        value={form.boxId}
+                        onChange={(e) => set("boxId", e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-lg border bg-white appearance-none"
+                      >
+                        <option value="">Chọn loại box</option>
+                        {boxes.map((b) => (
+                          <option key={b._id} value={b._id}>
+                            {b.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    <div className="text-right text-xs text-gray-500">
-                      Giá gốc: <del>{fmtPrice(selectedBox.value)}</del>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-600 uppercase">
+                        Chu kỳ
+                      </label>
+                      <select
+                        value={form.planType}
+                        onChange={(e) => set("planType", e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-lg border bg-white"
+                      >
+                        {Object.entries(PLAN_LABELS).map(([v, l]) => (
+                          <option key={v} value={v}>
+                            {l}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
+              </CardContent>
+            </Card>
 
-            {/* Trạng thái */}
-            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Trạng thái & Gia hạn
-              </h3>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Trạng thái
-                </label>
-                <select
-                  value={form.status}
-                  onChange={(e) => set("status", e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="active">Đang hoạt động</option>
-                  <option value="cancelled">Đã huỷ</option>
-                  <option value="expired">Hết hạn</option>
-                </select>
-              </div>
-              <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-gray-200 dark:border-gray-700">
-                <input
-                  type="checkbox"
-                  checked={form.cancelAtPeriodEnd}
-                  onChange={(e) => set("cancelAtPeriodEnd", e.target.checked)}
-                  className="w-5 h-5 rounded border-gray-300"
-                />
-                <div>
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                    Huỷ vào cuối kỳ
-                  </span>
-                  <p className="text-xs text-gray-500">
-                    Gói sẽ không tự động gia hạn sau khi hết kỳ thanh toán.
-                  </p>
+            {/* Address Info */}
+            <Card className="shadow-sm border-gray-200/60">
+              <CardHeader className="border-b border-gray-50 bg-gray-50/30">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <MapPin size={18} className="text-orange-500" /> Địa chỉ giao
+                  hàng
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2 space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase">
+                      Địa chỉ cụ thể
+                    </label>
+                    <input
+                      value={address.address || ""}
+                      onChange={(e) =>
+                        setAddress({ ...address, address: e.target.value })
+                      }
+                      className="w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-orange-500/20 outline-none"
+                      placeholder="Số nhà, tên đường..."
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase">
+                      Quận / Huyện
+                    </label>
+                    <input
+                      value={address.district || ""}
+                      onChange={(e) =>
+                        setAddress({ ...address, district: e.target.value })
+                      }
+                      className="w-full px-4 py-2.5 rounded-lg border"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase">
+                      Thành phố
+                    </label>
+                    <input
+                      value={address.city || ""}
+                      onChange={(e) =>
+                        setAddress({ ...address, city: e.target.value })
+                      }
+                      className="w-full px-4 py-2.5 rounded-lg border"
+                    />
+                  </div>
                 </div>
-              </label>
-            </div>
-
-            {/* Địa chỉ */}
-            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Địa chỉ giao hàng
-              </h3>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Số nhà, tên đường
-                </label>
-                <input
-                  type="text"
-                  value={address.address || ""}
-                  onChange={(e) => setAddr("address", e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                    Quận / Huyện
-                  </label>
-                  <input
-                    type="text"
-                    value={address.district || ""}
-                    onChange={(e) => setAddr("district", e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                    Thành phố
-                  </label>
-                  <input
-                    type="text"
-                    value={address.city || ""}
-                    onChange={(e) => setAddr("city", e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                    Số điện thoại
-                  </label>
-                  <input
-                    type="tel"
-                    value={address.phone || ""}
-                    onChange={(e) => setAddr("phone", e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                    Mã bưu chính
-                  </label>
-                  <input
-                    type="text"
-                    value={address.zipCode || ""}
-                    onChange={(e) => setAddr("zipCode", e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-
-          <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex justify-between bg-gray-50/50 dark:bg-gray-800/20 rounded-b-xl">
-            <button
-              onClick={() => router.back()}
-              className="px-4 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-            >
-              Huỷ bỏ
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
-            >
-              <Save size={14} />
-              {loading ? "Đang xử lý..." : "Cập nhật ngay"}
-            </button>
+              </CardContent>
+            </Card>
           </div>
-        </Card>
+
+          <div className="space-y-6">
+            {/* Pricing Summary Card */}
+            <Card className="bg-blue-600 text-white border-none shadow-lg shadow-blue-200">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-4 opacity-80">
+                  <CreditCard size={16} />{" "}
+                  <span className="text-xs font-bold uppercase tracking-wider">
+                    Tóm tắt thanh toán
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm opacity-90">
+                    <span>Giá gốc</span>
+                    <span>{fmtPrice(selectedBox?.value || 0)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-blue-200">
+                    <span>Chiết khấu</span>
+                    <span>-{form.discountPercent}%</span>
+                  </div>
+                  <div className="pt-3 border-t border-blue-500/50 flex justify-between items-end">
+                    <span className="text-sm font-medium">Giá cuối/lần</span>
+                    <span className="text-2xl font-bold">
+                      {fmtPrice(computedPrice)}
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-6 space-y-3">
+                  <label className="text-xs font-semibold opacity-70 uppercase">
+                    Điều chỉnh chiết khấu (%)
+                  </label>
+                  <input
+                    type="number"
+                    value={form.discountPercent}
+                    onChange={(e) => set("discountPercent", +e.target.value)}
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white outline-none focus:bg-white/20"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Trạng thái gói</span>
+                  <span
+                    className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${form.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
+                  >
+                    {form.status}
+                  </span>
+                </div>
+                <label className="flex items-center gap-3 p-3 rounded-lg border border-dashed cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={form.cancelAtPeriodEnd}
+                    onChange={(e) => set("cancelAtPeriodEnd", e.target.checked)}
+                    className="w-4 h-4 accent-blue-600"
+                  />
+                  <span className="text-xs text-gray-600 leading-tight">
+                    Dừng gia hạn khi hết chu kỳ thanh toán
+                  </span>
+                </label>
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="w-full bg-gray-900 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-black disabled:opacity-50 shadow-md transition-all"
+                >
+                  <Save size={18} />{" "}
+                  {loading ? "Đang lưu..." : "Cập nhật thay đổi"}
+                </button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
