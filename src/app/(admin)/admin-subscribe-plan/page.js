@@ -59,8 +59,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 import {
   getAllPlansApi,
-  cancelPlanApi,
   cancelImmediatelyApi,
+  cancelPlanApi,
   triggerDeliveryApi,
 } from "@/app/services/api/subscribePlanService";
 

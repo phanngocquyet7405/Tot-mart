@@ -8,8 +8,8 @@ import { useParams } from "next/navigation";
 import NavMenu from "@/app/(client)/components/ui/nav_menu";
 import AnnouncementBar from "@/app/(client)/components/ui/AnnouncementBar";
 import MainHeader from "@/app/(client)/components/ui/main_header";
-import HeroSection from "@/app/(client)/components/ui/hero_section";
-import FeaturedProducts from "@/app/(client)/components/ui/featured_products";
+import HeroSection from "../../../components/hero_section_page/hero_section";
+import FeaturedProducts from "../../../components/layout/product/featured_products";
 import Footer from "@/app/(client)/components/ui/footer";
 import CartDrawer from "@/app/(client)/components/Cart_component/cart_drawer";
 
