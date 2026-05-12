@@ -23,3 +23,14 @@ export const getPlanByIdApi = (id) =>
 
 export const createPlanApi = (data) =>
   axiosConfig.post(API_ENDPOINTS.SUBSCRIBE_PLANS.CREATE, data);
+
+export const planApi = {
+  getById: getPlanByIdApi,
+  create: createPlanApi,
+  cancel: cancelPlanApi,
+  cancelImmediately: cancelImmediatelyApi,
+  // Bạn cần bổ sung thêm update và delete vào file này nếu muốn dùng ở UI
+  update: (id, data) =>
+    axiosConfig.put(API_ENDPOINTS.SUBSCRIBE_PLANS.UPDATE(id), data),
+  delete: (id) => axiosConfig.delete(API_ENDPOINTS.SUBSCRIBE_PLANS.DELETE(id)),
+};
