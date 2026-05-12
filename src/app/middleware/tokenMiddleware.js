@@ -1,4 +1,3 @@
-import { tr } from "framer-motion/client";
 import { jwtDecode } from "jwt-decode";
 
 const TOKEN_KEY = "token";
@@ -19,8 +18,12 @@ export function getDecodedToken() {
   if (!token) return null;
 
   try {
-    return jwtDecode(token);
-  } catch {
+    const decoded = jwtDecode(token);
+    // DEBUG: Giúp bạn nhìn thấy cấu trúc thực tế của Token trong Console
+    console.log("DEBUG [Token] Decoded payload:", decoded);
+    return decoded;
+  } catch (err) {
+    console.error("DEBUG [Token] Lỗi decode:", err);
     clearStorage();
     return null;
   }
@@ -28,12 +31,17 @@ export function getDecodedToken() {
 
 export function checkTokenValid() {
   const decoded = getDecodedToken();
-  if (!decoded) return false;
-
-  if (!decoded.exp) return false;
+  if (!decoded || !decoded.exp) {
+    console.warn("DEBUG [checkTokenValid] Token hỏng hoặc thiếu exp");
+    return false;
+  }
 
   const BUFFER_MS = 30 * 1000;
   const isExpired = decoded.exp * 1000 - BUFFER_MS < Date.now();
+
+  if (isExpired) {
+    console.warn("DEBUG [checkTokenValid] Token đã hết hạn");
+  }
 
   return !isExpired;
 }
@@ -43,18 +51,23 @@ export function getTokenRole() {
   return decoded?.role ?? null;
 }
 
+export function getTokenUserId() {
+  const decoded = getDecodedToken();
+  if (!decoded) return null;
+  // Tìm kiếm ID ở mọi "ngóc ngách" có thể có trong JWT
+  return decoded._id || decoded.id || decoded.userId || null;
+}
+
 export function handleExpiredToken() {
   clearStorage();
-
   if (typeof window === "undefined") return;
 
   const currentPath = window.location.pathname;
-
   const isAuthPage = ["/login", "/register"].includes(currentPath);
-
   if (isAuthPage) return;
 
-  window.location.href = "/login?session=expixed";
+  // Tránh vòng lặp redirect
+  window.location.href = "/login?session=expired";
 }
 
 export function saveToken(token) {

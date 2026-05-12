@@ -16,6 +16,8 @@ export {
   checkTokenValid,
   getDecodedToken,
   handleExpiredToken,
+  getTokenRole,
+  getTokenUserId,
 } from "./tokenMiddleware";
 export { withAuth, withGuest } from "./authMiddleware";
 export { withAdmin, withRole, useRoleGuard } from "./roleMiddleware";

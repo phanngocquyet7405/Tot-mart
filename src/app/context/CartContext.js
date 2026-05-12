@@ -4,21 +4,6 @@ import { createContext, useContext, useState, useEffect } from "react";
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  /**
-   * Fix hydration mismatch:
-   *
-   * TRƯỚC: useState(() => { if (typeof window !== 'undefined') localStorage... })
-   *   → Lazy initializer chạy ngay khi render, kể cả lần đầu (SSR).
-   *   → Server thấy window = undefined → trả [].
-   *   → Client thấy window có → đọc localStorage → trả [item1, item2].
-   *   → React so sánh HTML server vs client → MISMATCH.
-   *
-   * SAU: Luôn khởi tạo [] (giống server), chỉ đọc localStorage trong useEffect
-   *   → Server render [] → Client render [] → MATCH.
-   *   → Sau khi mount xong, useEffect chạy → load từ localStorage → re-render đúng data.
-   *
-   * `isMounted` để tránh render cartCount/cartTotal sai trước khi load xong.
-   */
   const [cartItems, setCartItems] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -36,7 +21,6 @@ export const CartProvider = ({ children }) => {
     setIsMounted(true);
   }, []);
 
-  // Đồng bộ vào localStorage mỗi khi cartItems thay đổi (chỉ sau khi đã mount)
   useEffect(() => {
     if (!isMounted) return;
     localStorage.setItem("totmart_cart", JSON.stringify(cartItems));

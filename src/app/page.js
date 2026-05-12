@@ -14,15 +14,15 @@ import Footer from "./(client)/components/ui/footer";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-white">
+    <main className="min-h-screen bg-white">
+      {/* Announcement */}
       <AnnouncementBarBox />
-      <div className="sticky top-0 z-100 w-full">
-        <Navigation />
-      </div>
-      <div className="-mt-22">
-        {" "}
-        <HeroSection />
-      </div>
+
+      {/* Navigation */}
+      <Navigation />
+
+      {/* Content */}
+      <HeroSection />
 
       <div className="flex flex-col">
         <IntroSection />
@@ -34,7 +34,6 @@ export default function Home() {
         <Newsletter />
       </div>
 
-      {/* 3. Footer */}
       <Footer />
     </main>
   );

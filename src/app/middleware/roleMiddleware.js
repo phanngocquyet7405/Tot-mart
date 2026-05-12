@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useLayoutEffect } from "react"; // Sử dụng useLayoutEffect để chạy sớm hơn useEffect
+import { useLayoutEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
-import { useContext } from "react";
 import { AppContext } from "@/app/context/AppContext";
 import { checkTokenValid, getTokenRole } from "./tokenMiddleware";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Helper để kiểm tra quyền nhanh (dùng trong logic render)
 export function canAccess(allowedRoles) {
   const role = getTokenRole();
   const isValid = checkTokenValid();
@@ -20,32 +19,34 @@ export function withAdmin(WrappedComponent) {
     const router = useRouter();
     const { user, isLoading } = useContext(AppContext);
 
-    // Sử dụng useLayoutEffect để thực hiện redirect nhanh nhất có thể trước khi trình duyệt vẽ giao diện
     useLayoutEffect(() => {
-      const tokenValid = checkTokenValid();
-
       if (isLoading) return;
 
-      // Trường hợp 1: Không có token hoặc token hết hạn
+      const tokenValid = checkTokenValid();
       if (!tokenValid) {
         router.replace("/login?session=expired");
         return;
       }
 
-      // Trường hợp 2: Có token nhưng chưa có user hoặc user không phải admin
       if (user && user.role !== "admin") {
         router.replace("/homepage?error=forbidden");
       }
     }, [user, isLoading, router]);
 
-    // QUAN TRỌNG: Không bao giờ render WrappedComponent nếu chưa thỏa mãn điều kiện
-    if (isLoading || !user || !checkTokenValid() || user.role !== "admin") {
+    // Đang load → spinner (hợp lý vì chưa biết role)
+    if (isLoading) {
       return (
         <div className="flex h-screen items-center justify-center bg-white">
-          {/* Một hiệu ứng loading nhẹ để người dùng không thấy màn hình trắng hoàn toàn */}
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
       );
+    }
+
+    // FIX: Trả null thay vì spinner khi đang redirect
+    // Spinner cũ render rồi mới redirect → gây flash spinner → flash trắng → trang mới
+    // Null render không có gì → redirect ngay → không flash
+    if (!user || !checkTokenValid() || user.role !== "admin") {
+      return null;
     }
 
     return <WrappedComponent {...props} />;
@@ -55,7 +56,7 @@ export function withAdmin(WrappedComponent) {
   return AdminGuard;
 }
 
-// ─── withRole (Phiên bản tối ưu) ──────────────────────────────────────────────
+// ─── withRole ────────────────────────────────────────────────────────────────
 export function withRole(WrappedComponent, allowedRoles = [], options = {}) {
   const { redirectTo = "/homepage" } = options;
 
@@ -64,9 +65,9 @@ export function withRole(WrappedComponent, allowedRoles = [], options = {}) {
     const { user, isLoading } = useContext(AppContext);
 
     useLayoutEffect(() => {
-      const tokenValid = checkTokenValid();
       if (isLoading) return;
 
+      const tokenValid = checkTokenValid();
       if (!tokenValid) {
         router.replace("/login?session=expired");
         return;
@@ -75,7 +76,9 @@ export function withRole(WrappedComponent, allowedRoles = [], options = {}) {
       if (user && !allowedRoles.includes(user.role)) {
         router.replace(`${redirectTo}?error=forbidden`);
       }
-    }, [user, isLoading, router, redirectTo]);
+      // allowedRoles và redirectTo không cần trong dep array vì chúng là
+      // giá trị cố định từ factory function, không thay đổi theo lifecycle
+    }, [user, isLoading, router]);
 
     if (
       isLoading ||

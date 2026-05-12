@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from "react";
 import BrandBaseLayout from "../components/layout/brand/BrandBaseLayout";
 import { BrandCard } from "../components/layout/brand/brand_card";
-import { getAllBrandsApi } from "@/app/services/api/productServices"; //
+import { getAllBrandsApi } from "@/app/services/api/productServices";
 
 export default function BrandPage() {
   const [brands, setBrands] = useState([]);
@@ -13,7 +13,7 @@ export default function BrandPage() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await getAllBrandsApi(); //[cite: 11]
+        const response = await getAllBrandsApi();
         const data = response?.data?.data || response?.data || response;
         if (Array.isArray(data)) setBrands(data);
       } finally {
@@ -39,7 +39,7 @@ export default function BrandPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {brands.map((brand) => (
-            <BrandCard key={brand._id || brand.id} brand={brand} /> //[cite: 12]
+            <BrandCard key={brand._id || brand.id} brand={brand} />
           ))}
         </div>
       )}

@@ -13,12 +13,11 @@ import {
   LogOut,
   Package,
   PlusCircle,
-  Pencil,
-  Trash2,
-  ChevronDown,
   Box,
   Album,
   LayersPlus,
+  CreditCard,
+  Boxes,
 } from "lucide-react";
 import {
   Sidebar,
@@ -39,115 +38,78 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { title } from "framer-motion/client";
 
 const menuItems = [
+  { title: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
   {
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/dashboard",
-  },
-  {
-    title: "Quản lý sản phẩm",
+    title: "Sản phẩm",
     icon: ShoppingCart,
     submenu: [
-      { title: "Danh sách sản phẩm", icon: Package, href: "/admin-products" },
-      {
-        title: "Thêm sản phẩm",
-        icon: PlusCircle,
-        href: "/admin-products/create",
-      },
-      {
-        title: "Cập nhật sản phẩm",
-        icon: Pencil,
-        href: "/admin-products/update",
-      },
-      { title: "Xoá sản phẩm", icon: Trash2, href: "/admin-products/delete" },
+      { title: "Danh sách", icon: Package, href: "/admin-products" },
+      { title: "Thêm mới", icon: PlusCircle, href: "/admin-products/create" },
     ],
   },
+  { title: "Người dùng", icon: Users, href: "/admin-users" },
   {
-    title: "Quản lý người dùng",
-    icon: Users,
-    href: "/admin-users/",
-  },
-  {
-    title: "Quản lý thương hiệu",
+    title: "Thương hiệu",
     icon: Tags,
     submenu: [
-      { title: "Danh sách thương hiệu", icon: Album, href: "/admin-brands" },
-      {
-        title: "Thêm thương hiệu",
-        icon: LayersPlus,
-        href: "/admin-brands/create",
-      },
-      {
-        title: "Cập nhật thương hiệu",
-        icon: Pencil,
-        href: "/admin-brands/update",
-      },
-      {
-        title: "Xoá thương hiệu",
-        icon: Trash2,
-        href: "/admin-brands/delete",
-      },
+      { title: "Danh sách", icon: Album, href: "/admin-brands" },
+      { title: "Thêm mới", icon: LayersPlus, href: "/admin-brands/create" },
     ],
   },
   {
-    title: "Quản lý loại sản phẩm",
+    title: "Danh mục",
     icon: FolderTree,
     submenu: [
-      {
-        title: "Danh sách loại sản phẩm",
-        icon: Album,
-        href: "/admin-categories",
-      },
-      {
-        title: "Thêm loại sản phẩm",
-        icon: LayersPlus,
-        href: "/admin-categories/create",
-      },
-      {
-        title: "Cập nhật loại sản phẩm",
-        icon: Pencil,
-        href: "/admin-categories/update",
-      },
-      {
-        title: "xoá loại sản phẩm",
-        icon: Trash2,
-        href: "/admin-categories/delete",
-      },
+      { title: "Danh sách", icon: Album, href: "/admin-categories" },
+      { title: "Thêm mới", icon: LayersPlus, href: "/admin-categories/create" },
     ],
   },
   {
-    title: "Profile",
-    icon: User,
-    href: "/profile",
+    title: "Hộp",
+    icon: Boxes,
+    submenu: [
+      { title: "Danh sách", icon: Album, href: "/admin-box" },
+      { title: "Thêm mới", icon: LayersPlus, href: "/admin-box/create" },
+    ],
   },
+  {
+    title: "Gói đăng ký",
+    icon: CreditCard,
+    submenu: [
+      { title: "Danh sách", icon: Album, href: "/admin-subscribe-plan" },
+      {
+        title: "Thêm mới",
+        icon: LayersPlus,
+        href: "/admin-subscribe-plan/create",
+      },
+    ],
+  },
+  { title: "Hồ sơ cá nhân", icon: User, href: "/profile" },
 ];
 
 export function AppSidebar() {
   const router = useRouter();
   const pathname = usePathname();
-  const [openMenus, setOpenMenus] = useState(["E-Commerce"]);
+  const [openMenus, setOpenMenus] = useState(["Sản phẩm"]);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
-
+    localStorage.removeItem("user");
     router.push("/login");
   };
 
   const toggleMenu = (title) => {
     setOpenMenus((prev) =>
-      prev.includes(title)
-        ? prev.filter((item) => item !== title)
-        : [...prev, title],
+      prev.includes(title) ? prev.filter((i) => i !== title) : [...prev, title],
     );
   };
 
-  const isActive = (href) => {
-    if (href === "/") return pathname === "/";
-    return pathname.startsWith(href);
-  };
+  const isActive = (href) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <Sidebar className="border-r border-sidebar-border">
@@ -160,8 +122,8 @@ export function AppSidebar() {
             <span className="text-lg font-bold text-sidebar-foreground">
               TotBoxAdmin
             </span>
-            <span className="text-xs text-sidebar-foreground/60">
-              E-Commerce Platform
+            <span className="text-[10px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
+              Management
             </span>
           </div>
         </Link>
@@ -184,12 +146,11 @@ export function AppSidebar() {
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton className="w-full justify-between">
                           <span className="flex items-center gap-3">
-                            <item.icon className="h-4 w-4" />
-                            {item.title}
+                            <item.icon className="h-4 w-4" /> {item.title}
                           </span>
                           <ChevronDown
                             className={cn(
-                              "h-4 w-4 transition-transform duration-200",
+                              "h-4 w-4 transition-transform",
                               openMenus.includes(item.title) && "rotate-180",
                             )}
                           />
@@ -197,16 +158,15 @@ export function AppSidebar() {
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <SidebarMenuSub>
-                          {item.submenu.map((subItem) => (
-                            <SidebarMenuSubItem key={subItem.title}>
+                          {item.submenu.map((sub) => (
+                            <SidebarMenuSubItem key={sub.title}>
                               <SidebarMenuButton
                                 asChild
-                                isActive={isActive(subItem.href)}
+                                isActive={isActive(sub.href)}
                                 className="pl-8"
                               >
-                                <Link href={subItem.href}>
-                                  <subItem.icon className="h-4 w-4" />
-                                  {subItem.title}
+                                <Link href={sub.href}>
+                                  <sub.icon className="h-4 w-4" /> {sub.title}
                                 </Link>
                               </SidebarMenuButton>
                             </SidebarMenuSubItem>
@@ -219,8 +179,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={isActive(item.href)}>
                       <Link href={item.href}>
-                        <item.icon className="h-4 w-4" />
-                        {item.title}
+                        <item.icon className="h-4 w-4" /> {item.title}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -236,11 +195,10 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="text-destructive hover:bg-destructive/10"
               onClick={handleLogout}
             >
-              <LogOut className="h-4 w-4" />
-              Logout
+              <LogOut className="h-4 w-4" /> Đăng xuất
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
