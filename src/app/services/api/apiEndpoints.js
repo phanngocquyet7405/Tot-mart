@@ -66,7 +66,7 @@ export const API_ENDPOINTS = {
   },
 
   BOXES: {
-    GET_ALL: "/boxes/get-all-boxes",
+    GET_ALL: "/boxes/get-all-box",
     GET_BY_ID: (id) => `/boxes/get-box-by-id/${id}`,
     GET_PRODUCTS: (id) => `/boxes/get-products-in-box/${id}`,
     GET_OFFERS: "/boxes/get-box-offer-discount-coupons",
