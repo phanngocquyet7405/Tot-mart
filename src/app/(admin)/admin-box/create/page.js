@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -27,7 +27,6 @@ export default function CreateBoxPage() {
   const [mounted, setMounted] = useState(false);
   const [availableProducts, setAvailableProducts] = useState([]);
 
-  // ✅ Sử dụng key "descriptions" đúng chuẩn Backend
   const [form, setForm] = useState({
     name: "",
     stock: 1,
@@ -44,12 +43,10 @@ export default function CreateBoxPage() {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
 
-  // Fix hydration issues in Next.js
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Tải danh sách sản phẩm khả dụng khi mount component
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -90,20 +87,17 @@ export default function CreateBoxPage() {
     }
   };
 
-  const handleChangeProduct = (index, updatedProduct) => {
+  const handleChangeProduct = (index, fieldOrObject, value) => {
     setProducts((prev) => {
       const next = [...prev];
-      next[index] = { ...next[index], ...updatedProduct };
+      if (typeof fieldOrObject === "object" && fieldOrObject !== null) {
+        next[index] = { ...next[index], ...fieldOrObject };
+      } else {
+        next[index] = { ...next[index], [fieldOrObject]: value };
+      }
       return next;
     });
   };
-
-  const computedValue = useMemo(() => {
-    return products.reduce(
-      (sum, p) => sum + (p.price || 0) * (p.quantity || 1),
-      0,
-    );
-  }, [products]);
 
   const fmtPrice = (val) =>
     new Intl.NumberFormat("vi-VN", {
@@ -120,20 +114,25 @@ export default function CreateBoxPage() {
       newErrors.description = "Mô tả là bắt buộc";
     if (!form.validFrom) newErrors.validFrom = "Ngày bắt đầu là bắt buộc";
     if (!form.validTo) newErrors.validTo = "Ngày kết thúc là bắt buộc";
-    if (form.validFrom && form.validTo && form.validFrom > form.validTo) {
+
+    const dFrom = new Date(form.validFrom);
+    const dTo = new Date(form.validTo);
+
+    if (form.validFrom && isNaN(dFrom.getTime()))
+      newErrors.validFrom = "Ngày bắt đầu không hợp lệ";
+    if (form.validTo && isNaN(dTo.getTime()))
+      newErrors.validTo = "Ngày kết thúc không hợp lệ";
+
+    if (form.validFrom && form.validTo && dFrom > dTo) {
       newErrors.validTo = "Ngày kết thúc phải sau ngày bắt đầu";
     }
     if (!form.images || form.images.length === 0) {
       newErrors.images = "Cần có ít nhất 1 ảnh";
     }
 
-    const productErrors = [];
     let hasProductError = false;
-    products.forEach((p, idx) => {
-      if (!p.productId) {
-        hasProductError = true;
-        productErrors[idx] = "Vui lòng chọn sản phẩm";
-      }
+    products.forEach((p) => {
+      if (!p.productId) hasProductError = true;
     });
 
     if (hasProductError) {
@@ -144,43 +143,91 @@ export default function CreateBoxPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // ✅ Gửi API dưới dạng FormData (Thích hợp cho tải ảnh và mảng dữ liệu)
   const handleSubmit = async () => {
-    if (!validate()) return;
+    console.log("[1] Bắt đầu tiến trình Submit...");
+
+    if (!validate()) {
+      console.warn("[2] Form không hợp lệ");
+      return;
+    }
 
     setLoading(true);
     setApiError("");
+
     try {
       const formData = new FormData();
 
-      // Thêm các trường dữ liệu cơ bản
+      // 1. Thông tin cơ bản
       formData.append("name", form.name.trim());
-      formData.append("stock", Number(form.stock));
+      formData.append("stock", Number(form.stock) || 0);
       formData.append("description", form.description.trim());
-      formData.append("validFrom", form.validFrom);
-      formData.append("validTo", form.validTo);
-      formData.append("discountPercent", Number(form.discountPercent));
-      formData.append("isGift", form.isGift);
+      formData.append("discountPercent", Number(form.discountPercent) || 0);
+      formData.append("isGift", String(form.isGift));
 
-      // ✅ FIX ❶: Thêm từng ID sản phẩm dạng chuỗi vào FormData
-      products.forEach((p) => {
-        if (p.productId) {
-          formData.append("products", p.productId);
+      // 2. Parse ngày tránh lệch timezone
+      const parseLocalDate = (dateStr) => {
+        if (!dateStr) return null;
+        const [year, month, day] = dateStr.split("-").map(Number);
+        const d = new Date(year, month - 1, day, 12, 0, 0);
+        return isNaN(d.getTime()) ? null : d;
+      };
+
+      const dateFrom = parseLocalDate(form.validFrom);
+      const dateTo = parseLocalDate(form.validTo);
+
+      if (!dateFrom || !dateTo) {
+        setApiError("Ngày bắt đầu hoặc ngày kết thúc không hợp lệ");
+        setLoading(false);
+        return;
+      }
+
+      formData.append("validFrom", dateFrom.toISOString());
+      formData.append("validTo", dateTo.toISOString());
+
+      // 3. Sản phẩm — append từng field riêng theo index dạng products[0][productId]
+      const productsPayload = products
+        .filter((p) => p.productId)
+        .map((p) => ({
+          productId: p.productId,
+          quantity: Number(p.quantity) || 1,
+        }));
+
+      console.log("products payload:", productsPayload);
+
+      productsPayload.forEach((p, index) => {
+        formData.append(`products[${index}][productId]`, p.productId);
+        formData.append(`products[${index}][quantity]`, String(p.quantity));
+      });
+
+      // 4. Hình ảnh
+      form.images.forEach((file) => {
+        if (file instanceof File || file instanceof Blob) {
+          formData.append("images", file, file.name);
         }
       });
 
-      // ✅ FIX ❷: Đưa tất cả file ảnh vào FormData
-      form.images.forEach((file) => {
-        formData.append("images", file);
-      });
+      console.log("[3] Gửi Request tới API...");
 
-      await createBoxApi(formData);
+      const response = await createBoxApi(formData);
+
+      console.log("[4] Tạo thành công:", response.data);
       toast.success("Tạo box thành công!");
       router.push("/admin-box");
     } catch (err) {
-      console.error(err);
-      const errMsg =
-        err.response?.data?.message || err.message || "Đã có lỗi xảy ra";
+      console.group("[5] Lỗi API");
+      const errorData = err.response?.data;
+      console.error("Dữ liệu lỗi từ BE:", errorData);
+      console.groupEnd();
+
+      let errMsg = "Đã có lỗi xảy ra";
+      if (errorData?.errors && Array.isArray(errorData.errors)) {
+        errMsg = errorData.errors.map((e) => e.message || e).join(" | ");
+      } else if (errorData?.message) {
+        errMsg = errorData.message;
+      } else {
+        errMsg = err.message;
+      }
+
       setApiError(errMsg);
       toast.error(errMsg);
     } finally {
@@ -198,7 +245,7 @@ export default function CreateBoxPage() {
         {apiError && (
           <div className="mb-5 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 flex items-start gap-2 text-sm">
             <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-            <span>{apiError}</span>
+            <span className="whitespace-pre-wrap">{apiError}</span>
           </div>
         )}
 
@@ -220,7 +267,6 @@ export default function CreateBoxPage() {
               products={products}
               availableProducts={availableProducts}
               errors={errors}
-              computedValue={computedValue}
               discountPercent={form.discountPercent}
               fmtPrice={fmtPrice}
               onChangeProduct={handleChangeProduct}

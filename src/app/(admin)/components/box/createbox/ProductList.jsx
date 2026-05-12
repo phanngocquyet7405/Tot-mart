@@ -40,12 +40,12 @@ export function ProductList({
     setIsDialogOpen(true);
   };
 
+  // Cách 1: truyền object — dùng khi chọn từ dialog
   const handleSelectProduct = (p) => {
     if (
       selectedProductRowIndex !== null &&
       typeof onChangeProduct === "function"
     ) {
-      // Cập nhật cả 3 trường productId, name, price cùng lúc bằng object
       onChangeProduct(selectedProductRowIndex, {
         productId: p._id,
         name: p.name,
@@ -68,7 +68,7 @@ export function ProductList({
 
         <div className="divide-y divide-gray-100 dark:divide-gray-800">
           {products.map((product, index) => {
-            const itemKey = product.id || product._id || `product-row-${index}`;
+            const itemKey = product.productId || `product-row-${index}`;
 
             return (
               <div
@@ -102,6 +102,7 @@ export function ProductList({
                     min={1}
                     value={product.quantity || 1}
                     onChange={(e) =>
+                      // ✅ FIX: Cách 2 — truyền field name + value riêng lẻ
                       onChangeProduct(
                         index,
                         "quantity",
@@ -124,6 +125,7 @@ export function ProductList({
                     min={0}
                     value={product.price || 0}
                     onChange={(e) =>
+                      // ✅ FIX: Cách 2 — truyền field name + value riêng lẻ
                       onChangeProduct(
                         index,
                         "price",
@@ -161,7 +163,7 @@ export function ProductList({
         Thêm sản phẩm mới vào box
       </Button>
 
-      {/* ── Dialog Form Dialog chọn sản phẩm ── */}
+      {/* ── Dialog chọn sản phẩm ── */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-xl md:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
           <DialogHeader className="p-5 border-b border-gray-100 dark:border-gray-800">
@@ -185,7 +187,7 @@ export function ProductList({
             </div>
           </div>
 
-          {/* Danh sách các sản phẩm */}
+          {/* Danh sách sản phẩm */}
           <div className="flex-1 overflow-y-auto p-4 min-h-75 max-h-112.5">
             {filteredProducts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -246,7 +248,7 @@ export function ProductList({
 
                         {/* Text */}
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate group-hover:text-blue-600 transition duration-150">
+                          <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
                             {p.name}
                           </h4>
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate leading-normal">
