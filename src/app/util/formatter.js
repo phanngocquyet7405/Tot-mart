@@ -31,3 +31,10 @@ export const PLAN_TYPE_LABELS = {
   "6_month": "6 tháng",
   "12_month": "12 tháng",
 };
+
+export const DEFAULT_DELIVERIES = {
+  "1_month": 1,
+  "3_month": 3,
+  "6_month": 6,
+  "12_month": 12,
+};
