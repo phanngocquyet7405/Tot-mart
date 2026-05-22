@@ -1,10 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Package, Plus, Search, RefreshCw, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Package,
+  Plus,
+  Search,
+  RefreshCw,
+  Loader2,
+  Gift,
+  Calendar,
+  Boxes,
+  BadgePercent,
+} from "lucide-react";
+
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,13 +28,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
 
-// Components đã phân tách
-import { BoxTable } from "../components/box/BoxTable";
 import { BoxFormDialog } from "../components/box/BoxFormDialog";
+import { BoxTable } from "../components/box/BoxTable";
 
-// API services
 import { getAllBoxesApi, deleteBoxApi } from "@/app/services/api/boxService";
 
 export default function BoxManagement() {
@@ -37,9 +47,10 @@ export default function BoxManagement() {
     setIsLoading(true);
     try {
       const res = await getAllBoxesApi();
-      setBoxes(res.data?.data || []);
-    } catch {
-      toast.error("Không thể tải danh sách");
+      console.log("Dữ liệu API trả về:", res);
+      setBoxes(res?.data || []);
+    } catch (error) {
+      toast.error("Không thể tải danh sách box");
     } finally {
       setIsLoading(false);
     }
@@ -54,83 +65,165 @@ export default function BoxManagement() {
     setIsDeleting(true);
     try {
       await deleteBoxApi(deleteTarget._id);
-      toast.success("Đã xóa box");
+      toast.success("Xóa box thành công");
       fetchBoxes();
-    } catch {
-      toast.error("Xóa thất bại");
+    } catch (error) {
+      toast.error("Xóa box thất bại");
     } finally {
-      setIsDeleting(false);
       setDeleteTarget(null);
+      setIsDeleting(false);
     }
   };
 
-  const filtered = boxes.filter((b) =>
-    b.name?.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filteredBoxes = useMemo(() => {
+    return boxes.filter((box) =>
+      box?.name?.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [boxes, search]);
+
+  const isExpired = (validTo) => {
+    if (!validTo) return false;
+    return new Date(validTo) < new Date();
+  };
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Package className="text-indigo-600" /> Quản lý Box Sản phẩm
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Package className="text-indigo-600" />
+            Quản lý Box Sản phẩm
           </h1>
-          <p className="text-slate-500 text-sm">
-            Quản lý các gói sản phẩm và quà tặng
+          <p className="text-slate-500 mt-1">
+            Quản lý các combo sản phẩm, quà tặng và ưu đãi
           </p>
         </div>
+
         <Button
+          className="bg-indigo-600 hover:bg-indigo-700"
           onClick={() => {
             setEditTarget(null);
             setFormOpen(true);
           }}
-          className="bg-indigo-600"
         >
-          <Plus size={18} className="mr-2" /> Tạo Box mới
+          <Plus className="mr-2 h-4 w-4" />
+          Tạo Box mới
         </Button>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3 border-b">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                size={18}
-              />
-              <Input
-                placeholder="Tìm kiếm tên box..."
-                className="pl-10"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-500">Tổng Box</p>
+                <h2 className="text-2xl font-bold">{boxes.length}</h2>
+              </div>
+              <div className="p-3 rounded-xl bg-indigo-100">
+                <Boxes className="text-indigo-600" />
+              </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={fetchBoxes}
-              disabled={isLoading}
-            >
-              <RefreshCw
-                className={isLoading ? "animate-spin" : ""}
-                size={18}
-              />
-            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-500">Box quà tặng</p>
+                <h2 className="text-2xl font-bold">
+                  {boxes.filter((b) => b.isGift).length}
+                </h2>
+              </div>
+              <div className="p-3 rounded-xl bg-pink-100">
+                <Gift className="text-pink-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-500">Đang hoạt động</p>
+                <h2 className="text-2xl font-bold">
+                  {boxes.filter((b) => !isExpired(b.validTo)).length}
+                </h2>
+              </div>
+              <div className="p-3 rounded-xl bg-emerald-100">
+                <Calendar className="text-emerald-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-500">Tổng tồn kho</p>
+                <h2 className="text-2xl font-bold">
+                  {boxes.reduce((acc, item) => acc + (item.stock || 0), 0)}
+                </h2>
+              </div>
+              <div className="p-3 rounded-xl bg-amber-100">
+                <Package className="text-amber-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Table */}
+      <Card>
+        <CardHeader className="border-b">
+          <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
+            <CardTitle>Danh sách Box</CardTitle>
+
+            <div className="flex items-center gap-3">
+              <div className="relative w-full md:w-72">
+                <Search
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+                <Input
+                  placeholder="Tìm kiếm box..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={fetchBoxes}
+                disabled={isLoading}
+              >
+                <RefreshCw
+                  className={isLoading ? "animate-spin" : ""}
+                  size={18}
+                />
+              </Button>
+            </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <BoxTable
-            boxes={filtered}
-            isLoading={isLoading}
-            onEditClick={(box) => {
-              setEditTarget(box);
-              setFormOpen(true);
-            }}
-            onDeleteClick={(box) => setDeleteTarget(box)}
-          />
-        </CardContent>
+
+        <BoxTable
+          boxes={filteredBoxes}
+          isLoading={isLoading}
+          onEditClick={(box) => {
+            setEditTarget(box);
+            setFormOpen(true);
+          }}
+          onDeleteClick={(box) => setDeleteTarget(box)}
+        />
       </Card>
 
+      {/* Form Dialog */}
       <BoxFormDialog
         open={formOpen}
         onOpenChange={setFormOpen}
@@ -138,18 +231,22 @@ export default function BoxManagement() {
         onSuccess={fetchBoxes}
       />
 
+      {/* Delete Confirm Dialog */}
       <AlertDialog
         open={!!deleteTarget}
-        onOpenChange={(o) => !o && setDeleteTarget(null)}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-destructive">
-              Xác nhận xóa?
+              Xác nhận xóa Box
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Hành động này sẽ xóa vĩnh viễn box{" "}
-              <strong>{deleteTarget?.name}</strong>.
+              Bạn có chắc muốn xóa box <strong>{deleteTarget?.name}</strong>?
+              <br />
+              Hành động này không thể hoàn tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -157,9 +254,9 @@ export default function BoxManagement() {
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90"
             >
-              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{" "}
+              {isDeleting && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
               Xóa ngay
             </AlertDialogAction>
           </AlertDialogFooter>

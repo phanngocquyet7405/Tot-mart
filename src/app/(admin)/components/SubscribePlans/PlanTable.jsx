@@ -1,4 +1,6 @@
 // components/SubscribePlans/PlanTable.jsx
+// THÊM MỚI: prop onEditClick → item "Chỉnh sửa" trong dropdown
+
 import {
   Table,
   TableBody,
@@ -22,6 +24,7 @@ import {
   ChevronDown,
   MoreHorizontal,
   Eye,
+  Pencil,
   XCircle,
   Zap,
 } from "lucide-react";
@@ -30,7 +33,7 @@ import {
   formatDate,
   formatRelative,
   PLAN_TYPE_LABELS,
-} from "@/utils/formatters";
+} from "@/app/util/formatter";
 import { StatusBadge } from "./StatusBadge";
 
 function SortIcon({ col, sortKey, sortDir }) {
@@ -53,6 +56,7 @@ export function PlanTable({
   onSort,
   onViewDetail,
   onCancelClick,
+  onEditClick, // ← MỚI
 }) {
   if (isLoading) {
     return (
@@ -77,7 +81,6 @@ export function PlanTable({
               className="cursor-pointer"
               onClick={() => onSort("name")}
             >
-              {/* ✅ Truyền props vào SortIcon */}
               Tên gói{" "}
               <SortIcon col="name" sortKey={sortKey} sortDir={sortDir} />
             </TableHead>
@@ -101,6 +104,7 @@ export function PlanTable({
             <TableHead className="text-right">Thao tác</TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
           {filtered.length === 0 ? (
             <TableRow>
@@ -121,6 +125,7 @@ export function PlanTable({
                         100,
                     )
                   : 0;
+
               return (
                 <TableRow key={plan._id} className="group hover:bg-muted/20">
                   <TableCell>
@@ -129,6 +134,7 @@ export function PlanTable({
                       ID: {plan._id?.slice(-6)}
                     </p>
                   </TableCell>
+
                   <TableCell>
                     <p className="text-sm font-medium">
                       {plan.userId?.name || "—"}
@@ -137,6 +143,7 @@ export function PlanTable({
                       {plan.userId?.email || ""}
                     </p>
                   </TableCell>
+
                   <TableCell>
                     <Badge
                       variant="outline"
@@ -145,6 +152,7 @@ export function PlanTable({
                       {PLAN_TYPE_LABELS[plan.planType] || plan.planType}
                     </Badge>
                   </TableCell>
+
                   <TableCell>
                     <div className="space-y-1 min-w-25">
                       <div className="flex justify-between text-xs">
@@ -161,6 +169,7 @@ export function PlanTable({
                       </div>
                     </div>
                   </TableCell>
+
                   <TableCell>
                     <p className="font-medium">{formatCurrency(plan.price)}</p>
                     {plan.discountPercent > 0 && (
@@ -169,6 +178,7 @@ export function PlanTable({
                       </p>
                     )}
                   </TableCell>
+
                   <TableCell>
                     {plan.nextDeliveries ? (
                       <div>
@@ -183,12 +193,14 @@ export function PlanTable({
                       <span className="text-muted-foreground text-sm">—</span>
                     )}
                   </TableCell>
+
                   <TableCell>
                     <StatusBadge
                       status={plan.status}
                       cancelAtPeriodEnd={plan.cancelAtPeriodEnd}
                     />
                   </TableCell>
+
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -205,9 +217,24 @@ export function PlanTable({
                           className="cursor-pointer"
                           onClick={() => onViewDetail(plan)}
                         >
-                          <Eye size={14} className="mr-2 text-blue-500" /> Xem
-                          chi tiết
+                          <Eye size={14} className="mr-2 text-blue-500" />
+                          Xem chi tiết
                         </DropdownMenuItem>
+
+                        {/* ── THÊM MỚI ── */}
+                        {onEditClick && (
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => onEditClick(plan)}
+                          >
+                            <Pencil
+                              size={14}
+                              className="mr-2 text-indigo-500"
+                            />
+                            Chỉnh sửa
+                          </DropdownMenuItem>
+                        )}
+
                         {plan.status === "active" && (
                           <>
                             <DropdownMenuSeparator />
@@ -217,7 +244,7 @@ export function PlanTable({
                                 onCancelClick({ plan, mode: "end" })
                               }
                             >
-                              <XCircle size={14} className="mr-2" /> Hủy cuối kỳ
+                              <XCircle size={14} className="mr-2" /> Huỷ cuối kỳ
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive cursor-pointer focus:text-destructive focus:bg-red-50"
@@ -225,7 +252,7 @@ export function PlanTable({
                                 onCancelClick({ plan, mode: "immediate" })
                               }
                             >
-                              <Zap size={14} className="mr-2" /> Hủy ngay lập
+                              <Zap size={14} className="mr-2" /> Dừng ngay lập
                               tức
                             </DropdownMenuItem>
                           </>
@@ -240,7 +267,6 @@ export function PlanTable({
         </TableBody>
       </Table>
 
-      {/* Table Footer Stats */}
       {filtered.length > 0 && (
         <div className="border-t px-4 py-2.5 bg-muted/20 text-xs text-muted-foreground flex justify-between">
           <span>

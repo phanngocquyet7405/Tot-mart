@@ -1,19 +1,29 @@
 // components/SubscribePlans/PlanDetailDialog.jsx
+// THÊM MỚI: prop onEdit, onCancelClick → nút hành động trong footer
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { CalendarClock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CalendarClock, Pencil, XCircle, Zap } from "lucide-react";
 import {
   formatCurrency,
   formatDate,
   PLAN_TYPE_LABELS,
-} from "@/utils/formatters";
+} from "@/app/util/formatter";
 import { StatusBadge } from "./StatusBadge";
 
-export function PlanDetailDialog({ open, onOpenChange, plan }) {
+export function PlanDetailDialog({
+  open,
+  onOpenChange,
+  plan,
+  onEdit, // ← MỚI: () => void
+  onCancelClick, // ← MỚI: ({ plan, mode }) => void
+}) {
   if (!plan) return null;
 
   return (
@@ -25,6 +35,7 @@ export function PlanDetailDialog({ open, onOpenChange, plan }) {
             Chi tiết gói: {plan.name}
           </DialogTitle>
         </DialogHeader>
+
         <div className="space-y-4 text-sm">
           {/* User Info */}
           <div className="rounded-lg bg-muted/30 p-3 space-y-1">
@@ -134,6 +145,54 @@ export function PlanDetailDialog({ open, onOpenChange, plan }) {
             </div>
           )}
         </div>
+
+        {/* ── Footer actions ── */}
+        <DialogFooter className="flex-col sm:flex-row gap-2 pt-2 border-t">
+          {/* Edit button — luôn hiển thị */}
+          {onEdit && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+              onClick={onEdit}
+            >
+              <Pencil size={13} className="mr-1.5" />
+              Chỉnh sửa
+            </Button>
+          )}
+
+          {/* Cancel actions — chỉ hiện khi active */}
+          {onCancelClick && plan.status === "active" && (
+            <>
+              {!plan.cancelAtPeriodEnd && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 border-orange-200 text-orange-600 hover:bg-orange-50"
+                  onClick={() => {
+                    onOpenChange(false);
+                    onCancelClick({ plan, mode: "end" });
+                  }}
+                >
+                  <XCircle size={13} className="mr-1.5" />
+                  Huỷ cuối kỳ
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                onClick={() => {
+                  onOpenChange(false);
+                  onCancelClick({ plan, mode: "immediate" });
+                }}
+              >
+                <Zap size={13} className="mr-1.5" />
+                Dừng ngay
+              </Button>
+            </>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

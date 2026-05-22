@@ -81,11 +81,6 @@ const menuItems = [
     icon: CreditCard,
     submenu: [
       { title: "Danh sách", icon: Album, href: "/admin-subscribe-plan" },
-      {
-        title: "Thêm mới",
-        icon: LayersPlus,
-        href: "/admin-subscribe-plan/create",
-      },
     ],
   },
   { title: "Hồ sơ cá nhân", icon: User, href: "/profile" },

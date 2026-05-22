@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -14,23 +15,21 @@ import CartItem from "./cart_item";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
+// Import API lấy danh sách sản phẩm
+import { getAllProductsApi } from "@/app/services/api/productServices";
+import { toast } from "sonner";
 
 export default function CartDrawer({ open, setOpen }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { cartItems, cartTotal, addToCart, isMounted } = useCart();
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
-  // Danh sách sản phẩm gợi ý
-  const suggestions = [
-    { id: "s1", name: "SFC Plum Soda", price: 50000, image: "/soda.jpg" },
-    { id: "s2", name: "Glico Pretz Sticks", price: 35000, image: "/pretz.jpg" },
-    {
-      id: "s3",
-      name: "Coca-Cola Strawberry",
-      price: 45000,
-      image: "/coke.jpg",
-    },
-  ];
+  const getDrawerHeight = () => {
+    return "calc(100vh - var(--ann-h, 40px))";
+  };
 
   // Khóa cuộn trang khi mở Drawer
   useEffect(() => {
@@ -41,11 +40,47 @@ export default function CartDrawer({ open, setOpen }) {
     };
   }, [open]);
 
+  // Gọi API lấy sản phẩm gợi ý khi mở Drawer
+  useEffect(() => {
+    if (!open) return;
+
+    const fetchSuggestions = async () => {
+      setLoadingSuggestions(true);
+      try {
+        const res = await getAllProductsApi();
+        // Kiểm tra cấu trúc trả về từ axiosConfig của bạn
+        const rawProducts = res?.data?.data || res?.data || [];
+
+        if (Array.isArray(rawProducts)) {
+          // Lấy tối đa 5 sản phẩm đầu tiên
+          const limitProducts = rawProducts.slice(0, 5).map((item) => ({
+            _id: item._id, // Giữ nguyên _id để đồng bộ giỏ hàng
+            name: item.name,
+            price: item.price || 0,
+            image: item.images?.[0]?.url || "/placeholder.jpg", // Lấy ảnh đầu tiên hoặc ảnh mặc định
+          }));
+          setSuggestions(limitProducts);
+        }
+      } catch (error) {
+        console.error("Lỗi lấy sản phẩm gợi ý:", error);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    };
+
+    fetchSuggestions();
+  }, [open]);
+
+  const handleAddSuggestion = (item) => {
+    addToCart(item);
+    toast.success(`Đã thêm ${item.name} vào giỏ hàng 🛒`);
+  };
+
   return (
     <AnimatePresence>
       {open && (
         <>
-          {/* 1. OVERLAY: Nằm dưới thanh Announcement, che màn hình */}
+          {/* 1. OVERLAY */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -55,7 +90,7 @@ export default function CartDrawer({ open, setOpen }) {
             onClick={() => setOpen(false)}
           />
 
-          {/* 2. MAIN DRAWER: Chiều cao tính toán động theo Announcement */}
+          {/* 2. MAIN DRAWER */}
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -64,7 +99,7 @@ export default function CartDrawer({ open, setOpen }) {
             className="fixed right-0 z-56 flex shadow-2xl border-l border-stone-200 overflow-hidden"
             style={{
               top: "var(--ann-h, 40px)",
-              height: "calc(100vh - var(--ann-h, 40px))",
+              height: getDrawerHeight(),
             }}
           >
             {/* CỘT TRÁI: Sản phẩm gợi ý */}
@@ -74,7 +109,7 @@ export default function CartDrawer({ open, setOpen }) {
             >
               <button
                 onClick={() => setShowSuggestions(!showSuggestions)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#f5f0e8] p-1.5 border-y border-l border-stone-300 rounded-l-lg hover:bg-white text-stone-500 hover:text-amber-800 transition-colors shadow-sm"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#f5f0e8] p-1.5 border-y border-l border-stone-300 rounded-l-lg hover:bg-white text-stone-500 hover:text-amber-800 transition-colors shadow-sm active:scale-95"
               >
                 {showSuggestions ? (
                   <ChevronRight size={16} />
@@ -100,37 +135,48 @@ export default function CartDrawer({ open, setOpen }) {
                       </h3>
                     </div>
 
-                    <div className="space-y-3">
-                      {suggestions.map((item) => (
-                        <div
-                          key={item.id}
-                          className="bg-white rounded-xl p-3 flex gap-4 items-center shadow-sm relative group border border-stone-100 hover:border-amber-300 transition-colors"
-                        >
-                          <button
-                            onClick={() => addToCart(item)}
-                            className="absolute -left-2 -top-2 bg-amber-500 text-white rounded-full p-1 shadow-md hover:bg-amber-600 hover:scale-110 transition-all"
-                            aria-label="Thêm vào giỏ"
-                          >
-                            <PlusCircle size={18} />
-                          </button>
-                          <div className="w-16 h-16 relative bg-[#faf8f4] rounded-lg overflow-hidden shrink-0 border border-stone-100">
-                            <Image
-                              src={item.image}
-                              alt={item.name}
-                              fill
-                              className="object-contain p-1.5"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[13px] font-bold text-stone-800 line-clamp-1 uppercase tracking-tight group-hover:text-amber-800 transition-colors">
-                              {item.name}
-                            </p>
-                            <p className="text-[13px] font-black text-amber-700 mt-1">
-                              {item.price.toLocaleString("vi-VN")}₫
-                            </p>
-                          </div>
+                    <div className="space-y-3 pb-4">
+                      {loadingSuggestions ? (
+                        <div className="text-center py-10 text-stone-500 text-xs italic">
+                          Đang tải gợi ý...
                         </div>
-                      ))}
+                      ) : suggestions.length === 0 ? (
+                        <div className="text-center py-10 text-stone-400 text-xs">
+                          Không có sản phẩm gợi ý.
+                        </div>
+                      ) : (
+                        suggestions.map((item) => (
+                          <div
+                            key={item._id}
+                            className="bg-white rounded-xl p-3 flex gap-4 items-center shadow-sm relative group border border-stone-100 hover:border-amber-300 transition-colors"
+                          >
+                            <button
+                              onClick={() => handleAddSuggestion(item)}
+                              className="absolute -left-2 -top-2 bg-amber-500 text-white rounded-full p-1 shadow-md hover:bg-amber-600 active:scale-90 transition-all z-10"
+                              aria-label="Thêm vào giỏ"
+                            >
+                              <PlusCircle size={18} />
+                            </button>
+                            <div className="w-16 h-16 relative bg-[#faf8f4] rounded-lg overflow-hidden shrink-0 border border-stone-100">
+                              <Image
+                                src={item.image}
+                                alt={item.name}
+                                fill
+                                className="object-contain p-1.5"
+                                sizes="64px"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-bold text-stone-800 line-clamp-1 uppercase tracking-tight group-hover:text-amber-800 transition-colors">
+                                {item.name}
+                              </p>
+                              <p className="text-[13px] font-black text-amber-700 mt-1">
+                                {item.price.toLocaleString("vi-VN")}₫
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </motion.div>
                 ) : (
@@ -175,7 +221,7 @@ export default function CartDrawer({ open, setOpen }) {
                 </div>
                 <button
                   onClick={() => setOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center hover:bg-stone-100 rounded-full transition-colors text-stone-400 hover:text-stone-800"
+                  className="w-8 h-8 flex items-center justify-center hover:bg-stone-100 rounded-full transition-colors text-stone-400 hover:text-stone-800 active:scale-95"
                 >
                   <X size={18} />
                 </button>
@@ -201,7 +247,7 @@ export default function CartDrawer({ open, setOpen }) {
                     </p>
                     <button
                       onClick={() => setOpen(false)}
-                      className="mt-6 text-[12px] font-bold text-amber-700 hover:text-amber-800 uppercase tracking-widest border-b-2 border-amber-300 hover:border-amber-600 transition-colors pb-1"
+                      className="mt-6 text-[12px] font-bold text-amber-700 hover:text-amber-800 uppercase tracking-widest border-b-2 border-amber-300 hover:border-amber-600 transition-colors pb-1 active:translate-y-0.5"
                     >
                       Tiếp tục mua sắm
                     </button>
@@ -232,7 +278,7 @@ export default function CartDrawer({ open, setOpen }) {
                         router.push("/checkout");
                         setOpen(false);
                       }}
-                      className="w-full bg-amber-800 hover:bg-amber-900 text-white py-4 rounded-xl font-black uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-900/20"
+                      className="w-full bg-amber-800 hover:bg-amber-900 text-white py-4 rounded-xl font-black uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-900/20 active:scale-[0.98]"
                     >
                       Thanh toán ngay
                       <ArrowRight size={16} />
@@ -242,7 +288,7 @@ export default function CartDrawer({ open, setOpen }) {
                         router.push("/cart");
                         setOpen(false);
                       }}
-                      className="w-full bg-[#faf8f4] border border-stone-200 text-stone-700 hover:bg-white py-3.5 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:border-amber-400 hover:text-amber-800 transition-all"
+                      className="w-full bg-[#faf8f4] border border-stone-200 text-stone-700 hover:bg-white py-3.5 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:border-amber-400 hover:text-amber-800 transition-all active:scale-[0.98]"
                     >
                       Xem chi tiết giỏ hàng
                     </button>

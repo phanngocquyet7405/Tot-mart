@@ -1,5 +1,5 @@
 // components/SubscribePlans/PlanStats.jsx
-import { formatCurrency } from "@/utils/formatters";
+import { formatCurrency } from "@/app/util/formatter";
 
 export function PlanStats({ plans }) {
   const activePlans = plans.filter((p) => p.status === "active").length;

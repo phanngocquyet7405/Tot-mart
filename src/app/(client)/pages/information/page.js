@@ -2,7 +2,7 @@
 
 import Head from "next/head";
 import { useState } from "react";
-import Layout from "../components/Layout";
+import Layout from "../layout-page";
 import AnnouncementBarBox from "@/components_box/announcement-bar";
 import { Navigation } from "@/components_box/nav_box";
 import { Newsletter } from "@/components_box/newsletter";

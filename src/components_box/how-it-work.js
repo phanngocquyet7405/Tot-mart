@@ -1,29 +1,41 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 const steps = [
   {
+    number: "01",
     title: "Choose Your Box",
     description:
       "Select from our curated collections or let us surprise you with our monthly themed boxes.",
-    // Đã thay đổi đường dẫn ảnh tại đây
     image: "/assets/hero_section_picture.jpg",
+    // ← đường dẫn đến trang box
+    href: "/products/box",
+    cta: "Browse Boxes",
   },
   {
+    number: "02",
     title: "We Curate & Ship",
     description:
       "Our team handpicks 5-7 full-size products from artisan makers and ships them right to your door.",
-    // Đã thay đổi đường dẫn ảnh tại đây
     image: "/assets/hero_section_picture.jpg",
+    href: "/products/box",
+    cta: "See How It Works",
   },
   {
+    number: "03",
     title: "Unbox & Enjoy",
     description:
       "Experience the joy of discovering unique, quality products that support independent makers.",
-    // Đã thay đổi đường dẫn ảnh tại đây
     image: "/assets/hero_section_picture.jpg",
+    href: "/products/box",
+    cta: "Start Unboxing",
   },
 ];
+
 export function HowItWorks() {
   return (
     <section className="py-20 lg:py-32 bg-background">
@@ -43,31 +55,68 @@ export function HowItWorks() {
 
         <div className="grid md:grid-cols-3 gap-8">
           {steps.map((step, index) => (
-            <Card
+            /*
+             * Bọc toàn bộ Card trong <Link> trỏ đến /products/box
+             * Next.js Link không có thẻ <a> mặc định từ v13+,
+             * nên dùng className trực tiếp trên Link là được.
+             */
+            <Link
               key={index}
-              className="group overflow-hidden border-border hover:border-primary/30 transition-all hover:shadow-xl"
+              href={step.href}
+              className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl"
             >
-              <div className="aspect-3/2 relative overflow-hidden">
-                <Image
-                  src={step.image}
-                  alt={step.title}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute top-4 left-4 w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-lg">
-                  {index + 1}
+              <Card className="overflow-hidden border-border hover:border-primary/50 transition-all duration-300 hover:shadow-xl h-full cursor-pointer">
+                {/* Ảnh */}
+                <div className="aspect-3/2 relative overflow-hidden">
+                  <Image
+                    src={step.image}
+                    alt={step.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+
+                  {/* Số thứ tự nổi trên ảnh */}
+                  <div className="absolute top-4 left-4 w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-lg shadow-md">
+                    {index + 1}
+                  </div>
+
+                  {/* Overlay tối nhẹ khi hover */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                 </div>
-              </div>
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-card-foreground mb-3">
-                  {step.title}
-                </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {step.description}
-                </p>
-              </CardContent>
-            </Card>
+
+                <CardContent className="p-6">
+                  {/* Step label */}
+                  <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary/60 mb-2 block">
+                    Step {step.number}
+                  </span>
+
+                  <h3 className="text-xl font-bold text-card-foreground mb-3 group-hover:text-primary transition-colors duration-200">
+                    {step.title}
+                  </h3>
+
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    {step.description}
+                  </p>
+
+                  {/* CTA inline — chỉ để hiển thị, không cần href thêm vì đã có Link bọc ngoài */}
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary group-hover:gap-3 transition-all duration-200">
+                    {step.cta}
+                    <ArrowRight className="w-4 h-4" />
+                  </span>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <Link
+            href="/products/box"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-3.5 rounded-full font-semibold text-sm hover:opacity-90 transition-opacity shadow-md"
+          >
+            Xem tất cả hộp sản phẩm
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     </section>

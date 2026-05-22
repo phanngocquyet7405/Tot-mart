@@ -2,20 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import {
-  Button,
-  Card,
-  CardBody,
-  PageHeader,
-  Breadcrumb,
-  Alert,
-  Spinner,
-  Badge,
-  fmtPrice,
-  fmtDate,
-} from "@/components/ui";
-import { boxApi } from "@/lib/api";
-import { Trash2, AlertTriangle, Package } from "lucide-react";
+import { AlertCircle, Trash2, Package } from "lucide-react";
+import { toast } from "sonner";
+import { Card, CardContent } from "@/components/ui/card";
+import { getBoxByIdApi, deleteBoxApi } from "@/app/services/api/boxService";
+
+const fmtPrice = (val) =>
+  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+    val,
+  );
 
 export default function DeleteBoxPage() {
   const router = useRouter();
@@ -24,31 +19,35 @@ export default function DeleteBoxPage() {
   const [box, setBox] = useState(null);
   const [fetching, setFetching] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState(null);
+  const [apiError, setApiError] = useState("");
   const [confirm, setConfirm] = useState("");
 
   useEffect(() => {
-    (async () => {
+    async function fetchBox() {
       try {
-        const res = await boxApi.getById(id);
+        const res = await getBoxByIdApi(id);
         setBox(res.data);
-      } catch (e) {
-        setApiError(e.message);
+      } catch (err) {
+        setApiError(err.response?.data?.message || err.message);
       } finally {
         setFetching(false);
       }
-    })();
+    }
+    fetchBox();
   }, [id]);
 
   const handleDelete = async () => {
     if (confirm !== box.name) return;
     setLoading(true);
-    setApiError(null);
+    setApiError("");
     try {
-      await boxApi.delete(id);
-      router.push("/admin/boxes");
-    } catch (e) {
-      setApiError(e.message);
+      await deleteBoxApi(id);
+      toast.success("Xoá box thành công!");
+      router.push("/admin-box");
+    } catch (err) {
+      const errMsg = err.response?.data?.message || err.message;
+      setApiError(errMsg);
+      toast.error(errMsg);
       setLoading(false);
     }
   };
@@ -56,10 +55,7 @@ export default function DeleteBoxPage() {
   if (fetching) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <div className="flex items-center gap-3 text-gray-400">
-          <Spinner size={20} />
-          <span className="text-sm">Đang tải...</span>
-        </div>
+        <span className="text-sm text-gray-400">Đang tải...</span>
       </div>
     );
   }
@@ -67,66 +63,58 @@ export default function DeleteBoxPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6">
       <div className="max-w-lg mx-auto">
-        <Breadcrumb
-          items={[
-            { label: "Admin", href: "/admin" },
-            { label: "Boxes", href: "/admin/boxes" },
-            { label: "Xoá" },
-          ]}
-        />
-        <PageHeader
-          title="Xoá Box"
-          description="Thao tác này không thể hoàn tác"
-        />
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            Xoá Box
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Thao tác này không thể hoàn tác
+          </p>
+        </div>
 
         {apiError && (
-          <Alert type="error" className="mb-5">
+          <div className="mb-5 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 flex items-start gap-2 text-sm">
+            <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
             <span>{apiError}</span>
-          </Alert>
+          </div>
         )}
 
         {!box ? (
-          <Alert type="error">
-            <span>Không tìm thấy box</span>
-          </Alert>
+          <div className="p-4 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+            Không tìm thấy box
+          </div>
         ) : (
           <>
-            {/* Cảnh báo */}
             <div className="flex items-start gap-3 px-4 py-3 mb-5 rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
-              <AlertTriangle
+              <AlertCircle
                 size={16}
                 className="text-red-600 dark:text-red-400 shrink-0 mt-0.5"
               />
               <div className="text-sm text-red-800 dark:text-red-300 leading-relaxed">
                 <strong>Hành động nguy hiểm!</strong> Xoá box sẽ đồng thời xoá
-                toàn bộ hình ảnh liên quan trên Cloudinary và không thể khôi
-                phục.
+                toàn bộ hình ảnh liên quan và không thể khôi phục.
               </div>
             </div>
 
-            {/* Thông tin box sắp bị xoá */}
             <Card className="mb-5">
-              <CardBody>
+              <CardContent className="p-4">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
                     <Package size={18} className="text-gray-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-                        {box.name}
-                      </h3>
-                      {box.isGift && <Badge color="amber">Quà tặng</Badge>}
-                    </div>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      {box.name}
+                    </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">
-                      {box.descriptions}
+                      {box.description}
                     </p>
                     <div className="grid grid-cols-2 gap-3">
                       {[
-                        ["Giá trị", fmtPrice(box.value)],
+                        ["Giá trị", fmtPrice(box.value || 0)],
                         ["Tồn kho", `${box.stock} cái`],
                         ["Số sản phẩm", `${box.products?.length || 0} loại`],
-                        ["Hiệu lực đến", fmtDate(box.validTo)],
+                        ["Hiệu lực đến", box.validTo?.slice(0, 10) || "—"],
                       ].map(([label, value]) => (
                         <div
                           key={label}
@@ -143,12 +131,11 @@ export default function DeleteBoxPage() {
                     </div>
                   </div>
                 </div>
-              </CardBody>
+              </CardContent>
             </Card>
 
-            {/* Xác nhận tên */}
             <Card>
-              <CardBody>
+              <CardContent className="p-4">
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                   Để xác nhận, nhập chính xác tên box:{" "}
                   <code className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-gray-900 dark:text-gray-100 text-xs font-mono">
@@ -160,29 +147,25 @@ export default function DeleteBoxPage() {
                   placeholder="Nhập tên box để xác nhận..."
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700
-                    bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
-                    focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 mb-4"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 mb-4"
                 />
-
                 <div className="flex items-center justify-between">
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push("/admin/boxes")}
+                  <button
+                    onClick={() => router.push("/admin-box")}
+                    className="px-4 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     Quay lại
-                  </Button>
-                  <Button
-                    variant="danger"
+                  </button>
+                  <button
                     onClick={handleDelete}
-                    loading={loading}
-                    disabled={confirm !== box.name}
+                    disabled={confirm !== box.name || loading}
+                    className="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
                   >
                     <Trash2 size={14} />
                     {loading ? "Đang xoá..." : "Xoá vĩnh viễn"}
-                  </Button>
+                  </button>
                 </div>
-              </CardBody>
+              </CardContent>
             </Card>
           </>
         )}
