@@ -165,27 +165,65 @@ export function Navigation() {
   const pathname = usePathname();
   const { cartCount, isMounted } = useCart();
 
-  const isHome = pathname === "/";
+  // Xác định xem trang hiện tại có phải là trang cần làm sáng chữ lúc chưa cuộn hay không
+  const isLightPage =
+    pathname === "/" ||
+    pathname === "/Subscriber" ||
+    pathname === "/products/Subscriber";
 
-  const [scrolled, setScrolled] = useState(false);
-  const [isPastThreshold, setIsPastThreshold] = useState(pathname !== "/");
   const [open, setOpen] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileShopOpen, setMobileShopOpen] = useState(false);
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [annH, setAnnH] = useState(0);
+
+  // Khởi tạo annH an toàn bằng cách đọc trực tiếp từ môi trường browser nếu có
+  const [annH, setAnnH] = useState(() => {
+    if (typeof window !== "undefined") {
+      const v = getComputedStyle(document.documentElement)
+        .getPropertyValue("--ann-h")
+        .trim();
+      return parseInt(v) || 0;
+    }
+    return 0;
+  });
+
+  // Track việc cuộn vượt ngưỡng 40px thay vì cập nhật trực tiếp biến pastThreshold
+  const [scrolledPast40, setScrolledPast40] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.scrollY > 40;
+    }
+    return false;
+  });
+
+  // Khởi tạo biến scrolled an toàn trực tiếp từ trạng thái ban đầu của DOM
+  const [scrolled, setScrolled] = useState(() => {
+    if (typeof window !== "undefined") {
+      const y = window.scrollY;
+      const v = getComputedStyle(document.documentElement)
+        .getPropertyValue("--ann-h")
+        .trim();
+      const currentAnnH = parseInt(v) || 0;
+      return isLightPage ? y > currentAnnH + 10 : y > 10;
+    }
+    return false;
+  });
+
+  // derive (tính toán động trực tiếp lúc render) để giải quyết dứt điểm lỗi set-state-in-effect
+  const isPastThreshold = !isLightPage || scrolledPast40;
 
   const navRef = useRef(null);
 
+  // Effect theo dõi biến đổi style (chỉ cập nhật KHÔNG đồng bộ khi có đột biến thực tế)
   useEffect(() => {
     const read = () => {
       const v = getComputedStyle(document.documentElement)
         .getPropertyValue("--ann-h")
         .trim();
-      setAnnH(parseInt(v) || 0);
+      const calculated = parseInt(v) || 0;
+      setAnnH(calculated);
     };
-    read();
+
     const observer = new MutationObserver(read);
     observer.observe(document.documentElement, {
       attributes: true,
@@ -194,22 +232,28 @@ export function Navigation() {
     return () => observer.disconnect();
   }, []);
 
+  // Thay vì gọi setState đồng bộ trong luồng render, trì hoãn thông qua animation frame
+  // để đồng bộ hóa mượt mà trạng thái cuộn khi chuyển đổi giữa các trang
+  useEffect(() => {
+    const syncScrollState = () => {
+      const y = window.scrollY;
+      setScrolledPast40(y > 40);
+      setScrolled(isLightPage ? y > annH + 10 : y > 10);
+    };
+
+    const animFrameId = requestAnimationFrame(syncScrollState);
+    return () => cancelAnimationFrame(animFrameId);
+  }, [pathname, isLightPage, annH]);
+
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
-
-      if (isHome) {
-        setIsPastThreshold(y > 40);
-        setScrolled(y > annH + 10);
-      } else {
-        // Các trang khác luôn hiển thị trạng thái "đã cuộn" để dễ nhìn
-        setIsPastThreshold(true);
-        setScrolled(y > 10);
-      }
+      setScrolledPast40(y > 40);
+      setScrolled(isLightPage ? y > annH + 10 : y > 10);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [annH, isHome]);
+  }, [annH, isLightPage]);
 
   useEffect(() => {
     const handler = (e) => {
@@ -221,12 +265,18 @@ export function Navigation() {
 
   const close = () => setOpen(null);
 
-  // Logic màu sắc linh hoạt dựa trên isPastThreshold
+  // Logic màu sắc linh hoạt: Sử dụng tông sáng màu (màu sáng rõ) khi ở trang chủ hoặc Subscriber lúc chưa cuộn
   const textCls = isPastThreshold
     ? "text-stone-800 hover:text-amber-600"
-    : "text-stone-500 hover:text-stone-800";
+    : isLightPage
+      ? "text-stone-100 hover:text-white drop-shadow-sm"
+      : "text-stone-500 hover:text-stone-800";
 
-  const iconCls = isPastThreshold ? "text-stone-800" : "text-stone-500";
+  const iconCls = isPastThreshold
+    ? "text-stone-800"
+    : isLightPage
+      ? "text-stone-100 hover:text-white"
+      : "text-stone-500";
 
   return (
     <>
@@ -239,7 +289,7 @@ export function Navigation() {
             : "bg-transparent border-transparent",
         )}
         style={{
-          top: isHome ? (isPastThreshold ? 0 : annH) : scrolled ? 0 : annH,
+          top: isLightPage ? (isPastThreshold ? 0 : annH) : scrolled ? 0 : annH,
           height: NAV_H,
         }}
       >
@@ -251,7 +301,9 @@ export function Navigation() {
                   "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300",
                   isPastThreshold
                     ? "bg-amber-800 text-white"
-                    : "bg-stone-200 text-stone-500 group-hover:bg-amber-100",
+                    : isLightPage
+                      ? "bg-white/20 text-white backdrop-blur-xs"
+                      : "bg-stone-200 text-stone-500 group-hover:bg-amber-100",
                 )}
               >
                 <Package size={16} />
@@ -260,7 +312,11 @@ export function Navigation() {
                 <span
                   className={cn(
                     "text-[16px] font-black tracking-tight transition-colors duration-300",
-                    isPastThreshold ? "text-stone-900" : "text-stone-500",
+                    isPastThreshold
+                      ? "text-stone-900"
+                      : isLightPage
+                        ? "text-white"
+                        : "text-stone-500",
                   )}
                 >
                   TotMart
@@ -268,7 +324,11 @@ export function Navigation() {
                 <span
                   className={cn(
                     "text-[9px] font-semibold uppercase tracking-[0.18em] transition-colors",
-                    isPastThreshold ? "text-amber-700" : "text-amber-600/60",
+                    isPastThreshold
+                      ? "text-amber-700"
+                      : isLightPage
+                        ? "text-amber-200/90"
+                        : "text-amber-600/60",
                   )}
                 >
                   Craft & Gift
@@ -352,7 +412,9 @@ export function Navigation() {
                 "hidden md:inline-flex h-9 px-4 text-[11px] font-black uppercase tracking-[0.15em] rounded-full transition-all duration-300 border",
                 isPastThreshold
                   ? "bg-amber-800 text-white border-transparent hover:bg-amber-900"
-                  : "bg-stone-100 text-stone-500 border-stone-200 hover:bg-amber-50",
+                  : isLightPage
+                    ? "bg-white text-stone-900 border-transparent hover:bg-stone-100"
+                    : "bg-stone-100 text-stone-500 border-stone-200 hover:bg-amber-50",
               )}
             >
               Subscribe
@@ -401,6 +463,7 @@ export function Navigation() {
         </div>
 
         {/* ── Mobile drawer ── */}
+        {}
         {mobileOpen && (
           <div className="lg:hidden bg-[#faf8f4] border-t border-stone-200 shadow-2xl overflow-y-auto max-h-[75vh]">
             <div className="h-0.5 bg-linear-to-r from-amber-300 via-amber-500 to-amber-300" />
