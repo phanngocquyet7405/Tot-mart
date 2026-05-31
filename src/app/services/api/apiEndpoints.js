@@ -26,18 +26,22 @@ export const API_ENDPOINTS = {
   },
 
   CART: {
-    GET_ALL: "/cart/get-all-cart",
-    GET_BY_USER: (id) => `/cart/get-cart/${id}`,
-    ADD: "/cart/add-to-cart",
-    UPDATE: (id) => `/cart/update-cart/${id}`,
-    DELETE: (id) => `/cart/delete-from-cart/${id}`,
+    GET_ALL: "/carts/get-all-cart",
+    GET_BY_USER: (id) => `/carts/get-cart/${id}`,
+    ADD: "/carts/add-to-cart",
+    UPDATE: (id) => `/carts/update-cart/${id}`,
+    DELETE: (id) => `/carts/delete-from-cart/${id}`,
 
     SUBSCRIBE: {
-      ADD: "/cart/add-subcribe-plan-to-cart",
-      UPDATE: "/cart/update-subcribe-cart",
-      DELETE: (id) => `/cart/delete-from-subcribe-cart/${id}`,
-      GET_BY_USER: (id) => `/cart/get-subcribe-cart/${id}`,
+      ADD: "/carts/add-subcribe-plan-to-cart",
+      UPDATE: "/carts/update-subcribe-cart",
+      DELETE: (id) => `/carts/delete-from-subcribe-cart/${id}`,
+      GET_BY_USER: (id) => `/carts/get-subcribe-cart/${id}`,
     },
+  },
+
+  CHECKOUT: {
+    CREATE: "/checkout",
   },
 
   PRODUCTS: {
@@ -71,17 +75,17 @@ export const API_ENDPOINTS = {
     GET_PRODUCTS: (id) => `/boxes/get-products-in-box/${id}`,
     GET_OFFERS: "/boxes/get-box-offer-discount-coupons",
     CREATE: "/boxes/create-box",
-    UPDATE: (id) => `/box/update-box/${id}`,
+    UPDATE: (id) => `/boxes/update-box/${id}`,
     DELETE: (id) => `/boxes/delete-box/${id}`,
   },
 
   SUBSCRIBE_PLANS: {
-    CREATE: "/subscribe-plan/create-subcribe-plan",
-    GET_ALL: "/subscribe-plan/get-all-subcribe-plans",
-    GET_BY_ID: (id) => `/subscribe-plan/${id}`,
-    GET_BY_USER: (userId) => `/subscribe-plan/user/${userId}`,
-    CANCEL: (id) => `/subscribe-plan/${id}/cancel`,
-    CANCEL_IMMEDIATELY: (id) => `/subscribe-plan/${id}/cancel-immediately`,
-    PROCESS_DELIVERIES: "/subscribe-plan/process-deliveries",
+    CREATE: "/subcribe-plans/create-subcribe-plan",
+    GET_ALL: "/subcribe-plans/get-all-subcribe-plans",
+    GET_BY_ID: (id) => `/subcribe-plans/${id}`,
+    GET_BY_USER: (userId) => `/subcribe-plans/user/${userId}`,
+    CANCEL: (id) => `/subcribe-plans/${id}/cancel`,
+    CANCEL_IMMEDIATELY: (id) => `/subcribe-plans/${id}/cancel-immediately`,
+    PROCESS_DELIVERIES: "/subcribe-plans/process-deliveries",
   },
 };

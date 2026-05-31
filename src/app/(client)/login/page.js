@@ -19,7 +19,6 @@ import { useRouter } from "next/navigation";
 import { Lock, Loader2, Eye, EyeOff, Sparkles } from "lucide-react";
 
 import AuthContainer from "@/app/(client)/components/ui/auth/auth_container";
-import AuthCard from "@/app/(client)/components/ui/auth/auth_card";
 import { AppContext } from "@/app/context/AppContext";
 import { loginApi } from "../../services/api/authService";
 
@@ -55,28 +54,71 @@ function LoginPage() {
 
     try {
       const res = await loginApi(formData.email, formData.password);
-      const token = res?.token;
+
+      // 🔍 DEBUG: xem loginApi trả về gì
+      console.log("[Login] Raw response từ loginApi:", res);
+      console.log("[Login] res?.token:", res?.token);
+      console.log("[Login] res?.data?.token:", res?.data?.token);
+      console.log("[Login] typeof res:", typeof res);
+
+      // interceptor đã unwrap response.data rồi → res chính là { token, ... }
+      // Nhưng phòng trường hợp interceptor chưa unwrap → thử cả res.data.token
+      const token = res?.token ?? res?.data?.token;
+
+      console.log(
+        "[Login] Token sẽ dùng:",
+        token ? token.slice(0, 30) + "..." : "UNDEFINED ❌",
+      );
+      console.log("[Login] rememberMe:", rememberMe);
 
       if (!token) {
-        setError("Không nhận được token từ server.");
+        console.error(
+          "[Login] ❌ Không có token trong response — kiểm tra loginApi/authService",
+        );
+        setError("Không nhận được token từ hệ thống!");
         return;
       }
 
-      // 1. Lưu token (có hỗ trợ rememberMe nếu saveToken nhận options)
+      // Lưu token theo lựa chọn rememberMe
       saveToken(token, { persistent: rememberMe });
 
-      // 2. Sync AppContext (không dùng return value vì có thể bất đồng bộ)
+      // 🔍 DEBUG: verify đã lưu thật sự chưa
+      const savedLocal = localStorage.getItem("token");
+      const savedSession = sessionStorage.getItem("token");
+      console.log("[Login] Sau saveToken:");
+      console.log(
+        "  localStorage.token:",
+        savedLocal ? savedLocal.slice(0, 30) + "..." : "null ❌",
+      );
+      console.log(
+        "  sessionStorage.token:",
+        savedSession ? savedSession.slice(0, 30) + "..." : "null ❌",
+      );
+
+      if (!savedLocal && !savedSession) {
+        console.error(
+          "[Login] ❌ saveToken không lưu được vào bất kỳ storage nào!",
+        );
+      }
+
+      // Sync AppContext
       refreshUser();
 
-      // 3. Lấy role TRỰC TIẾP từ token vừa lưu — an toàn, không phụ thuộc React state
+      // Lấy role trực tiếp từ token — không phụ thuộc React state timing
       const role = getTokenRole();
-
-      if (role === "admin") {
-        router.push("/dashboard");
-      } else {
-        router.push("/homepage");
-      }
+      console.log(
+        "[Login] Role từ token:",
+        role,
+        "→ redirect đến",
+        role === "admin" ? "/dashboard" : "/homepage",
+      );
+      router.push(role === "admin" ? "/dashboard" : "/homepage");
     } catch (err) {
+      console.error(
+        "[Login] ❌ catch error:",
+        err?.response?.status,
+        err?.response?.data || err?.message,
+      );
       setError(
         err.response?.data?.message || "Email hoặc mật khẩu không đúng.",
       );

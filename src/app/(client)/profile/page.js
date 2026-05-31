@@ -40,7 +40,8 @@ function ProfilePage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [updatingAddress, setUpdatingAddress] = useState(false);
   const [updatingCart, setUpdatingCart] = useState(false);
-
+  const userId = getTokenUserId();
+  console.log("typeof userId:", typeof userId, "| value:", userId);
   // ── Debug render cycle ────────────────────────────────────────────────────
   logger.log("[ProfilePage] render — loading:", loading, "| user:", user);
 
@@ -155,10 +156,19 @@ function ProfilePage() {
     const userId = user.id || user._id;
     logger.log("handleUpsertAddress — userId:", userId, "| address:", address);
 
-    const index = user.addreses.findIndex((item) => item.id === address.id);
+    // 🛠️ SỬA LỖI: Lấy ID duy nhất (hỗ trợ cả id lẫn _id từ DB)
+    const addressId = address.id || address._id;
+
+    // Tìm kiếm vị trí địa chỉ trong danh sách hiện tại của State
+    const index = user.addreses.findIndex(
+      (item) => (item.id || item._id) === addressId,
+    );
+
     const nextAddresses =
       index >= 0
-        ? user.addreses.map((item) => (item.id === address.id ? address : item))
+        ? user.addreses.map((item) =>
+            (item.id || item._id) === addressId ? address : item,
+          )
         : [address, ...user.addreses];
 
     setUser({ ...user, addreses: nextAddresses });
@@ -166,13 +176,14 @@ function ProfilePage() {
 
     try {
       let res;
-      if (address.id.startsWith("addr-")) {
-        const { id, ...addressData } = address;
+      // Nếu địa chỉ tạm thời được tạo ở Client bắt đầu bằng "addr-"
+      if (addressId && String(addressId).startsWith("addr-")) {
+        const { id, _id, ...addressData } = address;
         logger.log("addAddress — addressData:", addressData);
         res = await userService.addAddress(userId, addressData);
       } else {
-        logger.log("editAddress — address.id:", address.id);
-        res = await userService.editAddress(userId, address.id, address);
+        logger.log("editAddress — addressId:", addressId);
+        res = await userService.editAddress(userId, addressId, address);
       }
       logger.log("upsertAddress response:", res);
 
@@ -201,7 +212,10 @@ function ProfilePage() {
       addressId,
     );
 
-    const nextAddresses = user.addreses.filter((item) => item.id !== addressId);
+    // 🛠️ SỬA LỖI: Lọc bỏ địa chỉ khớp với ID truyền vào (kiểm tra cả id và _id)
+    const nextAddresses = user.addreses.filter(
+      (item) => (item.id || item._id) !== addressId,
+    );
     setUser({ ...user, addreses: nextAddresses });
     setUpdatingAddress(true);
 

@@ -18,6 +18,7 @@ import {
   LayersPlus,
   CreditCard,
   Boxes,
+  X,
 } from "lucide-react";
 import {
   Sidebar,
@@ -92,9 +93,17 @@ export function AppSidebar() {
   const [openMenus, setOpenMenus] = useState(["Sản phẩm"]);
 
   const handleLogout = () => {
+    // Xóa cả localStorage và sessionStorage
+    // (saveToken lưu vào sessionStorage khi không chọn "Ghi nhớ")
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    router.push("/login");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+
+    // Dùng window.location.href thay vì router.push để:
+    // 1. Force reload hoàn toàn → AppContext reset về null
+    // 2. Tránh withGuest thấy user cũ trong state rồi redirect ngược lại /dashboard
+    window.location.href = "/login";
   };
 
   const toggleMenu = (title) => {

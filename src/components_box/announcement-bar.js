@@ -22,7 +22,7 @@ const ANNOUNCEMENTS = [
   },
 ];
 
-const BAR_H = 40; // px — single source of truth
+export const BAR_H = 40; // px — export để nav_box dùng chung
 
 export default function AnnouncementBarBox() {
   const [idx, setIdx] = useState(0);
@@ -30,7 +30,7 @@ export default function AnnouncementBarBox() {
   const [fading, setFading] = useState(false);
   const timerRef = useRef(null);
 
-  /* Expose --ann-h so nav + layout can read it */
+  // Set CSS var để các component khác (layout, v.v.) có thể đọc
   useEffect(() => {
     document.documentElement.style.setProperty(
       "--ann-h",
@@ -52,13 +52,16 @@ export default function AnnouncementBarBox() {
     return () => clearInterval(timerRef.current);
   }, [idx, dismissed]);
 
+  // Khi dismissed, ẩn hoàn toàn nhưng vẫn giữ chỗ trong DOM (height = 0)
   if (dismissed) return null;
 
   const { text, cta, href } = ANNOUNCEMENTS[idx];
 
   return (
+    // fixed top-0, toàn chiều ngang, z-50 để nằm trên mọi thứ
+    // Nav sẽ được đặt top = BAR_H bên dưới
     <div
-      className="w-full bg-stone-900 text-white overflow-hidden"
+      className="fixed left-0 right-0 top-0 z-50 w-full bg-stone-900 text-white overflow-hidden"
       style={{ height: BAR_H }}
     >
       <div className="h-full max-w-7xl mx-auto px-3 sm:px-6 flex items-center gap-2">

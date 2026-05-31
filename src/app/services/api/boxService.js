@@ -18,7 +18,9 @@ export const getBoxOffersApi = () => {
 };
 
 export const createBoxApi = (formData) => {
-  return axiosConfig.post(API_ENDPOINTS.BOXES.CREATE, formData);
+  return axiosConfig.post(API_ENDPOINTS.BOXES.CREATE, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 };
 
 export const updateBoxApi = (id, formData) => {

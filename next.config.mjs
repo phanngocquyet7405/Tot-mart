@@ -1,6 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
+
+  // Proxy mọi request /api/* → backend thật để tránh CORS
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${process.env.NEXT_PUBLIC_API_URL || "https://totmartapi.onrender.com/api"}/:path*`,
+      },
+    ];
+  },
+
   images: {
     remotePatterns: [
       {

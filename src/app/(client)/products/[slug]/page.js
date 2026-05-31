@@ -554,7 +554,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
   const slug = params?.slug || "";
   const productId = slug.includes("-") ? slug.split("-").pop() : slug;
 
-  const { addToCart } = useCart();
+  const { addToCart, cartCount, cartTotal } = useCart();
   const { toasts, addToast, removeToast } = useToast();
 
   const [product, setProduct] = useState(null);
@@ -657,7 +657,12 @@ export default function ProductDetailPage({ params: paramsPromise }) {
   const handleAddToCartWithQty = useCallback(() => {
     if (!product) return;
     setAddingToCart(true);
-    for (let i = 0; i < quantity; i++) addToCart(product);
+    // Thêm sản phẩm với đúng quantity — addToCart tự xử lý +1 mỗi lần
+    for (let i = 0; i < quantity; i++)
+      addToCart({
+        ...product,
+        image: product.images?.[0]?.url || "", // chuẩn hóa field image cho CartDrawer
+      });
     addToast({
       message: `${quantity} × "${product.name}" đã vào giỏ hàng`,
       type: "success",
@@ -781,7 +786,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
       {/* Header */}
       <div className="sticky top-0 bg-white shadow-sm z-100">
         <AnnouncementBar />
-        <MainHeader />
+        <MainHeader cartItemCount={cartCount} cartTotal={cartTotal} />
         <NavMenu />
       </div>
 
@@ -1141,7 +1146,10 @@ export default function ProductDetailPage({ params: paramsPromise }) {
                   key={rp._id || rp.id}
                   product={rp}
                   onAddToCart={(p) => {
-                    addToCart(p);
+                    addToCart({
+                      ...p,
+                      image: p.images?.[0]?.url || "",
+                    });
                     addToast({
                       message: `Đã thêm "${p.name}" vào giỏ`,
                       type: "success",

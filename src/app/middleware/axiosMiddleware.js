@@ -11,6 +11,7 @@ const PUBLIC_ENDPOINTS = [
   API_ENDPOINTS.BRANDS.GET_ALL,
   API_ENDPOINTS.CATEGORIES.GET_ALL,
   API_ENDPOINTS.CATEGORIES.GET_ROOT,
+  API_ENDPOINTS.BOXES.GET_ALL,
 ];
 
 function isPublicEndpoint(url = "") {
@@ -72,10 +73,17 @@ export function setupAxiosMiddleware(axiosInstance) {
         case 401:
           logger.warn(`[401] Unauthorized tại ${requestUrl}:`, message);
           if (typeof window !== "undefined") {
-            handleExpiredToken();
+            const hasToken =
+              localStorage.getItem("token") || sessionStorage.getItem("token");
+            if (!isPublicEndpoint(requestUrl) && hasToken) {
+              handleExpiredToken();
+            } else if (!hasToken) {
+              logger.warn(
+                "[401] Token không có trong storage, bỏ qua handleExpiredToken",
+              );
+            }
           }
           break;
-
         case 403:
           logger.warn(`[403] Forbidden tại ${requestUrl}:`, message);
           if (typeof window !== "undefined") {

@@ -9,10 +9,13 @@ import SideBar from "../components/ui/SideBar";
 import ProductsGrid from "../components/layout/product/products_grid";
 import Footer from "../components/ui/footer";
 import HeroSectionProduct from "../components/hero_section_page/hero_section_products";
-import Link from "next/link";
+import { useCart } from "@/app/context/CartContext";
 
 export default function ProductPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Lấy cartCount + cartTotal để truyền vào MainHeader
+  const { cartCount, cartTotal } = useCart();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -21,8 +24,8 @@ export default function ProductPage() {
 
         <MainHeader
           onMenuClick={() => setIsSidebarOpen(true)}
-          cartItemCount={0}
-          cartTotal={0}
+          cartItemCount={cartCount}
+          cartTotal={cartTotal}
         />
 
         <div className="border-b border-gray-100">
