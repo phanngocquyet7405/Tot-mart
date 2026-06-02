@@ -1,6 +1,8 @@
 "use client";
+// components/SubscribePlans/PlanFormDialog.jsx
+// Chỉ CREATE — BE không có route update.
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import {
   Loader2,
   Plus,
@@ -26,39 +28,10 @@ import {
 } from "@/components/ui/dialog";
 
 import { getAllBoxesApi } from "@/app/services/api/boxService";
-import {
-  createPlanApi,
-  planApi,
-} from "@/app/services/api/subscribePlanService";
-import {
-  formatCurrency,
-  PLAN_TYPE_LABELS,
-  DEFAULT_DELIVERIES,
-} from "@/app/util/formatter";
+import { usePlanForm } from "../../../../hooks/usePlanForm";
+import { formatCurrency, PLAN_TYPE_LABELS } from "@/app/util/formatter";
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const EMPTY_ADDRESS = {
-  address: "",
-  district: "",
-  city: "",
-  country: "Vietnam",
-  zipCode: "",
-  phone: "",
-};
-
-const EMPTY_FORM = {
-  name: "",
-  userId: "",
-  boxId: "",
-  planType: "1_month",
-  totalDeliveries: 1,
-  discountPercent: 0,
-  cancelAtPeriodEnd: false,
-  gift: [],
-};
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ── Shared atoms ──────────────────────────────────────────────────────────────
 
 function SectionTitle({ icon: Icon, color, label }) {
   return (
@@ -85,18 +58,11 @@ function Field({ label, error, required, hint, children }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ── Main ──────────────────────────────────────────────────────────────────────
 
-export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }) {
-  const isEdit = !!plan;
-
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [address, setAddress] = useState(EMPTY_ADDRESS);
+export function PlanFormDialog({ open, onOpenChange, onSuccess }) {
   const [boxes, setBoxes] = useState([]);
-  const [errors, setErrors] = useState({});
-  const [isSaving, setIsSaving] = useState(false);
 
-  // Load boxes list
   useEffect(() => {
     if (!open) return;
     getAllBoxesApi()
@@ -104,143 +70,25 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }) {
       .catch(() => toast.error("Không thể tải danh sách box"));
   }, [open]);
 
-  // Populate form on open
-  useEffect(() => {
-    if (!open) return;
-    if (isEdit) {
-      setForm({
-        name: plan.name || "",
-        userId:
-          typeof plan.userId === "object"
-            ? plan.userId?._id || ""
-            : plan.userId || "",
-        boxId:
-          typeof plan.boxId === "object"
-            ? plan.boxId?._id || ""
-            : plan.boxId || "",
-        planType: plan.planType || "1_month",
-        totalDeliveries: plan.totalDeliveries || 1,
-        discountPercent: plan.discountPercent || 0,
-        cancelAtPeriodEnd: plan.cancelAtPeriodEnd || false,
-        gift: (plan.gift || []).map((g) => ({
-          boxId:
-            typeof g.boxId === "object" ? g.boxId?._id || "" : g.boxId || "",
-          quantity: g.quantity || 1,
-        })),
-      });
-      setAddress({ ...EMPTY_ADDRESS, ...(plan.shippingAddress || {}) });
-    } else {
-      setForm(EMPTY_FORM);
-      setAddress(EMPTY_ADDRESS);
-    }
-    setErrors({});
-  }, [open, plan, isEdit]);
-
-  // Computed price preview
-  const selectedBox = useMemo(
-    () => boxes.find((b) => b._id === form.boxId),
-    [boxes, form.boxId],
-  );
-
-  const pricePreview = useMemo(() => {
-    if (!selectedBox?.value) return null;
-    const original = selectedBox.value;
-    const discountAmt = (original * (form.discountPercent || 0)) / 100;
-    return { original, discountAmt, final: original - discountAmt };
-  }, [selectedBox, form.discountPercent]);
-
-  // Field setters with error clearing
-  const set = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => {
-      const { [field]: _, ...rest } = prev;
-      return rest;
-    });
-  };
-
-  const setAddr = (field, value) => {
-    setAddress((prev) => ({ ...prev, [field]: value }));
-    const key = `addr_${field}`;
-    setErrors((prev) => {
-      const { [key]: _, ...rest } = prev;
-      return rest;
-    });
-  };
-
-  const handlePlanTypeChange = (val) => {
-    setForm((prev) => ({
-      ...prev,
-      planType: val,
-      // Auto-fill totalDeliveries only for new plans
-      ...(!isEdit && { totalDeliveries: DEFAULT_DELIVERIES[val] || 1 }),
-    }));
-  };
-
-  // Gift management
-  const addGift = () =>
-    setForm((prev) => ({
-      ...prev,
-      gift: [...prev.gift, { boxId: "", quantity: 1 }],
-    }));
-  const updateGift = (i, field, value) => {
-    const next = [...form.gift];
-    next[i] = { ...next[i], [field]: value };
-    setForm((prev) => ({ ...prev, gift: next }));
-  };
-  const removeGift = (i) =>
-    setForm((prev) => ({
-      ...prev,
-      gift: prev.gift.filter((_, idx) => idx !== i),
-    }));
-
-  // Validation
-  const validate = () => {
-    const e = {};
-    if (!form.name.trim()) e.name = "Tên gói là bắt buộc";
-    if (!isEdit && !form.userId.trim()) e.userId = "User ID là bắt buộc";
-    if (!form.boxId) e.boxId = "Vui lòng chọn box";
-    if (!form.totalDeliveries || form.totalDeliveries < 1)
-      e.totalDeliveries = "Tối thiểu 1 lần giao";
-    if (form.discountPercent < 0 || form.discountPercent > 100)
-      e.discountPercent = "Từ 0 đến 100";
-    // Address
-    if (!address.address.trim()) e.addr_address = "Bắt buộc";
-    if (!address.district.trim()) e.addr_district = "Bắt buộc";
-    if (!address.city.trim()) e.addr_city = "Bắt buộc";
-    if (!address.country.trim()) e.addr_country = "Bắt buộc";
-    if (!address.zipCode.trim()) e.addr_zipCode = "Bắt buộc";
-    if (!address.phone.trim()) e.addr_phone = "Bắt buộc";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const handleSave = async () => {
-    if (!validate()) {
-      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
-      return;
-    }
-    setIsSaving(true);
-    try {
-      const payload = {
-        ...form,
-        shippingAddress: address,
-        gift: form.gift.filter((g) => g.boxId),
-      };
-      if (isEdit) {
-        await planApi.update(plan._id, payload);
-        toast.success("Cập nhật gói thành công");
-      } else {
-        await createPlanApi(payload);
-        toast.success("Tạo gói đăng ký thành công");
-      }
-      onSuccess?.();
-      onOpenChange(false);
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Lỗi hệ thống");
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const {
+    form,
+    address,
+    errors,
+    isSaving,
+    pricePreview,
+    set,
+    setAddr,
+    handlePlanTypeChange,
+    addGift,
+    updateGift,
+    removeGift,
+    handleSave,
+  } = usePlanForm({
+    open,
+    boxes,
+    onSuccess,
+    onClose: () => onOpenChange(false),
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -248,13 +96,8 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }) {
         <DialogHeader>
           <DialogTitle className="text-base font-bold flex items-center gap-2">
             <Settings2 size={16} className="text-indigo-500" />
-            {isEdit ? `Chỉnh sửa: ${plan.name}` : "Tạo gói đăng ký mới"}
+            Tạo gói đăng ký mới
           </DialogTitle>
-          {isEdit && (
-            <p className="text-xs text-slate-400 font-mono mt-1">
-              ID: {plan._id}
-            </p>
-          )}
         </DialogHeader>
 
         <div className="space-y-6 py-1">
@@ -274,33 +117,19 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }) {
               />
             </Field>
 
-            {/* userId chỉ hiển thị khi tạo mới */}
-            {!isEdit ? (
-              <Field
-                label="User ID (khách hàng)"
-                required
-                error={errors.userId}
-                hint="MongoDB ObjectId của khách hàng"
-              >
-                <Input
-                  placeholder="6507f1f77bcf86cd79439011"
-                  value={form.userId}
-                  onChange={(e) => set("userId", e.target.value)}
-                  className="font-mono text-sm"
-                />
-              </Field>
-            ) : (
-              <div className="rounded-lg bg-slate-100 px-3 py-2 flex justify-between items-center">
-                <span className="text-xs text-slate-500">Khách hàng</span>
-                <span className="text-xs font-medium font-mono text-slate-700">
-                  {typeof plan.userId === "object"
-                    ? plan.userId?.email ||
-                      plan.userId?.name ||
-                      plan.userId?._id
-                    : plan.userId}
-                </span>
-              </div>
-            )}
+            <Field
+              label="User ID (khách hàng)"
+              required
+              error={errors.userId}
+              hint="MongoDB ObjectId của khách hàng"
+            >
+              <Input
+                placeholder="6507f1f77bcf86cd79439011"
+                value={form.userId}
+                onChange={(e) => set("userId", e.target.value)}
+                className="font-mono text-sm"
+              />
+            </Field>
 
             <div className="grid grid-cols-2 gap-4">
               <Field label="Chu kỳ gói" required>
@@ -321,7 +150,6 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }) {
                 label="Số lần giao hàng"
                 required
                 error={errors.totalDeliveries}
-                hint={isEdit ? "Chỉnh sửa thận trọng" : ""}
               >
                 <Input
                   type="number"
@@ -332,7 +160,6 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }) {
               </Field>
             </div>
 
-            {/* cancelAtPeriodEnd toggle */}
             <label className="flex items-center justify-between rounded-lg border border-dashed px-4 py-3 cursor-pointer hover:bg-slate-100 transition-colors">
               <div>
                 <p className="text-sm font-medium text-slate-700">
@@ -384,7 +211,6 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }) {
                 />
               </Field>
 
-              {/* Price preview */}
               {pricePreview ? (
                 <div className="rounded-lg bg-indigo-50 border border-indigo-100 px-4 py-3 space-y-1.5">
                   <p className="text-[10px] text-indigo-400 uppercase font-bold tracking-wide">
@@ -399,18 +225,18 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }) {
                           : "font-semibold text-indigo-700"
                       }
                     >
-                      {formatCurrency(pricePreview.original)}
+                      {pricePreview.formattedOriginal}
                     </span>
                   </div>
                   {form.discountPercent > 0 && (
                     <>
                       <div className="flex justify-between text-xs text-red-500">
                         <span>−{form.discountPercent}%</span>
-                        <span>−{formatCurrency(pricePreview.discountAmt)}</span>
+                        <span>−{pricePreview.formattedDiscount}</span>
                       </div>
                       <div className="flex justify-between text-sm font-bold text-indigo-700 border-t border-indigo-100 pt-1.5">
                         <span>Giá / kỳ</span>
-                        <span>{formatCurrency(pricePreview.final)}</span>
+                        <span>{pricePreview.formattedFinal}</span>
                       </div>
                     </>
                   )}
@@ -422,7 +248,7 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }) {
               )}
             </div>
 
-            {/* Gift boxes */}
+            {/* Gift */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
@@ -441,8 +267,7 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }) {
                   className="h-7 text-xs text-pink-600 border-pink-200 hover:bg-pink-50"
                   onClick={addGift}
                 >
-                  <Plus size={11} className="mr-1" />
-                  Thêm quà
+                  <Plus size={11} className="mr-1" /> Thêm quà
                 </Button>
               </div>
 
@@ -555,12 +380,12 @@ export function PlanFormDialog({ open, onOpenChange, plan, onSuccess }) {
             Huỷ
           </Button>
           <Button
-            className="bg-indigo-600 hover:bg-indigo-700 min-w-32.5"
+            className="bg-indigo-600 hover:bg-indigo-700 min-w-32"
             onClick={handleSave}
             disabled={isSaving}
           >
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isEdit ? "Lưu thay đổi" : "Tạo gói"}
+            Tạo gói
           </Button>
         </DialogFooter>
       </DialogContent>
