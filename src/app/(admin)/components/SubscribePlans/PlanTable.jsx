@@ -1,5 +1,4 @@
 // components/SubscribePlans/PlanTable.jsx
-// THÊM MỚI: prop onEditClick → item "Chỉnh sửa" trong dropdown
 
 import {
   Table,
@@ -24,7 +23,6 @@ import {
   ChevronDown,
   MoreHorizontal,
   Eye,
-  Pencil,
   XCircle,
   Zap,
 } from "lucide-react";
@@ -37,13 +35,12 @@ import {
 import { StatusBadge } from "./StatusBadge";
 
 function SortIcon({ col, sortKey, sortDir }) {
-  if (sortKey === col) {
+  if (sortKey === col)
     return sortDir === "asc" ? (
       <ChevronUp size={12} className="inline ml-1" />
     ) : (
       <ChevronDown size={12} className="inline ml-1" />
     );
-  }
   return <ChevronUp size={12} className="inline ml-1 opacity-20" />;
 }
 
@@ -56,7 +53,6 @@ export function PlanTable({
   onSort,
   onViewDetail,
   onCancelClick,
-  onEditClick, // ← MỚI
 }) {
   if (isLoading) {
     return (
@@ -154,7 +150,7 @@ export function PlanTable({
                   </TableCell>
 
                   <TableCell>
-                    <div className="space-y-1 min-w-25">
+                    <div className="space-y-1 min-w-20">
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
                           {plan.completeDeliveries || 0}/{plan.totalDeliveries}
@@ -212,7 +208,7 @@ export function PlanTable({
                           <MoreHorizontal size={15} />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-52">
+                      <DropdownMenuContent align="end" className="w-48">
                         <DropdownMenuItem
                           className="cursor-pointer"
                           onClick={() => onViewDetail(plan)}
@@ -220,20 +216,6 @@ export function PlanTable({
                           <Eye size={14} className="mr-2 text-blue-500" />
                           Xem chi tiết
                         </DropdownMenuItem>
-
-                        {/* ── THÊM MỚI ── */}
-                        {onEditClick && (
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={() => onEditClick(plan)}
-                          >
-                            <Pencil
-                              size={14}
-                              className="mr-2 text-indigo-500"
-                            />
-                            Chỉnh sửa
-                          </DropdownMenuItem>
-                        )}
 
                         {plan.status === "active" && (
                           <>

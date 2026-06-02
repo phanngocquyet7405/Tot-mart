@@ -23,7 +23,11 @@ import {
   Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createPlanApi } from "@/app/services/api/subscribePlanService";
+import {
+  getDecodedToken,
+  checkTokenValid,
+} from "@/app/middleware/tokenMiddleware";
+import { useCart } from "@/app/context/CartContext";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -101,6 +105,8 @@ function calculatePlanPrice(basePrice, planId) {
 
 export default function ChoosePlanModal({ box, onClose }) {
   const router = useRouter();
+  const { addSubscribeToCart } = useCart();
+
   const [selectedPlan, setSelectedPlan] = useState("6m");
   const [activeImage, setActiveImage] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -137,36 +143,50 @@ export default function ChoosePlanModal({ box, onClose }) {
     });
   };
 
-  const handleSubscribe = async () => {
-    try {
-      setLoading(true);
-      const user = JSON.parse(localStorage.getItem("user") || "null");
-      if (!user?._id) {
-        toast.error("Vui lòng đăng nhập trước");
-        router.push("/login");
-        return;
-      }
-      const payload = {
-        userId: user._id,
-        boxId: box._id,
-        planType: selected.planType,
-        totalDeliveries: selected.totalDeliveries,
-        discountPercent: selected.discountPercent,
-      };
-      const res = await createPlanApi(payload);
-      if (res?.data?.success || res?.success) {
-        toast.success("Đăng ký thành công!");
-        onClose();
-        router.push("/profile");
-      } else {
-        toast.error("Đăng ký thất bại, vui lòng thử lại");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Không thể tạo gói đăng ký");
-    } finally {
-      setLoading(false);
+  // ── Sửa handleSubscribe: thêm vào CartContext → redirect /checkout ────────
+  const handleSubscribe = () => {
+    // 2. SỬA ĐOẠN KIỂM TRA ĐĂNG NHẬP Ở ĐÂY
+
+    // Gọi hàm dùng chung thay vì localStorage.getItem("user")
+    const user = getDecodedToken();
+    const isTokenOk = checkTokenValid();
+
+    if (!user || !user.userId || !isTokenOk) {
+      console.log("Chưa đăng nhập hoặc phiên làm việc đã hết hạn");
+      toast.error("Vui lòng đăng nhập trước");
+      router.push("/login");
+      return;
     }
+
+    if (box.stock === 0) {
+      toast.error("Hộp này đã hết hàng");
+      return;
+    }
+
+    setLoading(true);
+
+    // Thêm gói subscribe vào CartContext (lưu localStorage)
+    addSubscribeToCart({
+      boxId: box._id,
+      userId: user.userId, // user bây giờ sẽ luôn có dữ liệu dù lưu ở Local hay Session
+      boxName: box.name,
+      boxImage: images[0]?.url || PLACEHOLDER,
+      planType: selected.planType,
+      planLabel: selected.label,
+      totalDeliveries: selected.totalDeliveries,
+      discountPercent: selected.discountPercent,
+      months: selected.months,
+      monthlyPrice: pricing.monthlyPrice,
+      totalPrice: pricing.total,
+      save: pricing.save,
+      basePrice,
+    });
+    console.log("da dang nhap nhung ko biet sao vao day");
+    toast.success(`Đã thêm gói ${selected.label} vào đơn hàng!`);
+    onClose();
+
+    // Redirect sang checkout
+    router.push("/checkout");
   };
 
   return (
@@ -212,32 +232,33 @@ export default function ChoosePlanModal({ box, onClose }) {
                       onClick={() => scroll("up")}
                       className="p-1 rounded-full border border-[#E8D5CC] bg-white text-[#C85C3C] hover:bg-[#FFF0EB] shadow-sm transition"
                     >
-                      <ChevronUp className="w-4 h-4" />
+                      <ChevronUp size={14} />
                     </button>
                   )}
                   <div
                     ref={thumbnailRef}
-                    className="flex flex-col gap-2 overflow-y-hidden scroll-smooth"
-                    style={{ maxHeight: 340 }}
+                    className="flex flex-col gap-2 overflow-hidden max-h-[calc(4*80px+3*8px)]"
                   >
                     {images.map((img, idx) => (
                       <button
                         key={idx}
                         onClick={() => setActiveImage(idx)}
                         className={cn(
-                          "shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all",
-                          idx === activeImage
-                            ? "border-[#C85C3C] scale-105 shadow-md"
+                          "w-18 h-18 rounded-xl overflow-hidden border-2 shrink-0 transition-all",
+                          activeImage === idx
+                            ? "border-[#C85C3C] shadow-md"
                             : "border-transparent opacity-60 hover:opacity-100",
                         )}
                       >
-                        <Image
-                          src={img.url}
-                          alt=""
-                          width={64}
-                          height={64}
-                          className="w-full h-full object-cover"
-                        />
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={img.url}
+                            alt={`thumb-${idx}`}
+                            fill
+                            className="object-cover"
+                            sizes="72px"
+                          />
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -246,20 +267,20 @@ export default function ChoosePlanModal({ box, onClose }) {
                       onClick={() => scroll("down")}
                       className="p-1 rounded-full border border-[#E8D5CC] bg-white text-[#C85C3C] hover:bg-[#FFF0EB] shadow-sm transition"
                     >
-                      <ChevronDown className="w-4 h-4" />
+                      <ChevronDown size={14} />
                     </button>
                   )}
                 </div>
               )}
 
               {/* Main image */}
-              <div className="flex-1 relative aspect-square rounded-2xl overflow-hidden bg-[#FFF5F2] border border-[#F0DDD5] shadow-sm">
+              <div className="flex-1 relative aspect-square rounded-2xl overflow-hidden bg-[#FFF0EB] shadow-inner">
                 {images.map((img, idx) => (
                   <div
                     key={idx}
                     className={cn(
-                      "absolute inset-0 transition-opacity duration-500",
-                      idx === activeImage
+                      "absolute inset-0 transition-opacity duration-300",
+                      activeImage === idx
                         ? "opacity-100 z-10"
                         : "opacity-0 z-0",
                     )}

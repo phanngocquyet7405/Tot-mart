@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/app/context/CartContext";
 import CartDrawer from "@/app/(client)/components/Cart_component/cart_drawer";
+import { BAR_H } from "@/components_box/announcement-bar"; // import hằng số
 
 // ─── Nav data ─────────────────────────────────────────────────────────────────
 
@@ -67,6 +68,13 @@ const aboutMega = {
     { label: "Refer a Friend", desc: "Giới thiệu bạn bè", href: "#" },
   ],
 };
+
+// ─── Chiều cao cố định ────────────────────────────────────────────────────────
+
+export const NAV_H = 60; // px
+
+// Tổng chiều cao header = ann bar + nav — dùng cho layout padding
+export const HEADER_H = BAR_H + NAV_H; // 100px
 
 // ─── Dropdowns ────────────────────────────────────────────────────────────────
 
@@ -158,14 +166,12 @@ function AboutMegaMenu({ onClose }) {
 
 // ─── Main Navigation ──────────────────────────────────────────────────────────
 
-const NAV_H = 60; // px
-
 export function Navigation() {
   const router = useRouter();
   const pathname = usePathname();
   const { cartCount, isMounted } = useCart();
 
-  // Xác định xem trang hiện tại có phải là trang cần làm sáng chữ lúc chưa cuộn hay không
+  // Trang có hero fullscreen → nav trong suốt + chữ sáng lúc chưa cuộn
   const isLightPage =
     pathname === "/" ||
     pathname === "/Subscriber" ||
@@ -177,53 +183,30 @@ export function Navigation() {
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 
-  // Khởi tạo annH an toàn bằng cách đọc trực tiếp từ môi trường browser nếu có
-  const [annH, setAnnH] = useState(() => {
-    if (typeof window !== "undefined") {
-      const v = getComputedStyle(document.documentElement)
-        .getPropertyValue("--ann-h")
-        .trim();
-      return parseInt(v) || 0;
-    }
-    return 0;
-  });
+  // annH được đọc từ --ann-h (do AnnouncementBarBox set) — phản ánh 0 khi đã dismiss
+  const [annH, setAnnH] = useState(BAR_H); // khởi tạo = BAR_H (trước khi dismiss)
 
-  // Track việc cuộn vượt ngưỡng 40px thay vì cập nhật trực tiếp biến pastThreshold
-  const [scrolledPast40, setScrolledPast40] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.scrollY > 40;
-    }
-    return false;
-  });
+  // Cuộn vượt quá ann bar + 10px → coi như đã "scrolled"
+  const [scrolled, setScrolled] = useState(false);
 
-  // Khởi tạo biến scrolled an toàn trực tiếp từ trạng thái ban đầu của DOM
-  const [scrolled, setScrolled] = useState(() => {
-    if (typeof window !== "undefined") {
-      const y = window.scrollY;
-      const v = getComputedStyle(document.documentElement)
-        .getPropertyValue("--ann-h")
-        .trim();
-      const currentAnnH = parseInt(v) || 0;
-      return isLightPage ? y > currentAnnH + 10 : y > 10;
-    }
-    return false;
-  });
-
-  // derive (tính toán động trực tiếp lúc render) để giải quyết dứt điểm lỗi set-state-in-effect
-  const isPastThreshold = !isLightPage || scrolledPast40;
+  // isPastThreshold: với light page, chỉ đổi style khi đã cuộn qua hẳn ann bar
+  // với trang thường thì luôn dùng style solid
+  const isPastThreshold = !isLightPage || scrolled;
 
   const navRef = useRef(null);
 
-  // Effect theo dõi biến đổi style (chỉ cập nhật KHÔNG đồng bộ khi có đột biến thực tế)
+  // Theo dõi --ann-h khi AnnouncementBar bị dismiss
   useEffect(() => {
     const read = () => {
       const v = getComputedStyle(document.documentElement)
         .getPropertyValue("--ann-h")
         .trim();
-      const calculated = parseInt(v) || 0;
-      setAnnH(calculated);
+      const h = parseInt(v) || 0;
+      setAnnH(h);
     };
-
+    // Đọc ngay khi mount
+    read();
+    // Lắng nghe thay đổi style trên <html>
     const observer = new MutationObserver(read);
     observer.observe(document.documentElement, {
       attributes: true,
@@ -232,29 +215,25 @@ export function Navigation() {
     return () => observer.disconnect();
   }, []);
 
-  // Thay vì gọi setState đồng bộ trong luồng render, trì hoãn thông qua animation frame
-  // để đồng bộ hóa mượt mà trạng thái cuộn khi chuyển đổi giữa các trang
+  // Đồng bộ trạng thái scroll khi đổi trang hoặc annH thay đổi
   useEffect(() => {
-    const syncScrollState = () => {
+    const sync = () => {
       const y = window.scrollY;
-      setScrolledPast40(y > 40);
-      setScrolled(isLightPage ? y > annH + 10 : y > 10);
+      // scrolled = true khi cuộn qua khỏi vùng ann bar (+ 10px buffer)
+      setScrolled(y > annH + 10);
     };
+    const id = requestAnimationFrame(sync);
+    return () => cancelAnimationFrame(id);
+  }, [pathname, annH]);
 
-    const animFrameId = requestAnimationFrame(syncScrollState);
-    return () => cancelAnimationFrame(animFrameId);
-  }, [pathname, isLightPage, annH]);
-
+  // Lắng nghe scroll
   useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY;
-      setScrolledPast40(y > 40);
-      setScrolled(isLightPage ? y > annH + 10 : y > 10);
-    };
+    const onScroll = () => setScrolled(window.scrollY > annH + 10);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [annH, isLightPage]);
+  }, [annH]);
 
+  // Đóng dropdown khi click ngoài
   useEffect(() => {
     const handler = (e) => {
       if (navRef.current && !navRef.current.contains(e.target)) setOpen(null);
@@ -265,7 +244,7 @@ export function Navigation() {
 
   const close = () => setOpen(null);
 
-  // Logic màu sắc linh hoạt: Sử dụng tông sáng màu (màu sáng rõ) khi ở trang chủ hoặc Subscriber lúc chưa cuộn
+  // ── Màu sắc ────────────────────────────────────────────────────────────────
   const textCls = isPastThreshold
     ? "text-stone-800 hover:text-amber-600"
     : isLightPage
@@ -278,20 +257,27 @@ export function Navigation() {
       ? "text-stone-100 hover:text-white"
       : "text-stone-500";
 
+  // ── Vị trí top của nav ─────────────────────────────────────────────────────
+  // - Luôn nằm ngay bên dưới ann bar (top = annH)
+  // - Khi scroll qua ann bar → ann bar biến mất khỏi viewport → nav "dính" top=0
+  //   nhưng thực ra annH lúc này vẫn = BAR_H (chưa dismiss), scroll làm ann bar
+  //   ra ngoài viewport tự nhiên → nav theo sau
+  // → Dùng position: fixed + top = annH là đủ. Khi cuộn, cả ann bar và nav
+  //   đều fixed nên cùng hiển thị → không bao giờ đè nhau.
+  const navTop = annH; // luôn = BAR_H (40) hoặc 0 nếu đã dismiss
+
   return (
     <>
       <nav
         ref={navRef}
         className={cn(
-          "fixed left-0 right-0 z-50 transition-all duration-500 border-b",
+          "fixed left-0 right-0 z-40 transition-all duration-500 border-b",
+          // z-40 thấp hơn ann bar (z-50) để ann bar luôn nằm trên
           scrolled
             ? "bg-[#faf8f4]/95 backdrop-blur-md border-stone-200 shadow-sm"
             : "bg-transparent border-transparent",
         )}
-        style={{
-          top: isLightPage ? (isPastThreshold ? 0 : annH) : scrolled ? 0 : annH,
-          height: NAV_H,
-        }}
+        style={{ top: navTop, height: NAV_H }}
       >
         <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center gap-6">
@@ -463,7 +449,6 @@ export function Navigation() {
         </div>
 
         {/* ── Mobile drawer ── */}
-        {}
         {mobileOpen && (
           <div className="lg:hidden bg-[#faf8f4] border-t border-stone-200 shadow-2xl overflow-y-auto max-h-[75vh]">
             <div className="h-0.5 bg-linear-to-r from-amber-300 via-amber-500 to-amber-300" />

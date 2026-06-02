@@ -20,7 +20,9 @@ export function buildHeaders(contentType = "json", requireAuth = true) {
   // Content-Type
   switch (contentType) {
     case "multipart":
-      // Không set Content-Type cho multipart → axios tự thêm boundary
+      // FIX Chú ý quan trọng: Ép gán undefined để Axios chủ động xóa bỏ
+      // header "application/json" mặc định trong config, giúp trình duyệt tự điền boundary.
+      headers["Content-Type"] = undefined;
       break;
     case "urlencoded":
       headers["Content-Type"] = "application/x-www-form-urlencoded";
@@ -44,20 +46,13 @@ export function buildHeaders(contentType = "json", requireAuth = true) {
   return headers;
 }
 
-// ─── sanitizeParams
+// ─── sanitizeParams ───────────────────────────────────────────────────────────
 
 /**
  * Làm sạch object query params:
  *  - Bỏ undefined, null, empty string
  *  - Trim string values
  *  - Chuyển boolean thành string ('true'/'false') để URL encode đúng
- *
- * Ví dụ:
- *   sanitizeParams({ page: 1, search: '', active: true, deleted: null })
- *   → { page: 1, active: 'true' }
- *
- * @param {object} params
- * @returns {object}
  */
 export function sanitizeParams(params = {}) {
   return Object.entries(params).reduce((acc, [key, value]) => {
@@ -82,13 +77,7 @@ export function sanitizeParams(params = {}) {
 
 /**
  * Chuyển object JavaScript thành FormData để upload file.
- * Hỗ trợ: string, number, boolean, File/Blob, Array (nhiều file).
- *
- * Ví dụ (upload ảnh sản phẩm):
- *   const fd = buildFormData({ name: 'Áo', price: 100000, images: [file1, file2] });
- *   axiosConfig.post(ENDPOINTS.PRODUCTS.CREATE, fd, {
- *     headers: buildHeaders('multipart')
- *   });
+ * Hỗ trợ: string, number, boolean, File/Blob, Array (nhiều file kèm chỉ mục index).
  *
  * @param {object} data
  * @returns {FormData}
@@ -100,8 +89,17 @@ export function buildFormData(data = {}) {
     if (value === null || value === undefined) return;
 
     if (Array.isArray(value)) {
-      // Nhiều file: append cùng key nhiều lần
-      value.forEach((item) => formData.append(key, item));
+      // FIX Chú ý quan trọng:
+      // Nếu trường dữ liệu là mảng ảnh 'images', ta cần bọc kèm chỉ mục index ví dụ: images[0], images[1]...
+      // Điều này giúp Backend (multer) nhận diện chính xác tên trường fieldname có chứa số để xử lý update/ghi đè.
+      value.forEach((item, index) => {
+        if (key === "images") {
+          formData.append(`images[${index}]`, item);
+        } else {
+          // Các loại mảng text/id thông thường khác giữ nguyên cấu trúc trùng key
+          formData.append(key, item);
+        }
+      });
     } else if (typeof value === "boolean" || typeof value === "number") {
       formData.append(key, String(value));
     } else {
@@ -120,12 +118,6 @@ export function withTimeout(ms) {
 
 /**
  * @param {object} [options]
- * @param {number} [options.page=1]
- * @param {number} [options.limit=10]
- * @param {string} [options.search='']
- * @param {string} [options.sortBy='createdAt']
- * @param {'asc'|'desc'} [options.order='desc']
- * @returns {object}
  */
 export function createPaginationParams({
   page = 1,

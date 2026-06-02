@@ -1,6 +1,22 @@
 "use client";
+/**
+ * page.js — AdminSubscribePlanPage
+ * ─────────────────────────────────────────────────────────────────
+ * Orchestrator thuần: chỉ wire hooks → props, không có logic.
+ *
+ * BE router hỗ trợ:
+ *   POST   create-subcribe-plan          PlanFormDialog (create only)
+ *   GET    get-all-subcribe-plans        usePlanList
+ *   GET    /:id                          PlanDetailDialog
+ *   GET    /user/:userId                 (dùng khi cần)
+ *   PATCH  /:id/cancel                   usePlanActions
+ *   PATCH  /:id/cancel-immediately       usePlanActions
+ *   POST   process-deliveries            usePlanActions
+ *
+ * KHÔNG có: PUT /:id (update), DELETE /:id — bỏ hoàn toàn.
+ * ─────────────────────────────────────────────────────────────────
+ */
 
-import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Plus,
   RefreshCw,
@@ -9,7 +25,6 @@ import {
   Filter,
   ChevronDown,
 } from "lucide-react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,171 +40,59 @@ import { PlanStats } from "../components/SubscribePlans/PlanStats";
 import { PlanTable } from "../components/SubscribePlans/PlanTable";
 import { PlanDetailDialog } from "../components/SubscribePlans/PlanDetailDialog";
 import { CancelPlanDialog } from "../components/SubscribePlans/CancelPlanDialog";
-
 import { PlanFormDialog } from "../components/SubscribePlans/PlanFormDialog";
 
 import {
-  getAllPlansApi,
-  cancelPlanApi,
-  cancelImmediatelyApi,
-  triggerDeliveryApi,
-} from "@/app/services/api/subscribePlanService";
-import { PLAN_TYPE_LABELS } from "@/app/util/formatter";
-
-const STATUS_OPTIONS = [
-  { value: "all", label: "Tất cả trạng thái" },
-  { value: "active", label: "Đang hoạt động" },
-  { value: "cancelled", label: "Đã huỷ" },
-  { value: "expired", label: "Hết hạn" },
-];
-
-const PLAN_TYPE_OPTIONS = [
-  { value: "all", label: "Tất cả chu kỳ" },
-  ...Object.entries(PLAN_TYPE_LABELS).map(([v, l]) => ({ value: v, label: l })),
-];
+  usePlanList,
+  STATUS_OPTIONS,
+  PLAN_TYPE_OPTIONS,
+} from "../../../hooks/usePlanList";
+import { usePlanDialog } from "../../../hooks/usePlanDialog";
+import { usePlanActions } from "../../../hooks/usePlanActions";
 
 export default function AdminSubscribePlanPage() {
-  const [plans, setPlans] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // ── Data ──────────────────────────────────────────────────────────────────
+  const {
+    plans,
+    filtered,
+    isLoading,
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    planTypeFilter,
+    setPlanTypeFilter,
+    hasActiveFilters,
+    clearFilters,
+    sortKey,
+    sortDir,
+    handleSort,
+    fetchPlans,
+  } = usePlanList();
 
-  // Filters & sort
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [planTypeFilter, setPlanTypeFilter] = useState("all");
-  const [sortKey, setSortKey] = useState("createdAt");
-  const [sortDir, setSortDir] = useState("desc");
+  // ── Dialog state ──────────────────────────────────────────────────────────
+  const {
+    detailPlan,
+    detailOpen,
+    setDetailOpen,
+    handleViewDetail,
+    closeDetail,
+    formOpen,
+    setFormOpen,
+    handleOpenCreate,
+  } = usePlanDialog();
 
-  // Dialog states
-  const [detailPlan, setDetailPlan] = useState(null);
-  const [detailOpen, setDetailOpen] = useState(false);
-
-  const [cancelTarget, setCancelTarget] = useState(null); // { plan, mode: 'end' | 'immediate' }
-  const [cancelOpen, setCancelOpen] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const [formOpen, setFormOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState(null); // null = create, plan = edit
-
-  const [isTriggeringDelivery, setIsTriggeringDelivery] = useState(false);
-
-  // ── Data fetching ──────────────────────────────────────────────────────────
-
-  const fetchPlans = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await getAllPlansApi();
-      setPlans(res.data?.plans || res.data || []);
-    } catch {
-      toast.error("Không thể tải danh sách gói đăng ký");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchPlans();
-  }, [fetchPlans]);
-
-  // ── Sort ───────────────────────────────────────────────────────────────────
-
-  const handleSort = (key) => {
-    if (sortKey === key) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortKey(key);
-      setSortDir("asc");
-    }
-  };
-
-  // ── Filter + Sort ──────────────────────────────────────────────────────────
-
-  const filtered = useMemo(() => {
-    let result = plans.filter((p) => {
-      const q = search.toLowerCase();
-      const matchSearch =
-        !q ||
-        p.name?.toLowerCase().includes(q) ||
-        p.userId?.name?.toLowerCase().includes(q) ||
-        p.userId?.email?.toLowerCase().includes(q) ||
-        p._id?.slice(-6).includes(q);
-      const matchStatus = statusFilter === "all" || p.status === statusFilter;
-      const matchType =
-        planTypeFilter === "all" || p.planType === planTypeFilter;
-      return matchSearch && matchStatus && matchType;
-    });
-
-    result = [...result].sort((a, b) => {
-      let va = a[sortKey];
-      let vb = b[sortKey];
-      if (typeof va === "string") va = va.toLowerCase();
-      if (typeof vb === "string") vb = vb.toLowerCase();
-      if (va < vb) return sortDir === "asc" ? -1 : 1;
-      if (va > vb) return sortDir === "asc" ? 1 : -1;
-      return 0;
-    });
-
-    return result;
-  }, [plans, search, statusFilter, planTypeFilter, sortKey, sortDir]);
-
-  const hasActiveFilters = statusFilter !== "all" || planTypeFilter !== "all";
-
-  // ── Actions ────────────────────────────────────────────────────────────────
-
-  const handleTriggerDelivery = async () => {
-    setIsTriggeringDelivery(true);
-    try {
-      await triggerDeliveryApi();
-      toast.success("Đã kích hoạt xử lý giao hàng thủ công");
-      fetchPlans();
-    } catch {
-      toast.error("Kích hoạt thất bại");
-    } finally {
-      setIsTriggeringDelivery(false);
-    }
-  };
-
-  const handleViewDetail = (plan) => {
-    setDetailPlan(plan);
-    setDetailOpen(true);
-  };
-
-  const handleCancelClick = (target) => {
-    setCancelTarget(target);
-    setCancelOpen(true);
-  };
-
-  const handleCancelConfirm = async () => {
-    if (!cancelTarget) return;
-    setIsProcessing(true);
-    try {
-      if (cancelTarget.mode === "immediate") {
-        await cancelImmediatelyApi(cancelTarget.plan._id);
-        toast.success("Đã dừng gói ngay lập tức");
-      } else {
-        await cancelPlanApi(cancelTarget.plan._id);
-        toast.success("Đã đặt lịch huỷ cuối kỳ");
-      }
-      fetchPlans();
-      setCancelOpen(false);
-      setCancelTarget(null);
-      if (detailPlan?._id === cancelTarget.plan._id) setDetailOpen(false);
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Thao tác thất bại");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleOpenCreate = () => {
-    setEditTarget(null);
-    setFormOpen(true);
-  };
-
-  const handleOpenEdit = (plan) => {
-    setEditTarget(plan);
-    setFormOpen(true);
-    setDetailOpen(false);
-  };
+  // ── Actions ───────────────────────────────────────────────────────────────
+  const {
+    isTriggeringDelivery,
+    handleTriggerDelivery,
+    cancelTarget,
+    cancelOpen,
+    setCancelOpen,
+    isProcessing,
+    handleCancelClick,
+    handleCancelConfirm,
+  } = usePlanActions({ fetchPlans, closeDetail });
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -255,6 +158,7 @@ export default function AdminSubscribePlanPage() {
             </CardTitle>
 
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Status filter */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -287,6 +191,7 @@ export default function AdminSubscribePlanPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
+              {/* Plan type filter */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -324,10 +229,7 @@ export default function AdminSubscribePlanPage() {
                   variant="ghost"
                   size="sm"
                   className="h-8 text-xs text-slate-400 hover:text-slate-600"
-                  onClick={() => {
-                    setStatusFilter("all");
-                    setPlanTypeFilter("all");
-                  }}
+                  onClick={clearFilters}
                 >
                   Xoá bộ lọc
                 </Button>
@@ -349,7 +251,6 @@ export default function AdminSubscribePlanPage() {
           </div>
         </CardHeader>
 
-        {/* PlanTable — thêm prop onEditClick */}
         <PlanTable
           filtered={filtered}
           totalPlans={plans.length}
@@ -359,20 +260,17 @@ export default function AdminSubscribePlanPage() {
           onSort={handleSort}
           onViewDetail={handleViewDetail}
           onCancelClick={handleCancelClick}
-          onEditClick={handleOpenEdit} // ← THÊM MỚI
         />
       </Card>
 
-      {/* PlanDetailDialog — thêm prop onEdit + onCancelClick */}
+      {/* ── Dialogs ── */}
       <PlanDetailDialog
         open={detailOpen}
         onOpenChange={setDetailOpen}
         plan={detailPlan}
-        onEdit={() => handleOpenEdit(detailPlan)} // ← THÊM MỚI
-        onCancelClick={handleCancelClick} // ← THÊM MỚI
+        onCancelClick={handleCancelClick}
       />
 
-      {/* CancelPlanDialog — giữ nguyên interface */}
       <CancelPlanDialog
         cancelTarget={cancelTarget}
         open={cancelOpen}
@@ -381,11 +279,9 @@ export default function AdminSubscribePlanPage() {
         isProcessing={isProcessing}
       />
 
-      {/* PlanFormDialog — component mới */}
       <PlanFormDialog
         open={formOpen}
         onOpenChange={setFormOpen}
-        plan={editTarget}
         onSuccess={fetchPlans}
       />
     </div>

@@ -146,8 +146,9 @@ export default function CreateBoxPage() {
   const handleSubmit = async () => {
     console.log("[1] Bắt đầu tiến trình Submit...");
 
+    // Chỉnh sửa hàm validate một chút để lấy log chuẩn hoặc log trực tiếp trong validate()
     if (!validate()) {
-      console.warn("[2] Form không hợp lệ");
+      console.warn("[2] Form không hợp lệ!");
       return;
     }
 
@@ -176,6 +177,10 @@ export default function CreateBoxPage() {
       const dateTo = parseLocalDate(form.validTo);
 
       if (!dateFrom || !dateTo) {
+        console.error("Lỗi parse ngày:", {
+          validFrom: form.validFrom,
+          validTo: form.validTo,
+        });
         setApiError("Ngày bắt đầu hoặc ngày kết thúc không hợp lệ");
         setLoading(false);
         return;
@@ -184,15 +189,13 @@ export default function CreateBoxPage() {
       formData.append("validFrom", dateFrom.toISOString());
       formData.append("validTo", dateTo.toISOString());
 
-      // 3. Sản phẩm — append từng field riêng theo index dạng products[0][productId]
+      // 3. Sản phẩm
       const productsPayload = products
         .filter((p) => p.productId)
         .map((p) => ({
           productId: p.productId,
           quantity: Number(p.quantity) || 1,
         }));
-
-      console.log("products payload:", productsPayload);
 
       productsPayload.forEach((p, index) => {
         formData.append(`products[${index}][productId]`, p.productId);
@@ -201,21 +204,41 @@ export default function CreateBoxPage() {
 
       // 4. Hình ảnh
       form.images.forEach((file) => {
-        if (file instanceof File || file instanceof Blob) {
-          formData.append("images", file, file.name);
+        if (file instanceof File) {
+          formData.append("images", file);
         }
       });
 
-      console.log("[3] Gửi Request tới API...");
+      // --- ĐOẠN LOG BỔ SUNG ĐỂ KIỂM TRA DATA TRƯỚC KHI GỬI ---
+      console.group("[3] Kiểm tra dữ liệu FormData gửi đi");
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(
+            `👉 ${key}: File -> Name: ${value.name}, Size: ${value.size} bytes`,
+          );
+        } else {
+          console.log(`👉 ${key}:`, value);
+        }
+      }
+      console.groupEnd();
+      // -----------------------------------------------------
 
+      console.log("[4] Gửi Request tới API...");
       const response = await createBoxApi(formData);
 
-      console.log("[4] Tạo thành công:", response.data);
+      console.log("full reponse", response);
+
+      console.log(
+        "[5] Tạo thành công. Kèm data phản hồi:",
+        response.data.images,
+      );
+
       toast.success("Tạo box thành công!");
       router.push("/admin-box");
     } catch (err) {
-      console.group("[5] Lỗi API");
+      console.group("Lỗi API khi tạo Box");
       const errorData = err.response?.data;
+      console.error("Chi tiết Error Object:", err);
       console.error("Dữ liệu lỗi từ BE:", errorData);
       console.groupEnd();
 

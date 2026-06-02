@@ -56,8 +56,11 @@ export const AppContextProvider = ({ children }) => {
   }, [fetchUserProfile]);
 
   const logout = useCallback(() => {
+    // Xóa cả 2 nơi vì saveToken có thể lưu vào sessionStorage (khi không rememberMe)
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
     setUser(null);
     window.location.href = "/login";
   }, []);
