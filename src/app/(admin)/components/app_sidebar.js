@@ -81,7 +81,16 @@ const menuItems = [
     title: "Gói đăng ký",
     icon: CreditCard,
     submenu: [
-      { title: "Danh sách", icon: Album, href: "/admin-subscribe-plan" },
+      {
+        title: "Danh sách các gói",
+        icon: Album,
+        href: "/admin-subscribe-plan",
+      },
+      {
+        title: "Danh sách các gói được đăng ký",
+        icon: Album,
+        href: "/admin-subscribe-plan/registered",
+      },
     ],
   },
   { title: "Hồ sơ cá nhân", icon: User, href: "/profile" },

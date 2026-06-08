@@ -2,29 +2,22 @@
 /**
  * page.js — AdminSubscribePlanPage
  * ─────────────────────────────────────────────────────────────────
- * Orchestrator thuần: chỉ wire hooks → props, không có logic.
+ * Quản lý Subscription Templates (mẫu gói).
  *
- * BE router hỗ trợ:
- *   POST   create-subcribe-plan          PlanFormDialog (create only)
- *   GET    get-all-subcribe-plans        usePlanList
- *   GET    /:id                          PlanDetailDialog
- *   GET    /user/:userId                 (dùng khi cần)
- *   PATCH  /:id/cancel                   usePlanActions
- *   PATCH  /:id/cancel-immediately       usePlanActions
- *   POST   process-deliveries            usePlanActions
+ * BE routes được dùng:
+ *   POST   create-subscription-template    PlanFormDialog (create)
+ *   GET    all-subscription-templates      usePlanList
+ *   GET    get-subscription-template/:id   PlanDetailDialog
+ *   PATCH  update-subscription-template/:id PlanFormDialog (edit)
+ *   DELETE delete-subscription-template/:id DeleteConfirmDialog
  *
- * KHÔNG có: PUT /:id (update), DELETE /:id — bỏ hoàn toàn.
+ * KHÔNG quản lý user subscriptions ở đây — đó là trang riêng.
  * ─────────────────────────────────────────────────────────────────
  */
 
-import {
-  Plus,
-  RefreshCw,
-  Zap,
-  Search,
-  Filter,
-  ChevronDown,
-} from "lucide-react";
+import { useState, useCallback } from "react";
+import { Plus, RefreshCw, Search, Filter, ChevronDown } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,19 +29,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { PlanStats } from "../components/SubscribePlans/PlanStats";
-import { PlanTable } from "../components/SubscribePlans/PlanTable";
-import { PlanDetailDialog } from "../components/SubscribePlans/PlanDetailDialog";
-import { CancelPlanDialog } from "../components/SubscribePlans/CancelPlanDialog";
-import { PlanFormDialog } from "../components/SubscribePlans/PlanFormDialog";
+import { PlanStats } from "../components/SubscribePlans/PlanTemplate/PlanStats";
+import { PlanTable } from "../components/SubscribePlans/PlanTemplate/PlanTable";
+import { PlanDetailDialog } from "../components/SubscribePlans/PlanTemplate/PlanDetailDialog";
+import { PlanFormDialog } from "../components/SubscribePlans/PlanTemplate/PlanFormDialog";
+import { DeleteTemplateDialog } from "../components/SubscribePlans/PlanTemplate/DeleteTemplateDialog";
+
+import { deleteTemplateApi } from "@/app/services/api/subscribePlanService";
 
 import {
   usePlanList,
   STATUS_OPTIONS,
   PLAN_TYPE_OPTIONS,
 } from "../../../hooks/usePlanList";
-import { usePlanDialog } from "../../../hooks/usePlanDialog";
-import { usePlanActions } from "../../../hooks/usePlanActions";
 
 export default function AdminSubscribePlanPage() {
   // ── Data ──────────────────────────────────────────────────────────────────
@@ -70,29 +63,55 @@ export default function AdminSubscribePlanPage() {
     fetchPlans,
   } = usePlanList();
 
-  // ── Dialog state ──────────────────────────────────────────────────────────
-  const {
-    detailPlan,
-    detailOpen,
-    setDetailOpen,
-    handleViewDetail,
-    closeDetail,
-    formOpen,
-    setFormOpen,
-    handleOpenCreate,
-  } = usePlanDialog();
+  // ── Detail dialog ─────────────────────────────────────────────────────────
+  const [detailTemplate, setDetailTemplate] = useState(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
-  // ── Actions ───────────────────────────────────────────────────────────────
-  const {
-    isTriggeringDelivery,
-    handleTriggerDelivery,
-    cancelTarget,
-    cancelOpen,
-    setCancelOpen,
-    isProcessing,
-    handleCancelClick,
-    handleCancelConfirm,
-  } = usePlanActions({ fetchPlans, closeDetail });
+  const handleViewDetail = useCallback((template) => {
+    setDetailTemplate(template);
+    setDetailOpen(true);
+  }, []);
+
+  // ── Form dialog (create / edit) ───────────────────────────────────────────
+  const [formOpen, setFormOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null); // null = create mode
+
+  const handleOpenCreate = useCallback(() => {
+    setEditTarget(null);
+    setFormOpen(true);
+  }, []);
+
+  const handleEditClick = useCallback((template) => {
+    setEditTarget(template);
+    setFormOpen(true);
+  }, []);
+
+  // ── Delete dialog ─────────────────────────────────────────────────────────
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteClick = useCallback((template) => {
+    setDeleteTarget(template);
+    setDeleteOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      await deleteTemplateApi(deleteTarget._id);
+      toast.success(`Đã xoá mẫu gói "${deleteTarget.name}"`);
+      setDeleteOpen(false);
+      fetchPlans();
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message || err?.message || "Xoá thất bại";
+      toast.error(msg);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [deleteTarget, fetchPlans]);
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -102,25 +121,14 @@ export default function AdminSubscribePlanPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Gói đăng ký định kỳ
+            Mẫu gói đăng ký
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">
-            Quản lý toàn bộ subscription của khách hàng
+            Quản lý các mẫu gói hiển thị cho khách hàng chọn đăng ký
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleTriggerDelivery}
-            disabled={isTriggeringDelivery}
-            className="text-amber-600 border-amber-200 hover:bg-amber-50"
-          >
-            <Zap size={14} className="mr-1.5" />
-            {isTriggeringDelivery ? "Đang xử lý..." : "Trigger giao hàng"}
-          </Button>
-
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -136,7 +144,7 @@ export default function AdminSubscribePlanPage() {
             onClick={handleOpenCreate}
           >
             <Plus size={14} className="mr-1.5" />
-            Tạo gói mới
+            Tạo mẫu gói
           </Button>
         </div>
       </div>
@@ -149,7 +157,7 @@ export default function AdminSubscribePlanPage() {
         <CardHeader className="border-b bg-white px-5 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <CardTitle className="text-sm font-semibold text-slate-700">
-              Danh sách gói
+              Danh sách mẫu gói
               {hasActiveFilters && (
                 <span className="ml-2 text-xs font-normal text-indigo-500">
                   (đang lọc)
@@ -241,10 +249,10 @@ export default function AdminSubscribePlanPage() {
                   className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
                 />
                 <Input
-                  placeholder="Tên gói, email, ID..."
+                  placeholder="Tên gói, ID..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-8 h-8 text-xs w-48"
+                  className="pl-8 h-8 text-xs w-44"
                 />
               </div>
             </div>
@@ -259,30 +267,37 @@ export default function AdminSubscribePlanPage() {
           sortDir={sortDir}
           onSort={handleSort}
           onViewDetail={handleViewDetail}
-          onCancelClick={handleCancelClick}
+          onEditClick={handleEditClick}
+          onDeleteClick={handleDeleteClick}
         />
       </Card>
 
       {/* ── Dialogs ── */}
+
+      {/* Detail */}
       <PlanDetailDialog
         open={detailOpen}
         onOpenChange={setDetailOpen}
-        plan={detailPlan}
-        onCancelClick={handleCancelClick}
+        template={detailTemplate}
+        onEditClick={handleEditClick}
+        onDeleteClick={handleDeleteClick}
       />
 
-      <CancelPlanDialog
-        cancelTarget={cancelTarget}
-        open={cancelOpen}
-        onOpenChange={setCancelOpen}
-        onConfirm={handleCancelConfirm}
-        isProcessing={isProcessing}
-      />
-
+      {/* Create / Edit form */}
       <PlanFormDialog
         open={formOpen}
         onOpenChange={setFormOpen}
+        editTarget={editTarget}
         onSuccess={fetchPlans}
+      />
+
+      {/* Delete confirm */}
+      <DeleteTemplateDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        template={deleteTarget}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={isDeleting}
       />
     </div>
   );

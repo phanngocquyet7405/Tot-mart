@@ -172,10 +172,10 @@ export function Navigation() {
   const { cartCount, isMounted } = useCart();
 
   // Trang có hero fullscreen → nav trong suốt + chữ sáng lúc chưa cuộn
-  const isLightPage =
-    pathname === "/" ||
-    pathname === "/Subscriber" ||
-    pathname === "/products/Subscriber";
+  const isLightPage = pathname === "/";
+
+  const isSolidPage =
+    pathname === "/products/Subscriber" || pathname === "/Subscriber";
 
   const [open, setOpen] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -191,7 +191,7 @@ export function Navigation() {
 
   // isPastThreshold: với light page, chỉ đổi style khi đã cuộn qua hẳn ann bar
   // với trang thường thì luôn dùng style solid
-  const isPastThreshold = !isLightPage || scrolled;
+  const isPastThreshold = isSolidPage || !isLightPage || scrolled;
 
   const navRef = useRef(null);
 

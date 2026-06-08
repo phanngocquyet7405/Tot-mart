@@ -6,6 +6,8 @@ export const API_ENDPOINTS = {
     HEALTH: "/home/health",
     LOGIN: "/home/login",
     LOGOUT: "/home/logout",
+    FORGOT_PASSWORD: "/home/forgot-password",
+    RESET_PASSWORD: "/home/reset-password",
   },
 
   USERS: {
@@ -41,7 +43,7 @@ export const API_ENDPOINTS = {
   },
 
   CHECKOUT: {
-    CREATE: "/checkout",
+    CREATE: "/checkout/check-out",
   },
 
   PRODUCTS: {
@@ -80,12 +82,31 @@ export const API_ENDPOINTS = {
   },
 
   SUBSCRIBE_PLANS: {
-    CREATE: "/subcribe-plans/create-subcribe-plan",
-    GET_ALL: "/subcribe-plans/get-all-subcribe-plans",
-    GET_BY_ID: (id) => `/subcribe-plans/${id}`,
-    GET_BY_USER: (userId) => `/subcribe-plans/user/${userId}`,
-    CANCEL: (id) => `/subcribe-plans/${id}/cancel`,
-    CANCEL_IMMEDIATELY: (id) => `/subcribe-plans/${id}/cancel-immediately`,
+    TEMPLATES: {
+      CREATE: "/subcribe-plans/create-subscription-template",
+      GET_ALL: "/subcribe-plans/all-subscription-templates",
+      GET_BY_ID: (id) => `/subcribe-plans/get-subscription-template/${id}`,
+      UPDATE: (id) => `/subcribe-plans/update-subscription-template/${id}`,
+      DELETE: (id) => `/subcribe-plans/delete-subscription-template/${id}`,
+    },
+
+    GET_ACTIVE: "/subcribe-plans/get-active-subscribe",
+
+    SUBSCRIBE: "/subcribe-plans/user-subscribe",
+    MY_SUBSCRIPTIONS: "/subcribe-plans/my-subscriptions",
+    MY_SUBSCRIPTION_BY_ID: (id) => `/subcribe-plans/my-subscriptions/${id}`,
+    CANCEL_AT_END: (id) =>
+      `/subcribe-plans/my-subscriptions/${id}/cancel-at-end`,
+    CANCEL_IMMEDIATELY: (id) =>
+      `/subcribe-plans/my-subscriptions/${id}/cancel-immediately`,
+
+    MY_TODAY_DELIVERIES: "/subcribe-plans/my-today-deliveries",
+
+    ADMIN_ALL: "/subcribe-plans/admin-all-subscriptions",
+    ADMIN_BY_USER: (userId) =>
+      `/subcribe-plans/admin-subscriptions/user/${userId}`,
+
     PROCESS_DELIVERIES: "/subcribe-plans/process-deliveries",
+    TODAY_DELIVERIES: "/subcribe-plans/today-deliveries",
   },
 };

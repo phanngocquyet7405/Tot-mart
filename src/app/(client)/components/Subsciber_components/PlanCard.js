@@ -1,237 +1,118 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import {
-  CalendarDays,
-  ArrowRight,
-  Package,
-  Star,
-  Sparkles,
-} from "lucide-react";
+import { ArrowUpRight, Package, Star, Sparkles } from "lucide-react";
 
 const PLACEHOLDER =
   "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80";
 
-export default function PlanCard({ box, onOpenPlan }) {
+export default function PlanCard({ box, onOpenPlan, isFirst = false }) {
+  // Lấy giá trị cơ bản của box (từ API trả về)
   const price = box.value || 0;
-  const hasDiscount = box.discountPercent > 0;
+
+  // Hình ảnh từ object box
+  const coverImage = box.images?.[0]?.url || box.image || PLACEHOLDER;
 
   return (
     <div
-      className="group relative rounded-3xl overflow-hidden flex flex-col transition-all duration-500 hover:-translate-y-2"
+      onClick={() => onOpenPlan(box)}
+      className="group relative flex flex-col rounded-3xl overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2 bg-[#FFFAF8] border border-[#F0DDD5]"
       style={{
-        background: "linear-gradient(145deg, #FFFAF8 0%, #FFFFFF 100%)",
-        border: "1px solid #F0DDD5",
-        boxShadow: "0 4px 24px rgba(44, 24, 16, 0.06)",
+        boxShadow: isFirst
+          ? "0 20px 40px rgba(200,92,60,0.12)"
+          : "0 8px 24px rgba(44,24,16,0.04)",
       }}
     >
-      {/* Hover glow */}
-      <div
-        className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0"
-        style={{
-          boxShadow:
-            "inset 0 0 60px rgba(200, 92, 60, 0.02), 0 10px 30px rgba(200, 92, 60, 0.08)",
-        }}
-      />
+      {/* Decorative Golden Top Line */}
+      <div className="absolute top-0 left-0 right-0 h-0.75 bg-linear-to-r from-transparent via-[#C85C3C] to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
 
-      {/* Top accent */}
-      <div
-        className="h-[1.5px] w-full opacity-60 group-hover:opacity-100 transition-opacity"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, #C85C3C, #FFF0EB, #C85C3C, transparent)",
-        }}
-      />
+      {/* Premium Badge if isFirst */}
+      {isFirst && (
+        <span className="absolute top-4 left-4 z-10 text-[9px] font-black uppercase tracking-widest text-white bg-[#C85C3C] px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
+          <Sparkles size={10} className="fill-white" /> Khuyên dùng
+        </span>
+      )}
 
-      {/* Image */}
-      <div className="relative h-52 overflow-hidden bg-[#FFF5F2]">
+      {/* Image Container with Custom Gradients */}
+      <div className="relative h-64 overflow-hidden bg-[#FFF5F2]">
         <Image
-          fill
-          src={box.images?.[0]?.url || PLACEHOLDER}
+          src={coverImage}
           alt={box.name || "Box"}
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          fill
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        {/* Soft light gradient overlay at bottom of image */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to top, rgba(255,250,248,0.85) 0%, rgba(255,250,248,0.1) 40%, transparent 100%)",
-          }}
-        />
+        {/* Soft shadow inside the image container to integrate with content below */}
+        <div className="absolute inset-0 bg-linear-to-t from-[#FFFAF8] via-transparent to-black/10 pointer-events-none" />
 
-        {/* Badges */}
-        {hasDiscount && (
-          <span
-            className="absolute top-3 left-3 text-[9px] font-black px-2.5 py-1.5 rounded-full uppercase tracking-wider z-10 text-white shadow-sm"
-            style={{ background: "#C85C3C" }}
-          >
-            -{box.discountPercent}%
-          </span>
-        )}
-        {box.isGift && (
-          <span
-            className="absolute top-3 right-3 text-[9px] font-black px-2.5 py-1.5 rounded-full z-10 text-white shadow-sm"
-            style={{
-              background: "#2C1810",
-              border: "1px solid #4A3028",
-            }}
-          >
-            🎁 GIFT
-          </span>
-        )}
-
-        {/* Stock indicator */}
+        {/* Stock warning */}
         {box.stock > 0 && box.stock <= 5 && (
-          <span
-            className="absolute bottom-3 left-3 text-[9px] font-bold px-2 py-1 rounded-full z-10 animate-pulse shadow-sm"
-            style={{
-              background: "rgba(239,68,68,0.1)",
-              color: "#dc2626",
-              border: "1px solid rgba(239,68,68,0.2)",
-            }}
-          >
-            Chỉ còn {box.stock} hộp!
+          <span className="absolute bottom-4 left-4 text-[10px] font-bold px-2.5 py-1 rounded-md bg-red-50 text-[#dc2626] border border-red-100 flex items-center gap-1.5 z-10 shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping" />
+            Chỉ còn {box.stock} hộp cuối!
           </span>
         )}
 
-        {/* Stars overlay at bottom */}
-        <div className="absolute bottom-3 right-3 z-10 flex gap-0.5">
+        {/* Rating Stars Overlay */}
+        <div className="absolute bottom-4 right-4 flex items-center gap-0.5 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-lg border border-[#F0DDD5] shadow-sm z-10">
+          <span className="text-[10px] font-bold text-[#2C1810] mr-1">5.0</span>
           {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              size={10}
-              fill="#F59E0B"
-              color="#F59E0B"
-              opacity={0.9}
-            />
+            <Star key={i} size={10} fill="#C85C3C" color="#C85C3C" />
           ))}
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex flex-col flex-1 p-5 relative z-10">
-        {/* Name */}
-        <h2
-          className="font-bold text-lg leading-tight mb-1 transition-colors group-hover:text-[#C85C3C]"
-          style={{ fontFamily: "Georgia, serif", color: "#2C1810" }}
-        >
-          {box.name}
-        </h2>
+      {/* Box Info */}
+      <div className="p-6 flex flex-col flex-1">
+        <h3 className="font-serif text-xl font-bold leading-tight mb-2 text-[#2C1810] group-hover:text-[#C85C3C] transition-colors line-clamp-1">
+          {box.name || "Premium Snack Box"}
+        </h3>
 
-        {/* Description */}
-        <p
-          className="text-xs leading-relaxed line-clamp-2 mb-4"
-          style={{ color: "#6B5E59" }}
-        >
+        <p className="text-xs leading-relaxed text-[#7A645D] line-clamp-2 mb-5 min-h-9">
           {box.descriptions ||
             box.description ||
-            "Hộp quà cao cấp được tuyển chọn kỹ lưỡng"}
+            "Trải nghiệm văn hóa ẩm thực Nhật Bản cao cấp với bánh kẹo, trà đặc sản chính gốc được chọn lọc thủ công."}
         </p>
 
-        {/* Meta */}
-        <div className="flex items-center gap-3 mb-4">
-          <div
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold"
-            style={{
-              background: "#FFF0EB",
-              border: "1px solid #F0DDD5",
-              color: "#C85C3C",
-            }}
-          >
+        {/* Feature Pill Tags */}
+        <div className="flex flex-wrap gap-1.5 mb-6 mt-auto">
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold bg-[#FFF0EB] text-[#C85C3C] border border-[#F0DDD5]">
             <Package size={11} />
-            {box.totalItem || box.products?.length || 0} sản phẩm
-          </div>
-          {box.stock > 0 && (
-            <div
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold"
-              style={{
-                background: "rgba(16,185,129,0.08)",
-                border: "1px solid rgba(16,185,129,0.15)",
-                color: "#059669",
-              }}
-            >
-              ✓ Còn hàng
+            {box.totalItem || 20}+ sản phẩm
+          </span>
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+            ✓ Free Ship toàn quốc
+          </span>
+        </div>
+
+        {/* Price & CTA section inside Card */}
+        <div className="pt-4 border-t border-[#F5E6E0] flex items-center justify-between">
+          <div>
+            <span className="text-[9px] uppercase tracking-wider text-[#A08880] block font-bold mb-0.5">
+              Chỉ từ
+            </span>
+            <div className="flex items-baseline gap-1">
+              <span className="font-serif text-2xl font-black text-[#C85C3C]">
+                {price.toLocaleString("vi-VN")}đ
+              </span>
+              <span className="text-[10px] text-[#A08880] font-semibold">
+                /tháng
+              </span>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Price */}
-        <div className="mb-5">
-          {hasDiscount && (
-            <p
-              className="text-xs line-through mb-0.5"
-              style={{ color: "#A8A29E" }}
-            >
-              {price.toLocaleString("vi-VN")}đ
-            </p>
-          )}
-          <p
-            className="text-2xl font-black"
-            style={{ fontFamily: "Georgia, serif", color: "#C85C3C" }}
-          >
-            {hasDiscount
-              ? (price * (1 - box.discountPercent / 100)).toLocaleString(
-                  "vi-VN",
-                )
-              : price.toLocaleString("vi-VN")}
-            đ
-          </p>
-          <p className="text-[10px] mt-0.5" style={{ color: "#8C7E7A" }}>
-            / tháng khi đăng ký
-          </p>
-        </div>
-
-        {/* CTA Buttons */}
-        <div className="flex gap-2 mt-auto">
           <button
-            onClick={() => onOpenPlan(box)}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-xs uppercase tracking-wide transition-all duration-300 active:scale-95 group/btn text-white"
-            style={{
-              background: "linear-gradient(135deg, #C85C3C, #B14B2D)",
-              boxShadow: "0 4px 16px rgba(200, 92, 60, 0.2)",
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenPlan(box);
             }}
+            className="flex items-center gap-1.5 bg-[#C85C3C] text-white px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-wider hover:bg-[#B14B2D] hover:shadow-lg hover:shadow-[#C85C3C]/20 transition-all active:scale-95"
           >
-            <Sparkles
-              size={12}
-              className="transition-transform group-hover/btn:rotate-12"
-            />
-            Subscribe
-            <CalendarDays size={12} />
+            Chọn gói
+            <ArrowUpRight size={13} strokeWidth={2.5} />
           </button>
-
-          <Link
-            href={`/products/box/${box._id}`}
-            className="flex items-center gap-1.5 px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wide transition-all duration-300 active:scale-95"
-            style={{
-              background: "rgba(200, 92, 60, 0.05)",
-              border: "1px solid #F0DDD5",
-              color: "#C85C3C",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#FFF0EB";
-              e.currentTarget.style.borderColor = "#C85C3C";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(200, 92, 60, 0.05)";
-              e.currentTarget.style.borderColor = "#F0DDD5";
-            }}
-          >
-            Xem
-            <ArrowRight size={11} />
-          </Link>
         </div>
       </div>
-
-      {/* Bottom accent */}
-      <div
-        className="h-px opacity-40"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, rgba(200, 92, 60, 0.25), transparent)",
-        }}
-      />
     </div>
   );
 }

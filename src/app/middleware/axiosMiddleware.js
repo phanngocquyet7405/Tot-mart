@@ -1,4 +1,8 @@
-import { handleExpiredToken, checkTokenValid } from "./tokenMiddleware";
+import {
+  handleExpiredToken,
+  checkTokenValid,
+  getTokenUserId,
+} from "./tokenMiddleware";
 import { API_ENDPOINTS } from "../services/api/apiEndpoints";
 import axios from "axios";
 import logger from "../util/Logger";
@@ -49,6 +53,12 @@ export function setupAxiosMiddleware(axiosInstance) {
         const accessToken = localStorage.getItem("token");
         if (accessToken) {
           config.headers.Authorization = `Bearer ${accessToken}`;
+
+          // Workaround: BE controller đọc req.user.id nhưng JWT payload dùng field "userId"
+          // authMiddleware chỉ set req.userId chứ không set req.user.id
+          // → inject x-user-id để BE fallback: req.user.id || req.userId || req.headers['x-user-id']
+          const uid = getTokenUserId(); // decode từ token: decoded._id || decoded.id || decoded.userId
+          if (uid) config.headers["x-user-id"] = uid;
         }
       }
 

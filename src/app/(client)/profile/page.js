@@ -40,9 +40,7 @@ function ProfilePage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [updatingAddress, setUpdatingAddress] = useState(false);
   const [updatingCart, setUpdatingCart] = useState(false);
-  const userId = getTokenUserId();
-  console.log("typeof userId:", typeof userId, "| value:", userId);
-  // ── Debug render cycle ────────────────────────────────────────────────────
+
   logger.log("[ProfilePage] render — loading:", loading, "| user:", user);
 
   useEffect(() => {
@@ -61,14 +59,17 @@ function ProfilePage() {
           return;
         }
 
-        // ── 1. Gọi API lấy user ────────────────────────────────────────
-        logger.log("Gọi userService.getUserById — userId:", userId);
-        const userRes = await userService.getUserById(userId);
+        // ── 1. Gọi getMe — không cần userId, dùng token ───────────────
+        logger.log("Gọi userService.getMe");
+        const userRes = await userService.getMe();
         logger.log("userService response raw:", userRes);
 
-        let userData = userRes.data;
+        // FIX: getMe trả về { data: { success, message, data: user } }
+        // → phải lấy .data.data để có user thật
+        let userData = userRes.data?.data || userRes.data;
         logger.log("userData sau parse:", userData);
 
+        // ── 2. Gọi cart API ────────────────────────────────────────────
         try {
           logger.log("Gọi getCartByUserApi — userId:", userId);
           const cartRes = await getCartByUserApi(userId);
@@ -114,10 +115,11 @@ function ProfilePage() {
     loadProfileAndCart();
   }, []);
 
+  // ── handleProfileSave ──────────────────────────────────────────────────────
   const handleProfileSave = async (payload) => {
     if (!user) return;
     const previous = user;
-    const userId = user.id || user._id;
+    const userId = user._id || user.id;
     logger.log("handleProfileSave — userId:", userId, "| payload:", payload);
 
     const optimistic = {
@@ -139,7 +141,10 @@ function ProfilePage() {
         avatar: optimistic.avatar,
       });
       logger.log("updateUser response:", res);
-      setUser((prev) => ({ ...prev, ...res.data }));
+
+      // FIX: parse đúng tầng từ response
+      const updated = res.data?.data || res.data;
+      setUser((prev) => ({ ...prev, ...updated }));
       toast.success("Cập nhật hồ sơ thành công!");
     } catch (err) {
       logger.error("Lỗi cập nhật hồ sơ:", err?.response || err);
@@ -150,24 +155,24 @@ function ProfilePage() {
     }
   };
 
+  // ── handleUpsertAddress ────────────────────────────────────────────────────
   const handleUpsertAddress = async (address) => {
     if (!user) return;
     const previous = user;
-    const userId = user.id || user._id;
+    const userId = user._id || user.id;
     logger.log("handleUpsertAddress — userId:", userId, "| address:", address);
 
-    // 🛠️ SỬA LỖI: Lấy ID duy nhất (hỗ trợ cả id lẫn _id từ DB)
-    const addressId = address.id || address._id;
+    // FIX: ưu tiên _id (MongoDB) trước id (timestamp local)
+    const addressId = address._id || address.id;
 
-    // Tìm kiếm vị trí địa chỉ trong danh sách hiện tại của State
     const index = user.addreses.findIndex(
-      (item) => (item.id || item._id) === addressId,
+      (item) => (item._id || item.id) === addressId,
     );
 
     const nextAddresses =
       index >= 0
         ? user.addreses.map((item) =>
-            (item.id || item._id) === addressId ? address : item,
+            (item._id || item.id) === addressId ? address : item,
           )
         : [address, ...user.addreses];
 
@@ -176,20 +181,31 @@ function ProfilePage() {
 
     try {
       let res;
-      // Nếu địa chỉ tạm thời được tạo ở Client bắt đầu bằng "addr-"
+
       if (addressId && String(addressId).startsWith("addr-")) {
+        // CREATE — strip id giả trước khi gửi lên server
         const { id, _id, ...addressData } = address;
         logger.log("addAddress — addressData:", addressData);
         res = await userService.addAddress(userId, addressData);
       } else {
-        logger.log("editAddress — addressId:", addressId);
-        res = await userService.editAddress(userId, addressId, address);
+        // EDIT — strip _id, id, __v để tránh conflict ở backend
+        const { id, _id, __v, ...addressData } = address;
+        logger.log(
+          "editAddress — addressId:",
+          addressId,
+          "| addressData:",
+          addressData,
+        );
+        res = await userService.editAddress(userId, addressId, addressData);
       }
+
       logger.log("upsertAddress response:", res);
 
+      // FIX: parse đúng tầng từ response
+      const updatedUser = res.data?.data || res.data;
       setUser((prev) => ({
         ...prev,
-        addreses: res.data.addreses || nextAddresses,
+        addreses: updatedUser?.addreses || nextAddresses,
       }));
       toast.success("Đã lưu địa chỉ");
     } catch (err) {
@@ -201,20 +217,21 @@ function ProfilePage() {
     }
   };
 
+  // ── handleDeleteAddress ────────────────────────────────────────────────────
   const handleDeleteAddress = async (addressId) => {
     if (!user) return;
     const previous = user;
-    const userId = user.id || user._id;
+    const userId = user._id || user.id;
     logger.log(
-      "🗑️ handleDeleteAddress — userId:",
+      "handleDeleteAddress — userId:",
       userId,
       "| addressId:",
       addressId,
     );
 
-    // 🛠️ SỬA LỖI: Lọc bỏ địa chỉ khớp với ID truyền vào (kiểm tra cả id và _id)
+    // Optimistic update — lọc bỏ địa chỉ theo _id hoặc id
     const nextAddresses = user.addreses.filter(
-      (item) => (item.id || item._id) !== addressId,
+      (item) => (item._id || item.id) !== addressId,
     );
     setUser({ ...user, addreses: nextAddresses });
     setUpdatingAddress(true);
@@ -222,9 +239,12 @@ function ProfilePage() {
     try {
       const res = await userService.deleteAddress(userId, addressId);
       logger.log("deleteAddress response:", res);
+
+      // FIX: parse đúng tầng từ response
+      const updatedUser = res.data?.data || res.data;
       setUser((prev) => ({
         ...prev,
-        addreses: res.data.addreses || nextAddresses,
+        addreses: updatedUser?.addreses || nextAddresses,
       }));
       toast.success("Đã xóa địa chỉ");
     } catch (err) {
@@ -236,10 +256,11 @@ function ProfilePage() {
     }
   };
 
+  // ── handleChangeQuantity ───────────────────────────────────────────────────
   const handleChangeQuantity = async (productId, nextQuantity) => {
     if (!user || nextQuantity < 1) return;
     const previous = user;
-    const userId = user.id || user._id;
+    const userId = user._id || user.id;
     logger.log(
       "handleChangeQuantity — productId:",
       productId,
@@ -255,8 +276,8 @@ function ProfilePage() {
 
     try {
       await updateCartItemApi(productId, {
-        userId: userId,
-        productId: productId,
+        userId,
+        productId,
         quantity: nextQuantity,
       });
     } catch (err) {
@@ -268,10 +289,11 @@ function ProfilePage() {
     }
   };
 
+  // ── handleRemoveItem ───────────────────────────────────────────────────────
   const handleRemoveItem = async (productId) => {
     if (!user) return;
     const previous = user;
-    const userId = user.id || user._id;
+    const userId = user._id || user.id;
     logger.log("handleRemoveItem — productId:", productId);
 
     const nextCart = user.cart.filter((item) => item.productId !== productId);
@@ -280,8 +302,8 @@ function ProfilePage() {
 
     try {
       await deleteFromCartApi(productId, {
-        userId: userId,
-        productId: productId,
+        userId,
+        productId,
       });
       toast.success("Đã bỏ sản phẩm khỏi giỏ");
     } catch (err) {
@@ -293,6 +315,7 @@ function ProfilePage() {
     }
   };
 
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <main className="min-h-screen bg-linear-to-b from-emerald-50 to-white px-4 py-8">
       <Toaster richColors position="top-right" />

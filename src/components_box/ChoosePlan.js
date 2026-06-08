@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Check,
   BookOpen,
@@ -10,100 +12,17 @@ import {
   ChevronRight,
   ChevronUp,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { subscriptionApi } from "@/app/services/api/subscribePlanService";
+import { checkTokenValid } from "@/app/middleware/tokenMiddleware";
 
-// --- Mock API (Thêm nhiều ảnh để test tính năng scroll) ---
-async function fetchProductData() {
-  return {
-    title: "Snack Box Subscription",
-    subtitle: "CHOOSE YOUR PLAN",
-    promoCode: "SAKURAGIFTS",
-    promoText: "Free sakura gifts with 3, 6, and 12-month plans. Use code",
-    images: [
-      {
-        id: "img-1",
-        url: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80",
-        alt: "Bokksu 1",
-      },
-      {
-        id: "img-2",
-        url: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80",
-        alt: "Bokksu 2",
-      },
-      {
-        id: "img-3",
-        url: "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800&q=80",
-        alt: "Bokksu 3",
-      },
-      {
-        id: "img-4",
-        url: "https://images.unsplash.com/photo-1582213706822-21966d588448?w=800&q=80",
-        alt: "Bokksu 4",
-      },
-      {
-        id: "img-5",
-        url: "https://images.unsplash.com/photo-1511018556340-d16986a1c194?w=800&q=80",
-        alt: "Bokksu 5",
-      },
-    ],
-    plans: [
-      {
-        id: "12m",
-        label: "12 Months",
-        months: 12,
-        price: 31.99,
-        originalPrice: 39.99,
-        savings: 96,
-        badge: "BEST VALUE",
-      },
-      {
-        id: "6m",
-        label: "6 Months",
-        months: 6,
-        price: 32.99,
-        originalPrice: 39.99,
-        savings: 42,
-        badge: "POPULAR",
-        highlight: true,
-        bonusTitle: "LIMITED-EDITION SAKURA BOX",
-        bonusDesc: "Plus Sakura Matcha Kit Kats",
-        bonusCode: "SAKURAGIFTS",
-      },
-      {
-        id: "3m",
-        label: "3 Months",
-        months: 3,
-        price: 34.99,
-        originalPrice: 39.99,
-        savings: 15,
-      },
-      { id: "1m", label: "1 Month", months: 1, price: 39.99 },
-    ],
-    features: [
-      { icon: "package", text: "20+ Japan-exclusive snacks" },
-      { icon: "book", text: "20 to 24-page Culture Guide" },
-      { icon: "gift", text: "Limited-Time Bonus: 2 Rare Snacks added" },
-    ],
-    details: {
-      heading: "Experience Japan From Home",
-      description:
-        "Bokksu delivers to your door the experience of tasting authentic Japanese snacks, candies, and teas sourced directly from family makers.",
-      bullets: [
-        {
-          bold: "All subscribers",
-          text: " will receive our spring-edition Sakura Silk Lounge box.",
-        },
-        {
-          bold: "The box includes 20–22 items",
-          text: " curated around the elegance of cherry blossom season.",
-        },
-      ],
-    },
-  };
-}
+const PLACEHOLDER =
+  "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80";
+const HARDCODED_SUB_ID = "6a1ffd616e58e8ce63d15fe3";
 
 const iconMap = {
   package: <Package className="w-4 h-4" />,
@@ -111,21 +30,172 @@ const iconMap = {
   gift: <Gift className="w-4 h-4" />,
 };
 
-export default function TotBoxProductChoosePlan() {
-  const [product, setProduct] = useState(null);
-  const [selectedPlan, setSelectedPlan] = useState("6m");
+const formatPrice = (price) => {
+  return Math.round(price || 0).toLocaleString("vi-VN") + "đ";
+};
+
+const getPlanLabel = (type) => {
+  switch (type) {
+    case "1_month":
+      return "Gói 1 Tháng";
+    case "3_month":
+      return "Gói 3 Tháng";
+    case "6_month":
+      return "Gói 6 Tháng";
+    case "12_month":
+      return "Gói 12 Tháng";
+    default:
+      return "Gói định kỳ";
+  }
+};
+
+const getPlanMonths = (type) => {
+  switch (type) {
+    case "1_month":
+      return 1;
+    case "3_month":
+      return 3;
+    case "6_month":
+      return 6;
+    case "12_month":
+      return 12;
+    default:
+      return 1;
+  }
+};
+
+const DUMMY_FEATURES = [
+  { icon: "package", text: "Tuyển tập sản phẩm cao cấp mỗi tháng" },
+  { icon: "book", text: "Cẩm nang hướng dẫn & câu chuyện thương hiệu" },
+  { icon: "gift", text: "Tặng kèm quà tặng bí mật theo từng chu kỳ" },
+];
+
+const DUMMY_DETAILS = {
+  heading: "Trải Nghiệm Đẳng Cấp Tại Nhà",
+  description:
+    "Gói đăng ký mang đến cho bạn những trải nghiệm tuyệt vời nhất với các sản phẩm được lựa chọn kỹ lưỡng, đóng gói cẩn thận và giao tận tay bạn mỗi tháng.",
+  bullets: [
+    {
+      bold: "Đặc quyền thành viên",
+      text: "nhận ngay các hộp quà phiên bản giới hạn.",
+    },
+    { bold: "Sản phẩm chất lượng", text: "cam kết 100% chính hãng, an toàn." },
+  ],
+};
+
+export default function ChoosePlan() {
+  const params = useParams();
+  const router = useRouter();
+
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [boxInfo, setBoxInfo] = useState(null);
+  const [templates, setTemplates] = useState([]);
+  const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
 
-  // Ref để điều khiển cuộn danh sách ảnh con
   const thumbnailContainerRef = useRef(null);
 
   useEffect(() => {
-    fetchProductData().then(setProduct);
-  }, []);
+    const fetchSubData = async () => {
+      try {
+        setLoading(true);
+        const targetSubId = params?.id || HARDCODED_SUB_ID;
+
+        const res = await subscriptionApi.getActive();
+
+        let allTemplates = [];
+        if (res?.data && Array.isArray(res.data.data)) {
+          allTemplates = res.data.data;
+        } else if (Array.isArray(res?.data)) {
+          allTemplates = res.data;
+        } else if (Array.isArray(res)) {
+          allTemplates = res;
+        }
+
+        const mainSub = allTemplates.find(
+          (t) => String(t._id) === String(targetSubId),
+        );
+
+        if (mainSub) {
+          const targetBox = mainSub.boxId;
+          const targetBoxId = targetBox?._id || targetBox;
+
+          // Lọc các gói thực tế từ Database
+          const dbPlans = allTemplates.filter((t) => {
+            const bId = t.boxId?._id || t.boxId;
+            return String(bId) === String(targetBoxId);
+          });
+
+          // --- CƠ CHẾ TỰ BÙ GÓI THIẾU ---
+          // Định nghĩa danh sách 4 chu kỳ chuẩn cần phải hiển thị
+          const standardTypes = ["1_month", "3_month", "6_month", "12_month"];
+          const finalPlans = [];
+
+          // Lấy các thông số cơ bản từ gói API để làm điểm tựa tính toán
+          const baseValue =
+            mainSub.basePrice ||
+            (typeof targetBox === "object" ? targetBox.value : 111810.6);
+
+          standardTypes.forEach((type) => {
+            // Tìm xem trong Database đã có chu kỳ này chưa
+            const existingPlan = dbPlans.find((p) => p.planType === type);
+
+            if (existingPlan) {
+              finalPlans.push(existingPlan);
+            } else {
+              // Nếu thiếu, tự sinh data ảo dựa trên giá trị của Box để không lỗi giao diện
+              let discountPercent = 0;
+              if (type === "3_month") discountPercent = 10;
+              if (type === "6_month") discountPercent = 15;
+              if (type === "12_month") discountPercent = 20;
+
+              const mockBasePrice = baseValue * getPlanMonths(type);
+              const mockDiscountPrice =
+                mockBasePrice * (1 - discountPercent / 100);
+
+              finalPlans.push({
+                _id: `mock-${type}-${targetBoxId}`,
+                planType: type,
+                basePrice: mockBasePrice,
+                discountPercent: discountPercent,
+                discountPrice: mockDiscountPrice,
+                gift: type === "3_month" ? mainSub.gift : [], // Kế thừa gift nếu có
+                boxId: targetBox,
+                isMock: true, // Đánh dấu gói ảo
+              });
+            }
+          });
+
+          // Sắp xếp tăng dần theo tháng
+          finalPlans.sort(
+            (a, b) => getPlanMonths(a.planType) - getPlanMonths(b.planType),
+          );
+
+          setBoxInfo(
+            typeof targetBox === "object"
+              ? targetBox
+              : { _id: targetBox, name: "TestAPi", value: baseValue },
+          );
+          setTemplates(finalPlans);
+          setSelectedPlanId(mainSub._id);
+        } else {
+          toast.error("Không tìm thấy thông tin gói đăng ký này!");
+        }
+      } catch (error) {
+        console.error("Lỗi lấy dữ liệu Sub:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubData();
+  }, [params?.id]);
 
   const handleScroll = (direction) => {
     if (thumbnailContainerRef.current) {
-      const scrollAmount = 92; // Chiều cao ảnh (80px) + gap (12px)
+      const scrollAmount = 92;
       thumbnailContainerRef.current.scrollBy({
         top: direction === "up" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -133,23 +203,78 @@ export default function TotBoxProductChoosePlan() {
     }
   };
 
-  if (!product) return <div className="p-20 text-center">Loading...</div>;
+  const handleSubscribe = async () => {
+    if (!checkTokenValid()) {
+      toast.error("Vui lòng đăng nhập để đăng ký gói dịch vụ!");
+      router.push("/login");
+      return;
+    }
 
-  const selected = product.plans.find((p) => p.id === selectedPlan);
+    if (!selectedPlanId) return;
+
+    // Ngăn chặn nếu nhấn chọn trúng gói Mock ảo chưa được cấu hình ở Database
+    if (String(selectedPlanId).startsWith("mock-")) {
+      toast.error(
+        "Gói chu kỳ này chưa được Admin cấu hình chính thức trên hệ thống!",
+      );
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const response = await subscriptionApi.subscribe({
+        templateId: selectedPlanId,
+      });
+      if (response) {
+        toast.success("Đăng ký gói thành công!");
+        router.push("/my-subscriptions");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Đăng ký thất bại.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-[70vh] flex flex-col justify-center items-center bg-[#FFFAF8]">
+        <Loader2 className="w-10 h-10 animate-spin text-[#C85C3C]" />
+        <p className="mt-4 text-stone-500 font-medium animate-pulse">
+          Đang nạp dữ liệu gói...
+        </p>
+      </div>
+    );
+  }
+
+  if (!boxInfo || templates.length === 0) {
+    return (
+      <div className="min-h-[70vh] flex justify-center items-center bg-[#FFFAF8]">
+        <p className="text-stone-500 font-medium">
+          Không có dữ liệu cho gói này.
+        </p>
+      </div>
+    );
+  }
+
+  const selectedPlan =
+    templates.find((p) => p._id === selectedPlanId) || templates[0];
+  const boxImages =
+    boxInfo.images?.length > 0
+      ? boxInfo.images
+      : [{ url: boxInfo.image || PLACEHOLDER }];
 
   return (
     <section
-      id="choose-plan"
       className="w-full py-12 md:py-20"
       style={{ background: "#FFFAF8" }}
     >
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex flex-col lg:flex-row gap-12 items-start relative">
-          {/* CỘT TRÁI: Gallery Thiết kế lại */}
+          {/* CỘT TRÁI: Hình Ảnh */}
           <div className="w-full lg:w-1/2 lg:sticky lg:top-28 flex gap-4">
-            {/* Danh sách ảnh con bên trái (Chỉ hiện trên desktop/tablet) */}
             <div className="hidden md:flex flex-col items-center gap-2">
-              {product.images.length > 4 && (
+              {boxImages.length > 4 && (
                 <button
                   onClick={() => handleScroll("up")}
                   className="p-1 hover:bg-white rounded-full shadow-sm border border-gray-200 transition-colors"
@@ -161,11 +286,11 @@ export default function TotBoxProductChoosePlan() {
               <div
                 ref={thumbnailContainerRef}
                 className="flex flex-col gap-3 overflow-y-hidden transition-all duration-300 scroll-smooth"
-                style={{ maxHeight: "356px" }} // (80px * 4) + (12px * 3) = 356px (vừa đủ 4 ảnh)
+                style={{ maxHeight: "356px" }}
               >
-                {product.images.map((img, idx) => (
+                {boxImages.map((img, idx) => (
                   <button
-                    key={img.id}
+                    key={idx}
                     onClick={() => setActiveImage(idx)}
                     className={cn(
                       "shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all",
@@ -175,8 +300,8 @@ export default function TotBoxProductChoosePlan() {
                     )}
                   >
                     <Image
-                      src={img.url}
-                      alt={img.alt}
+                      src={img.url || img}
+                      alt={`thumb-${idx}`}
                       width={80}
                       height={80}
                       className="w-full h-full object-cover"
@@ -185,7 +310,7 @@ export default function TotBoxProductChoosePlan() {
                 ))}
               </div>
 
-              {product.images.length > 4 && (
+              {boxImages.length > 4 && (
                 <button
                   onClick={() => handleScroll("down")}
                   className="p-1 hover:bg-white rounded-full shadow-sm border border-gray-200 transition-colors"
@@ -195,19 +320,18 @@ export default function TotBoxProductChoosePlan() {
               )}
             </div>
 
-            {/* Ảnh chính bên phải của Gallery */}
             <div className="flex-1 relative overflow-hidden rounded-2xl shadow-xl aspect-square bg-[#FFE8E0]">
-              {product.images.map((img, idx) => (
+              {boxImages.map((img, idx) => (
                 <div
-                  key={img.id}
+                  key={idx}
                   className={cn(
                     "absolute inset-0 transition-opacity duration-700 ease-in-out",
                     idx === activeImage ? "opacity-100 z-10" : "opacity-0 z-0",
                   )}
                 >
                   <Image
-                    src={img.url}
-                    alt={img.alt}
+                    src={img.url || img}
+                    alt="Box Main Image"
                     fill
                     className="object-cover"
                     priority={idx === 0}
@@ -218,108 +342,132 @@ export default function TotBoxProductChoosePlan() {
             </div>
           </div>
 
-          {/* CỘT PHẢI: Nội dung (Giữ nguyên) */}
+          {/* CỘT PHẢI: Chọn gói */}
           <div className="w-full lg:w-1/2 flex flex-col gap-8">
             <header>
               <p className="text-xs tracking-[0.2em] uppercase text-[#C85C3C] mb-3 font-bold">
-                {product.subtitle}
+                CẤU HÌNH GÓI ĐĂNG KÝ
               </p>
               <h2 className="text-4xl md:text-5xl font-bold text-[#2C1810] leading-tight font-serif">
-                {product.title}
+                {boxInfo.name || "Box Đăng Ký Định Kỳ"}
               </h2>
             </header>
 
             <div className="grid gap-4">
-              {product.plans.map((plan) => (
-                <div key={plan.id} className="relative">
-                  <button
-                    onClick={() => setSelectedPlan(plan.id)}
-                    className={cn(
-                      "w-full rounded-2xl border-2 px-6 py-5 text-left transition-all",
-                      selectedPlan === plan.id
-                        ? "border-[#C85C3C] bg-[#FFF0EB] shadow-md"
-                        : "border-[#E8D5CC] bg-white hover:border-[#D8C5BC]",
+              {templates.map((plan) => {
+                const isSelected = selectedPlanId === plan._id;
+                const basePrice = plan.basePrice || 0;
+                const finalPrice = plan.discountPrice || basePrice;
+                const saveAmount = basePrice - finalPrice;
+
+                return (
+                  <div key={plan._id} className="relative">
+                    <button
+                      onClick={() => setSelectedPlanId(plan._id)}
+                      className={cn(
+                        "w-full rounded-2xl border-2 px-6 py-5 text-left transition-all",
+                        isSelected
+                          ? "border-[#C85C3C] bg-[#FFF0EB] shadow-md"
+                          : "border-[#E8D5CC] bg-white hover:border-[#D8C5BC]",
+                      )}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={cn(
+                              "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors",
+                              isSelected
+                                ? "border-[#C85C3C] bg-[#C85C3C]"
+                                : "border-gray-300",
+                            )}
+                          >
+                            {isSelected && (
+                              <div className="w-2.5 h-2.5 rounded-full bg-white" />
+                            )}
+                          </div>
+                          <div>
+                            <span className="font-bold text-[#2C1810] text-lg block">
+                              {getPlanLabel(plan.planType)}
+                              {plan.isMock && (
+                                <span className="text-xs text-stone-400 font-normal ml-2">
+                                  (Chưa kích hoạt)
+                                </span>
+                              )}
+                            </span>
+                            {plan.discountPercent > 0 && (
+                              <Badge className="mt-1 bg-[#2C1810] text-white text-[10px] uppercase tracking-tighter hover:bg-[#2C1810]">
+                                TIẾT KIỆM {plan.discountPercent}%
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          {saveAmount > 0 && (
+                            <span className="text-sm text-[#C85C3C] font-bold block mb-1">
+                              GIẢM {formatPrice(saveAmount)}
+                            </span>
+                          )}
+                          <span className="text-xl font-black text-[#2C1810]">
+                            {formatPrice(finalPrice)}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+
+                    {isSelected && plan.gift && plan.gift.length > 0 && (
+                      <div className="mt-3 p-4 rounded-xl border-l-4 border-[#C85C3C] bg-white shadow-sm flex gap-4 items-center">
+                        <Gift className="w-6 h-6 text-[#C85C3C] shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-[#2C1810]">
+                            Quà tặng đính kèm gói
+                          </p>
+                          <p className="text-xs text-[#7A5C52] mt-0.5 font-medium">
+                            {plan.gift
+                              .map(
+                                (g) =>
+                                  `${g.boxId?.name || "Sản phẩm bí mật"} (x${g.quantity || 1})`,
+                              )
+                              .join(", ")}
+                          </p>
+                        </div>
+                      </div>
                     )}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={cn(
-                            "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors",
-                            selectedPlan === plan.id
-                              ? "border-[#C85C3C] bg-[#C85C3C]"
-                              : "border-gray-300",
-                          )}
-                        >
-                          {selectedPlan === plan.id && (
-                            <div className="w-2.5 h-2.5 rounded-full bg-white" />
-                          )}
-                        </div>
-                        <div>
-                          <span className="font-bold text-[#2C1810] text-lg block">
-                            {plan.label}
-                          </span>
-                          {plan.badge && (
-                            <Badge className="mt-1 bg-[#2C1810] text-white text-[10px] uppercase tracking-tighter">
-                              {plan.badge}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        {plan.savings && (
-                          <span className="text-sm text-[#C85C3C] font-bold block mb-1">
-                            SAVE ${plan.savings}
-                          </span>
-                        )}
-                        <span className="text-xl font-black text-[#2C1810]">
-                          ${plan.price}
-                          <span className="text-sm font-normal">/mo</span>
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                  {plan.bonusTitle && selectedPlan === plan.id && (
-                    <div className="mt-3 p-4 rounded-xl border-l-4 border-[#C85C3C] bg-white shadow-sm flex gap-4 items-center animate-in slide-in-from-top-2 duration-300">
-                      <div className="flex-1">
-                        <p className="text-xs font-bold text-[#2C1810]">
-                          {plan.bonusTitle}
-                        </p>
-                        <p className="text-xs text-[#7A5C52]">
-                          {plan.bonusDesc}
-                        </p>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className="text-[#C85C3C] border-[#C85C3C] font-mono"
-                      >
-                        {plan.bonusCode}
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
 
             <div className="p-8 rounded-3xl bg-[#2C1810] text-white flex flex-col md:flex-row gap-6 items-center justify-between shadow-2xl">
               <div className="text-center md:text-left">
-                <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">
-                  Total Due Today
+                <p className="text-stone-400 text-xs uppercase tracking-widest mb-1">
+                  Thanh Toán Hôm Nay
                 </p>
-                <p className="text-4xl font-bold">
-                  ${(selected.price * selected.months).toFixed(2)}
+                <p className="text-4xl font-bold text-[#FFF0EB]">
+                  {formatPrice(
+                    selectedPlan.discountPrice || selectedPlan.basePrice,
+                  )}
                 </p>
-                <p className="text-[10px] text-gray-400 mt-2 italic">
-                  Billed every {selected.months} months. Cancel anytime.
+                <p className="text-[10px] text-stone-400 mt-2 italic">
+                  Giao hàng định kỳ trong {getPlanMonths(selectedPlan.planType)}{" "}
+                  tháng.
                 </p>
               </div>
-              <Button className="w-full md:w-auto bg-[#C85C3C] hover:bg-[#B14B2D] text-white px-10 py-7 rounded-2xl text-lg font-bold transition-all hover:translate-y-0.5">
-                SELECT THIS PLAN <ChevronRight className="ml-2 w-5 h-5" />
+              <Button
+                onClick={handleSubscribe}
+                disabled={submitting}
+                className="w-full md:w-auto bg-[#C85C3C] hover:bg-[#B14B2D] text-white px-8 py-7 rounded-2xl text-sm font-bold uppercase tracking-wider transition-all hover:translate-y-0.5 shadow-md"
+              >
+                {submitting ? (
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                ) : null}
+                {submitting ? "ĐANG XỬ LÝ..." : "XÁC NHẬN ĐĂNG KÝ"}{" "}
+                <ChevronRight className="ml-2 w-5 h-5" />
               </Button>
             </div>
 
+            {/* Chân trang */}
             <div className="grid gap-4 py-8 border-y border-[#F0DDD5]">
-              {product.features.map((f, i) => (
+              {DUMMY_FEATURES.map((f, i) => (
                 <div key={i} className="flex gap-4 items-center">
                   <div className="w-10 h-10 rounded-full bg-[#FFE0D6] text-[#C85C3C] flex items-center justify-center shrink-0">
                     {iconMap[f.icon] || <Check className="w-5 h-5" />}
@@ -327,25 +475,6 @@ export default function TotBoxProductChoosePlan() {
                   <p className="text-[#4A3028] font-medium">{f.text}</p>
                 </div>
               ))}
-            </div>
-
-            <div className="space-y-6 pb-10">
-              <h3 className="text-2xl font-bold text-[#2C1810]">
-                {product.details.heading}
-              </h3>
-              <p className="text-[#5C3D30] leading-relaxed italic">
-                {product.details.description}
-              </p>
-              <ul className="space-y-4">
-                {product.details.bullets.map((b, i) => (
-                  <li key={i} className="flex gap-4 items-start group">
-                    <span className="mt-2 w-2 h-2 rounded-full bg-[#C85C3C] shrink-0 group-hover:scale-125 transition-transform" />
-                    <p className="text-[#4A3028]">
-                      <span className="font-bold">{b.bold}</span> {b.text}
-                    </p>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
         </div>
