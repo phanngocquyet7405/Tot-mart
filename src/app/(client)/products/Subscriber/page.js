@@ -1,55 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import {
-  Loader2,
-  Gift,
-  Sparkles,
-  Package,
-  Truck,
-  RotateCcw,
-} from "lucide-react";
+import { Loader2, Gift } from "lucide-react";
 import { subscriptionApi } from "@/app/services/api/subscribePlanService";
 
-// UI Components (Đảm bảo đường dẫn import đúng với project của bạn)
+// Layout Components
 import { Navigation } from "@/components_box/nav_box";
 import AnnouncementBarBox from "@/components_box/announcement-bar";
 import Footer from "@/app/(client)/components/ui/footer";
-import TrustBadge from "@/app/(client)/components/Subsciber_components/TrustBadges";
 import { Newsletter } from "@/components_box/newsletter";
 
+// Subscriber Components
+import TrustBadge from "@/app/(client)/components/Subsciber_components/TrustBadges";
 import PlanCard from "@/app/(client)/components/Subsciber_components/PlanCard";
 import ChoosePlanModal from "@/app/(client)/components/Subsciber_components/ChoosePlanModal";
-
-// --- MOCK THEMES CHO SECTION DƯỚI CÙNG (Có thể thay bằng API sau) ---
-const MOCK_THEMES = [
-  {
-    title: "HANDPICKED IN JAPAN",
-    img: "https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=500&q=80",
-    tag: "Hot Seller",
-  },
-  {
-    title: "SAKURA SILK LOUNGE",
-    img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=500&q=80",
-    tag: "Spring Edition",
-  },
-  {
-    title: "VELVET NEON NIGHTS",
-    img: "https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=500&q=80",
-    tag: "Tokyo Special",
-  },
-  {
-    title: "HATSUYUME DREAMS",
-    img: "https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=500&q=80",
-    tag: "New Year Classic",
-  },
-  {
-    title: "REFLECTIONS IN SNOWLIGHT",
-    img: "https://images.unsplash.com/photo-1483168527879-c66136b56105?auto=format&fit=crop&w=500&q=80",
-    tag: "Hokkaido Winter",
-  },
-];
+import { MonthlyThemes } from "@/app/(client)/components/Subsciber_components/MonthlyThemes";
+import { SubscriptionShowcase } from "@/components_box/product-showcase";
 
 /** --- LOGIC XỬ LÝ DỮ LIỆU TỪ API --- */
 function normalizePlansToBoxes(plans) {
@@ -61,15 +27,13 @@ function normalizePlansToBoxes(plans) {
     const boxId = boxRef._id;
 
     if (!boxMap.has(boxId)) {
-      // Lưu lại thông tin Box cơ bản và lấy giá trị cơ sở của plan đầu tiên làm tham chiếu
       boxMap.set(boxId, {
         ...boxRef,
         value: plan.basePrice || boxRef.value || 0,
         discountPercent: plan.discountPercent || 0,
-        apiPlans: [], // Lưu trữ tạm các plans thuộc box này
+        apiPlans: [],
       });
     }
-    // Đẩy plan vào box tương ứng
     boxMap.get(boxId).apiPlans.push(plan);
   });
 
@@ -82,7 +46,6 @@ export default function SubscriberPage() {
   const [loading, setLoading] = useState(true);
   const [selectedBoxForModal, setSelectedBoxForModal] = useState(null);
 
-  // Fetch dữ liệu từ API
   useEffect(() => {
     const fetchAll = async () => {
       try {
@@ -132,7 +95,7 @@ export default function SubscriberPage() {
       </div>
 
       <main className="max-w-300 mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
-        {/* Intro Header */}
+        {/* ── Intro Header ── */}
         <div className="text-center max-w-3xl mx-auto mb-12 lg:mb-16">
           <span className="text-[10px] font-black uppercase tracking-widest text-[#C85C3C] bg-[#FFF5F2] border border-[#F0DDD5] px-3.5 py-1.5 rounded-full inline-block mb-4 shadow-sm">
             Premium Subscription Experience
@@ -147,7 +110,7 @@ export default function SubscriberPage() {
           </p>
         </div>
 
-        {/* Grid of Plan Cards (Dữ liệu thật từ API) */}
+        {/* ── Grid of Plan Cards ── */}
         {boxes.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-[#F0DDD5]">
             <p className="text-stone-500">
@@ -166,98 +129,26 @@ export default function SubscriberPage() {
             ))}
           </div>
         )}
-
-        {/* SECTION 2: Tính năng nổi bật */}
-        <section className="bg-[#FFF5F2] rounded-3xl p-8 lg:p-12 mb-20 border border-[#F0DDD5]">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#C85C3C]">
-              YOUR FIRST BOX INCLUDES
-            </span>
-            <h2 className="font-serif text-2xl lg:text-3xl font-black text-[#2C1810] mt-1">
-              Hộp Quà Đầu Tiên Của Bạn Gồm Những Gì?
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                title: "GIFT-WITH-PURCHASE",
-                desc: "Hội viên nhận ngay bộ quà tặng độc quyền Nhật Bản giá trị cao.",
-                icon: <Gift className="w-5 h-5 text-[#C85C3C]" />,
-              },
-              {
-                title: "AUTHENTIC TREATS",
-                desc: "Bánh mochi dẻo mềm, senbei giòn rụm, kẹo trái cây chính gốc.",
-                icon: <Sparkles className="w-5 h-5 text-[#C85C3C]" />,
-              },
-              {
-                title: "BOKKSU EXCLUSIVES",
-                desc: "Sản phẩm độc quyền từ các thương hiệu lâu đời tại Nhật Bản.",
-                icon: <Package className="w-5 h-5 text-[#C85C3C]" />,
-              },
-            ].map((f, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-2xl p-6 border border-[#F0DDD5] hover:shadow-md transition-all"
-              >
-                <div className="w-10 h-10 rounded-xl bg-[#FFF0EB] flex items-center justify-center mb-4">
-                  {f.icon}
-                </div>
-                <h3 className="font-serif text-[13px] font-black text-[#2C1810] tracking-wider uppercase mb-1">
-                  {f.title}
-                </h3>
-                <p className="text-xs text-[#7A645D] leading-relaxed">
-                  {f.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* SECTION 3: Khám phá chủ đề */}
-        <section className="mb-20">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#C85C3C]">
-              DISCOVER MONTHLY THEMES
-            </span>
-            <h2 className="font-serif text-2xl lg:text-3xl font-black text-[#2C1810] mt-1">
-              Khám Phá Các Chủ Đề Hàng Tháng
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {MOCK_THEMES.map((theme, idx) => (
-              <div key={idx} className="group cursor-pointer">
-                <div className="aspect-4/5 rounded-2xl overflow-hidden border border-[#F0DDD5] bg-stone-100 relative mb-2.5">
-                  <Image
-                    src={theme.img}
-                    alt={theme.title}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-80" />
-                  <span className="absolute top-3 left-3 text-[8px] font-black bg-white text-[#C85C3C] px-2 py-0.5 rounded uppercase tracking-wider shadow-sm">
-                    {theme.tag}
-                  </span>
-                </div>
-                <h4 className="font-serif text-[11px] font-black text-[#2C1810] tracking-wider text-center group-hover:text-[#C85C3C] transition-colors leading-tight">
-                  {theme.title}
-                </h4>
-              </div>
-            ))}
-          </div>
-        </section>
       </main>
 
-      {/* Modal Container: Render khi có Hộp quà được chọn */}
+      {/* ── SECTION: Product Showcase (full-width, outside max-w container) ── */}
+      <SubscriptionShowcase />
+
+      <main className="max-w-300 mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
+        {/* ── SECTION: Monthly Themes Carousel ── */}
+        <MonthlyThemes />
+      </main>
+
+      {/* Modal Container */}
       {selectedBoxForModal && (
         <ChoosePlanModal
           box={selectedBoxForModal}
-          plansProps={selectedBoxForModal.apiPlans} // Truyền luôn plans đã có để khỏi gọi API lại
+          plansProps={selectedBoxForModal.apiPlans}
           onClose={() => setSelectedBoxForModal(null)}
         />
       )}
 
-      {/* FOOTER WIDGETS */}
+      {/* ── FOOTER WIDGETS ── */}
       <div className="bg-white border-t border-[#F0DDD5] pt-12">
         <div className="max-w-300 mx-auto px-4">
           <TrustBadge />
