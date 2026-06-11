@@ -3,8 +3,8 @@
  * ─────────────────────────────────────────────────────────────────
  * Side-effect actions có trong BE:
  *   - Trigger giao hàng thủ công  (POST /process-deliveries)
- *   - Huỷ cuối kỳ                 (PATCH /:id/cancel)
- *   - Huỷ ngay lập tức            (PATCH /:id/cancel-immediately)
+ *   - Huỷ cuối kỳ                 (PATCH /my-subscriptions/:id/cancel-at-end)
+ *   - Huỷ ngay lập tức            (PATCH /my-subscriptions/:id/cancel-immediately)
  * ─────────────────────────────────────────────────────────────────
  */
 "use client";
@@ -12,7 +12,7 @@
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import {
-  cancelPlanApi,
+  cancelAtEndApi,
   cancelImmediatelyApi,
   triggerDeliveryApi,
 } from "../app/services/api/subscribePlanService";
@@ -52,7 +52,7 @@ export function usePlanActions({ fetchPlans, closeDetail }) {
         await cancelImmediatelyApi(cancelTarget.plan._id);
         toast.success("Đã dừng gói ngay lập tức");
       } else {
-        await cancelPlanApi(cancelTarget.plan._id);
+        await cancelAtEndApi(cancelTarget.plan._id);
         toast.success("Đã đặt lịch huỷ cuối kỳ");
       }
       fetchPlans();

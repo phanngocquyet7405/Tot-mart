@@ -1,10 +1,11 @@
 "use client";
 
-import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Trash2, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
+import Link from "next/link";
 
 const formatPrice = (price) =>
   new Intl.NumberFormat("vi-VN", {
@@ -20,6 +21,19 @@ export function CartManager({ cart, loading, onChangeQuantity, onRemoveItem }) {
     <Card className="border-emerald-100">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-emerald-700">My Cart</CardTitle>
+        <div className="flex items-center gap-2">
+          {/* Nút tạm thời trỏ đến trang /my-subscriptions */}
+          <Link href="/profile/my-subscriptions">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs border-emerald-200 text-emerald-700 hover:bg-emerald-50 h-7 px-2"
+            >
+              <CalendarDays className="mr-1 h-3 w-3" />
+              Gói đăng ký của tôi
+            </Button>
+          </Link>
+        </div>
         <Badge className="bg-emerald-600">
           <ShoppingCart className="mr-1 h-3 w-3" />
           {cart.length} items

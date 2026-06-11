@@ -1,14 +1,14 @@
 /**
  * usePlanList.js
  * ─────────────────────────────────────────────────────────────────
- * Fetch + filter + sort danh sách SubscribePlan.
+ * Fetch + filter + sort danh sách SubscribePlan (Admin dashboard).
  * ─────────────────────────────────────────────────────────────────
  */
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { toast } from "sonner";
-import { getAllPlansApi } from "../app/services/api/subscribePlanService";
+import { getAllTemplatesApi } from "../app/services/api/subscribePlanService";
 import { PLAN_TYPE_LABELS } from "@/app/util/formatter";
 
 export const STATUS_OPTIONS = [
@@ -35,8 +35,9 @@ export function usePlanList() {
   const fetchPlans = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await getAllPlansApi();
-      setPlans(res.data?.plans || res.data || []);
+      const res = await getAllTemplatesApi();
+      // axiosMiddleware đã unwrap response.data, nên res = { success, count, data: [...] }
+      setPlans(res?.data || []);
     } catch {
       toast.error("Không thể tải danh sách gói đăng ký");
     } finally {

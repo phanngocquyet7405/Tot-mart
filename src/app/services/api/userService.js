@@ -2,9 +2,7 @@ import { axiosConfig } from "./axiosConfig";
 import { API_ENDPOINTS } from "./apiEndpoints";
 
 export const userService = {
-  /** * Lấy thông tin cá nhân của chính mình (dựa trên Token)
-   * Thay vì truyền ID từ frontend, backend sẽ tự giải mã token để lấy ID.
-   */
+  /** Lấy thông tin cá nhân của chính mình (dựa trên Token) */
   getMe: () => axiosConfig.get(API_ENDPOINTS.USERS.GET_ME),
 
   /** Lấy danh sách người dùng (Admin) */
@@ -19,13 +17,11 @@ export const userService = {
   /** Đăng ký người dùng mới */
   createUser: (data) => axiosConfig.post(API_ENDPOINTS.USERS.REGISTER, data),
 
-  /** Cập nhật thông tin người dùng */
+  /** Cập nhật thông tin người dùng (multipart/form-data) */
   updateUser: (id, data) =>
     axiosConfig.put(API_ENDPOINTS.USERS.UPDATE(id), data),
 
-  /** * Khóa người dùng
-   * Lưu ý: Backend router đang để routers.delete('/lock-user/:_id', ...)
-   */
+  /** Khóa người dùng */
   lockUser: (id) => axiosConfig.delete(API_ENDPOINTS.USERS.LOCK(id)),
 
   /** Mở khóa người dùng */

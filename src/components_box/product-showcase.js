@@ -1,174 +1,176 @@
 "use client";
 
 import { useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Gift,
+  Leaf,
+  BookOpen,
+  Palette,
+  Crown,
+  Sparkles,
+} from "lucide-react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 
-const productImages = [
-  "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=800&fit=crop",
-  "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&h=800&fit=crop",
-  "https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?w=800&h=800&fit=crop",
-  "https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=800&h=800&fit=crop",
-];
+export function SubscriptionShowcase() {
+  const [currentSlide, setCurrentSlide] = useState(0);
 
-const productBadges = ["Best Seller", "Limited Edition", "New Arrival"];
+  const slides = [
+    {
+      id: 1,
+      src: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      id: 2,
+      src: "https://images.unsplash.com/photo-1511688878353-3a2f5be94cd7?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      id: 3,
+      src: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80",
+    },
+  ];
 
-export function ProductShowcase() {
-  const [currentImage, setCurrentImage] = useState(0);
+  const features = [
+    {
+      icon: Gift,
+      title: "GIFT-WITH-PURCHASE",
+      description: "Hội viên 3, 6, 12 tháng nhận ngay quà tặng độc quyền.",
+    },
+    {
+      icon: Palette,
+      title: "AUTHENTIC TREATS",
+      description: "Bánh mochi, senbei, kẹo trái cây chính gốc Nhật.",
+    },
+    {
+      icon: Leaf,
+      title: "TRÀ CAO CẤP",
+      description: "Mỗi tháng một loại trà mới — matcha, hojicha, sencha.",
+    },
+    {
+      icon: BookOpen,
+      title: "SỔ TAY 22-24 TRANG",
+      description: "Câu chuyện nguồn gốc, thành phần và văn hóa ẩm thực.",
+    },
+    {
+      icon: Sparkles,
+      title: "NGỌT & MẶN",
+      description: "Sự kết hợp đa dạng hương vị cho mọi khẩu vị.",
+    },
+    {
+      icon: Crown,
+      title: "ĐỘC QUYỀN TOTMART",
+      description: "Sản phẩm chỉ có tại TotMart, từ các nghệ nhân địa phương.",
+    },
+  ];
 
-  const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % productImages.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImage(
-      (prev) => (prev - 1 + productImages.length) % productImages.length,
-    );
-  };
-
-  // Hàm xử lý cuộn xuống phần ChoosePlan
-  const handleScrollToChoosePlan = () => {
-    const element = document.getElementById("choose-plan");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
+  const prevSlide = () =>
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
   return (
-    <section className="py-20 lg:py-32 bg-secondary">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left Column - Image Slider */}
-          <div className="relative">
-            <div className="aspect-square relative rounded-2xl overflow-hidden bg-card shadow-2xl">
-              {productImages.map((image, index) => (
-                <div
-                  key={index}
-                  className={`absolute inset-0 transition-opacity duration-500 ${
-                    index === currentImage ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <Image
-                    src={image}
-                    alt={`Product image ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-
-              {/* Navigation Arrows */}
-              <button
-                onClick={prevImage}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
-              >
-                <ChevronLeft className="h-5 w-5 text-foreground" />
-              </button>
-              <button
-                onClick={nextImage}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
-              >
-                <ChevronRight className="h-5 w-5 text-foreground" />
-              </button>
-
-              {/* Badges */}
-              <div className="absolute top-4 left-4 flex flex-col gap-2">
-                {productBadges.map((badge, index) => (
-                  <span
-                    key={index}
-                    className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full"
-                  >
-                    {badge}
-                  </span>
-                ))}
+    <div className="bg-[#FFF5F2] border-y border-[#F0DDD5] px-6 py-14 md:px-8 md:py-20">
+      <div className="mx-auto max-w-6xl">
+        <div className="grid gap-10 md:grid-cols-2 md:gap-16 md:items-start">
+          {/* ─── Left: Carousel ─── */}
+          <div className="flex flex-col gap-5">
+            <div className="relative w-full overflow-hidden rounded-3xl border border-[#F0DDD5] shadow-lg shadow-[#C85C3C]/6 bg-[#F0DDD5]">
+              <div className="aspect-square relative">
+                <Image
+                  src={slides[currentSlide].src}
+                  alt="TotMart Subscription Box"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+                {/* Subtle overlay */}
+                <div className="absolute inset-0 bg-linear-to-t from-[#2C1810]/20 to-transparent pointer-events-none" />
               </div>
+
+              {/* Nav Arrows */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 backdrop-blur-sm border border-[#F0DDD5] p-2 hover:bg-white hover:shadow-md transition-all"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="h-5 w-5 text-[#2C1810]" />
+              </button>
+
+              <button
+                onClick={nextSlide}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 backdrop-blur-sm border border-[#F0DDD5] p-2 hover:bg-white hover:shadow-md transition-all"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="h-5 w-5 text-[#2C1810]" />
+              </button>
             </div>
 
             {/* Dot Indicators */}
-            <div className="flex justify-center gap-2 mt-6">
-              {productImages.map((_, index) => (
+            <div className="flex justify-center gap-2">
+              {slides.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => setCurrentImage(index)}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    index === currentImage ? "bg-primary w-8" : "bg-border"
+                  onClick={() => setCurrentSlide(index)}
+                  className={`rounded-full transition-all duration-300 ${
+                    index === currentSlide
+                      ? "w-6 h-2 bg-[#C85C3C]"
+                      : "w-2 h-2 bg-[#F0DDD5] hover:bg-[#C85C3C]/40"
                   }`}
+                  aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
             </div>
           </div>
 
-          {/* Right Column - Product Info */}
-          <div>
-            <span className="text-primary font-semibold text-sm uppercase tracking-wider">
-              This Month&apos;s Box
-            </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mt-4 mb-4 leading-tight text-balance">
-              Spring Awakening Collection
-            </h2>
-
-            {/* Rating */}
-            <div className="flex items-center gap-2 mb-6">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-                ))}
-              </div>
-              <span className="text-muted-foreground">(2,847 reviews)</span>
-            </div>
-
-            {/* Price */}
-            <div className="flex items-baseline gap-3 mb-6">
-              <span className="text-4xl font-bold text-foreground">$49.99</span>
-              <span className="text-xl text-muted-foreground line-through">
-                $89.99
+          {/* ─── Right: Content ─── */}
+          <div className="flex flex-col gap-8">
+            {/* Header */}
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#C85C3C]">
+                Your First Box Includes
               </span>
-              <span className="bg-primary/10 text-primary text-sm font-semibold px-2 py-1 rounded">
-                44% OFF
-              </span>
+              <h2 className="font-serif text-3xl md:text-4xl font-black text-[#2C1810] mt-2 leading-tight">
+                20+ Đặc Sản Nhật Bản, Bánh Kẹo & Trà Cao Cấp!
+              </h2>
             </div>
 
-            <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-              Embrace the season of renewal with our Spring Awakening box.
-              Featuring 7 handpicked items from artisan makers including
-              botanical skincare, organic teas, handcrafted candles, and unique
-              home decor pieces.
-            </p>
-
-            {/* Product Highlights */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              {[
-                { label: "Items Included", value: "7 Products" },
-                { label: "Retail Value", value: "$150+" },
-                { label: "Ships By", value: "April 15th" },
-                { label: "Subscription", value: "Cancel Anytime" },
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-card rounded-lg p-4 border border-border"
-                >
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                    {item.label}
-                  </p>
-                  <p className="text-foreground font-semibold mt-1">
-                    {item.value}
-                  </p>
-                </div>
-              ))}
+            {/* Features Grid */}
+            <div className="grid gap-5 sm:grid-cols-2">
+              {features.map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <div key={index} className="flex gap-3.5">
+                    <div className="w-9 h-9 rounded-xl bg-[#FFF0EB] border border-[#F0DDD5] flex items-center justify-center shrink-0 mt-0.5">
+                      <Icon className="h-4 w-4 text-[#C85C3C]" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-serif text-[11px] font-black text-[#2C1810] tracking-wider uppercase">
+                        {feature.title}
+                      </h3>
+                      <p className="mt-1 text-xs text-[#7A645D] leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                onClick={handleScrollToChoosePlan}
-                className="w-full md:w-auto bg-[#C85C3C] hover:bg-[#B14B2D] text-white px-10 py-7 rounded-2xl text-lg font-bold transition-all hover:translate-y-0.5 flex items-center justify-center cursor-pointer shadow-lg"
-              >
-                Subscribe Now <ChevronRight className="ml-2 w-5 h-5" />
-              </Button>
-            </div>
+            {/* CTA */}
+            <button
+              onClick={() =>
+                document
+                  .getElementById("plan-grid")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="w-full rounded-2xl bg-[#C85C3C] hover:bg-[#B14B2D] px-8 py-4 text-center text-xs font-black text-white uppercase tracking-widest transition-all duration-300 shadow-lg shadow-[#C85C3C]/20 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+            >
+              <Sparkles size={14} />
+              ĐĂNG KÝ NGAY HÔM NAY
+            </button>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
