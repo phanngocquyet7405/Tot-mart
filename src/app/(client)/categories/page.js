@@ -1,9 +1,12 @@
 // app/categories/page.jsx
 "use client";
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import CategoryBaseLayout from "../components/layout/category/category_base_layout";
+import AnnouncementBar from "../components/ui/AnnouncementBar";
+import MainHeader from "../components/ui/main_header";
+import NavMenu from "../components/ui/nav_menu";
+import TotMartSupport from "../components/layout/totmart_suppport";
+import Footer from "../components/ui/footer";
+import CategoryCard from "../components/layout/category/category_card";
 import { getAllCategoriesApi } from "@/app/services/api/productServices";
 
 export default function CategoryPage() {
@@ -24,52 +27,50 @@ export default function CategoryPage() {
   }, []);
 
   return (
-    <CategoryBaseLayout>
-      <div className="flex justify-between items-end mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Khám phá Danh mục
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Lựa chọn sản phẩm theo nhu cầu của bạn
-          </p>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="sticky top-0 bg-white shadow-sm z-1000">
+        <AnnouncementBar />
+        <MainHeader onMenuClick={() => {}} cartItemCount={0} cartTotal={0} />
+        <div className="border-b border-gray-200">
+          <NavMenu />
         </div>
       </div>
 
-      {loading ? (
-        <div className="py-20 text-center text-gray-400 italic">
-          Đang tìm kiếm danh mục...
+      {/* Hero Section */}
+      <div className="bg-gradient-to-b from-gray-50 to-white py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold text-yellow-600 uppercase tracking-wider mb-3">
+              Browse Our Collections
+            </p>
+            <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">
+              Discover Our Curation
+            </h1>
+            <p className="text-base md:text-lg text-gray-600">
+              Explore the finest organic selections, from premium heritage nuts to sustainably sourced gifts. Meticulously curated for the conscious epicurean.
+            </p>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {categories.map((cat) => (
-            <Link
-              key={cat._id}
-              href={`/categories/${cat._id}`}
-              className="group"
-            >
-              <div className="bg-white border border-gray-100 rounded-sm p-6 text-center hover:shadow-md hover:border-orange-200 transition-all h-full flex flex-col items-center">
-                <div className="relative w-20 h-20 mb-4 group-hover:scale-110 transition-transform">
-                  <Image
-                    src={cat.image || "/icons/category-default.png"}
-                    alt={cat.name}
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-                <h3 className="font-bold text-gray-800 group-hover:text-orange-600 transition-colors">
-                  {cat.name}
-                </h3>
-                <div className="mt-2 py-1 px-3 bg-gray-50 rounded-full">
-                  <p className="text-[10px] uppercase font-semibold text-gray-400">
-                    {cat.productCount || 0} sản phẩm
-                  </p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-    </CategoryBaseLayout>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-20">
+        {loading ? (
+          <div className="py-20 text-center text-gray-400 italic">
+            Loading categories...
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 md:gap-16">
+            {categories.map((cat) => (
+              <CategoryCard key={cat._id} category={cat} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <TotMartSupport />
+      <Footer />
+    </div>
   );
 }

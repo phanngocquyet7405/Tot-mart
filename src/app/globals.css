@@ -128,3 +128,163 @@
     @apply font-sans;
   }
 }
+/* Custom animations for TotMart design */
+@layer components {
+  /* Smooth hover shadow effect */
+  .shadow-totmart {
+    @apply shadow-sm hover:shadow-lg transition-shadow duration-300;
+  }
+
+  /* Product card hover scale */
+  .card-hover {
+    @apply hover:scale-102 transition-transform duration-300;
+  }
+
+  /* Green accent button */
+  .btn-primary-green {
+    @apply bg-green-700 hover:bg-green-800 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors duration-300;
+  }
+
+  /* Category card circular image */
+  .category-image-wrapper {
+    @apply relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center;
+  }
+
+  /* Serif heading for luxury feel */
+  .serif-heading {
+    @apply font-serif font-bold;
+  }
+
+  /* Yellow accent underline */
+  .accent-underline {
+    @apply h-1 w-12 bg-yellow-500 rounded-full;
+  }
+
+  /* Hero section styling */
+  .hero-gradient {
+    @apply bg-gradient-to-r from-green-900 via-green-800 to-green-900;
+  }
+
+  /* Bento grid featured item */
+  .bento-featured {
+    @apply relative overflow-hidden rounded-lg bg-gray-900 hover:shadow-2xl transition-all duration-300;
+  }
+
+  /* Product grid responsive layout */
+  .product-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+  }
+
+  /* Sidebar filter section */
+  .filter-section {
+    @apply border-b border-gray-200 py-4 last:border-b-0;
+  }
+
+  /* Filter checkbox styling */
+  .filter-checkbox {
+    @apply w-4 h-4 rounded accent-green-600;
+  }
+}
+
+@layer utilities {
+  /* Utility for smooth transitions */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Text truncation utilities */
+  .line-clamp-2 {
+    @apply line-clamp-2;
+  }
+
+  .line-clamp-3 {
+    @apply line-clamp-3;
+  }
+
+  /* Scale utilities for hover effects */
+  .scale-102 {
+    @apply hover:scale-[1.02];
+  }
+
+  /* Green color utilities */
+  .text-green-primary {
+    @apply text-green-700;
+  }
+
+  .bg-green-primary {
+    @apply bg-green-700;
+  }
+
+  /* Accent yellow */
+  .text-accent {
+    @apply text-yellow-500;
+  }
+
+  .bg-accent {
+    @apply bg-yellow-500;
+  }
+}
+
+/* Keyframe animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Apply animations */
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
