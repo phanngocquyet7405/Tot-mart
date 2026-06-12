@@ -1,21 +1,26 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { AppContextProvider } from "./context/AppContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { CartProvider } from "@/app/context/CartContext";
 import "./globals.css";
 
-// Cấu hình font
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+// Cấu hình font cho Vietnamese
+const playfairDisplay = Playfair_Display({ 
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-serif"
+});
+const plusJakartaSans = Plus_Jakarta_Sans({ 
+  subsets: ["latin", "vietnamese"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-sans"
+});
 
-/**
- * Metadata cho ứng dụng.
- */
 export const metadata = {
-  title: "Chill with Q....",
+  title: "TotMart - Sản Phẩm Hữu Cơ Chất Lượng Cao",
   description:
-    "Discover curated subscription boxes filled with handpicked products from artisan makers. Subscribe to TotMart for monthly surprises.",
+    "Khám phá những sản phẩm hữu cơ chất lượng cao, từ các vùng nguyên liệu sạch và bền vững. TotMart cam kết mang đến cho bạn những sản phẩm tốt nhất từ thiên nhiên.",
   generator: "v0.app",
   icons: {
     icon: [
@@ -38,7 +43,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="vi" className={`${playfairDisplay.variable} ${plusJakartaSans.variable}`}>
       <body className="font-sans antialiased">
         {/* 2. Bọc CartProvider xung quanh children */}
         <AppContextProvider>
