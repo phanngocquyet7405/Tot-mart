@@ -32,7 +32,7 @@ export default function ProductCategoriesShowcase() {
         {/* Section Header */}
         <div className="mb-12">
           <p className="text-sm font-semibold text-yellow-600 uppercase tracking-wider mb-2">
-            Curation
+            Bộ Sưu Tập
           </p>
           <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900">
             Phân loại sản phẩm
@@ -41,7 +41,7 @@ export default function ProductCategoriesShowcase() {
 
         {/* Categories Grid */}
         {loading ? (
-          <div className="py-12 text-center text-gray-500">Loading categories...</div>
+          <div className="py-12 text-center text-gray-500">Đang tải danh mục...</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {categories.map((category) => (
@@ -66,7 +66,7 @@ export default function ProductCategoriesShowcase() {
                 {/* Category Info */}
                 <div className="text-center">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">
-                    {category.productCount || 0} Products
+                    {category.productCount || 0} Sản Phẩm
                   </p>
                   <h3 className="text-lg font-serif font-bold text-gray-900 group-hover:text-green-700 transition-colors duration-300">
                     {category.name}

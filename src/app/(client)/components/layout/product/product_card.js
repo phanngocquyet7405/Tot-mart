@@ -114,7 +114,7 @@ export const ProductCard = ({ product, onAddToCart, onToggleWishlist }) => {
             onClick={(e) => handleAction(e, onAddToCart)}
             className="w-full bg-green-700 hover:bg-green-800 text-white py-2.5 text-xs font-bold tracking-wider flex items-center justify-center gap-2 transition-colors duration-300 rounded-md"
           >
-            <ShoppingCart className="w-4 h-4" /> ADD TO CART
+            <ShoppingCart className="w-4 h-4" /> THÊM VÀO GIỎ
           </button>
         </div>
       </Link>

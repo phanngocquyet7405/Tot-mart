@@ -32,7 +32,7 @@ export default function TotMartSupport() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           <div className="text-center mb-16">
             <p className="text-xs tracking-widest text-yellow-600 mb-4 uppercase font-bold">
-              Support
+              Hỗ Trợ
             </p>
             <h2 className="text-4xl md:text-5xl text-gray-900 font-serif font-bold">
               Câu Hỏi Thường Gặp
@@ -72,7 +72,7 @@ export default function TotMartSupport() {
           <div className="max-w-2xl mx-auto text-center">
             {/* Badge */}
             <p className="text-sm font-semibold text-yellow-300 uppercase tracking-widest mb-4">
-              Join the Collective
+              Tham Gia Cộng Đồng
             </p>
 
             {/* Heading */}
@@ -89,7 +89,7 @@ export default function TotMartSupport() {
             <form onSubmit={(e) => e.preventDefault()} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <input
                 type="email"
-                placeholder="Email address"
+                placeholder="Địa chỉ email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="flex-1 px-6 py-3.5 bg-white/20 text-white placeholder-white/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 border border-white/30 backdrop-blur-sm"
@@ -99,7 +99,7 @@ export default function TotMartSupport() {
                 type="submit"
                 className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-8 py-3.5 rounded-lg transition-colors duration-300 whitespace-nowrap uppercase tracking-wider text-sm"
               >
-                Join
+                Tham Gia
               </button>
             </form>
           </div>

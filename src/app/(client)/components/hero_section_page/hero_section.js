@@ -26,7 +26,7 @@ export default function HeroSection() {
             <div className="max-w-2xl">
               {/* Label */}
               <p className="text-sm font-semibold text-yellow-300 uppercase tracking-widest mb-4">
-                Premium Selection
+                Lựa Chọn Cao Cấp
               </p>
 
               {/* Main Heading */}
@@ -47,7 +47,7 @@ export default function HeroSection() {
                   href="/products"
                   className="px-8 py-3.5 bg-green-700 text-white font-semibold rounded-lg hover:bg-green-800 transition-colors duration-300 flex items-center justify-center gap-2 group/btn"
                 >
-                  Shop Now
+                  Mua Ngay
                   <svg
                     className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform"
                     fill="none"
@@ -66,7 +66,7 @@ export default function HeroSection() {
                   href="/categories"
                   className="px-8 py-3.5 bg-white/20 text-white font-semibold rounded-lg hover:bg-white/30 transition-colors duration-300 backdrop-blur-sm border border-white/30"
                 >
-                  Learn More
+                  Tìm Hiểu Thêm
                 </Link>
               </div>
             </div>

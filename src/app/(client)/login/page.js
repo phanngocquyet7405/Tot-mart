@@ -73,10 +73,10 @@ function LoginPage() {
               <Lock className="w-8 h-8 text-green-700" strokeWidth={2} />
             </div>
             <h1 className="text-3xl font-serif font-bold text-gray-900">
-              Welcome Back
+              Chào Mừng Trở Lại
             </h1>
             <p className="text-gray-600 text-sm">
-              Sign in to access your TotMart account
+              Đăng nhập để truy cập tài khoản TotMart của bạn
             </p>
           </div>
 
@@ -95,7 +95,7 @@ function LoginPage() {
           {/* Form */}
           <form onSubmit={handleOnSubmit} className="space-y-5">
             <FormInput
-              Label="Email Address"
+              Label="Địa Chỉ Email"
               type="email"
               id="email"
               placeholder="name@example.com"
@@ -108,13 +108,13 @@ function LoginPage() {
             {/* Password Field with Show/Hide */}
             <div className="space-y-2">
               <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
-                Password
+                Mật Khẩu
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
-                  placeholder="Enter your password"
+                  placeholder="Nhập mật khẩu của bạn"
                   value={formData.password}
                   onChange={handleChange}
                   required
@@ -146,13 +146,13 @@ function LoginPage() {
                   disabled={loading}
                   className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 accent-green-600"
                 />
-                <span className="text-gray-700 font-medium">Remember me</span>
+                <span className="text-gray-700 font-medium">Ghi nhớ tôi</span>
               </label>
               <Link
                 href="/forgot-password"
                 className="text-green-700 font-medium hover:text-green-800 transition-colors"
               >
-                Forgot password?
+                Quên mật khẩu?
               </Link>
             </div>
 
@@ -161,10 +161,10 @@ function LoginPage() {
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Signing in...</span>
+                  <span>Đang đăng nhập...</span>
                 </div>
               ) : (
-                "Sign In"
+                "Đăng Nhập"
               )}
             </AuthButton>
           </form>
@@ -172,28 +172,28 @@ function LoginPage() {
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-gray-200"></div>
-            <span className="text-xs font-medium text-gray-500 uppercase">Or</span>
+            <span className="text-xs font-medium text-gray-500 uppercase">Hoặc</span>
             <div className="flex-1 h-px bg-gray-200"></div>
           </div>
 
           {/* Sign Up Link */}
           <p className="text-center text-gray-600 text-sm">
-            Don&apos;t have an account?{" "}
+            Chưa có tài khoản?{" "}
             <Link href="/register" className="text-green-700 font-semibold hover:text-green-800 transition-colors">
-              Sign up
+              Đăng ký ngay
             </Link>
           </p>
         </AuthCard>
 
         {/* Footer Text */}
         <p className="text-center text-xs text-gray-500 mt-8">
-          By signing in, you agree to our{" "}
+          Bằng cách đăng nhập, bạn đồng ý với{" "}
           <Link href="/terms" className="text-gray-700 hover:text-gray-900 underline">
-            Terms of Service
+            Điều Khoản Dịch Vụ
           </Link>{" "}
-          and{" "}
+          và{" "}
           <Link href="/privacy" className="text-gray-700 hover:text-gray-900 underline">
-            Privacy Policy
+            Chính Sách Quyền Riêng Tư
           </Link>
         </p>
       </div>

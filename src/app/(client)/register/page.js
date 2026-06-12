@@ -40,12 +40,12 @@ export default function RegisterPage() {
     if (loading) return;
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match!");
+      setError("Mật khẩu không trùng khớp!");
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters!");
+      setError("Mật khẩu phải có ít nhất 6 ký tự!");
       return;
     }
 
@@ -63,7 +63,7 @@ export default function RegisterPage() {
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
-        "An error occurred during registration. Please try again.";
+        "Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -83,10 +83,10 @@ export default function RegisterPage() {
               <UserPlus className="w-8 h-8 text-green-700" strokeWidth={2} />
             </div>
             <h1 className="text-3xl font-serif font-bold text-gray-900">
-              Create Account
+              Tạo Tài Khoản
             </h1>
             <p className="text-gray-600 text-sm">
-              Join TotMart to explore premium organic products
+              Tham gia TotMart để khám phá các sản phẩm hữu cơ cao cấp
             </p>
           </div>
 
@@ -106,10 +106,10 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Full Name */}
             <FormInput
-              Label="Full Name"
+              Label="Họ Và Tên"
               type="text"
               id="name"
-              placeholder="John Doe"
+              placeholder="Nguyễn Văn A"
               value={formData.name}
               onChange={handleChange}
               required
@@ -118,7 +118,7 @@ export default function RegisterPage() {
 
             {/* Email */}
             <FormInput
-              Label="Email Address"
+              Label="Địa Chỉ Email"
               type="email"
               id="email"
               placeholder="name@example.com"
@@ -131,13 +131,13 @@ export default function RegisterPage() {
             {/* Password */}
             <div className="space-y-2">
               <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
-                Password
+                Mật Khẩu
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
-                  placeholder="Create a strong password"
+                  placeholder="Tạo một mật khẩu mạnh"
                   value={formData.password}
                   onChange={handleChange}
                   required
@@ -161,7 +161,7 @@ export default function RegisterPage() {
                 <div className="flex items-center gap-2 text-xs">
                   <div className={`h-1.5 flex-1 rounded-full ${passwordStrength === "strong" ? "bg-green-500" : passwordStrength === "medium" ? "bg-yellow-500" : "bg-red-500"}`}></div>
                   <span className={`font-medium ${passwordStrength === "strong" ? "text-green-600" : passwordStrength === "medium" ? "text-yellow-600" : "text-red-600"}`}>
-                    {passwordStrength === "strong" ? "Strong" : passwordStrength === "medium" ? "Medium" : "Weak"}
+                    {passwordStrength === "strong" ? "Mạnh" : passwordStrength === "medium" ? "Trung Bình" : "Yếu"}
                   </span>
                 </div>
               )}
@@ -170,13 +170,13 @@ export default function RegisterPage() {
             {/* Confirm Password */}
             <div className="space-y-2">
               <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700">
-                Confirm Password
+                Xác Nhận Mật Khẩu
               </label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   id="confirmPassword"
-                  placeholder="Confirm your password"
+                  placeholder="Xác nhận mật khẩu của bạn"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
@@ -200,7 +200,7 @@ export default function RegisterPage() {
                 <div className="flex items-center gap-2 text-xs">
                   <CheckCircle className={`w-4 h-4 ${formData.password === formData.confirmPassword ? "text-green-500" : "text-red-500"}`} />
                   <span className={formData.password === formData.confirmPassword ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
-                    {formData.password === formData.confirmPassword ? "Passwords match" : "Passwords do not match"}
+                    {formData.password === formData.confirmPassword ? "Mật khẩu trùng khớp" : "Mật khẩu không trùng khớp"}
                   </span>
                 </div>
               )}
@@ -215,13 +215,13 @@ export default function RegisterPage() {
                 className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 accent-green-600 mt-0.5 flex-shrink-0"
               />
               <span className="text-xs text-gray-700">
-                I agree to the{" "}
+                Tôi đồng ý với{" "}
                 <Link href="/terms" className="text-green-700 font-semibold hover:text-green-800">
-                  Terms of Service
+                  Điều Khoản Dịch Vụ
                 </Link>{" "}
-                and{" "}
+                và{" "}
                 <Link href="/privacy" className="text-green-700 font-semibold hover:text-green-800">
-                  Privacy Policy
+                  Chính Sách Quyền Riêng Tư
                 </Link>
               </span>
             </label>
@@ -231,10 +231,10 @@ export default function RegisterPage() {
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Creating account...</span>
+                  <span>Đang tạo tài khoản...</span>
                 </div>
               ) : (
-                "Create Account"
+                "Tạo Tài Khoản"
               )}
             </AuthButton>
           </form>
@@ -242,22 +242,22 @@ export default function RegisterPage() {
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-gray-200"></div>
-            <span className="text-xs font-medium text-gray-500 uppercase">Or</span>
+            <span className="text-xs font-medium text-gray-500 uppercase">Hoặc</span>
             <div className="flex-1 h-px bg-gray-200"></div>
           </div>
 
           {/* Sign In Link */}
           <p className="text-center text-gray-600 text-sm">
-            Already have an account?{" "}
+            Đã có tài khoản?{" "}
             <Link href="/login" className="text-green-700 font-semibold hover:text-green-800 transition-colors">
-              Sign in
+              Đăng nhập
             </Link>
           </p>
         </AuthCard>
 
         {/* Footer Text */}
         <p className="text-center text-xs text-gray-500 mt-8">
-          By creating an account, you join our community of conscious consumers
+          Bằng cách tạo tài khoản, bạn tham gia cộng đồng của những người tiêu dùng có ý thức
         </p>
       </div>
     </AuthContainer>
