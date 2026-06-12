@@ -1,9 +1,13 @@
 import ProductSection from './product_section';
 import TotMartSupport from './totmart_suppport';
+import ProductCategoriesShowcase from './home/product_categories_showcase';
 
 export default function TotmartLanding() {
   return (
     <>
+      {/* Product Categories Showcase */}
+      <ProductCategoriesShowcase />
+
       {/* Nhóm sản phẩm 1 */}
       <ProductSection 
         title="Hạt Dinh Dưỡng Cao Cấp"
