@@ -68,15 +68,15 @@ export function BoxTable({ boxes, isLoading, onEditClick, onDeleteClick }) {
       <Table>
         <TableHeader>
           <TableRow className="bg-slate-50 hover:bg-slate-50">
-            <TableHead className="w-18">Ảnh</TableHead>
-            <TableHead className="min-w-22.5">Tên Box</TableHead>
-            <TableHead className="w-22.5 text-center">Tồn kho</TableHead>
-            <TableHead className="w-27.5 text-right">Giá trị</TableHead>
-            <TableHead className="w-22.5 text-center">Giảm giá</TableHead>
+            <TableHead className="w-16">Ảnh</TableHead>
+            <TableHead className="min-w-40">Tên Box</TableHead>
+            <TableHead className="w-24 text-center">Tồn kho</TableHead>
+            <TableHead className="w-32 text-right">Giá trị</TableHead>
+            <TableHead className="w-24 text-center">Giảm giá</TableHead>
             <TableHead className="w-20 text-center">SP</TableHead>
-            <TableHead className="w-45">Thời hạn</TableHead>
-            <TableHead className="w-27.5 text-center">Trạng thái</TableHead>
-            <TableHead className="w-15 text-right">Thao tác</TableHead>
+            <TableHead className="w-44">Thời hạn</TableHead>
+            <TableHead className="w-28 text-center">Trạng thái</TableHead>
+            <TableHead className="w-16 text-right">Thao tác</TableHead>
           </TableRow>
         </TableHeader>
 

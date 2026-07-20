@@ -11,16 +11,21 @@ import {
   Calendar,
   ChevronDown,
   ChevronUp,
+  ChevronRight,
   XCircle,
   Zap,
+  Package,
+  Loader2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { DeliveryTimeline } from "./Deliverytimeline";
 import {
   STATUS_CONFIG,
   getDaysRemaining,
 } from "@/app/services/api/MySubscriptionService";
 import { formatCurrency, PLAN_TYPE_LABELS } from "@/app/util/formatter";
+import { useBoxProducts } from "@/hooks/useBoxProducts";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
@@ -29,6 +34,22 @@ const PLACEHOLDER =
 
 export function SubscriptionCard({ subscription: sub, onCancel }) {
   const [expanded, setExpanded] = useState(false);
+
+  // Sản phẩm bên trong box của gói này — chỉ tải khi người dùng mở "Chi tiết"
+  // để tránh gọi API cho toàn bộ danh sách subscription ngay khi vào trang.
+  const boxId = sub.boxId?._id;
+  const {
+    products: boxProducts,
+    isLoading: loadingProducts,
+    hasFetched,
+    refetch: fetchBoxProducts,
+  } = useBoxProducts(boxId, { lazy: true });
+
+  useEffect(() => {
+    if (expanded && boxId && !hasFetched) {
+      fetchBoxProducts();
+    }
+  }, [expanded, boxId, hasFetched, fetchBoxProducts]);
 
   const config = STATUS_CONFIG[sub.status] ?? STATUS_CONFIG["cancelled"];
   const planLabel = PLAN_TYPE_LABELS[sub.planType] ?? sub.planType;
@@ -60,7 +81,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
           <Image
             fill
             src={sub.boxId?.images?.[0] ?? PLACEHOLDER}
-            alt={sub.boxId?.name}
+            alt={sub.boxId?.name || "Box"}
             className="w-full h-full object-cover"
             onError={(e) => {
               e.target.src = PLACEHOLDER;
@@ -183,6 +204,89 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
               </div>
             </div>
           )}
+
+          {/* Sản phẩm trong hộp */}
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-1.5 flex items-center gap-1.5">
+              <Package size={12} className="text-[#C85C3C]" />
+              Sản phẩm trong hộp
+            </p>
+
+            {loadingProducts ? (
+              <div className="flex items-center gap-2 text-[11px] text-stone-400 py-2">
+                <Loader2 size={12} className="animate-spin" />
+                Đang tải danh sách sản phẩm...
+              </div>
+            ) : boxProducts.length > 0 ? (
+              <div className="space-y-1.5">
+                {boxProducts.slice(0, 4).map((p, i) => {
+                  const href = p._id
+                    ? `/products/${p.slug || "san-pham"}-${p._id}`
+                    : null;
+                  const row = (
+                    <>
+                      <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white border border-stone-100 shrink-0">
+                        {p.images?.[0]?.url ? (
+                          <Image
+                            src={p.images[0].url}
+                            alt={p.name || "Sản phẩm"}
+                            fill
+                            className="object-cover"
+                            sizes="32px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package size={12} className="text-stone-300" />
+                          </div>
+                        )}
+                      </div>
+                      <span className="flex-1 min-w-0 text-xs text-stone-600 truncate">
+                        {p.name || "Sản phẩm"}
+                      </span>
+                      <span className="text-[10px] text-stone-400 shrink-0">
+                        x{p.quantity || 1}
+                      </span>
+                      {href && (
+                        <ChevronRight
+                          size={12}
+                          className="text-stone-300 shrink-0"
+                        />
+                      )}
+                    </>
+                  );
+                  return href ? (
+                    <Link
+                      key={p._id || i}
+                      href={href}
+                      className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 -mx-1.5 hover:bg-white transition-colors"
+                    >
+                      {row}
+                    </Link>
+                  ) : (
+                    <div
+                      key={p._id || i}
+                      className="flex items-center gap-2.5 px-1.5 py-1 -mx-1.5"
+                    >
+                      {row}
+                    </div>
+                  );
+                })}
+                {boxProducts.length > 4 && boxId && (
+                  <Link
+                    href={`/products/box/${boxId}`}
+                    className="inline-flex items-center gap-1 text-[10px] font-bold text-[#C85C3C] hover:text-[#B14B2D] mt-1"
+                  >
+                    Xem tất cả {boxProducts.length} sản phẩm
+                    <ChevronRight size={11} />
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <p className="text-[11px] text-stone-400 italic">
+                Chưa có thông tin sản phẩm chi tiết cho hộp này.
+              </p>
+            )}
+          </div>
 
           {/* Gifts */}
           {sub.gift && sub.gift.length > 0 && (

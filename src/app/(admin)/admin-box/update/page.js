@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { getBoxByIdApi, updateBoxApi } from "@/app/services/api/boxService";
 import { getAllProductsApi } from "@/app/services/api/productServices";
+import RichTextEditor from "../../components/ui/RichTextEditor";
 
 const fmtPrice = (val) =>
   new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
@@ -265,17 +266,12 @@ export default function UpdateBoxPage() {
                 <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
                   Mô tả *
                 </label>
-                <textarea
-                  rows={3}
+                <RichTextEditor
                   value={form.description}
-                  onChange={(e) => handleChange("description", e.target.value)}
-                  className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${errors.description ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
+                  onChange={(html) => handleChange("description", html)}
+                  placeholder="Mô tả chi tiết box..."
+                  error={errors.description}
                 />
-                {errors.description && (
-                  <span className="text-xs text-red-500">
-                    {errors.description}
-                  </span>
-                )}
               </div>
 
               <label className="flex items-center gap-2 cursor-pointer select-none">

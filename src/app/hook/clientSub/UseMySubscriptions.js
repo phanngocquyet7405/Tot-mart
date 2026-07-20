@@ -17,7 +17,7 @@ import {
 export function useMySubscriptions() {
   const [subscriptions, setSubscriptions] = useState([]);
   const [todayDeliveries, setTodayDeliveries] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // ─── Cancel dialog state ──────────────────────────────────────────────────
@@ -30,7 +30,7 @@ export function useMySubscriptions() {
 
   // ─── Load ─────────────────────────────────────────────────────────────────
   const load = useCallback(async () => {
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
 
     const [subResult, todayResult] = await Promise.all([
@@ -49,7 +49,7 @@ export function useMySubscriptions() {
       setTodayDeliveries(todayResult.data);
     }
 
-    setLoading(false);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -124,7 +124,7 @@ export function useMySubscriptions() {
   return {
     subscriptions: filteredSubscriptions,
     todayDeliveries,
-    loading,
+    isLoading,
     error,
     activeTab,
     setActiveTab,
@@ -140,3 +140,5 @@ export function useMySubscriptions() {
     refresh: load,
   };
 }
+
+export default useMySubscriptions;

@@ -82,34 +82,38 @@ function ProductPicker({ onSelect, availableProducts }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 h-9 px-3 text-sm rounded-md border border-input bg-white hover:bg-gray-50 text-gray-700 transition-colors w-full truncate"
+        className="flex items-center gap-2 h-9 px-3 text-sm rounded-lg border border-input bg-white hover:bg-slate-50 text-slate-600 transition-colors w-full truncate focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
       >
-        <Search size={14} className="text-gray-400 shrink-0" />
-        <span className="truncate text-gray-400">Tìm và chọn sản phẩm...</span>
-        <ChevronDown size={14} className="ml-auto text-gray-400 shrink-0" />
+        <Search size={14} className="text-slate-400 shrink-0" />
+        <span className="truncate text-slate-500">Tìm và chọn sản phẩm...</span>
+        <ChevronDown 
+          size={14} 
+          className={`ml-auto text-slate-400 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
-          <div className="p-2 border-b">
+        <div className="absolute z-50 top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+          <div className="p-3 border-b border-slate-100">
             <div className="relative">
               <Search
                 size={14}
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               />
               <input
                 autoFocus
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Nhập tên sản phẩm..."
-                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
               />
             </div>
           </div>
-          <div className="max-h-52 overflow-y-auto">
+          <div className="max-h-56 overflow-y-auto">
             {filtered.length === 0 ? (
-              <div className="py-6 text-center text-sm text-gray-400">
-                Không tìm thấy sản phẩm
+              <div className="py-8 text-center text-sm text-slate-400">
+                <Package size={24} className="mx-auto mb-2 opacity-40" />
+                <p>Không tìm thấy sản phẩm</p>
               </div>
             ) : (
               filtered.map((p) => {
@@ -126,27 +130,28 @@ function ProductPicker({ onSelect, availableProducts }) {
                       setOpen(false);
                       setSearch("");
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-indigo-50 transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 transition-colors text-left border-b border-slate-50 last:border-b-0"
                   >
-                    <div className="w-9 h-9 rounded-lg border bg-gray-50 overflow-hidden shrink-0 relative">
+                    <div className="w-10 h-10 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden shrink-0 relative">
                       {imgUrl ? (
                         <Image
                           src={imgUrl}
                           alt={p.name}
                           fill
                           className="object-cover"
+                          sizes="40px"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Package size={14} className="text-gray-300" />
+                          <Package size={14} className="text-slate-300" />
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">
+                      <p className="text-sm font-medium text-slate-800 truncate">
                         {p.name}
                       </p>
-                      <p className="text-xs text-indigo-600 font-semibold">
+                      <p className="text-xs text-indigo-600 font-semibold mt-0.5">
                         {fmtPrice(p.price)}
                       </p>
                     </div>
@@ -171,17 +176,19 @@ function ProductRow({
   error,
 }) {
   return (
-    <div className="group rounded-xl border border-gray-100 bg-white p-3 space-y-2.5 hover:border-indigo-200 transition-colors">
-      <div className="flex items-center justify-between gap-2">
+    <div className="group rounded-lg border border-slate-200 bg-white p-4 space-y-3 hover:border-indigo-300 hover:shadow-sm transition-all">
+      <div className="flex items-center justify-between gap-3">
         <div className="flex-1 min-w-0">
           {item.name ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-800 truncate">
-                {item.name}
-              </span>
-              <span className="text-xs text-indigo-600 font-semibold shrink-0">
-                {fmtPrice(item.price)}
-              </span>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <span className="text-sm font-semibold text-slate-900 block">
+                  {item.name}
+                </span>
+                <span className="text-xs text-indigo-600 font-medium mt-0.5">
+                  {fmtPrice(item.price)}
+                </span>
+              </div>
             </div>
           ) : (
             <ProductPicker
@@ -199,57 +206,64 @@ function ProductRow({
         <button
           type="button"
           onClick={() => onRemove(index)}
-          className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0 opacity-0 group-hover:opacity-100"
+          title="Remove product"
         >
-          <Trash2 size={14} />
+          <Trash2 size={16} />
         </button>
       </div>
 
       {item.productId && (
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Label className="text-xs text-gray-500 shrink-0">Số lượng</Label>
-            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-              <button
-                type="button"
-                onClick={() =>
-                  onChange(index, "quantity", Math.max(1, item.quantity - 1))
-                }
-                className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 text-sm transition-colors"
-              >
-                −
-              </button>
-              <span className="w-8 text-center text-sm font-semibold text-gray-800">
-                {item.quantity}
-              </span>
-              <button
-                type="button"
-                onClick={() => onChange(index, "quantity", item.quantity + 1)}
-                className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 text-sm transition-colors"
-              >
-                +
-              </button>
+        <div className="space-y-3 pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Label className="text-xs font-medium text-slate-600 shrink-0">Số lượng</Label>
+              <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                <button
+                  type="button"
+                  onClick={() =>
+                    onChange(index, "quantity", Math.max(1, item.quantity - 1))
+                  }
+                  className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-200 text-sm transition-colors font-medium"
+                >
+                  −
+                </button>
+                <span className="w-9 text-center text-sm font-semibold text-slate-800 border-l border-r border-slate-200">
+                  {item.quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onChange(index, "quantity", item.quantity + 1)}
+                  className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-200 text-sm transition-colors font-medium"
+                >
+                  +
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="text-xs text-gray-400">
-            Tổng:{" "}
-            <span className="font-semibold text-gray-700">
-              {fmtPrice(item.price * item.quantity)}
-            </span>
+            <div className="text-xs text-slate-600">
+              <span className="font-medium">Tổng:</span>{" "}
+              <span className="font-bold text-slate-900">
+                {fmtPrice(item.price * item.quantity)}
+              </span>
+            </div>
           </div>
           <button
             type="button"
             onClick={() =>
               onChange(index, { productId: "", name: "", price: 0 })
             }
-            className="ml-auto text-xs text-indigo-500 hover:text-indigo-700 underline"
+            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
           >
-            Đổi sản phẩm
+            ↻ Đổi sản phẩm
           </button>
         </div>
       )}
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && (
+        <p className="text-xs text-red-600 font-medium bg-red-50 p-2 rounded">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -317,14 +331,20 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     setErrors({});
   }, [open, box, isEdit]);
 
-  // Cleanup object URLs
+  // Cleanup object URLs when component unmounts or previews change
   useEffect(() => {
     return () => {
-      imagePreviews
-        .filter((p) => p.startsWith("blob:"))
-        .forEach((p) => URL.revokeObjectURL(p));
+      imagePreviews.forEach((p) => {
+        if (typeof p === "string" && p.startsWith("blob:")) {
+          try {
+            URL.revokeObjectURL(p);
+          } catch (e) {
+            // Ignore errors during cleanup
+          }
+        }
+      });
     };
-  }, [imagePreviews]);
+  }, []);
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 

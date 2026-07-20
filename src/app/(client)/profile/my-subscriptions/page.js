@@ -7,6 +7,7 @@
 
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   RefreshCw,
@@ -15,11 +16,15 @@ import {
   Truck,
   ArrowLeft,
   Sparkles,
+  Package,
 } from "lucide-react";
 import { useMySubscriptions } from "@/app/hook/clientSub/UseMySubscriptions";
+import { useOtherPlans } from "@/app/hook/clientSub/useOtherPlans";
 import { SubscriptionCard } from "../../components/profile/MySub/Subscriptioncard";
 import { CancelDialog } from "../../components/profile/MySub/Canceldialog";
 import { EmptySubscription } from "../../components/profile/MySub/Emptysubscription";
+import PlanCard from "../../components/Subsciber_components/PlanCard";
+import ChoosePlanModal from "../../components/Subsciber_components/ChoosePlanModal";
 
 // ─── Tab Bar ──────────────────────────────────────────────────────────────────
 function TabBar({ activeTab, setActiveTab, tabCounts }) {
@@ -86,12 +91,60 @@ function TodayDeliveryBanner({ deliveries }) {
   );
 }
 
+// ─── Gói khác dành cho bạn ─────────────────────────────────────────────────
+function OtherPlansSection({ excludeBoxIds, onSubscribed }) {
+  const { otherPlans, isLoading } = useOtherPlans(excludeBoxIds);
+  const [selectedBoxForModal, setSelectedBoxForModal] = useState(null);
+
+  if (!isLoading && otherPlans.length === 0) return null;
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 pb-16">
+      <div className="flex items-center gap-2 mb-5">
+        <Package size={16} className="text-[#C85C3C]" />
+        <h2 className="text-sm font-black text-stone-800 uppercase tracking-widest">
+          Gói khác dành cho bạn
+        </h2>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center gap-2 text-stone-400 text-xs py-6">
+          <Loader2 size={14} className="animate-spin" />
+          Đang tải gợi ý...
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {otherPlans.map((box, index) => (
+            <PlanCard
+              key={box._id}
+              box={box}
+              onOpenPlan={(b) => setSelectedBoxForModal(b)}
+              isFirst={index === 0}
+            />
+          ))}
+        </div>
+      )}
+
+      {selectedBoxForModal && (
+        <ChoosePlanModal
+          box={selectedBoxForModal}
+          plansProps={selectedBoxForModal.apiPlans}
+          onClose={() => {
+            setSelectedBoxForModal(null);
+            onSubscribed?.(); // refresh danh sách gói đã đăng ký ở trên sau khi đóng modal
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function MySubscriptionsPage() {
   const {
     subscriptions,
     todayDeliveries,
-    loading,
+    isLoading,
     error,
     activeTab,
     setActiveTab,
@@ -131,17 +184,17 @@ export default function MySubscriptionsPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={refresh}
-                disabled={loading}
+                disabled={isLoading}
                 className="w-8 h-8 rounded-xl border border-stone-200 bg-white flex items-center justify-center text-stone-400 hover:text-stone-600 transition-all"
               >
                 <RefreshCw
                   size={13}
-                  className={loading ? "animate-spin" : ""}
+                  className={isLoading ? "animate-spin" : ""}
                 />
               </button>
 
               <Link
-                href="/subscribe"
+                href="/products/Subscriber"
                 className="flex items-center gap-1.5 px-3 py-2 bg-[#C85C3C] text-white rounded-xl text-[11px] font-black uppercase tracking-wide hover:bg-[#B14B2D] transition-colors"
               >
                 <Sparkles size={11} />
@@ -175,7 +228,7 @@ export default function MySubscriptionsPage() {
         </div>
 
         {/* Loading */}
-        {loading ? (
+        {isLoading ? (
           <div className="flex flex-col items-center py-24 gap-4">
             <Loader2 size={32} className="animate-spin text-stone-300" />
             <p className="text-sm text-stone-400">Đang tải gói đăng ký...</p>
@@ -194,6 +247,16 @@ export default function MySubscriptionsPage() {
           </div>
         )}
       </div>
+
+      {/* ─── Gói khác dành cho bạn ─── */}
+      {!isLoading && (
+        <OtherPlansSection
+          excludeBoxIds={subscriptions
+            .map((sub) => sub.boxId?._id)
+            .filter(Boolean)}
+          onSubscribed={refresh}
+        />
+      )}
 
       {/* ─── Cancel Dialog ─── */}
       <CancelDialog

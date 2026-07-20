@@ -40,6 +40,8 @@ import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+import RichTextEditor from "../../components/ui/RichTextEditor";
+
 // API Services
 import {
   getAllCategoriesApi,
@@ -339,28 +341,11 @@ export default function AddProductPage() {
               <CardTitle>Mô tả chi tiết</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center gap-1 rounded-md border bg-muted/50 p-1 w-fit">
-                <Toggle size="sm">
-                  <Bold className="h-4 w-4" />
-                </Toggle>
-                <Toggle size="sm">
-                  <Italic className="h-4 w-4" />
-                </Toggle>
-                <Separator orientation="vertical" className="h-4 mx-1" />
-                <Toggle size="sm">
-                  <List className="h-4 w-4" />
-                </Toggle>
-                <Toggle size="sm">
-                  <LinkIcon className="h-4 w-4" />
-                </Toggle>
-              </div>
-              <Textarea
+              <RichTextEditor
                 value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
+                onChange={(html) => setForm({ ...form, description: html })}
                 placeholder="Mô tả các đặc điểm nổi bật của sản phẩm..."
-                className="min-h-50 resize-none"
+                minHeight={220}
               />
             </CardContent>
           </Card>

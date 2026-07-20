@@ -196,3 +196,13 @@ export const STATUS_LABELS = {
 
   expired: "Hết hạn",
 };
+
+/* =============================
+   TEXT
+============================= */
+
+export const getExcerpt = (text, maxLength = 100) => {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength).trim() + "...";
+};
