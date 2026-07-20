@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "../../components/ui/RichTextEditor";
 import {
   Select,
   SelectContent,
@@ -333,7 +333,7 @@ export default function UpdateProductPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Mô tả chi tiết</Label>
-                    <Textarea
+                    <RichTextEditor
                       className="min-h-37.5"
                       value={formData.description}
                       onChange={(e) =>

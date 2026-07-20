@@ -6,6 +6,7 @@ import { AlertCircle, Trash2, Package } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { getBoxByIdApi, deleteBoxApi } from "@/app/services/api/boxService";
+import { getExcerpt } from "@/app/util/formatter";
 
 const fmtPrice = (val) =>
   new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
@@ -107,7 +108,7 @@ export default function DeleteBoxPage() {
                       {box.name}
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">
-                      {box.description}
+                      {getExcerpt(box.description || box.descriptions, 140)}
                     </p>
                     <div className="grid grid-cols-2 gap-3">
                       {[
