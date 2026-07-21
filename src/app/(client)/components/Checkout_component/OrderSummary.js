@@ -2,6 +2,7 @@
  * OrderSummary.js
  * Cột phải — Tóm tắt đơn hàng (sticky sidebar)
  * Hiển thị danh sách items rút gọn + breakdown chi phí
+ * Palette: indigo-600 primary, slate colors, rose-600 for discount/alert
  */
 
 import { Package, Truck } from "lucide-react";
@@ -13,15 +14,15 @@ const fmt = (n) => (n ?? 0).toLocaleString("vi-VN");
 function CostRow({ label, value, highlight, strike, icon }) {
   return (
     <div className="flex justify-between items-center text-sm">
-      <span className={`flex items-center gap-1 ${highlight === "red" ? "text-[#C85C3C]" : highlight === "green" ? "text-emerald-600" : "text-stone-500"}`}>
+      <span className={`flex items-center gap-1 ${highlight === "rose" ? "text-rose-600" : highlight === "emerald" ? "text-emerald-600" : "text-slate-600"}`}>
         {icon}
         {label}
       </span>
       <span
         className={[
           "font-bold",
-          strike ? "line-through text-stone-300" : "",
-          highlight === "red" ? "text-[#C85C3C]" : highlight === "green" ? "text-emerald-600" : "text-[#2C1810]",
+          strike ? "line-through text-slate-300" : "",
+          highlight === "rose" ? "text-rose-600" : highlight === "emerald" ? "text-emerald-600" : "text-slate-900",
         ].join(" ")}
       >
         {value}
@@ -48,23 +49,23 @@ export function OrderSummary({
 
         {/* Sản phẩm thường */}
         {hasProducts && (
-          <div className="space-y-2 pb-3 border-b border-[#F0DDD5]">
-            <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-2">
+          <div className="space-y-2 pb-3 border-b border-slate-200">
+            <p className="text-[10px] text-slate-600 uppercase tracking-widest font-bold mb-2">
               Sản phẩm
             </p>
             {cartItems.slice(0, 3).map((item, i) => (
               <div key={item._id || i} className="flex justify-between items-center gap-2">
-                <span className="text-xs text-stone-500 line-clamp-1 flex-1">
+                <span className="text-xs text-slate-700 line-clamp-1 flex-1">
                   {item.name}{" "}
-                  <span className="text-stone-400">x{item.quantity}</span>
+                  <span className="text-slate-500">x{item.quantity}</span>
                 </span>
-                <span className="text-xs font-bold text-[#2C1810] shrink-0">
+                <span className="text-xs font-bold text-slate-900 shrink-0">
                   {fmt(item.price * item.quantity)}₫
                 </span>
               </div>
             ))}
             {cartItems.length > 3 && (
-              <p className="text-xs text-stone-400">
+              <p className="text-xs text-slate-600">
                 +{cartItems.length - 3} sản phẩm khác
               </p>
             )}
@@ -73,19 +74,19 @@ export function OrderSummary({
 
         {/* Subscribe */}
         {hasSubscribes && (
-          <div className="space-y-2 py-3 border-b border-[#F0DDD5]">
-            <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-2">
+          <div className="space-y-2 py-3 border-b border-slate-200">
+            <p className="text-[10px] text-slate-600 uppercase tracking-widest font-bold mb-2">
               Subscribe
             </p>
             {subscribeItems.map((sub) => (
               <div key={sub.key} className="flex justify-between items-start gap-2">
                 <div className="flex-1 min-w-0">
-                  <span className="text-xs text-stone-500 line-clamp-1 block">
+                  <span className="text-xs text-slate-700 line-clamp-1 block">
                     {sub.boxName}
                   </span>
-                  <span className="text-[10px] text-stone-400">{sub.planLabel}</span>
+                  <span className="text-[10px] text-slate-600">{sub.planLabel}</span>
                 </div>
-                <span className="text-xs font-bold text-[#2C1810] shrink-0">
+                <span className="text-xs font-bold text-slate-900 shrink-0">
                   {fmt(sub.totalPrice)}₫
                 </span>
               </div>
@@ -105,28 +106,28 @@ export function OrderSummary({
             <CostRow
               label="Giảm giá"
               value={`-${fmt(discount)}₫`}
-              highlight="green"
+              highlight="rose"
             />
           )}
           <CostRow
             label="Vận chuyển"
             value={shippingFee === 0 ? "Miễn phí" : `${fmt(shippingFee)}₫`}
-            highlight={shippingFee === 0 ? "green" : null}
+            highlight={shippingFee === 0 ? "emerald" : null}
             icon={<Truck size={12} />}
           />
           {shippingFee > 0 && (
-            <p className="text-[10px] text-stone-400 pl-4">
+            <p className="text-[10px] text-slate-600 pl-4">
               Miễn phí ship cho đơn sản phẩm từ 500.000₫
             </p>
           )}
         </div>
 
         {/* Total */}
-        <div className="flex justify-between items-center pt-4 border-t border-[#F0DDD5] mt-3">
-          <span className="text-sm font-black text-[#2C1810] uppercase tracking-wider">
+        <div className="flex justify-between items-center pt-4 border-t border-slate-200 mt-3">
+          <span className="text-sm font-black text-slate-900 uppercase tracking-wider">
             Tổng cộng
           </span>
-          <span className="text-2xl font-black text-[#C85C3C]">
+          <span className="text-2xl font-black text-indigo-600">
             {fmt(finalTotal)}₫
           </span>
         </div>
@@ -139,7 +140,7 @@ export function OrderSummary({
           { icon: "🔄", text: "Đổi trả miễn phí trong 7 ngày" },
           { icon: "🎁", text: "Đóng gói quà tặng miễn phí" },
         ].map(({ icon, text }) => (
-          <div key={text} className="flex items-center gap-2 text-stone-400">
+          <div key={text} className="flex items-center gap-2 text-slate-600">
             <span className="text-base">{icon}</span>
             <span className="text-xs">{text}</span>
           </div>

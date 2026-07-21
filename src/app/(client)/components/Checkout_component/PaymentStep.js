@@ -1,6 +1,7 @@
 /**
  * PaymentStep.js
  * Bước 3 — Chọn phương thức thanh toán + mã giảm giá + đặt hàng
+ * Palette: indigo-600 primary, slate colors, rose-600 accent
  */
 
 "use client";
@@ -17,19 +18,19 @@ function PaymentMethodCard({ method, selected, onSelect }) {
   return (
     <label
       className={[
-        "flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all",
+        "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
         selected
-          ? "border-[#C85C3C] bg-[#FFF5F2]"
-          : "border-[#F0DDD5] bg-[#FFFAF8] hover:border-[#C85C3C]/40",
+          ? "border-indigo-600 bg-indigo-50"
+          : "border-slate-200 bg-white hover:border-indigo-600/40 hover:shadow-sm",
       ].join(" ")}
     >
       {/* Custom radio */}
       <div
         className={[
-          "w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors",
+          "w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors duration-200",
           selected
-            ? "border-[#C85C3C] bg-[#C85C3C]"
-            : "border-stone-300 bg-white",
+            ? "border-indigo-600 bg-indigo-600"
+            : "border-slate-300 bg-white",
         ].join(" ")}
       >
         {selected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -44,8 +45,8 @@ function PaymentMethodCard({ method, selected, onSelect }) {
       />
       <span className="text-xl">{method.icon}</span>
       <div>
-        <p className="text-sm font-bold text-[#2C1810]">{method.label}</p>
-        <p className="text-xs text-stone-400">{method.desc}</p>
+        <p className="text-sm font-bold text-slate-900">{method.label}</p>
+        <p className="text-xs text-slate-600">{method.desc}</p>
       </div>
     </label>
   );
@@ -61,16 +62,16 @@ function CouponInput({ coupon, setCoupon, couponApplied, discount, onApply }) {
           onChange={(e) => setCoupon(e.target.value.toUpperCase())}
           placeholder="Nhập mã (thử: TOTMART10)"
           disabled={couponApplied}
-          className="flex-1 bg-[#FFFAF8] border border-[#F0DDD5] rounded-xl px-3.5 py-2.5 text-sm text-[#2C1810] placeholder-stone-300 focus:outline-none focus:border-[#C85C3C] focus:ring-2 focus:ring-[#C85C3C]/10 transition-all uppercase disabled:opacity-60"
+          className="flex-1 bg-white border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 transition-all duration-200 uppercase disabled:opacity-60"
         />
         <button
           onClick={onApply}
           disabled={!coupon.trim() || couponApplied}
           className={[
-            "px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
+            "px-4 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all duration-200",
             couponApplied
               ? "bg-emerald-500 text-white cursor-default"
-              : "bg-[#C85C3C] hover:bg-[#B14B2D] disabled:bg-stone-200 disabled:text-stone-400 text-white",
+              : "bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white",
           ].join(" ")}
         >
           {couponApplied ? (
@@ -142,7 +143,7 @@ export function PaymentStep({
       </SectionCard>
 
       {/* Security note */}
-      <div className="flex items-center gap-2 text-stone-400 px-1">
+      <div className="flex items-center gap-2 text-slate-600 px-1">
         <ShieldCheck size={13} className="text-emerald-500 shrink-0" />
         <p className="text-xs">
           Thông tin thanh toán được mã hóa và bảo mật tuyệt đối.
@@ -153,14 +154,14 @@ export function PaymentStep({
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="flex-1 border-2 border-[#F0DDD5] text-stone-500 py-3.5 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:border-[#C85C3C]/30 hover:text-[#C85C3C] transition-all"
+          className="flex-1 border-2 border-slate-200 text-slate-600 py-3.5 rounded-lg font-bold uppercase tracking-widest text-[11px] hover:border-indigo-600/30 hover:text-indigo-600 transition-all duration-200"
         >
           ← Quay lại
         </button>
         <button
           onClick={onPlaceOrder}
           disabled={submitting}
-          className="flex-2 bg-[#C85C3C] hover:bg-[#B14B2D] disabled:bg-stone-200 disabled:text-stone-400 text-white py-3.5 rounded-2xl font-black uppercase tracking-widest text-[12px] transition-all active:scale-[0.98] shadow-lg shadow-[#C85C3C]/20 flex items-center justify-center gap-2"
+          className="flex-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white py-3.5 rounded-lg font-black uppercase tracking-widest text-[12px] transition-all duration-200 active:scale-[0.98] shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
         >
           {submitting ? (
             <>

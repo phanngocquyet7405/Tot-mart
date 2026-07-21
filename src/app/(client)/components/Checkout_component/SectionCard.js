@@ -1,15 +1,15 @@
 /**
  * SectionCard.js
  * Card wrapper dùng chung cho mọi section trong checkout
- * Palette: warm cream / terracotta — nhất quán với toàn TotMart
+ * Palette: indigo-600 primary, slate colors
  */
 
 export function SectionCard({ title, icon, children }) {
   return (
-    <div className="bg-white border border-[#F0DDD5] rounded-2xl p-6 shadow-sm">
+    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="flex items-center gap-2 mb-5">
-        <span className="text-[#C85C3C]">{icon}</span>
-        <h2 className="text-sm font-black text-[#2C1810] uppercase tracking-widest">
+        <span className="text-indigo-600">{icon}</span>
+        <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">
           {title}
         </h2>
       </div>

@@ -1,6 +1,7 @@
 /**
  * CheckoutStepper.js
  * Thanh bước tiến (Step indicator) — 3 bước: Địa chỉ → Kiểm tra → Thanh toán
+ * Palette: indigo-600 primary, slate-600 secondary
  */
 
 import { MapPin, Package, CreditCard, CheckCircle2 } from "lucide-react";
@@ -25,24 +26,24 @@ export function CheckoutStepper({ currentStep, onGoBack }) {
                 onClick={() => isDone && onGoBack(s.id)}
                 disabled={!isDone}
                 className={[
-                  "w-9 h-9 rounded-full flex items-center justify-center border font-black transition-all",
+                  "w-9 h-9 rounded-full flex items-center justify-center border font-black transition-all duration-200",
                   isActive
-                    ? "bg-[#C85C3C] border-[#C85C3C] text-white shadow-lg shadow-[#C85C3C]/25"
+                    ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-600/25"
                     : isDone
-                      ? "bg-[#FFF0EB] border-[#C85C3C]/40 text-[#C85C3C] cursor-pointer hover:border-[#C85C3C]"
-                      : "bg-stone-100 border-stone-200 text-stone-300 cursor-default",
+                      ? "bg-indigo-50 border-indigo-600/40 text-indigo-600 cursor-pointer hover:border-indigo-600 hover:bg-indigo-100"
+                      : "bg-slate-100 border-slate-200 text-slate-300 cursor-default",
                 ].join(" ")}
               >
                 {isDone ? <CheckCircle2 size={16} /> : <Icon size={15} />}
               </button>
               <span
                 className={[
-                  "text-[10px] font-bold uppercase tracking-wider",
+                  "text-[10px] font-bold uppercase tracking-wider transition-colors duration-200",
                   isActive
-                    ? "text-[#C85C3C]"
+                    ? "text-indigo-600"
                     : isDone
-                      ? "text-stone-400"
-                      : "text-stone-300",
+                      ? "text-slate-600"
+                      : "text-slate-400",
                 ].join(" ")}
               >
                 {s.label}
@@ -52,8 +53,8 @@ export function CheckoutStepper({ currentStep, onGoBack }) {
             {i < STEPS.length - 1 && (
               <div
                 className={[
-                  "flex-1 h-px mx-2 mb-4 transition-colors",
-                  isDone ? "bg-[#C85C3C]/30" : "bg-stone-200",
+                  "flex-1 h-px mx-2 mb-4 transition-colors duration-200",
+                  isDone ? "bg-indigo-600/30" : "bg-slate-200",
                 ].join(" ")}
               />
             )}
