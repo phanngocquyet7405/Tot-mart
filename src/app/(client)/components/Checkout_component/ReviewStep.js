@@ -1,6 +1,7 @@
 /**
  * ReviewStep.js
  * Bước 2 — Kiểm tra đơn hàng: sản phẩm, gói subscribe, địa chỉ đã chọn
+ * Palette: indigo-600 primary, slate colors
  */
 
 "use client";
@@ -16,7 +17,7 @@ const fmt = (n) => (n ?? 0).toLocaleString("vi-VN");
 function ProductRow({ item }) {
   return (
     <div className="flex gap-3 items-center">
-      <div className="w-14 h-14 rounded-xl bg-[#FFF5F2] overflow-hidden shrink-0 border border-[#F0DDD5] relative">
+      <div className="w-14 h-14 rounded-lg bg-indigo-50 overflow-hidden shrink-0 border border-slate-200 relative">
         {item.image && (
           <Image
             src={item.image}
@@ -28,12 +29,12 @@ function ProductRow({ item }) {
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-[#2C1810] line-clamp-1">{item.name}</p>
-        <p className="text-xs text-stone-400 mt-0.5">
+        <p className="text-sm font-bold text-slate-900 line-clamp-1">{item.name}</p>
+        <p className="text-xs text-slate-600 mt-0.5">
           x{item.quantity} · {fmt(item.price)}₫/sp
         </p>
       </div>
-      <p className="text-sm font-black text-[#C85C3C] shrink-0">
+      <p className="text-sm font-black text-indigo-600 shrink-0">
         {fmt(item.price * item.quantity)}₫
       </p>
     </div>
@@ -44,7 +45,7 @@ function ProductRow({ item }) {
 function SubscribeRow({ sub }) {
   return (
     <div className="flex gap-3 items-center">
-      <div className="w-14 h-14 rounded-xl bg-[#FFF5F2] overflow-hidden shrink-0 border border-[#F0DDD5] relative">
+      <div className="w-14 h-14 rounded-lg bg-indigo-50 overflow-hidden shrink-0 border border-slate-200 relative">
         {sub.boxImage && (
           <Image
             src={sub.boxImage}
@@ -56,10 +57,10 @@ function SubscribeRow({ sub }) {
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-[#2C1810] line-clamp-1">{sub.boxName}</p>
+        <p className="text-sm font-bold text-slate-900 line-clamp-1">{sub.boxName}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
-          <CalendarDays size={11} className="text-[#C85C3C]" />
-          <p className="text-xs text-stone-400">
+          <CalendarDays size={11} className="text-indigo-600" />
+          <p className="text-xs text-slate-600">
             {sub.planLabel} · {sub.totalDeliveries} lần giao
           </p>
         </div>
@@ -69,7 +70,7 @@ function SubscribeRow({ sub }) {
           </p>
         )}
       </div>
-      <p className="text-sm font-black text-[#C85C3C] shrink-0">
+      <p className="text-sm font-black text-indigo-600 shrink-0">
         {fmt(sub.totalPrice)}₫
       </p>
     </div>
@@ -80,20 +81,20 @@ function SubscribeRow({ sub }) {
 function AddressSummary({ addr, user, onEdit }) {
   return (
     <div>
-      <p className="text-sm font-bold text-[#2C1810]">
+      <p className="text-sm font-bold text-slate-900">
         {addr.fullName || user?.name}
       </p>
       {addr.phone && (
-        <p className="text-xs text-stone-500 mt-0.5">{addr.phone}</p>
+        <p className="text-xs text-slate-600 mt-0.5">{addr.phone}</p>
       )}
-      <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+      <p className="text-xs text-slate-500 mt-1 leading-relaxed">
         {[addr.street, addr.ward, addr.district, addr.province]
           .filter(Boolean)
           .join(", ")}
       </p>
       <button
         onClick={onEdit}
-        className="text-xs text-[#C85C3C] hover:text-[#B14B2D] font-bold mt-2 transition-colors"
+        className="text-xs text-indigo-600 hover:text-indigo-700 font-bold mt-2 transition-colors duration-200"
       >
         Thay đổi
       </button>
@@ -166,13 +167,13 @@ export function ReviewStep({
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="flex-1 border-2 border-[#F0DDD5] text-stone-500 py-3.5 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:border-[#C85C3C]/30 hover:text-[#C85C3C] transition-all"
+          className="flex-1 border-2 border-slate-200 text-slate-600 py-3.5 rounded-lg font-bold uppercase tracking-widest text-[11px] hover:border-indigo-600/30 hover:text-indigo-600 transition-all duration-200"
         >
           ← Quay lại
         </button>
         <button
           onClick={onNext}
-          className="flex-[2] bg-[#C85C3C] hover:bg-[#B14B2D] text-white py-3.5 rounded-2xl font-black uppercase tracking-widest text-[12px] transition-all active:scale-[0.98] shadow-lg shadow-[#C85C3C]/20"
+          className="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-lg font-black uppercase tracking-widest text-[12px] transition-all duration-200 active:scale-[0.98] shadow-lg shadow-indigo-600/20"
         >
           Tiếp theo → Thanh toán
         </button>

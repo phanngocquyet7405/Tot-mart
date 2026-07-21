@@ -24,17 +24,17 @@ function AddressRadioCard({ addr, index, selected, user, onSelect }) {
   return (
     <label
       className={[
-        "flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all",
+        "flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
         selected
-          ? "border-[#C85C3C] bg-[#FFF5F2]"
-          : "border-[#F0DDD5] bg-[#FFFAF8] hover:border-[#C85C3C]/40",
+          ? "border-indigo-600 bg-indigo-50"
+          : "border-slate-200 bg-white hover:border-indigo-600/40 hover:shadow-sm",
       ].join(" ")}
     >
       {/* Radio dot */}
       <div
         className={[
-          "mt-0.5 w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors",
-          selected ? "border-[#C85C3C] bg-[#C85C3C]" : "border-stone-300 bg-white",
+          "mt-0.5 w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors duration-200",
+          selected ? "border-indigo-600 bg-indigo-600" : "border-slate-300 bg-white",
         ].join(" ")}
       >
         {selected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -48,19 +48,19 @@ function AddressRadioCard({ addr, index, selected, user, onSelect }) {
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-bold text-[#2C1810]">
+          <p className="text-sm font-bold text-slate-900">
             {addr.fullName || addr.name || user?.name}
           </p>
           {index === 0 && (
-            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-[#C85C3C] text-white uppercase tracking-wide">
+            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-indigo-600 text-white uppercase tracking-wide">
               Mặc định
             </span>
           )}
         </div>
         {addr.phone && (
-          <p className="text-xs text-stone-500 mt-0.5">{addr.phone}</p>
+          <p className="text-xs text-slate-600 mt-0.5">{addr.phone}</p>
         )}
-        <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
           {[addr.street, addr.ward, addr.district, addr.province]
             .filter(Boolean)
             .join(", ")}
@@ -78,17 +78,17 @@ function NewAddressForm({ newAddress, onChange }) {
       exit={{ opacity: 0, height: 0 }}
       className="overflow-hidden"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-4 border-t border-[#F0DDD5]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-200">
         {ADDRESS_FIELDS.map(({ key, label, full }) => (
           <div key={key} className={full ? "sm:col-span-2" : ""}>
-            <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold block mb-1.5">
+            <label className="text-[10px] text-slate-600 uppercase tracking-widest font-bold block mb-1.5">
               {label}
             </label>
             <input
               value={newAddress[key]}
               onChange={(e) => onChange(key, e.target.value)}
               placeholder={label}
-              className="w-full bg-[#FFFAF8] border border-[#F0DDD5] rounded-xl px-3.5 py-2.5 text-sm text-[#2C1810] placeholder-stone-300 focus:outline-none focus:border-[#C85C3C] focus:ring-2 focus:ring-[#C85C3C]/10 transition-all"
+              className="w-full bg-white border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 transition-all duration-200"
             />
           </div>
         ))}
@@ -144,7 +144,7 @@ export function AddressStep({
             {addresses.length > 2 && (
               <button
                 onClick={() => setShowAllAddresses(!showAllAddresses)}
-                className="text-xs text-[#C85C3C] hover:text-[#B14B2D] flex items-center gap-1 font-bold transition-colors"
+                className="text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1 font-bold transition-colors duration-200"
               >
                 {showAllAddresses ? (
                   <><ChevronUp size={14} /> Thu gọn</>
@@ -160,10 +160,10 @@ export function AddressStep({
         <button
           onClick={onToggleAddNew}
           className={[
-            "text-xs font-bold flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 transition-all",
+            "text-xs font-bold flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 transition-all duration-200",
             addingNew
-              ? "border-[#C85C3C] text-[#C85C3C] bg-[#FFF5F2]"
-              : "border-[#F0DDD5] text-stone-400 hover:border-[#C85C3C]/40 hover:text-[#C85C3C]",
+              ? "border-indigo-600 text-indigo-600 bg-indigo-50"
+              : "border-slate-200 text-slate-600 hover:border-indigo-600/40 hover:text-indigo-600",
           ].join(" ")}
         >
           <Plus size={12} />
@@ -184,7 +184,7 @@ export function AddressStep({
           onChange={(e) => setNote(e.target.value)}
           rows={3}
           placeholder="Ghi chú cho người giao hàng (không bắt buộc)..."
-          className="w-full bg-[#FFFAF8] border border-[#F0DDD5] rounded-xl px-3.5 py-2.5 text-sm text-[#2C1810] placeholder-stone-300 focus:outline-none focus:border-[#C85C3C] focus:ring-2 focus:ring-[#C85C3C]/10 transition-all resize-none"
+          className="w-full bg-white border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 transition-all duration-200 resize-none"
         />
       </SectionCard>
 
@@ -192,7 +192,7 @@ export function AddressStep({
       <button
         onClick={onNext}
         disabled={!canProceed}
-        className="w-full bg-[#C85C3C] hover:bg-[#B14B2D] disabled:bg-stone-200 disabled:text-stone-400 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[12px] transition-all active:scale-[0.98] disabled:cursor-not-allowed shadow-lg shadow-[#C85C3C]/20"
+        className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white py-4 rounded-xl font-black uppercase tracking-widest text-[12px] transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed shadow-lg shadow-indigo-600/20"
       >
         Tiếp theo → Kiểm tra đơn
       </button>

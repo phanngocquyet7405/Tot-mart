@@ -23,16 +23,21 @@ import { OrderSuccessScreen } from "../components/Checkout_component/OrderSucces
 // ─── Loading screen ────────────────────────────────────────────────────────────
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-[#FFFAF8] flex items-center justify-center">
+    <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="animate-spin text-[#C85C3C]" size={32} />
-        <p className="text-sm text-stone-400 font-medium">Đang tải...</p>
+        <Loader2 className="animate-spin text-indigo-600" size={32} />
+        <p className="text-sm text-slate-600 font-medium">Đang tải...</p>
       </div>
     </div>
   );
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
+/**
+ * page.jsx — Trang Checkout
+ * Route: /checkout
+ * Palette: indigo-600 primary, slate colors, rose-600 accent
+ */
 export default function CheckoutPage() {
   const router = useRouter();
   const checkout = useCheckout();
@@ -44,11 +49,11 @@ export default function CheckoutPage() {
   if (!checkout.isMounted || checkout.loading) return <LoadingScreen />;
 
   return (
-    <div className="min-h-screen bg-[#FFFAF8] text-[#2C1810]">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* Ambient background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#C85C3C]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 right-0 w-80 h-80 bg-[#F0DDD5]/30 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 right-0 w-80 h-80 bg-indigo-100/30 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
@@ -56,15 +61,15 @@ export default function CheckoutPage() {
         <div className="flex items-center gap-4 mb-10">
           <button
             onClick={() => router.back()}
-            className="w-9 h-9 rounded-full border-2 border-[#F0DDD5] flex items-center justify-center text-stone-400 hover:border-[#C85C3C]/40 hover:text-[#C85C3C] transition-all bg-white"
+            className="w-9 h-9 rounded-full border-2 border-slate-200 flex items-center justify-center text-slate-600 hover:border-indigo-600/50 hover:text-indigo-600 transition-all duration-200 bg-white"
           >
             <ArrowLeft size={16} />
           </button>
           <div>
-            <h1 className="text-xl font-black text-[#2C1810] tracking-tight">
+            <h1 className="text-xl font-black text-slate-900 tracking-tight">
               Thanh toán
             </h1>
-            <p className="text-xs text-stone-400 mt-0.5">
+            <p className="text-xs text-slate-600 mt-0.5">
               {checkout.hasProducts && `${checkout.cartCount} sản phẩm`}
               {checkout.hasProducts && checkout.hasSubscribes && " · "}
               {checkout.hasSubscribes &&

@@ -93,10 +93,10 @@ function TodayDeliveryBanner({ deliveries }) {
 
 // ─── Gói khác dành cho bạn ─────────────────────────────────────────────────
 function OtherPlansSection({ excludeBoxIds, onSubscribed }) {
-  const { otherPlans, isLoading } = useOtherPlans(excludeBoxIds);
+  const { plans, isLoading } = useOtherPlans(excludeBoxIds);
   const [selectedBoxForModal, setSelectedBoxForModal] = useState(null);
 
-  if (!isLoading && otherPlans.length === 0) return null;
+  if (!isLoading && (!plans || plans.length === 0)) return null;
 
   return (
     <div className="max-w-5xl mx-auto px-4 pb-16">
@@ -114,7 +114,7 @@ function OtherPlansSection({ excludeBoxIds, onSubscribed }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {otherPlans.map((box, index) => (
+          {plans && plans.map((box, index) => (
             <PlanCard
               key={box._id}
               box={box}
