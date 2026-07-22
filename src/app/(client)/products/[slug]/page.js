@@ -17,6 +17,9 @@ import { ProductInfoTabs } from "../../components/Product/ProductInfoTabs";
 import { RelatedProducts } from "../../components/Product/RelatedProducts";
 import { ProductLoadingState } from "../../components/Product/ProductLoadingState";
 import { ProductNotFoundState } from "../../components/Product/ProductNotFoundState";
+import { BulkDiscounts } from "../../components/Product/Bulk_Discounts";
+import { FrequentlyBought } from "../../components/Product/FrequentlyBought";
+import { GiftOptions } from "../../components/Product/GiftOptions";
 
 export default function ProductDetailPage({ params: paramsPromise }) {
   const params = use(paramsPromise);
@@ -35,6 +38,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
     isAddingToCart,
     isCartOpen,
     setIsCartOpen,
+    selectQuantity,
     increaseQty,
     decreaseQty,
     handleAddToCart,
@@ -104,19 +108,28 @@ export default function ProductDetailPage({ params: paramsPromise }) {
             discountPercent={product.discount || 0}
           />
 
-          <ProductPurchasePanel
-            product={product}
-            finalPrice={finalPrice}
-            quantity={quantity}
-            onIncrease={increaseQty}
-            onDecrease={decreaseQty}
-            isAddingToCart={isAddingToCart}
-            onAddToCart={handleAddToCart}
-            isWishlisted={isWishlisted}
-            onWishlist={handleWishlist}
-            onShare={handleShare}
-            fmtPrice={fmtPrice}
-          />
+          <div className="lg:col-span-5 space-y-6">
+            <ProductPurchasePanel
+              product={product}
+              finalPrice={finalPrice}
+              quantity={quantity}
+              onIncrease={increaseQty}
+              onDecrease={decreaseQty}
+              isAddingToCart={isAddingToCart}
+              onAddToCart={handleAddToCart}
+              isWishlisted={isWishlisted}
+              onWishlist={handleWishlist}
+              onShare={handleShare}
+              fmtPrice={fmtPrice}
+            />
+
+            <BulkDiscounts
+              basePrice={product.price}
+              onSelectQuantity={selectQuantity}
+            />
+
+            <GiftOptions />
+          </div>
         </div>
 
         <ProductInfoTabs
@@ -124,6 +137,10 @@ export default function ProductDetailPage({ params: paramsPromise }) {
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
+
+        <div className="mt-16">
+          <FrequentlyBought products={relatedProducts} />
+        </div>
 
         <RelatedProducts products={relatedProducts} fmtPrice={fmtPrice} />
       </div>

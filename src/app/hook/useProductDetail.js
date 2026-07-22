@@ -87,6 +87,16 @@ export function useProductDetail(slug) {
     });
   }, [product]);
 
+  // Dùng khi chọn bậc số lượng từ BulkDiscounts — kẹp theo tồn kho giống
+  // increaseQty để không bao giờ vượt quá product.stock.
+  const selectQuantity = useCallback(
+    (qty) => {
+      const maxStock = product?.stock ?? 99;
+      setQuantity(Math.max(1, Math.min(qty, maxStock)));
+    },
+    [product],
+  );
+
   const decreaseQty = useCallback(() => {
     setQuantity((q) => (q > 1 ? q - 1 : q));
   }, []);
@@ -159,6 +169,7 @@ export function useProductDetail(slug) {
     isAddingToCart,
     isCartOpen,
     setIsCartOpen,
+    selectQuantity,
     increaseQty,
     decreaseQty,
     handleAddToCart,
