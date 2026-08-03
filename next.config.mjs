@@ -2,12 +2,15 @@
 const nextConfig = {
   reactCompiler: true,
 
-  // Proxy mọi request /api/* → backend thật để tránh CORS
   async rewrites() {
+    const rawApiUrl =
+      process.env.NEXT_PUBLIC_API_URL || "https://totmartapi.onrender.com/api";
+    const apiUrl = rawApiUrl.replace(/\/$/, "");
+
     return [
       {
         source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_URL || "https://totmartapi.onrender.com/api"}/:path*`,
+        destination: `${apiUrl}/:path*`,
       },
     ];
   },
@@ -15,31 +18,13 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "res.cloudinary.com",
-        pathname: "/**",
+        protocol: "http",
+        hostname: "**",
       },
       {
         protocol: "https",
-        hostname: "images.unsplash.com",
-        pathname: "/**",
+        hostname: "**",
       },
-      {
-        protocol: "https",
-        hostname: "v0.blob.com", // Lưu ý: v0 thường dùng v0.blob.com hoặc tên miền tương tự
-        pathname: "/**",
-      },
-      // Thêm domain đang gây lỗi để test
-      {
-        protocol: "https",
-        hostname: "example.com",
-        pathname: "/**",
-      },
-      // Nếu bạn muốn cho phép TOÀN BỘ internet (cẩn thận về bảo mật)
-      // {
-      //   protocol: "https",
-      //   hostname: "**",
-      // },
     ],
   },
 };

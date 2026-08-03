@@ -161,7 +161,7 @@
 
   /* Hero section styling */
   .hero-gradient {
-    @apply bg-gradient-to-r from-green-900 via-green-800 to-green-900;
+    @apply bg-linear-to-r from-green-900 via-green-800 to-green-900;
   }
 
   /* Bento grid featured item */
@@ -254,6 +254,31 @@
   to {
     opacity: 1;
   }
+}
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-33.333333%);
+  }
+}
+
+@keyframes marquee-reverse {
+  0% {
+    transform: translateX(-33.333333%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee-reverse {
+  animation: marquee-reverse 25s linear infinite;
 }
 
 /* Apply animations */

@@ -4,8 +4,9 @@ import { useState } from "react";
 import { AppSidebar } from "./components/app_sidebar";
 import { AdminHeader } from "./components/admin_header";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { withAdmin } from "../middleware/roleMiddleware";
 
-export default function AdminLayout({ children }) {
+const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
@@ -17,4 +18,6 @@ export default function AdminLayout({ children }) {
       </SidebarInset>
     </SidebarProvider>
   );
-}
+};
+
+export default withAdmin(AdminLayout);

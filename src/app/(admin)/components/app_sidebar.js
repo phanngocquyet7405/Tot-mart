@@ -87,7 +87,7 @@ const menuItems = [
         href: "/admin-subscribe-plan",
       },
       {
-        title: "Danh sách các gói được đăng ký",
+        title: "Các gói đăng ký",
         icon: Album,
         href: "/admin-subscribe-plan/registered",
       },

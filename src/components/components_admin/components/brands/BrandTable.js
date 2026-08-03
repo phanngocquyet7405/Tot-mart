@@ -1,122 +1,133 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { Pencil, Trash2, Globe, ExternalLink } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowUpDown,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Globe,
+  ExternalLink,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { AdminEmptyState } from "@/app/(admin)/components/shared";
 
-export default function BrandTable({ brands = [], onDeleteClick }) {
-  const [hoveredRow, setHoveredRow] = useState(null);
+export function BrandTable({ brands, onDelete }) {
+  if (brands.length === 0) {
+    return <AdminEmptyState message="Không tìm thấy thương hiệu nào." />;
+  }
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-zinc-200 bg-zinc-50/75 text-xs uppercase tracking-widest text-zinc-500">
-            <th className="px-6 py-4 text-left font-semibold">Logo</th>
-            <th className="px-6 py-4 text-left font-semibold">
-              Tên thương hiệu
-            </th>
-            <th className="px-6 py-4 text-left font-semibold">Mô tả</th>
-            <th className="px-6 py-4 text-left font-semibold">Website</th>
-            <th className="px-6 py-4 text-right font-semibold">Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {brands.length === 0 ? (
-            <tr>
-              <td colSpan={5} className="px-6 py-16 text-center text-zinc-400">
-                <div className="flex flex-col items-center gap-2">
-                  <span className="text-4xl">🏷️</span>
-                  <span>Chưa có thương hiệu nào</span>
-                </div>
-              </td>
-            </tr>
-          ) : (
-            brands.map((brand) => (
-              <tr
-                key={brand._id}
-                className="border-b border-zinc-100 transition-colors hover:bg-zinc-50/80"
-                onMouseEnter={() => setHoveredRow(brand._id)}
-                onMouseLeave={() => setHoveredRow(null)}
-              >
-                <td className="px-6 py-4">
-                  <div className="relative h-10 w-10 flex items-center justify-center">
-                    {brand.logo ? (
-                      <Image
-                        src={brand.logo}
-                        alt={brand.name}
-                        fill
-                        className="h-10 w-10 rounded-lg object-contain bg-zinc-50 border border-zinc-100 p-1"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.nextSibling.style.display = "flex";
-                        }}
-                      />
-                    ) : null}
-                    <div
-                      className={`h-10 w-10 rounded-lg bg-zinc-100 items-center justify-center text-zinc-600 text-xs font-bold border border-zinc-200 ${brand.logo ? "hidden" : "flex"}`}
-                    >
-                      {brand.name?.charAt(0)?.toUpperCase()}
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="font-semibold text-zinc-900">
-                    {brand.name}
-                  </span>
-                  {brand.slug && (
-                    <p className="text-xs text-zinc-400 mt-0.5">
-                      /{brand.slug}
-                    </p>
-                  )}
-                </td>
-                <td className="px-6 py-4 text-zinc-600 max-w-xs">
-                  <span className="line-clamp-2">
-                    {brand.description || "—"}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  {brand.website ? (
-                    <a
-                      href={brand.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-700 hover:underline transition-colors text-xs font-medium"
-                    >
-                      <Globe size={13} />
-                      <span className="max-w-30 truncate">
-                        {brand.website.replace(/^https?:\/\//, "")}
-                      </span>
-                      <ExternalLink size={11} />
-                    </a>
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-20">Logo</TableHead>
+            <TableHead>
+              <div className="flex items-center gap-1 cursor-pointer">
+                Tên thương hiệu <ArrowUpDown size={14} />
+              </div>
+            </TableHead>
+            <TableHead className="hidden md:table-cell">Mô tả</TableHead>
+            <TableHead>Website</TableHead>
+            <TableHead className="text-right">Hành động</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {brands.map((brand) => (
+            <TableRow key={brand._id}>
+              <TableCell>
+                <div className="h-10 w-10 relative rounded-lg border bg-white p-1 overflow-hidden">
+                  {brand.logo ? (
+                    <Image
+                      src={brand.logo}
+                      alt={brand.name}
+                      fill
+                      unoptimized
+                      className="object-contain"
+                    />
                   ) : (
-                    <span className="text-zinc-300">—</span>
+                    <div className="flex h-full w-full items-center justify-center bg-zinc-100 text-xs font-bold text-zinc-500">
+                      {brand.name?.charAt(0).toUpperCase()}
+                    </div>
                   )}
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center justify-end gap-2">
-                    <Link
-                      href={`/admin-brands/update?id=${brand._id}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 border border-indigo-200 px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-100 hover:border-indigo-300 transition-all"
+                </div>
+              </TableCell>
+              <TableCell className="font-medium">
+                <div>{brand.name}</div>
+                <div className="text-xs text-muted-foreground font-normal">
+                  /{brand.slug}
+                </div>
+              </TableCell>
+              <TableCell className="max-w-50 truncate hidden md:table-cell text-muted-foreground">
+                {brand.description || "—"}
+              </TableCell>
+              <TableCell>
+                {brand.website ? (
+                  <a
+                    href={brand.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-indigo-500 hover:underline text-xs"
+                  >
+                    <Globe size={12} />
+                    <span className="max-w-30 truncate">
+                      {brand.website.replace(/^https?:\/\//, "")}
+                    </span>
+                    <ExternalLink size={10} />
+                  </a>
+                ) : (
+                  "—"
+                )}
+              </TableCell>
+              <TableCell className="text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreHorizontal size={16} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Tùy chọn</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/admin-brands/update?id=${brand._id}`}
+                        className="cursor-pointer"
+                      >
+                        <Pencil size={14} className="mr-2" /> Sửa thông tin
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive cursor-pointer"
+                      onClick={() => onDelete(brand)}
                     >
-                      <Pencil size={12} />
-                      Sửa
-                    </Link>
-                    <button
-                      onClick={() => onDeleteClick?.(brand)}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 hover:border-red-300 transition-all"
-                    >
-                      <Trash2 size={12} />
-                      Xóa
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+                      <Trash2 size={14} className="mr-2" /> Xóa thương hiệu
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

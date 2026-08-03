@@ -44,7 +44,7 @@ export default function BrandPage() {
       </div>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-900 to-green-800 text-white py-12 md:py-16">
+      <div className="bg-linear-to-r from-green-900 to-green-800 text-white py-12 md:py-16">
         <div className="container mx-auto px-4">
           <p className="text-sm font-semibold uppercase tracking-wider mb-3 text-green-200">
             Curated Excellence
@@ -91,11 +91,7 @@ export default function BrandPage() {
                   </label>
                 </li>
                 <li className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="fair-trade"
-                    className="w-4 h-4"
-                  />
+                  <input type="checkbox" id="fair-trade" className="w-4 h-4" />
                   <label htmlFor="fair-trade" className="text-gray-700">
                     Fair Trade Partners
                   </label>
@@ -151,8 +147,7 @@ export default function BrandPage() {
                           {brand.name}
                         </h3>
                         <p className="text-sm opacity-90">
-                          {brand.tagline ||
-                            "Premium organic goods"}
+                          {brand.tagline || "Premium organic goods"}
                         </p>
                       </div>
                     </Link>

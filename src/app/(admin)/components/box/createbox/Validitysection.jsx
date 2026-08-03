@@ -15,14 +15,17 @@ export function ValiditySection({ form, errors, onChange }) {
   // FIX: Giới hạn không cho chọn ngày trong quá khứ
   const today = new Date().toISOString().split("T")[0];
 
+  const inputClass =
+    "border-[#F0DDD5] bg-[#FFFAF8] text-[#2C1810] focus-visible:border-[#C85C3C] focus-visible:ring-[#C85C3C]/30";
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
       {/* Label section */}
       <div>
-        <h3 className="text-sm font-medium text-foreground">
+        <h3 className="text-sm font-medium text-[#2C1810]">
           Thời hạn hiệu lực
         </h3>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-xs text-[#2C1810]/50 mt-1">
           Khoảng thời gian box được phép bán
         </p>
       </div>
@@ -30,13 +33,16 @@ export function ValiditySection({ form, errors, onChange }) {
       {/* Inputs */}
       <div className="md:col-span-2 grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="validFrom">Ngày bắt đầu *</Label>
+          <Label htmlFor="validFrom" className="text-[#2C1810]/80">
+            Ngày bắt đầu *
+          </Label>
           <Input
             id="validFrom"
             type="date"
             min={today}
             value={form.validFrom}
             onChange={(e) => onChange("validFrom", e.target.value)}
+            className={inputClass}
           />
           {errors.validFrom && (
             <span className="text-xs text-red-500">{errors.validFrom}</span>
@@ -44,7 +50,9 @@ export function ValiditySection({ form, errors, onChange }) {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="validTo">Ngày kết thúc *</Label>
+          <Label htmlFor="validTo" className="text-[#2C1810]/80">
+            Ngày kết thúc *
+          </Label>
           <Input
             id="validTo"
             type="date"
@@ -52,6 +60,7 @@ export function ValiditySection({ form, errors, onChange }) {
             min={form.validFrom || today}
             value={form.validTo}
             onChange={(e) => onChange("validTo", e.target.value)}
+            className={inputClass}
           />
           {errors.validTo && (
             <span className="text-xs text-red-500">{errors.validTo}</span>

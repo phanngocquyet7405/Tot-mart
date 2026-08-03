@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Package } from "lucide-react";
 
 /**
  * BoxFormHeader
@@ -16,24 +16,29 @@ export function BoxFormHeader({
   return (
     <>
       {/* Breadcrumb */}
-      <nav className="flex mb-4 text-xs font-medium text-gray-500 dark:text-gray-400 gap-2 items-center">
-        <Link href="/admin" className="hover:text-foreground">
+      <nav className="flex mb-4 text-xs font-medium text-[#2C1810]/50 gap-2 items-center">
+        <Link href="/admin" className="hover:text-[#2C1810]">
           Admin
         </Link>
         <ChevronRight size={12} />
-        <Link href="/admin-box" className="hover:text-foreground">
+        <Link href="/admin-box" className="hover:text-[#2C1810]">
           Boxes
         </Link>
         <ChevronRight size={12} />
-        <span className="text-foreground">Tạo mới</span>
+        <span className="text-[#2C1810]">Tạo mới</span>
       </nav>
 
       {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          {title}
-        </h1>
-        <p className="text-sm text-muted-foreground">{subtitle}</p>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#C85C3C]/10 border border-[#C85C3C]/20">
+          <Package size={18} className="text-[#C85C3C]" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#2C1810]">
+            {title}
+          </h1>
+          <p className="text-sm text-[#2C1810]/50">{subtitle}</p>
+        </div>
       </div>
     </>
   );

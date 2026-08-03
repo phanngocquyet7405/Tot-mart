@@ -21,12 +21,16 @@ import { BAR_H } from "@/components_box/announcement-bar"; // import hằng số
 // ─── Nav data ─────────────────────────────────────────────────────────────────
 
 const shopLinks = [
-  { name: "TotMartBox", desc: "Hộp quà tinh tuyển", href: "/totmartbox" },
+  { name: "TotMartBox", desc: "Hộp quà tinh tuyển", href: "/" },
   { name: "ShopTotMart", desc: "Cửa hàng chính", href: "/homepage" },
-  { name: "Gift", desc: "Quà tặng đặc biệt", href: "/gift" },
+  // Chưa có page riêng cho Gift trong repo — tạm trỏ về trang danh mục
+  // sản phẩm để không bị link chết, đổi lại khi có page/category riêng.
+  { name: "Gift", desc: "Quà tặng đặc biệt", href: "/categories" },
   { name: "Subscribe", desc: "Gói hàng tháng", href: "/products/Subscriber" },
-  { name: "TotMart", desc: "Thương hiệu TotMart", href: "/totmart" },
-  { name: "Past Themes", desc: "Chủ đề đã qua", href: "/past-themes" },
+  { name: "TotMart", desc: "Thương hiệu TotMart", href: "/brands" },
+  // Chưa có page riêng cho Past Themes — MonthlyThemes hiện chỉ là 1 section
+  // trong trang Subscriber, nên trỏ về đó thay vì route không tồn tại.
+  { name: "Past Themes", desc: "Chủ đề đã qua", href: "/products/Subscriber" },
 ];
 
 const aboutMega = {
@@ -149,7 +153,7 @@ function AboutMegaMenu({ onClose }) {
         </div>
         <div className="bg-stone-900 px-5 py-2.5 flex items-center justify-between">
           <span className="text-[11px] text-stone-400">
-            Hơn 120 nghệ nhân Việt Nam
+            Kết nối với nhiều Doanh nghiệp trong Việt Nam
           </span>
           <Link
             href="/pages/our-makers"

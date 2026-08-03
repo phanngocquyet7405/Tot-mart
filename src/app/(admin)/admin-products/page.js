@@ -1,211 +1,61 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowUpDown,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  Search,
-  Filter,
-  Plus,
-  ArrowLeft,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { Package, Plus, Filter, Search, AlertCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { toast } from "sonner";
 
+import { useAdminProducts } from "./hooks/useAdminProducts";
+import { ProductTable } from "./components/ProductTable";
 import { DeleteProductDialog } from "../components/products/delete_product_dialog";
 import { AdvancedFilterDrawer } from "../components/products/advanced_filter_drawer";
 import { BulkActionsBar } from "../components/products/bulk_action_bar";
-
-import {
-  getAllProductsApi,
-  getAllBrandsApi,
-  getAllCategoriesApi,
-  deleteProductApi,
-} from "@/app/services/api/productServices";
+import { AdminPageHeader, AdminLoadingState } from "../components/shared";
 
 export default function ProductListPage() {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState("name");
-  const [sortDirection, setSortDirection] = useState("asc");
-
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const [activeFilters, setActiveFilters] = useState({
-    category: "all",
-    brand: "all",
-    minPrice: 0,
-    maxPrice: 1000000000,
-  });
-
-  // 1. Hàm fetch dữ liệu
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [prodRes, catRes, brandRes] = await Promise.all([
-        getAllProductsApi(),
-        getAllCategoriesApi(),
-        getAllBrandsApi(),
-      ]);
-
-      const prodData = prodRes.data?.data || prodRes.data || [];
-      const catData = catRes.data?.data || catRes.data || [];
-      const brandData = brandRes.data?.data || brandRes.data || [];
-
-      setProducts(Array.isArray(prodData) ? prodData : []);
-      setCategories(Array.isArray(catData) ? catData : []);
-      setBrands(Array.isArray(brandData) ? brandData : []);
-    } catch (err) {
-      console.error("Fetch error:", err);
-      setError(
-        "Không thể tải danh sách sản phẩm. Vui lòng kiểm tra kết nối API.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  // 2. Logic Lọc và Sắp xếp
-  const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products.filter((p) => {
-      const matchSearch = p.name
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase());
-
-      const pCatId = p.category?._id || p.category;
-      const pBrandId = p.brand?._id || p.brand;
-
-      const matchCategory =
-        activeFilters.category === "all" ||
-        String(pCatId) === activeFilters.category;
-      const matchBrand =
-        activeFilters.brand === "all" ||
-        String(pBrandId) === activeFilters.brand;
-
-      const price = Number(p.price ?? 0);
-      const matchPrice =
-        price >= activeFilters.minPrice && price <= activeFilters.maxPrice;
-
-      return matchSearch && matchCategory && matchBrand && matchPrice;
-    });
-
-    filtered.sort((a, b) => {
-      const aValue = a[sortField];
-      const bValue = b[sortField];
-      const modifier = sortDirection === "asc" ? 1 : -1;
-      if (typeof aValue === "string")
-        return aValue.localeCompare(bValue) * modifier;
-      return ((aValue ?? 0) - (bValue ?? 0)) * modifier;
-    });
-
-    return filtered;
-  }, [products, searchQuery, sortField, sortDirection, activeFilters]);
-
-  // 3. Xử lý xóa
-  const handleConfirmDelete = async () => {
-    setIsDeleting(true);
-    try {
-      if (productToDelete) {
-        await deleteProductApi(productToDelete._id);
-        toast.success(`Đã xóa "${productToDelete.name}"`);
-      } else {
-        await Promise.all(selectedIds.map((id) => deleteProductApi(id)));
-        toast.success(`Đã xóa ${selectedIds.length} sản phẩm thành công`);
-      }
-      setSelectedIds([]);
-      setDeleteDialogOpen(false);
-      fetchData();
-    } catch (err) {
-      toast.error("Lỗi hệ thống khi xóa sản phẩm");
-    } finally {
-      setIsDeleting(false);
-      setProductToDelete(null);
-    }
-  };
-
-  // 4. Helper hiển thị trạng thái kho (Khớp với p.stock)
-  const getStatusBadge = (stock) => {
-    if (stock <= 0) return <Badge variant="destructive">Hết hàng</Badge>;
-    if (stock <= 10)
-      return (
-        <Badge
-          variant="outline"
-          className="bg-amber-50 text-amber-600 border-amber-200"
-        >
-          Sắp hết ({stock})
-        </Badge>
-      );
-    return (
-      <Badge
-        variant="secondary"
-        className="bg-emerald-50 text-emerald-600 border-emerald-200 font-normal"
-      >
-        Còn hàng ({stock})
-      </Badge>
-    );
-  };
+  const {
+    products,
+    categories,
+    brands,
+    loading,
+    error,
+    searchQuery,
+    setSearchQuery,
+    selectedIds,
+    setSelectedIds,
+    toggleSort,
+    toggleSelectAll,
+    toggleSelectOne,
+    filterOpen,
+    setFilterOpen,
+    deleteDialogOpen,
+    setDeleteDialogOpen,
+    productToDelete,
+    isDeleting,
+    openDeleteSingle,
+    openDeleteBulk,
+    applyFilters,
+    handleConfirmDelete,
+    fetchData,
+  } = useAdminProducts();
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/admin">
-              <ArrowLeft />
+      <AdminPageHeader
+        title="Sản phẩm"
+        description="Quản lý danh sách và tồn kho sản phẩm"
+        icon={Package}
+        backHref="/admin"
+        actions={
+          <Button asChild className="bg-indigo-600 hover:bg-indigo-700">
+            <Link href="/admin-products/create">
+              <Plus className="mr-2 h-4 w-4" /> Thêm mới
             </Link>
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Sản phẩm</h1>
-            <p className="text-sm text-muted-foreground">
-              Quản lý danh sách và tồn kho sản phẩm
-            </p>
-          </div>
-        </div>
-        <Button asChild className="bg-indigo-600 hover:bg-indigo-700">
-          <Link href="/admin-products/create">
-            <Plus className="mr-2 h-4 w-4" /> Thêm mới
-          </Link>
-        </Button>
-      </div>
+        }
+      />
 
       <Card>
         <CardHeader>
@@ -230,10 +80,7 @@ export default function ProductListPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex flex-col items-center py-20 text-muted-foreground">
-              <Loader2 className="h-8 w-8 animate-spin mb-3 text-indigo-600" />
-              <p className="text-sm animate-pulse">Đang đồng bộ dữ liệu...</p>
-            </div>
+            <AdminLoadingState message="Đang đồng bộ dữ liệu..." />
           ) : error ? (
             <div className="text-center py-20 border-2 border-dashed rounded-lg">
               <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-3" />
@@ -243,157 +90,23 @@ export default function ProductListPage() {
               </Button>
             </div>
           ) : (
-            <div className="rounded-md border overflow-hidden">
-              <Table>
-                <TableHeader className="bg-muted/50">
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={
-                          selectedIds.length ===
-                            filteredAndSortedProducts.length &&
-                          filteredAndSortedProducts.length > 0
-                        }
-                        onCheckedChange={() =>
-                          setSelectedIds(
-                            selectedIds.length ===
-                              filteredAndSortedProducts.length
-                              ? []
-                              : filteredAndSortedProducts.map((p) => p._id),
-                          )
-                        }
-                      />
-                    </TableHead>
-                    <TableHead>Ảnh</TableHead>
-                    <TableHead
-                      className="cursor-pointer hover:text-indigo-600 transition-colors"
-                      onClick={() => {
-                        setSortField("name");
-                        setSortDirection((prev) =>
-                          prev === "asc" ? "desc" : "asc",
-                        );
-                      }}
-                    >
-                      Tên sản phẩm{" "}
-                      <ArrowUpDown className="inline h-3 w-3 ml-1" />
-                    </TableHead>
-                    <TableHead
-                      className="text-right cursor-pointer"
-                      onClick={() => {
-                        setSortField("price");
-                        setSortDirection((prev) =>
-                          prev === "asc" ? "desc" : "asc",
-                        );
-                      }}
-                    >
-                      Giá <ArrowUpDown className="inline h-3 w-3 ml-1" />
-                    </TableHead>
-                    <TableHead className="text-right">Tồn kho</TableHead>
-                    <TableHead>Trạng thái</TableHead>
-                    <TableHead className="w-12"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAndSortedProducts.map((p) => (
-                    <TableRow
-                      key={p._id}
-                      className="hover:bg-muted/30 transition-colors"
-                    >
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedIds.includes(p._id)}
-                          onCheckedChange={() =>
-                            setSelectedIds((prev) =>
-                              prev.includes(p._id)
-                                ? prev.filter((id) => id !== p._id)
-                                : [...prev, p._id],
-                            )
-                          }
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="relative w-12 h-12">
-                          <Image
-                            src={
-                              p.images && p.images[0]?.url
-                                ? p.images[0].url
-                                : "/placeholder.svg"
-                            }
-                            alt={p.name}
-                            fill
-                            unoptimized
-                            className="rounded-lg object-cover border bg-white"
-                          />
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium max-w-50 truncate">
-                        {p.name}
-                      </TableCell>
-                      <TableCell className="text-right font-semibold">
-                        {new Intl.NumberFormat("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }).format(p.price)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {p.stock ?? 0}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(p.stock ?? 0)}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-36">
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href={`/admin-products/update?id=${p._id}`}
-                                className="cursor-pointer"
-                              >
-                                <Pencil className="mr-2 h-4 w-4" /> Sửa
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive focus:bg-destructive/10 cursor-pointer"
-                              onClick={() => {
-                                setProductToDelete(p);
-                                setDeleteDialogOpen(true);
-                              }}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" /> Xóa
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {filteredAndSortedProducts.length === 0 && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={7}
-                        className="text-center py-12 text-muted-foreground"
-                      >
-                        Không có dữ liệu phù hợp với bộ lọc.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <ProductTable
+              products={products}
+              selectedIds={selectedIds}
+              onToggleSelectAll={toggleSelectAll}
+              onToggleSelectOne={toggleSelectOne}
+              onSort={toggleSort}
+              onDelete={openDeleteSingle}
+            />
           )}
         </CardContent>
       </Card>
 
-      {/* Các Component hỗ trợ */}
+      {/* Các component hỗ trợ — vẫn dùng bản chung cũ, chưa có bản thay thế trong scaffold mới */}
       <BulkActionsBar
         selectedCount={selectedIds.length}
         onClearSelection={() => setSelectedIds([])}
-        onDelete={() => {
-          setProductToDelete(null);
-          setDeleteDialogOpen(true);
-        }}
+        onDelete={openDeleteBulk}
       />
 
       <AdvancedFilterDrawer
@@ -401,14 +114,7 @@ export default function ProductListPage() {
         onOpenChange={setFilterOpen}
         categories={categories}
         brands={brands}
-        onApplyFilters={(f) =>
-          setActiveFilters({
-            category: f.category || "all",
-            brand: f.brand || "all",
-            minPrice: f.minPrice ?? 0,
-            maxPrice: f.maxPrice ?? 1000000000,
-          })
-        }
+        onApplyFilters={applyFilters}
       />
 
       <DeleteProductDialog
@@ -418,7 +124,6 @@ export default function ProductListPage() {
         isBulk={!productToDelete}
         bulkCount={selectedIds.length}
         onConfirm={handleConfirmDelete}
-        loading={isDeleting}
       />
     </div>
   );
