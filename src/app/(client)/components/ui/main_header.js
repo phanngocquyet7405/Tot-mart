@@ -15,6 +15,7 @@ import SearchBar from "./search_bar";
 import CartBox from "./cart_box";
 import CartDrawer from "../Cart_component/cart_drawer";
 import { useCart } from "@/app/context/CartContext";
+import { useWishlist } from "@/app/context/WishlistContext";
 import { AppContext } from "@/app/context/AppContext";
 
 import {
@@ -26,9 +27,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function MainHeader() {
-  const { cartCount, cartTotal, isMounted } = useCart();
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [wishlistCount] = useState(0);
+  const { cartCount, cartTotal, isMounted, isCartOpen, setIsCartOpen, openCart } =
+    useCart();
+  const { wishlistCount } = useWishlist();
 
   /**
    * Fix 1: Bỏ useEffect gọi userService.getUserById(localStorage.getItem("userId"))
@@ -171,10 +172,7 @@ export default function MainHeader() {
               </Link>
 
               {/* CartBox chỉ render số lượng thật sau khi isMounted = true */}
-              <div
-                onClick={() => setIsCartOpen(true)}
-                className="cursor-pointer"
-              >
+              <div onClick={openCart} className="cursor-pointer">
                 <CartBox
                   itemCount={isMounted ? cartCount : 0}
                   totalAmount={isMounted ? cartTotal : 0}

@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { AppContextProvider } from "./context/AppContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { CartProvider } from "@/app/context/CartContext";
+import { WishlistProvider } from "@/app/context/WishlistContext";
 import "./globals.css";
 
 // Cấu hình font cho Vietnamese
@@ -45,11 +46,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="vi" className={`${playfairDisplay.variable} ${plusJakartaSans.variable}`}>
       <body className="font-sans antialiased">
-        {/* 2. Bọc CartProvider xung quanh children */}
+        {/* 2. Bọc CartProvider + WishlistProvider xung quanh children */}
         <AppContextProvider>
           <CartProvider>
-            {/* Toast notification — render vào document.body qua portal */}
-            <NotificationProvider>{children}</NotificationProvider>
+            <WishlistProvider>
+              {/* Toast notification — render vào document.body qua portal */}
+              <NotificationProvider>{children}</NotificationProvider>
+            </WishlistProvider>
           </CartProvider>
         </AppContextProvider>
 

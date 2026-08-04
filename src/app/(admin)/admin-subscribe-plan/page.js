@@ -17,7 +17,6 @@
 
 import { useState, useCallback } from "react";
 import { Plus, RefreshCw, Search, Filter, ChevronDown } from "lucide-react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,8 +33,6 @@ import { PlanTable } from "../components/SubscribePlans/PlanTemplate/PlanTable";
 import { PlanDetailDialog } from "../components/SubscribePlans/PlanTemplate/PlanDetailDialog";
 import { PlanFormDialog } from "../components/SubscribePlans/PlanTemplate/PlanFormDialog";
 import { DeleteTemplateDialog } from "../components/SubscribePlans/PlanTemplate/DeleteTemplateDialog";
-
-import { deleteTemplateApi } from "@/app/services/api/subscribePlanService";
 
 import {
   usePlanList,
@@ -61,6 +58,10 @@ export default function AdminSubscribePlanPage() {
     sortDir,
     handleSort,
     fetchPlans,
+    deleteTarget,
+    setDeleteTarget,
+    isDeleting,
+    handleDeleteConfirm,
   } = usePlanList();
 
   // ── Detail dialog ─────────────────────────────────────────────────────────
@@ -87,31 +88,20 @@ export default function AdminSubscribePlanPage() {
   }, []);
 
   // ── Delete dialog ─────────────────────────────────────────────────────────
-  const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDeleteClick = useCallback((template) => {
-    setDeleteTarget(template);
-    setDeleteOpen(true);
-  }, []);
+  const handleDeleteClick = useCallback(
+    (template) => {
+      setDeleteTarget(template);
+      setDeleteOpen(true);
+    },
+    [setDeleteTarget],
+  );
 
-  const handleDeleteConfirm = useCallback(async () => {
-    if (!deleteTarget) return;
-    setIsDeleting(true);
-    try {
-      await deleteTemplateApi(deleteTarget._id);
-      toast.success(`Đã xoá mẫu gói "${deleteTarget.name}"`);
-      setDeleteOpen(false);
-      fetchPlans();
-    } catch (err) {
-      const msg =
-        err?.response?.data?.message || err?.message || "Xoá thất bại";
-      toast.error(msg);
-    } finally {
-      setIsDeleting(false);
-    }
-  }, [deleteTarget, fetchPlans]);
+  const handleConfirmAndClose = useCallback(async () => {
+    await handleDeleteConfirm();
+    setDeleteOpen(false);
+  }, [handleDeleteConfirm]);
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -296,7 +286,7 @@ export default function AdminSubscribePlanPage() {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         template={deleteTarget}
-        onConfirm={handleDeleteConfirm}
+        onConfirm={handleConfirmAndClose}
         isDeleting={isDeleting}
       />
     </div>

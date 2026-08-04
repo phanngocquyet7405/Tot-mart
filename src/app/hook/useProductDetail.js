@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useCart } from "@/app/context/CartContext";
+import { useAddToCart } from "@/app/hook/useAddToCart";
+import { useWishlist } from "@/app/context/WishlistContext";
 import {
   PLACEHOLDER_IMAGE,
   extractProductId,
@@ -20,7 +22,9 @@ import {
  */
 export function useProductDetail(slug) {
   const productId = extractProductId(slug);
-  const { addToCart } = useCart();
+  const router = useRouter();
+  const { addToCart } = useAddToCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -28,9 +32,10 @@ export function useProductDetail(slug) {
   const [selectedImage, setSelectedImage] = useState(PLACEHOLDER_IMAGE);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("details");
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
+
+  const isWishlisted = product ? isInWishlist(product._id) : false;
 
   useEffect(() => {
     if (!productId) {
@@ -101,27 +106,44 @@ export function useProductDetail(slug) {
     setQuantity((q) => (q > 1 ? q - 1 : q));
   }, []);
 
+  // Helper dùng chung cho cả "Thêm vào giỏ" lẫn "Mua ngay" — tránh lặp lại
+  // cấu trúc item giữa 2 handler.
+  const buildCartItem = useCallback(() => {
+    if (!product) return null;
+    const finalPrice = getFinalPrice(product);
+    return {
+      _id: product._id,
+      id: product._id,
+      name: product.name,
+      image: product.images?.[0]?.url || PLACEHOLDER_IMAGE,
+      price: finalPrice,
+    };
+  }, [product]);
+
   const handleAddToCart = useCallback(async () => {
-    if (!product) return;
+    const itemToAdd = buildCartItem();
+    if (!itemToAdd) return;
     try {
       setIsAddingToCart(true);
-      const finalPrice = getFinalPrice(product);
-      const itemToAdd = {
-        _id: product._id,
-        id: product._id,
-        name: product.name,
-        image: product.images?.[0]?.url || PLACEHOLDER_IMAGE,
-        price: finalPrice,
-      };
-      for (let i = 0; i < quantity; i++) {
-        addToCart(itemToAdd);
-      }
-      toast.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng 🛒`);
-      setIsCartOpen(true);
+      // 1 lời gọi duy nhất với quantity — addToCart (hook dùng chung) tự lo
+      // toast báo thành công và mở Cart Drawer (dùng chung ở MainHeader).
+      addToCart(itemToAdd, quantity);
     } finally {
       setIsAddingToCart(false);
     }
-  }, [product, quantity, addToCart]);
+  }, [buildCartItem, quantity, addToCart]);
+
+  // "Mua ngay" — thêm sản phẩm vào giỏ (gộp với các sản phẩm đã có sẵn
+  // trong giỏ, vì trang /checkout hiện thanh toán theo TOÀN BỘ giỏ hàng
+  // chứ chưa hỗ trợ "checkout riêng 1 sản phẩm") rồi đi thẳng /checkout —
+  // bỏ qua toast/mở drawer vì đang điều hướng sang trang khác ngay.
+  const handleBuyNow = useCallback(() => {
+    const itemToAdd = buildCartItem();
+    if (!itemToAdd) return;
+    setIsBuyingNow(true);
+    addToCart(itemToAdd, quantity, { showToast: false, openDrawer: false });
+    router.push("/checkout");
+  }, [buildCartItem, quantity, addToCart, router]);
 
   const handleShare = useCallback(async () => {
     const url = window.location.href;
@@ -146,15 +168,20 @@ export function useProductDetail(slug) {
   }, [product]);
 
   const handleWishlist = useCallback(() => {
-    setIsWishlisted((prev) => {
-      toast.success(
-        prev
-          ? "Đã xóa khỏi danh sách yêu thích"
-          : "Đã thêm vào danh sách yêu thích",
-      );
-      return !prev;
-    });
-  }, []);
+    if (!product) return;
+    const item = {
+      _id: product._id,
+      id: product._id,
+      name: product.name,
+      slug: product.slug,
+      image: product.images?.[0]?.url || PLACEHOLDER_IMAGE,
+      price: getFinalPrice(product),
+    };
+    const added = toggleWishlist(item);
+    toast.success(
+      added ? "Đã thêm vào danh sách yêu thích" : "Đã xóa khỏi danh sách yêu thích",
+    );
+  }, [product, toggleWishlist]);
 
   return {
     product,
@@ -167,12 +194,12 @@ export function useProductDetail(slug) {
     setActiveTab,
     isWishlisted,
     isAddingToCart,
-    isCartOpen,
-    setIsCartOpen,
+    isBuyingNow,
     selectQuantity,
     increaseQty,
     decreaseQty,
     handleAddToCart,
+    handleBuyNow,
     handleShare,
     handleWishlist,
     finalPrice: getFinalPrice(product),

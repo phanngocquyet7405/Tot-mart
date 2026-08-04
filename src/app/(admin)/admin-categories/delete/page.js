@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -27,37 +26,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import DeleteCategory from "../../components/categories/delete_category";
-import { getAllCategoriesApi } from "@/app/services/api/productServices";
 import { toast } from "sonner";
 import Image from "next/image";
+import { useDeleteCategoriesList } from "../hooks/useDeleteCategoriesList";
 
 export default function DeleteCategoryPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categories, setCategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // 1. Lấy danh sách danh mục (Phương thức tương tự DeleteProductPage)
-  const fetchCategories = async () => {
-    try {
-      setIsLoading(true);
-      const response = await getAllCategoriesApi();
-      setCategories(response.data || []);
-    } catch (error) {
-      console.error("Lỗi khi tải danh mục:", error);
-      toast.error("Không thể tải danh sách danh mục");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  // 2. Logic tìm kiếm (Kế thừa từ DeleteProductPage)
-  const filteredCategories = categories.filter((cat) =>
-    cat.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const { searchQuery, setSearchQuery, categories, isLoading, fetchCategories } =
+    useDeleteCategoriesList();
 
   return (
     <div className="space-y-6">
@@ -76,7 +51,7 @@ export default function DeleteCategoryPage() {
         </div>
       </div>
 
-      {/* Warning Banner (Kế thừa từ Danger Zone của sản phẩm) */}
+      {/* Warning Banner */}
       <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
         <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
         <div className="space-y-1">
@@ -128,7 +103,7 @@ export default function DeleteCategoryPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCategories.map((cat) => (
+                {categories.map((cat) => (
                   <TableRow
                     key={cat._id}
                     className="hover:bg-destructive/5 transition-colors"
@@ -151,12 +126,11 @@ export default function DeleteCategoryPage() {
                       {cat.description || "Không có mô tả"}
                     </TableCell>
                     <TableCell className="text-center">
-                      {/* Gọi Component DeleteCategory đã có của bạn */}
                       <DeleteCategory
                         categoryId={cat._id}
                         onSuccess={() => {
                           toast.success(`Đã xóa danh mục ${cat.name}`);
-                          fetchCategories(); // Refresh danh sách sau khi xóa thành công
+                          fetchCategories();
                         }}
                       />
                     </TableCell>
@@ -166,7 +140,7 @@ export default function DeleteCategoryPage() {
             </Table>
           )}
 
-          {!isLoading && filteredCategories.length === 0 && (
+          {!isLoading && categories.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
               <p>Không tìm thấy danh mục nào phù hợp</p>
             </div>

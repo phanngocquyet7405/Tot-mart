@@ -4,7 +4,12 @@ import { Heart, Star, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export const ProductCard = ({ product, onAddToCart, onToggleWishlist }) => {
+export const ProductCard = ({
+  product,
+  onAddToCart,
+  onToggleWishlist,
+  isWishlisted = false,
+}) => {
   const productId = product._id || product.id;
   const productSlug = product.slug || "san-pham";
   const productHref = `/products/${productSlug}-${productId}`;
@@ -26,6 +31,11 @@ export const ProductCard = ({ product, onAddToCart, onToggleWishlist }) => {
   };
 
   const discountPercent = product.discountPercent || 0;
+  // product.stock có thể undefined với dữ liệu cũ/thiếu — coi như 0 (hết
+  // hàng) để nhất quán với cách trang chi tiết sản phẩm đang xử lý
+  // (ProductPurchasePanel.js: const stock = product.stock ?? 0).
+  const stock = product.stock ?? 0;
+  const outOfStock = stock <= 0;
 
   return (
     <div className="flex flex-col group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-green-200">
@@ -44,8 +54,18 @@ export const ProductCard = ({ product, onAddToCart, onToggleWishlist }) => {
             priority={false}
           />
 
+          {/* Overlay Hết hàng — phủ mờ ảnh + nhãn ở giữa, dễ nhận biết ngay
+              trên lưới sản phẩm thay vì phải bấm vào mới biết hết hàng */}
+          {outOfStock && (
+            <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
+              <span className="bg-gray-900 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                Hết hàng
+              </span>
+            </div>
+          )}
+
           {/* Discount Badge */}
-          {discountPercent > 0 && (
+          {discountPercent > 0 && !outOfStock && (
             <div className="absolute top-3 left-3 bg-green-700 text-white px-3 py-1 rounded-full text-xs font-bold">
               -{discountPercent}%
             </div>
@@ -61,13 +81,15 @@ export const ProductCard = ({ product, onAddToCart, onToggleWishlist }) => {
           {/* Wishlist Button */}
           <button
             onClick={(e) => handleAction(e, onToggleWishlist)}
-            className="absolute bottom-3 right-3 p-2 bg-white rounded-full hover:bg-gray-100 text-gray-700 hover:text-red-500 transition-all shadow-md hover:shadow-lg opacity-0 group-hover:opacity-100 duration-300"
+            className={`absolute bottom-3 right-3 p-2 bg-white rounded-full hover:bg-gray-100 shadow-md hover:shadow-lg transition-all duration-300 ${
+              isWishlisted
+                ? "text-red-500 opacity-100"
+                : "text-gray-700 hover:text-red-500 opacity-0 group-hover:opacity-100"
+            }`}
             aria-label="Add to wishlist"
           >
             <Heart
-              className={`w-5 h-5 ${
-                product.isWishlist ? "fill-red-500 text-red-500" : ""
-              }`}
+              className={`w-5 h-5 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`}
             />
           </button>
         </div>
@@ -111,10 +133,16 @@ export const ProductCard = ({ product, onAddToCart, onToggleWishlist }) => {
 
           {/* Add to Cart Button */}
           <button
-            onClick={(e) => handleAction(e, onAddToCart)}
-            className="w-full bg-green-700 hover:bg-green-800 text-white py-2.5 text-xs font-bold tracking-wider flex items-center justify-center gap-2 transition-colors duration-300 rounded-md"
+            onClick={(e) => !outOfStock && handleAction(e, onAddToCart)}
+            disabled={outOfStock}
+            className={`w-full py-2.5 text-xs font-bold tracking-wider flex items-center justify-center gap-2 transition-colors duration-300 rounded-md ${
+              outOfStock
+                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                : "bg-green-700 hover:bg-green-800 text-white cursor-pointer"
+            }`}
           >
-            <ShoppingCart className="w-4 h-4" /> THÊM VÀO GIỎ
+            <ShoppingCart className="w-4 h-4" />
+            {outOfStock ? "HẾT HÀNG" : "THÊM VÀO GIỎ"}
           </button>
         </div>
       </Link>

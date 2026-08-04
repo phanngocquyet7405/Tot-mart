@@ -8,7 +8,10 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { toast } from "sonner";
-import { getAllTemplatesApi } from "../app/services/api/subscribePlanService";
+import {
+  getAllTemplatesApi,
+  deleteTemplateApi,
+} from "../app/services/api/subscribePlanService";
 import { PLAN_TYPE_LABELS } from "@/app/util/formatter";
 
 export const STATUS_OPTIONS = [
@@ -93,6 +96,27 @@ export function usePlanList() {
 
   const hasActiveFilters = statusFilter !== "all" || planTypeFilter !== "all";
 
+  // ── Delete ──────────────────────────────────────────────────────────────
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      await deleteTemplateApi(deleteTarget._id);
+      toast.success(`Đã xoá mẫu gói "${deleteTarget.name}"`);
+      setDeleteTarget(null);
+      fetchPlans();
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message || err?.message || "Xoá thất bại";
+      toast.error(msg);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [deleteTarget, fetchPlans]);
+
   return {
     plans,
     filtered,
@@ -109,5 +133,9 @@ export function usePlanList() {
     sortDir,
     handleSort,
     fetchPlans,
+    deleteTarget,
+    setDeleteTarget,
+    isDeleting,
+    handleDeleteConfirm,
   };
 }

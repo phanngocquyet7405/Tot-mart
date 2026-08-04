@@ -20,16 +20,7 @@ import {
 
 export function useCheckout() {
   const router = useRouter();
-  const {
-    cartItems,
-    cartTotal,
-    cartCount,
-    subscribeItems,
-    subscribeTotal,
-    subscribeCount,
-    isMounted,
-    clearCart,
-  } = useCart();
+  const { cartItems, cartTotal, cartCount, isMounted, clearCart } = useCart();
 
   // ─── UI state ─────────────────────────────────────────────────────────────
   const [step, setStep] = useState("address");
@@ -54,11 +45,8 @@ export function useCheckout() {
 
   // ─── Derived ──────────────────────────────────────────────────────────────
   const hasProducts = cartItems.length > 0;
-  const hasSubscribes = subscribeItems.length > 0;
-  const totalItemCount = cartCount + subscribeCount;
-  const combinedSubtotal = cartTotal + subscribeTotal;
   const shippingFee = calcShippingFee(cartTotal, hasProducts);
-  const finalTotal = combinedSubtotal - discount + shippingFee;
+  const finalTotal = cartTotal - discount + shippingFee;
 
   const displayedAddresses = showAllAddresses
     ? addresses
@@ -87,14 +75,14 @@ export function useCheckout() {
 
   // ─── Redirect nếu giỏ trống ───────────────────────────────────────────────
   useEffect(() => {
-    if (isMounted && !loading && totalItemCount === 0 && !orderSuccess) {
+    if (isMounted && !loading && cartCount === 0 && !orderSuccess) {
       router.push("/");
     }
-  }, [isMounted, loading, totalItemCount, orderSuccess, router]);
+  }, [isMounted, loading, cartCount, orderSuccess, router]);
 
   // ─── Coupon ───────────────────────────────────────────────────────────────
   const handleApplyCoupon = useCallback(() => {
-    const result = validateCoupon(coupon, combinedSubtotal);
+    const result = validateCoupon(coupon, cartTotal);
     if (result.valid) {
       setDiscount(result.discount);
       setCouponApplied(true);
@@ -104,7 +92,7 @@ export function useCheckout() {
       setCouponApplied(false);
       toast.error(result.message);
     }
-  }, [coupon, combinedSubtotal]);
+  }, [coupon, cartTotal]);
 
   // ─── Place order ──────────────────────────────────────────────────────────
   const handlePlaceOrder = useCallback(async () => {
@@ -125,7 +113,6 @@ export function useCheckout() {
 
     const result = await placeOrder({
       cartItems,
-      subscribeItems,
       deliveryAddress,
       paymentMethod,
       note,
@@ -147,7 +134,6 @@ export function useCheckout() {
     addingNew,
     newAddress,
     cartItems,
-    subscribeItems,
     paymentMethod,
     note,
     shippingFee,
@@ -176,13 +162,7 @@ export function useCheckout() {
     cartItems,
     cartTotal,
     cartCount,
-    subscribeItems,
-    subscribeTotal,
-    subscribeCount,
     hasProducts,
-    hasSubscribes,
-    totalItemCount,
-    combinedSubtotal,
     shippingFee,
     finalTotal,
     discount,

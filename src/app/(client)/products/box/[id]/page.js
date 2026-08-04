@@ -11,12 +11,11 @@ import MainHeader from "@/app/(client)/components/ui/main_header";
 import HeroSection from "../../../components/hero_section_page/hero_section";
 import FeaturedProducts from "../../../components/layout/product/featured_products";
 import Footer from "@/app/(client)/components/ui/footer";
-import CartDrawer from "@/app/(client)/components/Cart_component/cart_drawer";
 import {
   getBoxByIdApi,
   getProductsInBoxApi,
 } from "@/app/services/api/boxService";
-import { useCart } from "@/app/context/CartContext";
+import { useAddToCart } from "@/app/hook/useAddToCart";
 
 // Icons từ Lucide tương thích thiết kế Shadcn cao cấp
 import {
@@ -45,7 +44,7 @@ const PLACEHOLDER_IMAGE =
 
 export default function BoxDetailPage() {
   const { id } = useParams();
-  const { addToCart } = useCart();
+  const { addToCart } = useAddToCart();
 
   const [box, setBox] = useState(null);
   const [boxProducts, setBoxProducts] = useState([]); // State mới để lưu chi tiết sản phẩm trong box
@@ -53,7 +52,6 @@ export default function BoxDetailPage() {
   const [selectedImage, setSelectedImage] = useState(PLACEHOLDER_IMAGE);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("inside"); // 'inside' hoặc 'description'
-  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Khởi chạy lấy dữ liệu từ API
   // Khởi chạy lấy dữ liệu từ API
@@ -137,13 +135,11 @@ export default function BoxDetailPage() {
       price: finalPrice,
     };
 
-    // Thêm số lượng mong muốn vào giỏ hàng
-    for (let i = 0; i < quantity; i++) {
-      addToCart(itemToAdd);
-    }
-
-    toast.success(`Đã thêm thành công ${quantity} hộp quà vào giỏ hàng 🛒`);
-    setIsCartOpen(true); // Trượt Drawer giỏ hàng ra ngay lập tức
+    // 1 lời gọi duy nhất với quantity — addToCart (hook dùng chung) tự lo
+    // toast báo thành công và mở Cart Drawer (dùng chung ở MainHeader).
+    addToCart(itemToAdd, quantity, {
+      message: `Đã thêm thành công ${quantity} hộp quà vào giỏ hàng 🛒`,
+    });
   };
 
   if (loading) {
@@ -189,8 +185,8 @@ export default function BoxDetailPage() {
       <NavMenu />
       <MainHeader />
 
-      {/* Drawer Giỏ hàng */}
-      <CartDrawer open={isCartOpen} setOpen={setIsCartOpen} />
+      {/* Cart Drawer giờ dùng chung 1 instance duy nhất (mount trong
+          MainHeader ở trên), điều khiển qua CartContext.isCartOpen. */}
 
       <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
         {/* Breadcrumb nhỏ phong cách Shadcn */}

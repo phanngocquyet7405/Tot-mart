@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -18,107 +18,18 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-
-import {
-  createCategoryApi,
-  getAllCategoriesApi,
-  updateCategoryApi,
-} from "@/app/services/api/productServices";
+import { useCreateCategory } from "../hooks/useCreateCategory";
 
 export default function AddCategoryPage() {
   const router = useRouter();
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [existingCategories, setExistingCategories] = useState([]);
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-    isActive: true,
-    parentId: null,
-  });
-
-  useEffect(() => {
-    const fetchCats = async () => {
-      try {
-        const res = await getAllCategoriesApi();
-        const data = res?.data?.data || res?.data || [];
-        setExistingCategories(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Lỗi fetch categories:", err);
-      }
-    };
-    fetchCats();
-  }, []);
-
-  const selectedParent =
-    existingCategories.find((c) => c._id === form.parentId) || null;
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.name.trim()) {
-      return toast.error("Vui lòng nhập tên danh mục");
-    }
-
-    try {
-      setIsSubmitting(true);
-
-      // 1. Tạo danh mục mới
-      const createPayload = {
-        name: form.name.trim(),
-        description: form.description.trim(),
-        isActive: form.isActive,
-        childrenIds: [], // Luôn là rỗng khi mới tạo
-      };
-
-      const createRes = await createCategoryApi(createPayload);
-      const newCategory = createRes?.data?.data || createRes?.data;
-      const newId = newCategory?._id;
-
-      if (!newId) {
-        throw new Error("Không lấy được ID của danh mục mới");
-      }
-
-      // 2. Cập nhật danh mục cha (NẾU CÓ)
-      if (form.parentId) {
-        const parentDoc = existingCategories.find(
-          (c) => c._id === form.parentId,
-        );
-
-        if (parentDoc) {
-          // FIX LỖI: Đảm bảo tất cả phần tử trong mảng cũ đều được chuyển về String ID
-          const currentChildrenIds = (parentDoc.childrenIds || [])
-            .map((item) => {
-              // Nếu là string thì giữ nguyên, nếu là object thì lấy field ID
-              if (typeof item === "string") return item;
-              return item?.categoryId || item?._id;
-            })
-            .filter(Boolean); // Loại bỏ các giá trị undefined/null
-
-          // Thêm ID mới vào và loại bỏ trùng lặp (nếu có)
-          const updatedChildren = Array.from(
-            new Set([...currentChildrenIds, newId]),
-          );
-
-          console.log("Dữ liệu gửi lên để cập nhật cha:", updatedChildren);
-
-          await updateCategoryApi(form.parentId, {
-            childrenIds: updatedChildren,
-          });
-        }
-      }
-
-      toast.success("Thêm và liên kết danh mục thành công!");
-      router.push("/admin-categories");
-      router.refresh(); // Làm mới dữ liệu trang danh sách
-    } catch (err) {
-      console.error("Lỗi:", err);
-      const errorMsg = err.response?.data?.message || "Lỗi khi lưu dữ liệu";
-      toast.error(errorMsg);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    form,
+    updateField,
+    existingCategories,
+    selectedParent,
+    isSubmitting,
+    handleSubmit,
+  } = useCreateCategory();
 
   return (
     <div className="container mx-auto max-w-6xl p-6 space-y-6">
@@ -175,7 +86,7 @@ export default function AddCategoryPage() {
                 <Input
                   placeholder="Ví dụ: Đồ gia dụng, Điện tử..."
                   value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  onChange={(e) => updateField("name", e.target.value)}
                   className="h-11 focus-visible:ring-orange-500 border-zinc-200"
                 />
               </div>
@@ -185,9 +96,7 @@ export default function AddCategoryPage() {
                 <Input
                   placeholder="Mô tả ngắn gọn..."
                   value={form.description}
-                  onChange={(e) =>
-                    setForm({ ...form, description: e.target.value })
-                  }
+                  onChange={(e) => updateField("description", e.target.value)}
                   className="h-11 border-zinc-200"
                 />
               </div>
@@ -198,7 +107,7 @@ export default function AddCategoryPage() {
                 </Label>
                 <div className="border rounded-xl overflow-hidden divide-y bg-white shadow-inner max-h-72 overflow-y-auto">
                   <div
-                    onClick={() => setForm({ ...form, parentId: null })}
+                    onClick={() => updateField("parentId", null)}
                     className={cn(
                       "flex items-center gap-4 p-4 cursor-pointer transition-all",
                       form.parentId === null
@@ -224,7 +133,7 @@ export default function AddCategoryPage() {
                   {existingCategories.map((cat) => (
                     <div
                       key={cat._id}
-                      onClick={() => setForm({ ...form, parentId: cat._id })}
+                      onClick={() => updateField("parentId", cat._id)}
                       className={cn(
                         "flex items-center gap-4 p-4 cursor-pointer transition-all",
                         form.parentId === cat._id
@@ -274,7 +183,7 @@ export default function AddCategoryPage() {
               </div>
               <Switch
                 checked={form.isActive}
-                onCheckedChange={(val) => setForm({ ...form, isActive: val })}
+                onCheckedChange={(val) => updateField("isActive", val)}
               />
             </CardContent>
           </Card>

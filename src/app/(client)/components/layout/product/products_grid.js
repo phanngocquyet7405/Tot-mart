@@ -1,15 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { ProductCard } from "./product_card";
 import {
   getAllProductsApi,
   getProductsByCategoryApi,
 } from "@/app/services/api/productServices";
-import { useCart } from "@/app/context/CartContext";
+import { useAddToCart } from "@/app/hook/useAddToCart";
+import { useWishlist } from "@/app/context/WishlistContext";
 
 export default function ProductsGrid({ categoryId, brandSlug }) {
-  const { addToCart } = useCart();
+  const { addToCart } = useAddToCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -145,7 +148,22 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
               key={product._id || product.id}
               product={product}
               onAddToCart={(p) => addToCart(p)}
-              onToggleWishlist={(p) => console.log("Wishlist:", p.name)}
+              isWishlisted={isInWishlist(product._id || product.id)}
+              onToggleWishlist={(p) => {
+                const added = toggleWishlist({
+                  _id: p._id || p.id,
+                  id: p._id || p.id,
+                  name: p.name,
+                  slug: p.slug,
+                  image: p.images?.[0]?.url || "/placeholder.svg",
+                  price: p.price,
+                });
+                toast.success(
+                  added
+                    ? "Đã thêm vào danh sách yêu thích"
+                    : "Đã xóa khỏi danh sách yêu thích",
+                );
+              }}
             />
           ))
         ) : (

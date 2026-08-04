@@ -34,11 +34,8 @@ function CostRow({ label, value, highlight, strike, icon }) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export function OrderSummary({
   cartItems,
-  subscribeItems,
   hasProducts,
-  hasSubscribes,
   cartTotal,
-  subscribeTotal,
   shippingFee,
   discount,
   finalTotal,
@@ -72,35 +69,10 @@ export function OrderSummary({
           </div>
         )}
 
-        {/* Subscribe */}
-        {hasSubscribes && (
-          <div className="space-y-2 py-3 border-b border-slate-200">
-            <p className="text-[10px] text-slate-600 uppercase tracking-widest font-bold mb-2">
-              Subscribe
-            </p>
-            {subscribeItems.map((sub) => (
-              <div key={sub.key} className="flex justify-between items-start gap-2">
-                <div className="flex-1 min-w-0">
-                  <span className="text-xs text-slate-700 line-clamp-1 block">
-                    {sub.boxName}
-                  </span>
-                  <span className="text-[10px] text-slate-600">{sub.planLabel}</span>
-                </div>
-                <span className="text-xs font-bold text-slate-900 shrink-0">
-                  {fmt(sub.totalPrice)}₫
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Cost breakdown */}
         <div className="space-y-2.5 pt-3">
           {hasProducts && (
             <CostRow label="Sản phẩm" value={`${fmt(cartTotal)}₫`} />
-          )}
-          {hasSubscribes && (
-            <CostRow label="Subscribe" value={`${fmt(subscribeTotal)}₫`} />
           )}
           {discount > 0 && (
             <CostRow

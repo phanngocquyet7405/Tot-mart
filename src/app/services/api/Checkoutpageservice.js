@@ -6,7 +6,6 @@
 
 import { userService } from "@/app/services/api/userService";
 import { checkoutService } from "@/app/services/api/checkoutService";
-import { subscriptionApi } from "@/app/services/api/subscribePlanService";
 import { getTokenUserId } from "@/app/middleware/tokenMiddleware";
 import logger from "@/app/util/Logger";
 
@@ -102,12 +101,13 @@ export function calcShippingFee(cartTotal, hasProducts) {
 // ─── Place order ──────────────────────────────────────────────────────────────
 
 /**
- * Đặt hàng: product + subscribe trong cùng một lần gọi
+ * Đặt hàng sản phẩm thường. Gói subscribe đi qua luồng riêng
+ * (ChoosePlanModal → subscriptionApi.subscribe trực tiếp), không qua
+ * CartContext/checkout — nên hàm này chỉ còn xử lý cartItems.
  * @returns {{ success: boolean, error?: string }}
  */
 export async function placeOrder({
   cartItems,
-  subscribeItems,
   deliveryAddress,
   paymentMethod,
   note,
@@ -115,53 +115,27 @@ export async function placeOrder({
   cartTotal,
   discount,
 }) {
-  const userId = getTokenUserId();
-
   try {
-    // 1. Sản phẩm thường
-    if (cartItems.length > 0) {
-      const productPayload = {
-        items: cartItems.map((item) => ({
-          productId: item._id || item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-        })),
-        address: deliveryAddress,
-        paymentMethod,
-        note,
-        shippingFee,
-        totalPrice: cartTotal - discount + shippingFee,
+    const productPayload = {
+      items: cartItems.map((item) => ({
+        productId: item._id || item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      address: deliveryAddress,
+      paymentMethod,
+      note,
+      shippingFee,
+      totalPrice: cartTotal - discount + shippingFee,
+    };
+
+    const res = await checkoutService.createOrder(productPayload);
+    if (!res?.data?.success) {
+      return {
+        success: false,
+        error: res?.data?.message || "Đặt hàng sản phẩm thất bại",
       };
-
-      const res = await checkoutService.createOrder(productPayload);
-      if (!res?.data?.success) {
-        return {
-          success: false,
-          error: res?.data?.message || "Đặt hàng sản phẩm thất bại",
-        };
-      }
-    }
-
-    // 2. Gói subscribe
-    if (subscribeItems.length > 0) {
-      const subResults = await Promise.allSettled(
-        subscribeItems.map((sub) =>
-          subscriptionApi.subscribe({
-            userId,
-            templateId: sub.templateId,
-            shippingAddress: deliveryAddress,
-          }),
-        ),
-      );
-
-      const failed = subResults.filter((r) => r.status === "rejected");
-      if (failed.length > 0) {
-        logger.warn(
-          `[checkoutPageService] ${failed.length} subscribe thất bại`,
-        );
-        // Không block — sản phẩm thường đã xong
-      }
     }
 
     return { success: true };

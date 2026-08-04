@@ -21,6 +21,8 @@ export function ProductPurchasePanel({
   onDecrease,
   isAddingToCart,
   onAddToCart,
+  isBuyingNow,
+  onBuyNow,
   isWishlisted,
   onWishlist,
   onShare,
@@ -107,21 +109,31 @@ export function ProductPurchasePanel({
       </div>
 
       {/* Hành động chính */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-2">
-        <Button
-          onClick={onAddToCart}
-          disabled={isAddingToCart || stock <= 0}
-          className="flex-1 py-6 bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-black uppercase tracking-widest text-[12px] shadow-lg shadow-amber-900/15 flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100 cursor-pointer"
-        >
-          <ShoppingCart size={18} />
-          {isAddingToCart ? "Đang thêm..." : "Thêm vào giỏ hàng"}
-        </Button>
+      <div className="flex flex-col gap-3 pt-2">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            onClick={onAddToCart}
+            disabled={isAddingToCart || isBuyingNow || stock <= 0}
+            className="flex-1 py-6 bg-white hover:bg-stone-50 text-amber-800 border-2 border-amber-800 rounded-xl font-black uppercase tracking-widest text-[12px] flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100 cursor-pointer"
+          >
+            <ShoppingCart size={18} />
+            {isAddingToCart ? "Đang thêm..." : "Thêm vào giỏ hàng"}
+          </Button>
+
+          <Button
+            onClick={onBuyNow}
+            disabled={isAddingToCart || isBuyingNow || stock <= 0}
+            className="flex-1 py-6 bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-black uppercase tracking-widest text-[12px] shadow-lg shadow-amber-900/15 flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100 cursor-pointer"
+          >
+            {isBuyingNow ? "Đang xử lý..." : "Mua ngay"}
+          </Button>
+        </div>
 
         <div className="flex gap-2">
           <Button
             variant="outline"
             onClick={onWishlist}
-            className={`p-3 w-12 h-12 flex items-center justify-center rounded-xl active:scale-90 transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none p-3 sm:w-12 h-12 flex items-center justify-center rounded-xl active:scale-90 transition-all cursor-pointer ${
               isWishlisted
                 ? "border-red-200 text-red-500 bg-red-50"
                 : "border-stone-200 text-stone-500 hover:text-red-500 hover:border-red-200"
@@ -133,7 +145,7 @@ export function ProductPurchasePanel({
           <Button
             variant="outline"
             onClick={onShare}
-            className="p-3 w-12 h-12 flex items-center justify-center rounded-xl border-stone-200 text-stone-500 hover:text-blue-500 hover:border-blue-200 active:scale-90 transition-all cursor-pointer"
+            className="flex-1 sm:flex-none p-3 sm:w-12 h-12 flex items-center justify-center rounded-xl border-stone-200 text-stone-500 hover:text-blue-500 hover:border-blue-200 active:scale-90 transition-all cursor-pointer"
           >
             <Share2 size={18} />
           </Button>

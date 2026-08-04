@@ -8,7 +8,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Package, RefreshCcw, MapPin, CalendarDays } from "lucide-react";
+import { Package, MapPin } from "lucide-react";
 import { SectionCard } from "./SectionCard";
 
 const fmt = (n) => (n ?? 0).toLocaleString("vi-VN");
@@ -41,41 +41,6 @@ function ProductRow({ item }) {
   );
 }
 
-// ─── Subscribe item row ───────────────────────────────────────────────────────
-function SubscribeRow({ sub }) {
-  return (
-    <div className="flex gap-3 items-center">
-      <div className="w-14 h-14 rounded-lg bg-indigo-50 overflow-hidden shrink-0 border border-slate-200 relative">
-        {sub.boxImage && (
-          <Image
-            src={sub.boxImage}
-            alt={sub.boxName}
-            fill
-            className="object-contain p-1.5"
-            sizes="56px"
-          />
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-slate-900 line-clamp-1">{sub.boxName}</p>
-        <div className="flex items-center gap-1.5 mt-0.5">
-          <CalendarDays size={11} className="text-indigo-600" />
-          <p className="text-xs text-slate-600">
-            {sub.planLabel} · {sub.totalDeliveries} lần giao
-          </p>
-        </div>
-        {sub.discountPercent > 0 && (
-          <p className="text-[10px] text-emerald-600 font-bold mt-0.5">
-            Tiết kiệm {fmt(sub.save)}₫
-          </p>
-        )}
-      </div>
-      <p className="text-sm font-black text-indigo-600 shrink-0">
-        {fmt(sub.totalPrice)}₫
-      </p>
-    </div>
-  );
-}
 
 // ─── Address summary ──────────────────────────────────────────────────────────
 function AddressSummary({ addr, user, onEdit }) {
@@ -106,10 +71,7 @@ function AddressSummary({ addr, user, onEdit }) {
 export function ReviewStep({
   cartItems,
   cartCount,
-  subscribeItems,
-  subscribeCount,
   hasProducts,
-  hasSubscribes,
   selectedAddress,
   newAddress,
   user,
@@ -135,20 +97,6 @@ export function ReviewStep({
           <div className="space-y-3">
             {cartItems.map((item, i) => (
               <ProductRow key={item._id || item.id || i} item={item} />
-            ))}
-          </div>
-        </SectionCard>
-      )}
-
-      {/* Gói subscribe */}
-      {hasSubscribes && (
-        <SectionCard
-          title={`Gói Subscribe (${subscribeCount})`}
-          icon={<RefreshCcw size={16} />}
-        >
-          <div className="space-y-3">
-            {subscribeItems.map((sub) => (
-              <SubscribeRow key={sub.key} sub={sub} />
             ))}
           </div>
         </SectionCard>

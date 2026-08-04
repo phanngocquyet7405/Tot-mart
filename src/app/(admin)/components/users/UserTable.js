@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
 import {
   MoreHorizontal,
   Lock,
@@ -33,122 +32,39 @@ import {
 } from "@/components/ui/dropdown-menu";
 import UserDialog from "./UserDialog";
 import { ConfirmActionDialog } from "./ConfirmActionDialog";
-import { userService } from "@/app/services/api/userService";
-import { toast } from "sonner";
+import { useAdminUsersTable } from "../../admin-users/hooks/useAdminUsersTable";
+
+function SortIcon({ sortConfig, col }) {
+  return sortConfig.key === col ? (
+    sortConfig.dir === "asc" ? (
+      <ChevronUp size={12} className="inline ml-1" />
+    ) : (
+      <ChevronDown size={12} className="inline ml-1" />
+    )
+  ) : (
+    <ChevronUp size={12} className="inline ml-1 opacity-20" />
+  );
+}
 
 export default function UserTable({ search, refreshTrigger }) {
-  const [users, setUsers] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [sortConfig, setSortConfig] = useState({ key: null, dir: "asc" });
-
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-
-  const [confirmConfig, setConfirmConfig] = useState({
-    open: false,
-    user: null,
-    type: "lock",
-  });
-  const [isActionLoading, setIsActionLoading] = useState(false);
-
-  const fetchUsers = async () => {
-    setIsLoading(true);
-    try {
-      const response = await userService.getAllUsers();
-      const data = response.data || response || [];
-      setUsers(Array.isArray(data) ? data : []);
-    } catch {
-      toast.error("Không thể tải danh sách người dùng");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, [refreshTrigger]);
-  const filteredUsers = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    const list = !q
-      ? users
-      : users.filter((user) => {
-          const name = (user.name || "").toLowerCase();
-          const email = (user.email || "").toLowerCase();
-          const role = (user.role || "").toLowerCase();
-          const phone = user.addreses?.[0]?.phone || "";
-          return (
-            name.includes(q) ||
-            email.includes(q) ||
-            phone.includes(q) ||
-            role.includes(q)
-          );
-        });
-
-    if (!sortConfig.key) return list;
-    return [...list].sort((a, b) => {
-      const aVal = (a[sortConfig.key] || "").toString().toLowerCase();
-      const bVal = (b[sortConfig.key] || "").toString().toLowerCase();
-      return sortConfig.dir === "asc"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    });
-  }, [users, search, sortConfig]);
-
-  const toggleSort = (key) => {
-    setSortConfig((prev) =>
-      prev.key === key
-        ? { key, dir: prev.dir === "asc" ? "desc" : "asc" }
-        : { key, dir: "asc" },
-    );
-  };
-
-  const SortIcon = ({ col }) =>
-    sortConfig.key === col ? (
-      sortConfig.dir === "asc" ? (
-        <ChevronUp size={12} className="inline ml-1" />
-      ) : (
-        <ChevronDown size={12} className="inline ml-1" />
-      )
-    ) : (
-      <ChevronUp size={12} className="inline ml-1 opacity-20" />
-    );
-
-  const handleEdit = (user) => {
-    setSelectedUser(user);
-    setIsEditDialogOpen(true);
-  };
-
-  const executeAction = async () => {
-    const { user, type } = confirmConfig;
-    if (!user?._id) return;
-
-    setIsActionLoading(true);
-    try {
-      if (type === "lock") {
-        await userService.lockUser(user._id);
-        toast.success(`Đã khóa tài khoản ${user.name}`);
-      } else if (type === "delete") {
-        await userService.deleteUser(user._id);
-        toast.success(`Đã xóa tài khoản ${user.name}`);
-      }
-      fetchUsers();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Thao tác thất bại");
-    } finally {
-      setIsActionLoading(false);
-      setConfirmConfig((prev) => ({ ...prev, open: false }));
-    }
-  };
-
-  const handleUnlock = async (user) => {
-    try {
-      await userService.unlockUser(user._id);
-      toast.success(`Đã mở khóa tài khoản ${user.name}`);
-      fetchUsers();
-    } catch {
-      toast.error("Mở khóa thất bại");
-    }
-  };
+  const {
+    users,
+    filteredUsers,
+    isLoading,
+    sortConfig,
+    toggleSort,
+    selectedUser,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    confirmConfig,
+    setConfirmConfig,
+    isActionLoading,
+    handleEdit,
+    requestAction,
+    executeAction,
+    handleUnlock,
+    fetchUsers,
+  } = useAdminUsersTable({ search, refreshTrigger });
 
   if (isLoading) {
     return (
@@ -174,14 +90,14 @@ export default function UserTable({ search, refreshTrigger }) {
                 className="cursor-pointer select-none font-semibold"
                 onClick={() => toggleSort("name")}
               >
-                Người dùng <SortIcon col="name" />
+                Người dùng <SortIcon sortConfig={sortConfig} col="name" />
               </TableHead>
               <TableHead className="font-semibold">Liên hệ</TableHead>
               <TableHead
                 className="cursor-pointer select-none font-semibold"
                 onClick={() => toggleSort("role")}
               >
-                Vai trò <SortIcon col="role" />
+                Vai trò <SortIcon sortConfig={sortConfig} col="role" />
               </TableHead>
               <TableHead className="font-semibold">Trạng thái</TableHead>
               <TableHead className="text-right font-semibold">
@@ -292,13 +208,7 @@ export default function UserTable({ search, refreshTrigger }) {
                         {user.isActive ? (
                           <DropdownMenuItem
                             className="text-amber-600 cursor-pointer focus:text-amber-700 focus:bg-amber-50"
-                            onClick={() =>
-                              setConfirmConfig({
-                                open: true,
-                                user,
-                                type: "lock",
-                              })
-                            }
+                            onClick={() => requestAction(user, "lock")}
                           >
                             <Lock className="mr-2" size={15} /> Khóa tài khoản
                           </DropdownMenuItem>
@@ -312,13 +222,7 @@ export default function UserTable({ search, refreshTrigger }) {
                         )}
                         <DropdownMenuItem
                           className="text-destructive focus:text-destructive cursor-pointer focus:bg-red-50"
-                          onClick={() =>
-                            setConfirmConfig({
-                              open: true,
-                              user,
-                              type: "delete",
-                            })
-                          }
+                          onClick={() => requestAction(user, "delete")}
                         >
                           <Trash2 className="mr-2" size={15} /> Xóa vĩnh viễn
                         </DropdownMenuItem>

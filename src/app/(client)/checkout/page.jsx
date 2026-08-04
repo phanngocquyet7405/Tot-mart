@@ -71,9 +71,6 @@ export default function CheckoutPage() {
             </h1>
             <p className="text-xs text-slate-600 mt-0.5">
               {checkout.hasProducts && `${checkout.cartCount} sản phẩm`}
-              {checkout.hasProducts && checkout.hasSubscribes && " · "}
-              {checkout.hasSubscribes &&
-                `${checkout.subscribeCount} gói subscribe`}
             </p>
           </div>
         </div>
@@ -114,10 +111,7 @@ export default function CheckoutPage() {
                 <ReviewStep
                   cartItems={checkout.cartItems}
                   cartCount={checkout.cartCount}
-                  subscribeItems={checkout.subscribeItems}
-                  subscribeCount={checkout.subscribeCount}
                   hasProducts={checkout.hasProducts}
-                  hasSubscribes={checkout.hasSubscribes}
                   selectedAddress={checkout.selectedAddress}
                   newAddress={checkout.newAddress}
                   user={checkout.user}
@@ -148,11 +142,8 @@ export default function CheckoutPage() {
           {/* Cột phải — Summary */}
           <OrderSummary
             cartItems={checkout.cartItems}
-            subscribeItems={checkout.subscribeItems}
             hasProducts={checkout.hasProducts}
-            hasSubscribes={checkout.hasSubscribes}
             cartTotal={checkout.cartTotal}
-            subscribeTotal={checkout.subscribeTotal}
             shippingFee={checkout.shippingFee}
             discount={checkout.discount}
             finalTotal={checkout.finalTotal}

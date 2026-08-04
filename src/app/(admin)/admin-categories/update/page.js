@@ -1,115 +1,35 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import React, { Suspense } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   LayoutGrid,
   Loader2,
   FolderTree,
-  CheckCircle2,
   Info,
-  AlertTriangle,
   Save,
 } from "lucide-react";
 
-// UI Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-
-// Services
-import {
-  updateCategoryApi,
-  getAllCategoriesApi,
-} from "@/app/services/api/productServices";
+import { useUpdateCategory } from "../hooks/useUpdateCategory";
 
 function UpdateCategoryContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const categoryId = searchParams.get("id");
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [existingCategories, setExistingCategories] = useState([]);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    isActive: true,
-    childrenIds: [],
-  });
-
-  // 1. Tải dữ liệu ban đầu
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!categoryId) return;
-      try {
-        setIsLoading(true);
-        // Lấy tất cả danh mục để tìm thông tin danh mục hiện tại và danh sách cha
-        const res = await getAllCategoriesApi();
-        const data = res?.data?.data || res?.data || [];
-        setExistingCategories(data);
-
-        // Tìm danh mục cần sửa trong list (vì hiện tại chưa có API getById riêng biệt)
-        const currentCat = data.find((c) => c._id === categoryId);
-        if (currentCat) {
-          setFormData({
-            name: currentCat.name || "",
-            description: currentCat.description || "",
-            isActive:
-              currentCat.isActive !== undefined ? currentCat.isActive : true,
-            childrenIds: currentCat.childrenIds || [],
-          });
-        }
-      } catch (err) {
-        toast.error("Không thể tải thông tin danh mục");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [categoryId]);
-
-  // 2. Xử lý cập nhật
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    if (!formData.name.trim())
-      return toast.error("Tên danh mục không được để trống");
-
-    try {
-      setIsSubmitting(true);
-
-      const cleanChildrenIds = (formData.childrenIds || []).map((item) =>
-        typeof item === "object" ? item._id : item,
-      );
-
-      const payload = {
-        name: formData.name.trim(),
-        description: formData.description.trim(),
-        isActive: formData.isActive,
-        childrenIds: cleanChildrenIds,
-      };
-
-      await updateCategoryApi(categoryId, payload);
-
-      toast.success("Cập nhật thành công!");
-      router.push("/admin-categories");
-      router.refresh();
-    } catch (error) {
-      const errorMsg = error.response?.data?.message || "Lỗi khi cập nhật";
-      toast.error(errorMsg);
-      console.error("Update Error:", error.response?.data);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    categoryId,
+    formData,
+    updateField,
+    existingCategories,
+    isLoading,
+    isSubmitting,
+    handleUpdate,
+  } = useUpdateCategory();
 
   if (isLoading) {
     return (
@@ -164,7 +84,7 @@ function UpdateCategoryContent() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        {/* Cột chính: Form nhập liệu[cite: 1] */}
+        {/* Cột chính: Form nhập liệu */}
         <div className="md:col-span-2 space-y-4">
           <Card className="border-orange-100 shadow-sm overflow-hidden">
             <CardHeader className="bg-orange-50/30 border-b">
@@ -180,9 +100,7 @@ function UpdateCategoryContent() {
                 </Label>
                 <Input
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
+                  onChange={(e) => updateField("name", e.target.value)}
                   className="h-11 focus-visible:ring-orange-500 border-zinc-200"
                 />
               </div>
@@ -193,9 +111,7 @@ function UpdateCategoryContent() {
                 </Label>
                 <Textarea
                   value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
+                  onChange={(e) => updateField("description", e.target.value)}
                   className="min-h-30 border-zinc-200 focus-visible:ring-orange-500"
                   placeholder="Nhập mô tả cho danh mục..."
                 />
@@ -240,13 +156,13 @@ function UpdateCategoryContent() {
               <p className="font-bold">Lưu ý về cấu trúc:</p>
               <p className="opacity-80">
                 Việc thay đổi tên hoặc mô tả tại đây sẽ cập nhật trực tiếp vào
-                hệ thống phân cấp <strong>Child-Referencing</strong>[cite: 1].
+                hệ thống phân cấp <strong>Child-Referencing</strong>.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Cột phụ: Trạng thái & Preview[cite: 1] */}
+        {/* Cột phụ: Trạng thái & Preview */}
         <div className="space-y-4">
           <Card className="shadow-sm border-zinc-200">
             <CardContent className="p-4 flex items-center justify-between">
@@ -258,14 +174,12 @@ function UpdateCategoryContent() {
               </div>
               <Switch
                 checked={formData.isActive}
-                onCheckedChange={(val) =>
-                  setFormData({ ...formData, isActive: val })
-                }
+                onCheckedChange={(val) => updateField("isActive", val)}
               />
             </CardContent>
           </Card>
 
-          {/* Live Preview Card - Đồng bộ style[cite: 1] */}
+          {/* Live Preview Card */}
           <Card className="bg-zinc-900 text-white border-none shadow-xl overflow-hidden">
             <CardHeader className="pb-2 border-b border-zinc-800">
               <CardTitle className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">

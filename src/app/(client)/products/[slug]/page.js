@@ -8,7 +8,6 @@ import NavMenu from "@/app/(client)/components/ui/nav_menu";
 import AnnouncementBar from "@/app/(client)/components/ui/AnnouncementBar";
 import MainHeader from "@/app/(client)/components/ui/main_header";
 import Footer from "@/app/(client)/components/ui/footer";
-import CartDrawer from "@/app/(client)/components/Cart_component/cart_drawer";
 
 import { useProductDetail } from "@/app/hook/useProductDetail";
 import { ProductGallery } from "../../components/Product/ProductGallery";
@@ -36,12 +35,12 @@ export default function ProductDetailPage({ params: paramsPromise }) {
     setActiveTab,
     isWishlisted,
     isAddingToCart,
-    isCartOpen,
-    setIsCartOpen,
+    isBuyingNow,
     selectQuantity,
     increaseQty,
     decreaseQty,
     handleAddToCart,
+    handleBuyNow,
     handleShare,
     handleWishlist,
     finalPrice,
@@ -82,10 +81,9 @@ export default function ProductDetailPage({ params: paramsPromise }) {
       <MainHeader />
       <NavMenu />
 
-      {/* Drawer giỏ hàng — luôn mount để AnimatePresence xử lý animation
-          đóng/mở đúng cách; prop đúng tên thật của CartDrawer là open/setOpen
-          (bản trước đây truyền nhầm isOpen/setIsOpen nên không hoạt động). */}
-      <CartDrawer open={isCartOpen} setOpen={setIsCartOpen} />
+      {/* Cart Drawer giờ dùng chung 1 instance duy nhất (mount trong
+          MainHeader ở trên), điều khiển qua CartContext.isCartOpen — không
+          còn mount riêng ở đây nữa để tránh 2 Drawer tồn tại song song. */}
 
       <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
         {/* Breadcrumb */}
@@ -117,6 +115,8 @@ export default function ProductDetailPage({ params: paramsPromise }) {
               onDecrease={decreaseQty}
               isAddingToCart={isAddingToCart}
               onAddToCart={handleAddToCart}
+              isBuyingNow={isBuyingNow}
+              onBuyNow={handleBuyNow}
               isWishlisted={isWishlisted}
               onWishlist={handleWishlist}
               onShare={handleShare}
