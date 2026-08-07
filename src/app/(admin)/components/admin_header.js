@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NotificationBell } from "./notifications/NotificationBell";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
@@ -75,40 +76,7 @@ export function AdminHeader() {
 
       <div className="flex items-center gap-3">
         {/* Dropdown thông báo */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative h-9 w-9">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
-                3
-              </span>
-              <span className="sr-only">Notifications</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <span className="font-medium">New order received</span>
-              <span className="text-xs text-muted-foreground">
-                Order #1234 from John Doe - $156.00
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <span className="font-medium">Low stock alert</span>
-              <span className="text-xs text-muted-foreground">
-                Product &quot;Wireless Headphones&quot; is running low
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <span className="font-medium">New user registered</span>
-              <span className="text-xs text-muted-foreground">
-                jane.smith@example.com joined 2 hours ago
-              </span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
+        <NotificationBell />
         {/* Dropdown thông tin User Admin */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
