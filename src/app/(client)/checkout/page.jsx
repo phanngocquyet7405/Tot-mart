@@ -131,6 +131,7 @@ export default function CheckoutPage() {
                   discount={checkout.discount}
                   finalTotal={checkout.finalTotal}
                   submitting={checkout.submitting}
+                  paymentStatus={checkout.paymentStatus}
                   onApplyCoupon={checkout.handleApplyCoupon}
                   onBack={() => checkout.setStep("review")}
                   onPlaceOrder={checkout.handlePlaceOrder}

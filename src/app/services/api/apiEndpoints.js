@@ -44,6 +44,14 @@ export const API_ENDPOINTS = {
 
   CHECKOUT: {
     CREATE: "/checkout/check-out",
+
+    // ─── VNPay ────────────────────────────────────────────────────────────
+    // BE cần bổ sung 3 route tương ứng:
+    //   POST /checkout/create-vnpay-url  -> build URL thanh toán (HMAC signed)
+    //   GET  /checkout/vnpay-ipn         -> VNPay gọi server-to-server, chốt trạng thái đơn
+    //   GET  /checkout/vnpay-return      -> verify khi user redirect về, CHỈ để hiển thị
+    CREATE_VNPAY_URL: "/checkout/create-vnpay-url",
+    VERIFY_VNPAY_RETURN: "/checkout/vnpay-return",
   },
 
   PRODUCTS: {

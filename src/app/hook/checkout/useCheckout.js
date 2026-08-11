@@ -15,6 +15,7 @@ import {
   validateCoupon,
   calcShippingFee,
   placeOrder,
+  initiateVnpayPayment,
   EMPTY_NEW_ADDRESS,
 } from "@/app/services/api/Checkoutpageservice";
 
@@ -27,6 +28,9 @@ export function useCheckout() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  // idle | redirecting | failed — chỉ dùng cho luồng online payment (vnpay).
+  // "success" không cần vì lúc đó user đã bị redirect sang trang payment-result.
+  const [paymentStatus, setPaymentStatus] = useState("idle");
 
   // ─── User / address ───────────────────────────────────────────────────────
   const [user, setUser] = useState(null);
@@ -109,6 +113,7 @@ export function useCheckout() {
     }
 
     setSubmitting(true);
+    setPaymentStatus("idle");
     const deliveryAddress = selectedAddress ?? newAddress;
 
     const result = await placeOrder({
@@ -121,13 +126,43 @@ export function useCheckout() {
       discount,
     });
 
-    if (result.success) {
-      clearCart();
-      setOrderSuccess(true);
-    } else {
+    if (!result.success) {
       toast.error(result.error || "Đặt hàng thất bại, vui lòng thử lại");
+      setSubmitting(false);
+      return;
     }
 
+    // COD: giữ nguyên luồng cũ — chốt đơn ngay tại đây.
+    if (paymentMethod === "cod") {
+      clearCart();
+      setOrderSuccess(true);
+      setSubmitting(false);
+      return;
+    }
+
+    // VNPay: đơn đã ở trạng thái pending_payment ở BE.
+    // Không clearCart() ở đây — chỉ clear khi VNPay xác nhận thành công
+    // (ở trang payment-result), để tránh mất dữ liệu giỏ hàng nếu user huỷ giữa chừng.
+    if (paymentMethod === "vnpay") {
+      setPaymentStatus("redirecting");
+      const vnpayResult = await initiateVnpayPayment(
+        result.orderId,
+        finalTotal,
+      );
+
+      if (!vnpayResult.success) {
+        toast.error(vnpayResult.error || "Không thể khởi tạo thanh toán VNPay");
+        setPaymentStatus("failed");
+        setSubmitting(false);
+        return;
+      }
+
+      window.location.href = vnpayResult.paymentUrl;
+      return; // đang điều hướng sang VNPay, không cần tắt submitting
+    }
+
+    // Các phương thức khác (bank/momo) chưa wire — không nên tới được đây
+    // vì PaymentStep đã disable lựa chọn không available.
     setSubmitting(false);
   }, [
     selectedAddress,
@@ -139,6 +174,7 @@ export function useCheckout() {
     shippingFee,
     cartTotal,
     discount,
+    finalTotal,
     clearCart,
   ]);
 
@@ -172,6 +208,7 @@ export function useCheckout() {
     loading,
     submitting,
     orderSuccess,
+    paymentStatus,
     isMounted,
     // User / address
     user,

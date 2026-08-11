@@ -6,6 +6,7 @@
 
 import { userService } from "@/app/services/api/userService";
 import { checkoutService } from "@/app/services/api/checkoutService";
+import { paymentGatewayService } from "@/app/services/api/paymentGatewayService";
 import { getTokenUserId } from "@/app/middleware/tokenMiddleware";
 import logger from "@/app/util/Logger";
 
@@ -17,20 +18,37 @@ export const STEPS = [
   { id: "payment", label: "Thanh toán", icon: "CreditCard" },
 ];
 
+// `available: false` = UI vẫn hiện nhưng disable + gắn nhãn "Sắp ra mắt",
+// tránh tình trạng chọn được nhưng không có gì xảy ra (như trước đây).
 export const PAYMENT_METHODS = [
   {
     id: "cod",
     label: "Thanh toán khi nhận hàng",
     icon: "💵",
     desc: "COD - Trả tiền mặt khi nhận",
+    available: true,
+  },
+  {
+    id: "vnpay",
+    label: "VNPay",
+    icon: "💳",
+    desc: "ATM nội địa / Visa / QR / Internet Banking",
+    available: true,
   },
   {
     id: "bank",
     label: "Chuyển khoản ngân hàng",
     icon: "🏦",
     desc: "VietQR / Internet Banking",
+    available: false,
   },
-  { id: "momo", label: "Ví MoMo", icon: "📱", desc: "Thanh toán qua app MoMo" },
+  {
+    id: "momo",
+    label: "Ví MoMo",
+    icon: "📱",
+    desc: "Thanh toán qua app MoMo",
+    available: false,
+  },
 ];
 
 export const EMPTY_NEW_ADDRESS = {
@@ -104,7 +122,12 @@ export function calcShippingFee(cartTotal, hasProducts) {
  * Đặt hàng sản phẩm thường. Gói subscribe đi qua luồng riêng
  * (ChoosePlanModal → subscriptionApi.subscribe trực tiếp), không qua
  * CartContext/checkout — nên hàm này chỉ còn xử lý cartItems.
- * @returns {{ success: boolean, error?: string }}
+ *
+ * Với phương thức online (vnpay), đơn hàng tạo ra ở BE nên ở trạng thái
+ * "pending_payment" chứ không confirm ngay — orderId trả về được dùng
+ * tiếp ở bước initiateVnpayPayment().
+ *
+ * @returns {{ success: boolean, orderId?: string, error?: string }}
  */
 export async function placeOrder({
   cartItems,
@@ -138,9 +161,48 @@ export async function placeOrder({
       };
     }
 
-    return { success: true };
+    // TODO xác nhận với BE field chính xác trả về id đơn hàng.
+    // Đang defensive-check vài khả năng phổ biến (_id / orderId).
+    const orderId =
+      res.data?.data?._id ?? res.data?.data?.orderId ?? res.data?.orderId;
+
+    return { success: true, orderId };
   } catch (err) {
     logger.error("[checkoutPageService] placeOrder:", err);
+    return {
+      success: false,
+      error: err?.response?.data?.message || err.message,
+    };
+  }
+}
+
+// ─── VNPay ────────────────────────────────────────────────────────────────────
+
+/**
+ * Gọi BE tạo URL thanh toán VNPay cho đơn hàng vừa tạo, để redirect user sang đó.
+ * @param {string} orderId
+ * @param {number} amount
+ * @returns {{ success: boolean, paymentUrl?: string, error?: string }}
+ */
+export async function initiateVnpayPayment(orderId, amount) {
+  try {
+    if (!orderId) {
+      return { success: false, error: "Thiếu mã đơn hàng để tạo thanh toán" };
+    }
+
+    const res = await paymentGatewayService.createVnpayUrl(orderId, amount);
+    const paymentUrl = res.data?.data?.paymentUrl ?? res.data?.paymentUrl;
+
+    if (!paymentUrl) {
+      return {
+        success: false,
+        error: "Không tạo được liên kết thanh toán VNPay",
+      };
+    }
+
+    return { success: true, paymentUrl };
+  } catch (err) {
+    logger.error("[checkoutPageService] initiateVnpayPayment:", err);
     return {
       success: false,
       error: err?.response?.data?.message || err.message,
