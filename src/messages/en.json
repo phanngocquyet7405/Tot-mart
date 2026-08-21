@@ -1,0 +1,61 @@
+{
+  "header": {
+    "promoBadge": "Save up to 70% now!",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "myAccount": "My Account",
+    "administrator": "Administrator",
+    "dashboard": "Dashboard",
+    "myProfile": "My Profile",
+    "logOut": "Log Out",
+    "guestFallbackName": "User"
+  },
+  "nav": {
+    "products": "Products",
+    "brands": "Brands",
+    "featuredBrands": "Featured Brands",
+    "otherBrands": "Other Brands",
+    "newProducts": "New Products",
+    "otherProducts": "More Products"
+  },
+  "search": {
+    "placeholder": "Search products...",
+    "loading": "Searching...",
+    "noResults": "No products found for \"{query}\"",
+    "viewAllResults": "View all results for \"{query}\""
+  },
+  "footer": {
+    "appPromoLine1": "Download our app to get",
+    "appPromoLine2": "app-exclusive offers and",
+    "appPromoLine3": "discounts!",
+    "qrCode": "QR CODE",
+    "brandsTitle": "Brands",
+    "informationTitle": "Information",
+    "supportTitle": "Support",
+    "weAcceptTitle": "We Accept",
+    "copyright": "© {year} TotMart Box. All rights reserved.",
+    "brandLinks": {
+      "snackBox": "TotMart Snack Box",
+      "boutique": "TotMart Boutique",
+      "market": "TotMart Market"
+    },
+    "information": {
+      "aboutUs": "About Us",
+      "todaysOffers": "Today's Offers",
+      "referFriend": "Refer a Friend",
+      "corporateGifts": "Corporate Gifts",
+      "rewards": "Rewards",
+      "blogs": "Blogs",
+      "careers": "Careers"
+    },
+    "support": {
+      "contactUs": "Contact Us",
+      "community": "Community",
+      "privacyPolicy": "Privacy Policy",
+      "terms": "Terms",
+      "faq": "FAQ",
+      "shippingPolicy": "Shipping Policy",
+      "accessibility": "Accessibility Statement"
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "header": {
+    "promoBadge": "Giảm giá đến 70%!",
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "myAccount": "Tài khoản của tôi",
+    "administrator": "Quản trị viên",
+    "dashboard": "Trang quản trị",
+    "myProfile": "Hồ sơ của tôi",
+    "logOut": "Đăng xuất",
+    "guestFallbackName": "Người dùng"
+  },
+  "nav": {
+    "products": "Sản phẩm",
+    "brands": "Thương hiệu",
+    "featuredBrands": "Thương hiệu nổi bật",
+    "otherBrands": "Thương hiệu khác",
+    "newProducts": "Sản phẩm mới",
+    "otherProducts": "Sản phẩm khác"
+  },
+  "search": {
+    "placeholder": "Tìm kiếm sản phẩm...",
+    "loading": "Đang tìm kiếm...",
+    "noResults": "Không tìm thấy sản phẩm nào cho \"{query}\"",
+    "viewAllResults": "Xem tất cả kết quả cho \"{query}\""
+  },
+  "footer": {
+    "appPromoLine1": "Tải ứng dụng để nhận",
+    "appPromoLine2": "ưu đãi và giảm giá",
+    "appPromoLine3": "độc quyền trên app!",
+    "qrCode": "MÃ QR",
+    "brandsTitle": "Thương hiệu",
+    "informationTitle": "Thông tin",
+    "supportTitle": "Hỗ trợ",
+    "weAcceptTitle": "Thanh toán",
+    "copyright": "© {year} TotMart Box. Bảo lưu mọi quyền.",
+    "brandLinks": {
+      "snackBox": "TotMart Snack Box",
+      "boutique": "TotMart Boutique",
+      "market": "TotMart Market"
+    },
+    "information": {
+      "aboutUs": "Về chúng tôi",
+      "todaysOffers": "Ưu đãi hôm nay",
+      "referFriend": "Giới thiệu bạn bè",
+      "corporateGifts": "Quà tặng doanh nghiệp",
+      "rewards": "Ưu đãi thành viên",
+      "blogs": "Bài viết",
+      "careers": "Tuyển dụng"
+    },
+    "support": {
+      "contactUs": "Liên hệ",
+      "community": "Cộng đồng",
+      "privacyPolicy": "Chính sách bảo mật",
+      "terms": "Điều khoản sử dụng",
+      "faq": "Câu hỏi thường gặp",
+      "shippingPolicy": "Chính sách vận chuyển",
+      "accessibility": "Hỗ trợ tiếp cận"
+    }
+  }
+}

@@ -1,21 +1,21 @@
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { AppContextProvider } from "./context/AppContext";
-import { NotificationProvider } from "./context/NotificationContext";
+import { AdminNotificationProvider } from "./context/NotificationContext";
 import { CartProvider } from "@/app/context/CartContext";
 import { WishlistProvider } from "@/app/context/WishlistContext";
 import "./globals.css";
 
 // Cấu hình font cho Vietnamese
-const playfairDisplay = Playfair_Display({ 
+const playfairDisplay = Playfair_Display({
   subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-serif"
+  variable: "--font-serif",
 });
-const plusJakartaSans = Plus_Jakarta_Sans({ 
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin", "vietnamese"],
   weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-sans"
+  variable: "--font-sans",
 });
 
 export const metadata = {
@@ -44,14 +44,17 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="vi" className={`${playfairDisplay.variable} ${plusJakartaSans.variable}`}>
+    <html
+      lang="vi"
+      className={`${playfairDisplay.variable} ${plusJakartaSans.variable}`}
+    >
       <body className="font-sans antialiased">
         {/* 2. Bọc CartProvider + WishlistProvider xung quanh children */}
         <AppContextProvider>
           <CartProvider>
             <WishlistProvider>
               {/* Toast notification — render vào document.body qua portal */}
-              <NotificationProvider>{children}</NotificationProvider>
+              <AdminNotificationProvider>{children}</AdminNotificationProvider>
             </WishlistProvider>
           </CartProvider>
         </AppContextProvider>

@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 import {
   useAdminNotifications,
   NOTIFICATION_TYPES,
-} from "../../context/AdminNotificationContext";
+} from "@/app/context/NotificationContext";
 
 const ICONS = { ShoppingCart, AlertTriangle, PackageX, UserPlus };
 
@@ -40,7 +40,10 @@ const TONE_CLASSES = {
 const STATUS_CONFIG = {
   live: { label: "Trực tiếp", dot: "bg-emerald-500" },
   connecting: { label: "Đang kết nối...", dot: "bg-amber-400 animate-pulse" },
-  reconnecting: { label: "Đang kết nối lại...", dot: "bg-amber-400 animate-pulse" },
+  reconnecting: {
+    label: "Đang kết nối lại...",
+    dot: "bg-amber-400 animate-pulse",
+  },
   offline: { label: "Ngoại tuyến", dot: "bg-zinc-400" },
   mock: { label: "Chế độ demo", dot: "bg-violet-500" },
 };
@@ -71,7 +74,9 @@ function NotificationRow({ notification, onRead }) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className={cn("text-sm", !notification.read && "font-semibold")}>
+          <span
+            className={cn("text-sm", !notification.read && "font-semibold")}
+          >
             {notification.title}
           </span>
           {!notification.read && (
@@ -123,7 +128,9 @@ export function NotificationBell() {
           <DropdownMenuLabel className="p-0 flex items-center gap-2">
             Thông báo
             <span className="flex items-center gap-1 text-[11px] font-normal text-muted-foreground">
-              <span className={cn("h-1.5 w-1.5 rounded-full", statusInfo.dot)} />
+              <span
+                className={cn("h-1.5 w-1.5 rounded-full", statusInfo.dot)}
+              />
               {statusInfo.label}
             </span>
           </DropdownMenuLabel>
@@ -165,7 +172,11 @@ export function NotificationBell() {
           ) : (
             <div className="divide-y">
               {notifications.map((n) => (
-                <NotificationRow key={n.id} notification={n} onRead={markAsRead} />
+                <NotificationRow
+                  key={n.id}
+                  notification={n}
+                  onRead={markAsRead}
+                />
               ))}
             </div>
           )}
