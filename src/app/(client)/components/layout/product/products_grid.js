@@ -6,9 +6,16 @@ import { ProductCard } from "./product_card";
 import {
   getAllProductsApi,
   getProductsByCategoryApi,
+  getAllBrandsApi,
 } from "@/app/services/api/productServices";
 import { useAddToCart } from "@/app/hook/useAddToCart";
 import { useWishlist } from "@/app/context/WishlistContext";
+
+function extractRefId(ref) {
+  if (!ref) return null;
+  if (typeof ref === "string") return ref;
+  return ref._id || null;
+}
 
 export default function ProductsGrid({ categoryId, brandSlug }) {
   const { addToCart } = useAddToCart();
@@ -23,11 +30,32 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        let response = categoryId
-          ? await getProductsByCategoryApi(categoryId)
-          : await getAllProductsApi();
+        setError(null);
+        let data;
 
-        const data = response?.data?.data || response?.data || response;
+        if (categoryId) {
+          const res = await getProductsByCategoryApi(categoryId);
+          data = res?.data?.data || res?.data || res;
+        } else if (brandSlug) {
+          // Chưa có endpoint lấy sản phẩm theo brand -> resolve slug thành
+          // brandId rồi lọc phía client trên toàn bộ danh sách sản phẩm.
+          const [brandRes, prodRes] = await Promise.all([
+            getAllBrandsApi(),
+            getAllProductsApi(),
+          ]);
+          const brands = brandRes?.data?.data || brandRes?.data || brandRes || [];
+          const allProducts = prodRes?.data?.data || prodRes?.data || prodRes || [];
+          const matched = Array.isArray(brands)
+            ? brands.find((b) => b.slug === brandSlug || b._id === brandSlug)
+            : null;
+          data = matched
+            ? allProducts.filter((p) => extractRefId(p.brandId || p.brand) === matched._id)
+            : [];
+        } else {
+          const res = await getAllProductsApi();
+          data = res?.data?.data || res?.data || res;
+        }
+
         if (Array.isArray(data)) {
           let sorted = [...data];
           if (sortBy === "price-asc") {
@@ -36,6 +64,8 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
             sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
           }
           setProducts(sorted);
+        } else {
+          setProducts([]);
         }
       } catch (err) {
         console.error("Error fetching products:", err);

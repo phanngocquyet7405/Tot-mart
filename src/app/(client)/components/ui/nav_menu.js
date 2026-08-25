@@ -2,22 +2,22 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import DropMenu from "./drop_menu";
+import CategoryDropdown from "./category_dropdown";
 import {
   getAllCategoriesApi,
   getAllBrandsApi,
-  getAllProductsApi, // 1. Giả sử bạn có hàm này trong services
+  getAllProductsApi,
 } from "../../../services/api/productServices";
 
 export default function NavMenu() {
   const [activeDropDown, setActiveDropdown] = useState(null);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
-  const [products, setProducts] = useState([]); // 2. Thêm state sản phẩm
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Gọi đồng thời cả 3 API
         const [catRes, brandRes, prodRes] = await Promise.all([
           getAllCategoriesApi(),
           getAllBrandsApi(),
@@ -26,7 +26,7 @@ export default function NavMenu() {
 
         setCategories(catRes?.data?.data || catRes?.data || []);
         setBrands(brandRes?.data?.data || brandRes?.data || []);
-        setProducts(prodRes?.data?.data || prodRes?.data || []); // Cập nhật state
+        setProducts(prodRes?.data?.data || prodRes?.data || []);
       } catch (error) {
         console.error("Lỗi tải menu:", error);
       }
@@ -35,7 +35,6 @@ export default function NavMenu() {
   }, []);
 
   const menuData = useMemo(() => {
-    // --- Xử lý Categories (Giữ nguyên logic của bạn) ---
     const activeCats = categories.filter((cat) => cat.isActive !== false);
     const allChildIds = new Set();
     activeCats.forEach((cat) => {
@@ -51,8 +50,7 @@ export default function NavMenu() {
     rootCategories.forEach((root) => {
       categoryTree[root._id] = (root.childrenIds || [])
         .map((child) => {
-          const targetId =
-            typeof child === "string" ? child : child?.categoryId;
+          const targetId = typeof child === "string" ? child : child?.categoryId;
           const childDoc = activeCats.find(
             (c) => c._id.toString() === targetId?.toString(),
           );
@@ -62,16 +60,12 @@ export default function NavMenu() {
             titleHref: `/categories/${childDoc.slug || childDoc._id}`,
             links: (childDoc.childrenIds || [])
               .map((gChild) => {
-                const gTargetId =
-                  typeof gChild === "string" ? gChild : gChild?.categoryId;
+                const gTargetId = typeof gChild === "string" ? gChild : gChild?.categoryId;
                 const gChildDoc = activeCats.find(
                   (c) => c._id.toString() === gTargetId?.toString(),
                 );
                 return gChildDoc
-                  ? {
-                      label: gChildDoc.name,
-                      href: `/categories/${gChildDoc.slug || gChildDoc._id}`,
-                    }
+                  ? { label: gChildDoc.name, href: `/categories/${gChildDoc.slug || gChildDoc._id}` }
                   : null;
               })
               .filter(Boolean),
@@ -80,7 +74,6 @@ export default function NavMenu() {
         .filter(Boolean);
     });
 
-    // --- Xử lý Brands (Giữ nguyên) ---
     const activeBrands = brands.filter((b) => b.isActive !== false);
     const brandLinks = activeBrands.map((b) => ({
       label: b.name,
@@ -100,7 +93,6 @@ export default function NavMenu() {
       label: p.name,
       href: `/products/${p.slug || p._id}`,
     }));
-
     const productColumns = [];
     const productsPerColumn = 8;
     for (let i = 0; i < productLinks.length; i += productsPerColumn) {
@@ -111,85 +103,72 @@ export default function NavMenu() {
       });
     }
 
-    return {
-      roots: rootCategories,
-      categoryTree,
-      brandColumns,
-      productColumns,
-    };
+    return { roots: rootCategories, categoryTree, brandColumns, productColumns };
   }, [categories, brands, products]);
+
+  const activeRoot = menuData.roots.find((r) => r._id === activeDropDown) || null;
 
   return (
     <nav
-      className="w-full bg-white border-b relative z-50"
+      className="relative z-50 w-full border-b bg-white"
       onMouseLeave={() => setActiveDropdown(null)}
     >
-      <div className="max-w-7xl mx-auto flex justify-center space-x-8">
+      <div className="mx-auto flex max-w-7xl justify-center space-x-8">
         {menuData.roots.map((root) => (
           <div
             key={root._id}
-            className="relative py-5 cursor-pointer group"
+            className="relative cursor-pointer py-5"
             onMouseEnter={() => setActiveDropdown(root._id)}
           >
             <Link
               href={`/categories/${root.slug || root._id}`}
-              className={`font-bold uppercase text-[12px] transition-colors ${
-                activeDropDown === root._id
-                  ? "text-orange-600"
-                  : "text-zinc-600"
-              } hover:text-orange-600`}
+              className={`text-[12px] font-bold uppercase transition-colors ${
+                activeDropDown === root._id ? "text-[#C85C3C]" : "text-zinc-600"
+              } hover:text-[#C85C3C]`}
             >
               {root.name}
             </Link>
           </div>
         ))}
 
-        {/* 4. Thêm mục Sản phẩm */}
-        <div
-          className="relative py-5 cursor-pointer group"
-          onMouseEnter={() => setActiveDropdown("products")}
-        >
+        <div className="relative cursor-pointer py-5" onMouseEnter={() => setActiveDropdown("products")}>
           <Link
             href="/products"
-            className={`font-bold uppercase text-[12px] transition-colors ${
-              activeDropDown === "products"
-                ? "text-orange-600"
-                : "text-zinc-600"
-            } hover:text-orange-600`}
+            className={`text-[12px] font-bold uppercase transition-colors ${
+              activeDropDown === "products" ? "text-[#C85C3C]" : "text-zinc-600"
+            } hover:text-[#C85C3C]`}
           >
             Sản phẩm
           </Link>
         </div>
 
-        {/* Thương hiệu */}
-        <div
-          className="relative py-5 cursor-pointer group"
-          onMouseEnter={() => setActiveDropdown("brands")}
-        >
+        <div className="relative cursor-pointer py-5" onMouseEnter={() => setActiveDropdown("brands")}>
           <Link
             href="/brands"
-            className={`font-bold uppercase text-[12px] transition-colors ${
-              activeDropDown === "brands" ? "text-orange-600" : "text-zinc-600"
-            } hover:text-orange-600`}
+            className={`text-[12px] font-bold uppercase transition-colors ${
+              activeDropDown === "brands" ? "text-[#C85C3C]" : "text-zinc-600"
+            } hover:text-[#C85C3C]`}
           >
             Thương hiệu
           </Link>
         </div>
       </div>
 
-      {/* Dropdown Menu chung */}
-      <DropMenu
-        isVisible={!!activeDropDown}
-        items={
-          activeDropDown === "brands"
-            ? menuData.brandColumns
-            : activeDropDown === "products"
-              ? menuData.productColumns
-              : menuData.categoryTree[activeDropDown] || []
-        }
-        onMouseEnter={() => setActiveDropdown(activeDropDown)}
-        onMouseLeave={() => setActiveDropdown(null)}
-      />
+      {activeRoot ? (
+        <CategoryDropdown
+          root={activeRoot}
+          columns={menuData.categoryTree[activeRoot._id] || []}
+          onMouseEnter={() => setActiveDropdown(activeDropDown)}
+          onMouseLeave={() => setActiveDropdown(null)}
+        />
+      ) : (
+        <DropMenu
+          isVisible={activeDropDown === "brands" || activeDropDown === "products"}
+          items={activeDropDown === "brands" ? menuData.brandColumns : menuData.productColumns}
+          onMouseEnter={() => setActiveDropdown(activeDropDown)}
+          onMouseLeave={() => setActiveDropdown(null)}
+        />
+      )}
     </nav>
   );
 }

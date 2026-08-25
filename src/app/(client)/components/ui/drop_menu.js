@@ -1,44 +1,28 @@
 "use client";
 import Link from "next/link";
 
-export default function DropMenu({
-  items,
-  isVisible,
-  onMouseEnter,
-  onMouseLeave,
-}) {
-  // Debug khi menu xuất hiện
-  if (isVisible) {
-    console.log("🎨 Rendering DropMenu với items:", items);
-  }
-
-  if (!isVisible || !items.length) return null;
+export default function DropMenu({ items, isVisible, onMouseEnter, onMouseLeave }) {
+  if (!isVisible || !items?.length) return null;
 
   return (
     <div
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className="absolute top-full left-0 w-full bg-white shadow-xl border-t z-50"
+      className="absolute left-0 top-full z-50 w-full border-t border-[#F0DDD5] bg-white shadow-xl"
     >
-      <div className="max-w-7xl mx-auto grid grid-cols-5 gap-8 p-10">
+      <div className="mx-auto grid max-w-7xl grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-8 p-10">
         {items.map((col, idx) => (
           <div key={idx} className="space-y-4">
-            {/* Cấp 2 */}
             <Link
               href={col.titleHref}
-              className="font-black text-[11px] uppercase text-orange-600"
+              className="text-[11px] font-black uppercase text-[#C85C3C] hover:text-[#B14B2D]"
             >
               {col.title}
             </Link>
-
-            {/* Cấp 3 */}
             <ul className="space-y-2">
               {col.links.map((link, lIdx) => (
                 <li key={lIdx}>
-                  <Link
-                    href={link.href}
-                    className="text-[13px] text-zinc-500 hover:text-black"
-                  >
+                  <Link href={link.href} className="text-[13px] text-zinc-500 hover:text-[#2C1810]">
                     {link.label}
                   </Link>
                 </li>

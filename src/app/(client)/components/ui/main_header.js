@@ -13,6 +13,7 @@ import Link from "next/link";
 import Image from "next/image";
 import SearchBar from "./search_bar";
 import CartBox from "./cart_box";
+import LanguageSwitcher from "./LanguageSwitcher";
 import CartDrawer from "../Cart_component/cart_drawer";
 import { useCart } from "@/app/context/CartContext";
 import { useWishlist } from "@/app/context/WishlistContext";
@@ -158,7 +159,9 @@ export default function MainHeader() {
               )}
             </div>
 
-            <div className="flex items-center gap-2 border-l pl-6 border-gray-100">
+            <div className="flex items-center gap-4 border-l pl-6 border-gray-100">
+              <LanguageSwitcher />
+
               <Link
                 href="/wishlist"
                 className="relative p-2 hover:bg-gray-100 rounded-full transition-all group"

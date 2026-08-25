@@ -1,5 +1,7 @@
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { AppContextProvider } from "./context/AppContext";
 import { AdminNotificationProvider } from "./context/NotificationContext";
 import { CartProvider } from "@/app/context/CartContext";
@@ -42,22 +44,31 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // locale đọc từ cookie TOTMART_LOCALE trong i18n/request.js (setup "không
+  // có [locale] trong URL" — xem comment trong file đó). Phải bọc
+  // NextIntlClientProvider ở đây thì useLocale()/useTranslations() trong
+  // client component (vd. LanguageSwitcher) mới có context để dùng.
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     <html
-      lang="vi"
+      lang={locale}
       className={`${playfairDisplay.variable} ${plusJakartaSans.variable}`}
     >
       <body className="font-sans antialiased">
-        {/* 2. Bọc CartProvider + WishlistProvider xung quanh children */}
-        <AppContextProvider>
-          <CartProvider>
-            <WishlistProvider>
-              {/* Toast notification — render vào document.body qua portal */}
-              <AdminNotificationProvider>{children}</AdminNotificationProvider>
-            </WishlistProvider>
-          </CartProvider>
-        </AppContextProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {/* 2. Bọc CartProvider + WishlistProvider xung quanh children */}
+          <AppContextProvider>
+            <CartProvider>
+              <WishlistProvider>
+                {/* Toast notification — render vào document.body qua portal */}
+                <AdminNotificationProvider>{children}</AdminNotificationProvider>
+              </WishlistProvider>
+            </CartProvider>
+          </AppContextProvider>
+        </NextIntlClientProvider>
 
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
