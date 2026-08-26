@@ -62,7 +62,7 @@ export const ProductCard = ({ product, onAddToCart, onToggleWishlist }) => {
           <button
             onClick={(e) => handleAction(e, onToggleWishlist)}
             className="absolute bottom-3 right-3 p-2 bg-white rounded-full hover:bg-gray-100 text-gray-700 hover:text-red-500 transition-all shadow-md hover:shadow-lg opacity-0 group-hover:opacity-100 duration-300"
-            aria-label="Add to wishlist"
+            aria-label="Thêm vào danh sách yêu thích"
           >
             <Heart
               className={`w-5 h-5 ${

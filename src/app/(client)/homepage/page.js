@@ -62,22 +62,22 @@ export default function HomePage() {
           <FeaturedProducts title="TotBox" initialData={products.slice(0, 5)} />
 
           <FeaturedProducts
-            title="New Arrivals"
+            title="Sản phẩm mới"
             initialData={products.slice(5, 10)}
           />
 
           <FeaturedProducts
-            title="Best Seller"
+            title="Bán chạy nhất"
             initialData={products.slice(10, 15)}
           />
 
           <FeaturedProducts
-            title="Trending Now"
+            title="Đang thịnh hành"
             initialData={products.slice(15, 20)}
           />
 
           <FeaturedProducts
-            title="Exclusive Deals"
+            title="Ưu đãi độc quyền"
             initialData={products.slice(20, 25)}
           />
 
