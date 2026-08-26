@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getAllCategoriesApi } from "@/app/services/api/productServices";
+import { buildCategoryTree } from "@/app/(client)/utils/catalogHelpers";
 
 export default function ProductCategoriesShowcase() {
   const [categories, setCategories] = useState([]);
@@ -15,7 +16,7 @@ export default function ProductCategoriesShowcase() {
         const response = await getAllCategoriesApi();
         const data = response?.data?.data || response?.data || response;
         if (Array.isArray(data)) {
-          setCategories(data.slice(0, 4)); // Get first 4 categories
+          setCategories(buildCategoryTree(data));
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -47,18 +48,17 @@ export default function ProductCategoriesShowcase() {
             {categories.map((category) => (
               <Link
                 key={category._id}
-                href={`/categories/${category._id}`}
+                href={`/categories/${category.slug || category._id}`}
                 className="group"
               >
-                <div className="relative rounded-lg overflow-hidden h-64 md:h-72 bg-gray-200 mb-4 shadow-sm hover:shadow-lg transition-all duration-300">
-                  {category.image && (
-                    <Image
-                      src={category.image}
-                      alt={category.name}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                  )}
+                <div className="relative mb-4 h-64 overflow-hidden rounded-lg bg-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg md:h-72">
+                  <Image
+                    src={category.image || "/assets/placeholder.png"}
+                    alt={category.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>

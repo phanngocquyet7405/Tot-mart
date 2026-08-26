@@ -13,7 +13,7 @@ export default function TotmartLanding() {
         title="Hạt Dinh Dưỡng Cao Cấp"
         subtitle="Năng lượng từ thiên nhiên"
         description="Sự kết hợp hoàn hảo giữa độ giòn tan và giá trị dinh dưỡng vượt trội cho sức khỏe gia đình bạn."
-        imageSrc="/assets/pr_test_1.webp"
+        imageSrc="/assets/hero_section_picture.jpg"
       />
 
       {/* Nhóm sản phẩm 2 (Đảo ngược vị trí & Nền tối) */}
@@ -21,7 +21,7 @@ export default function TotmartLanding() {
         title="Trái Cây Sấy Dẻo"
         subtitle="Vị ngọt thuần khiết"
         description="Giữ trọn hương vị tự nhiên của trái cây tươi vùng nhiệt đới, không đường hóa học, không chất bảo quản."
-        imageSrc="/assets/pr_test_2.avif"
+        imageSrc="/assets/test_hero.jfif"
         isDark={true}
         reverse={true}
       />
@@ -31,7 +31,7 @@ export default function TotmartLanding() {
         title="Set Quà Tặng Ý Nghĩa"
         subtitle="Gửi trọn tâm tình"
         description="Những hộp quà sang trọng, tinh tế thay lời chúc sức khỏe gửi đến người thân, bạn bè và đối tác."
-        imageSrc="/assets/pr_test_3.webp"
+        imageSrc="/assets/hero_section_picture.jpg"
       />
 
       {/* Phần FAQ và Newsletter */}

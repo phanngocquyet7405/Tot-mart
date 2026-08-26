@@ -9,7 +9,7 @@ export default function HeroSection() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
-            src="/assets/h1.png"
+            src="/assets/hero_section_picture.jpg"
             alt="Năng lượng từ thiên nhiên"
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-1000"
