@@ -54,7 +54,7 @@ export function ProfileInfo({ name, email, avatarUrl, onSave, saving }) {
             />
             <span className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50">
               <Camera className="h-4 w-4" />
-              Upload Avatar
+              Thay đổi ảnh đại diện
             </span>
           </label>
         </div>
@@ -90,7 +90,7 @@ export function ProfileInfo({ name, email, avatarUrl, onSave, saving }) {
           disabled={saving}
         >
           {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Save Profile
+          Lưu thông tin
         </Button>
       </CardContent>
     </Card>

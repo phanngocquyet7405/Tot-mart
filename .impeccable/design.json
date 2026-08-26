@@ -1,0 +1,459 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-26T00:59:00.000+07:00",
+  "title": "Design System: TotMart",
+  "extensions": {
+    "colorMeta": {
+      "terracotta": {
+        "role": "primary",
+        "displayName": "Fired Terracotta",
+        "canonical": "#C85C3C",
+        "tonalRamp": [
+          "oklch(0.28 0.09 40)",
+          "oklch(0.38 0.12 40)",
+          "oklch(0.48 0.14 40)",
+          "oklch(0.58 0.15 40)",
+          "oklch(0.66 0.14 40)",
+          "oklch(0.78 0.08 40)",
+          "oklch(0.90 0.04 40)",
+          "oklch(0.96 0.02 40)"
+        ]
+      },
+      "terracotta-deep": {
+        "role": "primary",
+        "displayName": "Fired Terracotta Deep",
+        "canonical": "#B14B2D",
+        "tonalRamp": [
+          "oklch(0.26 0.09 40)",
+          "oklch(0.34 0.12 40)",
+          "oklch(0.42 0.14 40)",
+          "oklch(0.50 0.15 40)",
+          "oklch(0.58 0.14 40)",
+          "oklch(0.72 0.08 40)",
+          "oklch(0.86 0.04 40)",
+          "oklch(0.95 0.02 40)"
+        ]
+      },
+      "terracotta-wash": {
+        "role": "primary",
+        "displayName": "Terracotta Wash",
+        "canonical": "#FFF0EB",
+        "tonalRamp": [
+          "oklch(0.30 0.06 40)",
+          "oklch(0.42 0.06 40)",
+          "oklch(0.55 0.05 40)",
+          "oklch(0.68 0.04 40)",
+          "oklch(0.80 0.03 40)",
+          "oklch(0.90 0.025 40)",
+          "oklch(0.95 0.02 40)",
+          "oklch(0.98 0.015 40)"
+        ]
+      },
+      "clay-border": {
+        "role": "neutral",
+        "displayName": "Clay Border",
+        "canonical": "#F0DDD5",
+        "tonalRamp": [
+          "oklch(0.30 0.04 40)",
+          "oklch(0.42 0.04 40)",
+          "oklch(0.55 0.035 40)",
+          "oklch(0.68 0.03 40)",
+          "oklch(0.80 0.025 40)",
+          "oklch(0.88 0.02 40)",
+          "oklch(0.93 0.02 40)",
+          "oklch(0.97 0.015 40)"
+        ]
+      },
+      "cream": {
+        "role": "neutral",
+        "displayName": "Warm Cream",
+        "canonical": "#FFFAF8",
+        "tonalRamp": [
+          "oklch(0.25 0.02 50)",
+          "oklch(0.40 0.02 50)",
+          "oklch(0.55 0.015 50)",
+          "oklch(0.70 0.012 50)",
+          "oklch(0.82 0.01 50)",
+          "oklch(0.91 0.008 50)",
+          "oklch(0.97 0.006 50)",
+          "oklch(0.995 0.004 50)"
+        ]
+      },
+      "warm-paper": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "canonical": "#f5f0e8",
+        "tonalRamp": [
+          "oklch(0.25 0.02 80)",
+          "oklch(0.40 0.02 80)",
+          "oklch(0.55 0.02 80)",
+          "oklch(0.68 0.018 80)",
+          "oklch(0.80 0.015 80)",
+          "oklch(0.90 0.012 80)",
+          "oklch(0.95 0.01 80)",
+          "oklch(0.98 0.008 80)"
+        ]
+      },
+      "blush-paper": {
+        "role": "neutral",
+        "displayName": "Blush Paper",
+        "canonical": "#FFF5F2",
+        "tonalRamp": [
+          "oklch(0.28 0.03 40)",
+          "oklch(0.42 0.03 40)",
+          "oklch(0.56 0.025 40)",
+          "oklch(0.70 0.02 40)",
+          "oklch(0.82 0.018 40)",
+          "oklch(0.90 0.015 40)",
+          "oklch(0.96 0.012 40)",
+          "oklch(0.99 0.008 40)"
+        ]
+      },
+      "espresso": {
+        "role": "neutral",
+        "displayName": "Espresso",
+        "canonical": "#2C1810",
+        "tonalRamp": [
+          "oklch(0.18 0.04 50)",
+          "oklch(0.26 0.04 50)",
+          "oklch(0.36 0.035 50)",
+          "oklch(0.48 0.03 50)",
+          "oklch(0.62 0.02 50)",
+          "oklch(0.76 0.015 50)",
+          "oklch(0.88 0.01 50)",
+          "oklch(0.96 0.006 50)"
+        ]
+      },
+      "forest-canopy": {
+        "role": "secondary",
+        "displayName": "Forest Canopy",
+        "canonical": "#4a7c44",
+        "tonalRamp": [
+          "oklch(0.22 0.08 140)",
+          "oklch(0.32 0.10 140)",
+          "oklch(0.42 0.11 140)",
+          "oklch(0.50 0.10 140)",
+          "oklch(0.58 0.09 140)",
+          "oklch(0.72 0.06 140)",
+          "oklch(0.86 0.03 140)",
+          "oklch(0.95 0.015 140)"
+        ]
+      },
+      "market-leaf": {
+        "role": "secondary",
+        "displayName": "Market Leaf",
+        "canonical": "#15803d",
+        "tonalRamp": [
+          "oklch(0.22 0.10 150)",
+          "oklch(0.32 0.12 150)",
+          "oklch(0.42 0.14 150)",
+          "oklch(0.50 0.15 150)",
+          "oklch(0.58 0.13 150)",
+          "oklch(0.72 0.08 150)",
+          "oklch(0.86 0.04 150)",
+          "oklch(0.95 0.02 150)"
+        ]
+      },
+      "harvest-gold": {
+        "role": "tertiary",
+        "displayName": "Harvest Gold",
+        "canonical": "#eab308",
+        "tonalRamp": [
+          "oklch(0.28 0.10 90)",
+          "oklch(0.40 0.12 90)",
+          "oklch(0.52 0.14 90)",
+          "oklch(0.64 0.15 90)",
+          "oklch(0.76 0.14 90)",
+          "oklch(0.84 0.10 90)",
+          "oklch(0.92 0.05 90)",
+          "oklch(0.97 0.02 90)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.205 0 0)",
+          "oklch(0.32 0 0)",
+          "oklch(0.44 0 0)",
+          "oklch(0.56 0 0)",
+          "oklch(0.70 0 0)",
+          "oklch(0.86 0 0)",
+          "oklch(0.96 0 0)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Canvas",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": [
+          "oklch(0.20 0 0)",
+          "oklch(0.35 0 0)",
+          "oklch(0.50 0 0)",
+          "oklch(0.65 0 0)",
+          "oklch(0.78 0 0)",
+          "oklch(0.88 0 0)",
+          "oklch(0.95 0 0)",
+          "oklch(1 0 0)"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Foreground",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": [
+          "oklch(0.145 0 0)",
+          "oklch(0.22 0 0)",
+          "oklch(0.35 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.62 0 0)",
+          "oklch(0.76 0 0)",
+          "oklch(0.88 0 0)",
+          "oklch(0.97 0 0)"
+        ]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "oklch(0.556 0 0)",
+        "tonalRamp": [
+          "oklch(0.20 0 0)",
+          "oklch(0.32 0 0)",
+          "oklch(0.44 0 0)",
+          "oklch(0.556 0 0)",
+          "oklch(0.68 0 0)",
+          "oklch(0.80 0 0)",
+          "oklch(0.90 0 0)",
+          "oklch(0.97 0 0)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(0.922 0 0)",
+        "tonalRamp": [
+          "oklch(0.25 0 0)",
+          "oklch(0.40 0 0)",
+          "oklch(0.55 0 0)",
+          "oklch(0.70 0 0)",
+          "oklch(0.82 0 0)",
+          "oklch(0.88 0 0)",
+          "oklch(0.922 0 0)",
+          "oklch(0.97 0 0)"
+        ]
+      },
+      "muted-fill": {
+        "role": "neutral",
+        "displayName": "Muted Fill",
+        "canonical": "oklch(0.97 0 0)",
+        "tonalRamp": [
+          "oklch(0.22 0 0)",
+          "oklch(0.38 0 0)",
+          "oklch(0.54 0 0)",
+          "oklch(0.70 0 0)",
+          "oklch(0.82 0 0)",
+          "oklch(0.90 0 0)",
+          "oklch(0.95 0 0)",
+          "oklch(0.97 0 0)"
+        ]
+      },
+      "destructive": {
+        "role": "primary",
+        "displayName": "Destructive",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": [
+          "oklch(0.25 0.16 27)",
+          "oklch(0.35 0.20 27)",
+          "oklch(0.45 0.23 27)",
+          "oklch(0.577 0.245 27.325)",
+          "oklch(0.68 0.20 27)",
+          "oklch(0.78 0.12 27)",
+          "oklch(0.90 0.06 27)",
+          "oklch(0.97 0.02 27)"
+        ]
+      },
+      "stone-text": {
+        "role": "neutral",
+        "displayName": "Stone Text",
+        "canonical": "#57534e",
+        "tonalRamp": [
+          "oklch(0.22 0.01 70)",
+          "oklch(0.32 0.012 70)",
+          "oklch(0.42 0.012 70)",
+          "oklch(0.50 0.012 70)",
+          "oklch(0.62 0.01 70)",
+          "oklch(0.74 0.008 70)",
+          "oklch(0.86 0.006 70)",
+          "oklch(0.95 0.004 70)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Story and box heroes only. Playfair Display." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles on atelier pages." },
+      "title": { "displayName": "Title", "purpose": "Product names, admin row titles, card headings." },
+      "body": { "displayName": "Body", "purpose": "Running copy and form helper text. Plus Jakarta Sans." },
+      "label": { "displayName": "Label", "purpose": "Tracked uppercase stamps: chips, kickers, shop CTAs, table headers." }
+    },
+    "shadows": [
+      {
+        "name": "rest-hairline",
+        "value": "none",
+        "purpose": "Default catalog and admin surfaces; pair with a 1px border or ring-foreground/10."
+      },
+      {
+        "name": "hover-merchandise",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Product card hover (.shadow-totmart / shadow-lg)."
+      },
+      {
+        "name": "plan-ambient",
+        "value": "0 8px 24px rgba(44,24,16,0.04)",
+        "purpose": "Default subscription / plan cards."
+      },
+      {
+        "name": "plan-featured",
+        "value": "0 20px 40px rgba(200,92,60,0.12)",
+        "purpose": "Recommended box card."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "300ms ease",
+        "purpose": "Default color, shadow, and transform transitions (.transition-smooth, product hover)."
+      },
+      {
+        "name": "ease-plan",
+        "value": "500ms ease",
+        "purpose": "Plan card lift and image scale."
+      },
+      {
+        "name": "slide-in-right",
+        "value": "300ms ease-out",
+        "purpose": "Drawer / cart enter (slideInRight)."
+      },
+      {
+        "name": "marquee",
+        "value": "25s linear infinite",
+        "purpose": "Brand marquee."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" },
+      { "name": "container-7xl", "value": "80rem" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Shop primary button",
+      "kind": "button",
+      "refersTo": "button-shop",
+      "description": "Atelier CTA: plump, tracked uppercase, clay seal.",
+      "html": "<button class=\"ds-btn-shop\">Chọn gói</button>",
+      "css": ".ds-btn-shop { background: #C85C3C; color: #fff; padding: 12px 32px; border: none; border-radius: 16px; font-family: \"Plus Jakarta Sans\", system-ui, sans-serif; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); cursor: pointer; transition: background 0.3s ease, transform 0.3s ease; } .ds-btn-shop:hover { background: #B14B2D; transform: translateY(-2px); } .ds-btn-shop:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(200,92,60,0.35); } .ds-btn-shop:active { transform: translateY(0); }"
+    },
+    {
+      "name": "Catalog primary button",
+      "kind": "button",
+      "refersTo": "button-catalog",
+      "description": "Market-leaf grocery CTA for catalog actions.",
+      "html": "<button class=\"ds-btn-catalog\">Thêm vào giỏ</button>",
+      "css": ".ds-btn-catalog { background: #15803d; color: #fff; padding: 10px 24px; border: none; border-radius: 12px; font-family: \"Plus Jakarta Sans\", system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.3s ease; } .ds-btn-catalog:hover { background: #166534; } .ds-btn-catalog:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(21,128,61,0.35); }"
+    },
+    {
+      "name": "Admin default button",
+      "kind": "button",
+      "refersTo": "button-admin",
+      "description": "Compact shadcn primitive: 32px, sentence case, ink fill.",
+      "html": "<button class=\"ds-btn-admin\">Save changes</button>",
+      "css": ".ds-btn-admin { background: oklch(0.205 0 0); color: oklch(1 0 0); height: 32px; padding: 0 10px; border: 1px solid transparent; border-radius: 10px; font-family: \"Plus Jakarta Sans\", system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background 0.15s ease; } .ds-btn-admin:hover { background: oklch(0.205 0 0 / 0.8); } .ds-btn-admin:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.708 0 0 / 0.5); } .ds-btn-admin:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Admin outline button",
+      "kind": "button",
+      "refersTo": "button-admin-outline",
+      "description": "Hairline compact control for secondary admin actions.",
+      "html": "<button class=\"ds-btn-admin-outline\">Cancel</button>",
+      "css": ".ds-btn-admin-outline { background: oklch(1 0 0); color: oklch(0.145 0 0); height: 32px; padding: 0 10px; border: 1px solid oklch(0.922 0 0); border-radius: 10px; font-family: \"Plus Jakarta Sans\", system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background 0.15s ease; } .ds-btn-admin-outline:hover { background: oklch(0.97 0 0); } .ds-btn-admin-outline:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.708 0 0 / 0.5); }"
+    },
+    {
+      "name": "Admin input",
+      "kind": "input",
+      "refersTo": "input-admin",
+      "description": "32px transparent field with hairline border and ring focus.",
+      "html": "<input class=\"ds-input-admin\" type=\"text\" placeholder=\"Tìm kiếm sản phẩm...\" />",
+      "css": ".ds-input-admin { height: 32px; width: 100%; padding: 4px 10px; border: 1px solid oklch(0.922 0 0); border-radius: 10px; background: transparent; color: oklch(0.145 0 0); font-family: \"Plus Jakarta Sans\", system-ui, sans-serif; font-size: 0.875rem; } .ds-input-admin::placeholder { color: oklch(0.556 0 0); } .ds-input-admin:focus-visible { outline: none; border-color: oklch(0.708 0 0); box-shadow: 0 0 0 3px oklch(0.708 0 0 / 0.5); } .ds-input-admin:disabled { opacity: 0.5; background: oklch(0.922 0 0 / 0.5); }"
+    },
+    {
+      "name": "Promo chip",
+      "kind": "chip",
+      "refersTo": "chip-promo",
+      "description": "Forest Canopy header stamp, tracked, tight radius.",
+      "html": "<span class=\"ds-chip-promo\">Save up to 70% now!</span>",
+      "css": ".ds-chip-promo { display: inline-flex; align-items: center; background: #4a7c44; color: #fff; padding: 6px 16px; border-radius: 4px; font-family: \"Plus Jakarta Sans\", system-ui, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }"
+    },
+    {
+      "name": "Product card",
+      "kind": "card",
+      "refersTo": "card-product",
+      "description": "White catalog tile: square photo, leaf discount, hover lift.",
+      "html": "<article class=\"ds-card-product\"><div class=\"ds-card-product-media\"><span class=\"ds-card-product-badge\">-20%</span></div><div class=\"ds-card-product-body\"><h3>Mật ong rừng</h3><p>189.000đ</p></div></article>",
+      "css": ".ds-card-product { background: #fff; border: 1px solid #f3f4f6; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); font-family: \"Plus Jakarta Sans\", system-ui, sans-serif; transition: box-shadow 0.3s ease, border-color 0.3s ease; } .ds-card-product:hover { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); border-color: #bbf7d0; } .ds-card-product-media { position: relative; aspect-ratio: 1; background: #f9fafb; } .ds-card-product-badge { position: absolute; top: 12px; left: 12px; background: #15803d; color: #fff; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; } .ds-card-product-body { padding: 16px; } .ds-card-product-body h3 { margin: 0 0 8px; font-size: 0.95rem; font-weight: 700; color: #111; } .ds-card-product-body p { margin: 0; font-size: 0.875rem; font-weight: 600; color: #15803d; }"
+    },
+    {
+      "name": "Plan card",
+      "kind": "card",
+      "refersTo": "card-plan",
+      "description": "Cream atelier tile with clay seal and featured drop shadow.",
+      "html": "<article class=\"ds-card-plan\"><span class=\"ds-card-plan-kicker\">Hộp tinh tuyển</span><h3>TotMartBox Classic</h3><p>Từ 299.000đ / tháng</p></article>",
+      "css": ".ds-card-plan { position: relative; background: #FFFAF8; border: 1px solid #F0DDD5; border-radius: 24px; padding: 28px 24px 24px; box-shadow: 0 20px 40px rgba(200,92,60,0.12); font-family: \"Plus Jakarta Sans\", system-ui, sans-serif; overflow: hidden; transition: transform 0.5s ease; } .ds-card-plan::before { content: \"\"; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #C85C3C, transparent); } .ds-card-plan:hover { transform: translateY(-8px); } .ds-card-plan-kicker { display: block; font-size: 10px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: #C85C3C; margin-bottom: 12px; } .ds-card-plan h3 { margin: 0 0 8px; font-family: \"Playfair Display\", Georgia, serif; font-size: 1.35rem; font-weight: 600; color: #2C1810; } .ds-card-plan p { margin: 0; font-size: 0.875rem; color: #57534e; }"
+    },
+    {
+      "name": "Market header nav",
+      "kind": "nav",
+      "refersTo": "chip-promo",
+      "description": "Sticky white masthead with Forest Canopy promo stamp.",
+      "html": "<nav class=\"ds-nav-market\"><strong>TotMart</strong><span class=\"ds-chip-promo\">Save up to 70% now!</span><span class=\"ds-nav-market-search\">Tìm kiếm sản phẩm...</span></nav>",
+      "css": ".ds-nav-market { display: flex; align-items: center; gap: 24px; padding: 16px 32px; background: #fff; border-bottom: 1px solid #e5e7eb; font-family: \"Plus Jakarta Sans\", system-ui, sans-serif; } .ds-nav-market strong { font-size: 1.125rem; color: #111; } .ds-nav-market .ds-chip-promo { background: #4a7c44; color: #fff; padding: 6px 16px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; } .ds-nav-market-search { flex: 1; height: 36px; display: flex; align-items: center; padding: 0 12px; border: 1px solid #e5e7eb; border-radius: 10px; color: oklch(0.556 0 0); font-size: 0.875rem; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Dual Shop",
+    "overview": "TotMart is one storefront with two counters, not a blended average. Gift, subscription, checkout, and box storytelling sit on warm cream paper with Fired Terracotta as the clay seal and Playfair Display as the voice of the unboxing. Catalog, header merchandising, and product cards sit on white supermarket shelves: Forest Canopy and Market Leaf do the sale work, Plus Jakarta Sans does the price and the SKU. Admin does not pretend to be either shop; it stays compact, near-black shadcn chrome so operators can scan.\n\nThe split is the identity. Future screens pick a counter and stay there. A subscription page that suddenly wears grocery green, or a product grid flooded in terracotta, is a collapse of Dual Shop, not a unification.",
+    "keyCharacteristics": [
+      "Two first-class dialects: atelier (cream, clay, espresso, serif) and market (white, leaf green, harvest gold, sans).",
+      "Two control registers: plump uppercase storefront CTAs vs compact sentence-case admin controls.",
+      "Accents used as seals and badges, not as page floods.",
+      "Depth is mostly state: hairlines at rest, lift on hover or on a featured plan.",
+      "Vietnamese-capable Playfair Display + Plus Jakarta Sans pairing, already loaded with Vietnamese subsets."
+    ],
+    "rules": [
+      { "name": "The Dual Shop Rule", "body": "Gift/subscribe/checkout speak clay. Catalog/header speak leaf. Do not average them into one accent per page.", "section": "colors" },
+      { "name": "The Seal Not Flood Rule", "body": "Terracotta or leaf occupies a small share of any screen — buttons, chips, rules, selected states. Large fields stay cream, paper, or white.", "section": "colors" },
+      { "name": "The No Third Accent Rule", "body": "No neon, glassmorphism, purple, or cyan families. Stay clay, leaf, cream, stone, espresso.", "section": "colors" },
+      { "name": "The Two Voices Rule", "body": "Playfair does not set UI chrome. Plus Jakarta does not set the unboxing hero.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. Shadows appear as hover, featured, or drawer response.", "section": "elevation" },
+      { "name": "The Two Registers Rule", "body": "Storefront CTAs are plump, uppercase, clay or leaf. Admin/shadcn controls stay compact, sentence-case, near-black.", "section": "components" }
+    ],
+    "dos": [
+      "Do pick a counter per surface: clay/cream/serif for gift and subscribe; leaf/white/sans for catalog and header; ink/compact for admin.",
+      "Do use Fired Terracotta as a seal (CTA, selected border, 2–4px rule), not as a page fill.",
+      "Do keep Playfair on display/headline roles and Plus Jakarta on body, UI, and labels.",
+      "Do keep hover lift and terracotta-tinted shadows on plan cards; keep product cards flatter until hover.",
+      "Do preserve Vietnamese subsets on both families."
+    ],
+    "donts": [
+      "Don't merge Dual Shop into one accent used on every page.",
+      "Don't restyle shadcn admin buttons into plump uppercase clay (or the reverse).",
+      "Don't introduce neon, glass, purple, or cyan.",
+      "Don't set long body copy in Playfair.",
+      "Don't treat about-page stats, founder names, or unused footer line names as visual proof — they are unverified product copy, not tokens."
+    ]
+  }
+}

@@ -20,7 +20,7 @@ export function CartManager({ cart, loading, onChangeQuantity, onRemoveItem }) {
   return (
     <Card className="border-emerald-100">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-emerald-700">My Cart</CardTitle>
+        <CardTitle className="text-emerald-700">Giỏ hàng</CardTitle>
         <div className="flex items-center gap-2">
           {/* Nút tạm thời trỏ đến trang /my-subscriptions */}
           <Link href="/profile/my-subscriptions">
@@ -42,7 +42,7 @@ export function CartManager({ cart, loading, onChangeQuantity, onRemoveItem }) {
       <CardContent className="space-y-4">
         {cart.length === 0 ? (
           <p className="text-sm text-slate-500">
-            Your cart is currently empty.
+            Giỏ hàng của bạn đang trống. Hãy thêm sản phẩm để tiếp tục.
           </p>
         ) : null}
         {cart.map((item) => (

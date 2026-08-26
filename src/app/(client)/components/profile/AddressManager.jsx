@@ -58,35 +58,35 @@ export function AddressManager({
         {/* ── CREATE FORM ─────────────────────────────────────────────── */}
         <div className="grid gap-3 md:grid-cols-2">
           <Input
-            placeholder="Country"
+            placeholder="Quốc gia / Country"
             value={newAddress.country}
             onChange={(e) =>
               setNewAddress((p) => ({ ...p, country: e.target.value }))
             }
           />
           <Input
-            placeholder="City"
+            placeholder="Thành phố / City"
             value={newAddress.city}
             onChange={(e) =>
               setNewAddress((p) => ({ ...p, city: e.target.value }))
             }
           />
           <Input
-            placeholder="District"
+            placeholder="Quận / District"
             value={newAddress.district}
             onChange={(e) =>
               setNewAddress((p) => ({ ...p, district: e.target.value }))
             }
           />
           <Input
-            placeholder="Street address"
+            placeholder="Địa chỉ / Street address"
             value={newAddress.address}
             onChange={(e) =>
               setNewAddress((p) => ({ ...p, address: e.target.value }))
             }
           />
           <Input
-            placeholder="Phone"
+            placeholder="Số điện thoại / Phone"
             value={newAddress.phone}
             onChange={(e) =>
               setNewAddress((p) => ({ ...p, phone: e.target.value }))
@@ -107,13 +107,15 @@ export function AddressManager({
           className="bg-emerald-600 hover:bg-emerald-700"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add Address
+          Thêm địa chỉ mới
         </Button>
 
         {/* ── LIST ────────────────────────────────────────────────────── */}
         <div className="space-y-3">
           {addresses.length === 0 && (
-            <p className="text-sm text-slate-500">No addresses saved yet.</p>
+            <p className="text-sm text-slate-500">
+              Không có địa chỉ nào được lưu.
+            </p>
           )}
 
           {addresses.map((item) => {
@@ -141,19 +143,19 @@ export function AddressManager({
                           className="border-emerald-200 text-emerald-700"
                         >
                           <Pencil className="mr-2 h-4 w-4" />
-                          Edit
+                          Chỉnh sửa
                         </Button>
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Edit Address</DialogTitle>
+                          <DialogTitle>Chỉnh sửa Địa chỉ</DialogTitle>
                           <DialogDescription>
-                            Update your delivery information.
+                            Cập nhật thông tin giao hàng của bạn.
                           </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-3">
                           <Input
-                            placeholder="Country"
+                            placeholder="Quốc gia / Country"
                             value={editing?.country ?? ""}
                             onChange={(e) =>
                               setEditing((p) =>
@@ -162,7 +164,7 @@ export function AddressManager({
                             }
                           />
                           <Input
-                            placeholder="City"
+                            placeholder="Thành phố / City"
                             value={editing?.city ?? ""}
                             onChange={(e) =>
                               setEditing((p) =>
@@ -171,7 +173,7 @@ export function AddressManager({
                             }
                           />
                           <Input
-                            placeholder="District"
+                            placeholder="Quận / District"
                             value={editing?.district ?? ""}
                             onChange={(e) =>
                               setEditing((p) =>
@@ -180,7 +182,7 @@ export function AddressManager({
                             }
                           />
                           <Input
-                            placeholder="Address"
+                            placeholder="Địa chỉ / Address"
                             value={editing?.address ?? ""}
                             onChange={(e) =>
                               setEditing((p) =>
@@ -189,7 +191,7 @@ export function AddressManager({
                             }
                           />
                           <Input
-                            placeholder="Phone"
+                            placeholder="Số điện thoại / Phone"
                             value={editing?.phone ?? ""}
                             onChange={(e) =>
                               setEditing((p) =>
@@ -236,7 +238,7 @@ export function AddressManager({
                       disabled={loading}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
+                      Xóa
                     </Button>
                   </div>
                 </div>

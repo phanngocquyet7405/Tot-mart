@@ -12,21 +12,21 @@ export function ProfileTabs({ profileContent, addressContent, cartContent }) {
           className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
         >
           <UserCircle className="mr-2 h-4 w-4" />
-          Profile Info
+          Thông tin cá nhân
         </TabsTrigger>
         <TabsTrigger
           value="addresses"
           className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
         >
           <Home className="mr-2 h-4 w-4" />
-          Addresses
+          Địa chỉ
         </TabsTrigger>
         <TabsTrigger
           value="cart"
           className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
         >
           <ShoppingBag className="mr-2 h-4 w-4" />
-          Cart
+          Giỏ hàng
         </TabsTrigger>
       </TabsList>
 
