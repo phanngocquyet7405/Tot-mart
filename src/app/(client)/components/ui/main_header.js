@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useContext } from "react";
+import { useContext } from "react";
+import { useTranslations } from "next-intl";
 import {
   User,
   Heart,
@@ -13,7 +14,6 @@ import Link from "next/link";
 import Image from "next/image";
 import SearchBar from "./search_bar";
 import CartBox from "./cart_box";
-import LanguageSwitcher from "./LanguageSwitcher";
 import CartDrawer from "../Cart_component/cart_drawer";
 import { useCart } from "@/app/context/CartContext";
 import { useWishlist } from "@/app/context/WishlistContext";
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function MainHeader() {
+  const t = useTranslations("header");
   const { cartCount, cartTotal, isMounted, isCartOpen, setIsCartOpen, openCart } =
     useCart();
   const { wishlistCount } = useWishlist();
@@ -63,7 +64,7 @@ export default function MainHeader() {
               />
             </Link>
             <div className="hidden lg:block bg-[#4a7c44] text-white text-[10px] font-bold px-4 py-1.5 rounded-sm tracking-widest uppercase">
-              Save up to 70% now!
+              Giảm giá đến 70%!
             </div>
           </div>
 
@@ -81,13 +82,13 @@ export default function MainHeader() {
                     href="/login"
                     className="text-sm font-bold text-gray-700 hover:text-[#4a7c44] transition-colors uppercase tracking-tight"
                   >
-                    Sign In
+                    {t("signIn")}
                   </Link>
                   <Link
                     href="/register"
                     className="text-[11px] font-bold bg-[#1e3040] text-white px-5 py-2.5 rounded-sm hover:bg-[#4a7c44] transition-all uppercase tracking-widest shadow-sm"
                   >
-                    Sign Up
+                    {t("signUp")}
                   </Link>
                 </div>
               ) : (
@@ -102,8 +103,8 @@ export default function MainHeader() {
                       <div className="hidden lg:flex flex-col items-start leading-none text-left">
                         <span className="text-[10px] font-bold text-gray-900 uppercase tracking-tight">
                           {userData.role === "admin"
-                            ? "Administrator"
-                            : "My Account"}
+                            ? t("administrator")
+                            : t("myAccount")}
                         </span>
                         {/* userData từ JWT: { _id, name, email, role, avatar } */}
                         <span className="text-[10px] text-gray-500 flex items-center gap-0.5">
@@ -129,7 +130,7 @@ export default function MainHeader() {
                           className="flex items-center font-bold"
                         >
                           <LayoutDashboard className="mr-3 h-4 w-4" />
-                          <span>Dashboard</span>
+                          <span>{t("dashboard")}</span>
                         </Link>
                       </DropdownMenuItem>
                     ) : (
@@ -152,7 +153,7 @@ export default function MainHeader() {
                       className="py-2.5 text-red-600 font-bold cursor-pointer rounded-md focus:bg-red-50 focus:text-red-700"
                     >
                       <LogOut className="mr-3 h-4 w-4" />
-                      <span>Log Out</span>
+                      <span>{t("logOut")}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -160,8 +161,6 @@ export default function MainHeader() {
             </div>
 
             <div className="flex items-center gap-4 border-l pl-6 border-gray-100">
-              <LanguageSwitcher />
-
               <Link
                 href="/wishlist"
                 className="relative p-2 hover:bg-gray-100 rounded-full transition-all group"

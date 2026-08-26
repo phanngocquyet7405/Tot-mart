@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useContext } from "react";
+import { useTranslations } from "next-intl";
 import {
   User,
   Heart,
@@ -26,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function MainHeader() {
+  const t = useTranslations("header");
   const { cartCount, cartTotal, isMounted } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [wishlistCount] = useState(0);
@@ -61,7 +63,7 @@ export default function MainHeader() {
               />
             </Link>
             <div className="hidden lg:block bg-[#4a7c44] text-white text-[10px] font-bold px-4 py-1.5 rounded-sm tracking-widest uppercase">
-              Save up to 70% now!
+              Giảm giá đến 70%!
             </div>
           </div>
 
@@ -79,13 +81,13 @@ export default function MainHeader() {
                     href="/login"
                     className="text-sm font-bold text-gray-700 hover:text-[#4a7c44] transition-colors uppercase tracking-tight"
                   >
-                    Sign In
+                    Đăng nhập
                   </Link>
                   <Link
                     href="/register"
                     className="text-[11px] font-bold bg-[#1e3040] text-white px-5 py-2.5 rounded-sm hover:bg-[#4a7c44] transition-all uppercase tracking-widest shadow-sm"
                   >
-                    Sign Up
+                    Đăng ký
                   </Link>
                 </div>
               ) : (
@@ -101,7 +103,7 @@ export default function MainHeader() {
                         <span className="text-[10px] font-bold text-gray-900 uppercase tracking-tight">
                           {userData.role === "admin"
                             ? "Administrator"
-                            : "My Account"}
+                            : "Tài khoản của tôi"}
                         </span>
                         {/* userData từ JWT: { _id, name, email, role, avatar } */}
                         <span className="text-[10px] text-gray-500 flex items-center gap-0.5">
@@ -140,7 +142,7 @@ export default function MainHeader() {
                           className="flex items-center font-bold"
                         >
                           <UserCircle className="mr-3 h-4 w-4" />
-                          <span>My Profile</span>
+                          <span>Hồ sơ cá nhân</span>
                         </Link>
                       </DropdownMenuItem>
                     )}
@@ -150,7 +152,7 @@ export default function MainHeader() {
                       className="py-2.5 text-red-600 font-bold cursor-pointer rounded-md focus:bg-red-50 focus:text-red-700"
                     >
                       <LogOut className="mr-3 h-4 w-4" />
-                      <span>Log Out</span>
+                      <span>Đăng xuất</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
