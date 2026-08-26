@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { ProductCard } from "./product_card";
 import {
@@ -25,6 +25,22 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
   const [error, setError] = useState(null);
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState("grid");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 12;
+
+  const totalPages = Math.ceil(products.length / pageSize);
+  const visibleProducts = useMemo(
+    () => products.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [products, currentPage],
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryId, brandSlug, sortBy]);
+
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -97,7 +113,7 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
             {categoryId ? "Category Products" : "All Products"}
           </h2>
           <p className="text-gray-600 text-sm mt-1">
-            Showing {products.length} results
+            Showing {products.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, products.length)} of {products.length} results
           </p>
         </div>
 
@@ -173,7 +189,7 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
         } mb-12`}
       >
         {products.length > 0 ? (
-          products.map((product) => (
+            visibleProducts.map((product) => (
             <ProductCard
               key={product._id || product.id}
               product={product}
@@ -204,24 +220,38 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
       </div>
 
       {/* Pagination */}
-      {products.length > 0 && (
-        <div className="flex justify-center gap-2 mt-12">
-          <button className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-            ←
+      {totalPages > 1 && (
+        <nav className="flex flex-wrap items-center justify-center gap-2 mt-12" aria-label="Product pagination">
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((page) => page - 1)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            aria-label="Previous page"
+          >
+            Previous
           </button>
-          <button className="px-3 py-2 bg-green-700 text-white rounded-md">
-            1
+          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+            <button
+              key={page}
+              type="button"
+              aria-current={page === currentPage ? "page" : undefined}
+              onClick={() => setCurrentPage(page)}
+              className={`min-w-10 px-3 py-2 rounded-md ${page === currentPage ? "bg-green-700 text-white" : "border border-gray-300 text-gray-700 hover:bg-gray-50"}`}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            type="button"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((page) => page + 1)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            aria-label="Next page"
+          >
+            Next
           </button>
-          <button className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-            2
-          </button>
-          <button className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-            3
-          </button>
-          <button className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-            →
-          </button>
-        </div>
+        </nav>
       )}
     </div>
   );

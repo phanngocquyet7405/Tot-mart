@@ -1,5 +1,6 @@
 import { ChevronDown, X,ChevronUp } from "lucide-react";
-import React,{useState} from "react";
+import React,{useEffect, useMemo, useState} from "react";
+import { getAllCategoriesApi } from "@/app/services/api/productServices";
 
 export default function SideBar ({isOpen, onClose}) {
     const [openSections, setOpenSections] = useState(['flavor', 'dietary']);
@@ -12,44 +13,33 @@ export default function SideBar ({isOpen, onClose}) {
         );
     };
 
-    const flavorOptions = [
-        {
-            label: 'Trái cây', count:23
-        },
-        {
-            label: 'Vị ngọt', count:42
-        },
-        {
-            label:'Vị mặn', count:1
-        },
-        {
-            label:'Cay',count:5
-        },
-        {
-            label:'Chua',count:10
-        },
-        {
-            label:'Thanh vị',count:4
-        },
-    ];
+    const [categories, setCategories] = useState([]);
 
-    const dietaryOptions = [
-        {
-            label: 'Ăn chay', count:35
-        },
-        {
-            label: 'Thuần chay', count:42
-        },
-        {
-            label:'Không gluten', count:1
-        },
-        {
-            label:'Không sữa',count:5
-        },
-        {
-            label:'Hữu cơ (Organic)',count:10
-        },
-    ];
+    useEffect(() => {
+      let active = true;
+      getAllCategoriesApi()
+        .then((res) => {
+          const data = res?.data?.data || res?.data || res || [];
+          if (active) setCategories(Array.isArray(data) ? data : []);
+        })
+        .catch((error) => console.error("Error loading filter categories:", error));
+      return () => { active = false; };
+    }, []);
+
+    const { flavorOptions, dietaryOptions } = useMemo(() => {
+      const idOf = (value) => typeof value === "string" ? value : value?._id;
+      const roots = categories.filter((category) => !idOf(category.parentId || category.parent || category.parentCategory));
+      const childrenOf = (root) => categories.filter((category) => idOf(category.parentId || category.parent || category.parentCategory) === root._id);
+      const findRoot = (names) => roots.find((root) => names.includes(String(root.name || root.title || "").toLowerCase()));
+      const optionsFor = (root) => root ? childrenOf(root).map((child) => ({
+        label: child.name || child.title,
+        count: child.productCount ?? child.productsCount ?? child.count ?? 0,
+      })) : [];
+      return {
+        flavorOptions: optionsFor(findRoot(["flavor", "flavors", "hương vị"])),
+        dietaryOptions: optionsFor(findRoot(["dietary", "diet", "chế độ ăn"])),
+      };
+    }, [categories]);
 
     return (
     <>
