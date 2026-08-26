@@ -1,9 +1,12 @@
-import { ChevronDown, X,ChevronUp } from "lucide-react";
-import React,{useEffect, useMemo, useState} from "react";
-import { getAllCategoriesApi } from "@/app/services/api/productServices";
+import { ChevronDown, X, ChevronUp } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  getAllBrandsApi,
+  getAllCategoriesApi,
+} from "@/app/services/api/productServices";
 
 export default function SideBar ({isOpen, onClose}) {
-    const [openSections, setOpenSections] = useState(['flavor', 'dietary']);
+    const [openSections, setOpenSections] = useState(['categories', 'brands', 'flavor', 'dietary']);
 
     const toggleSection = (section) => {
         setOpenSections(prev => 
@@ -14,19 +17,23 @@ export default function SideBar ({isOpen, onClose}) {
     };
 
     const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
 
     useEffect(() => {
       let active = true;
-      getAllCategoriesApi()
-        .then((res) => {
-          const data = res?.data?.data || res?.data || res || [];
-          if (active) setCategories(Array.isArray(data) ? data : []);
+      Promise.all([getAllCategoriesApi(), getAllBrandsApi()])
+        .then(([categoryResponse, brandResponse]) => {
+          const unwrap = (response) => response?.data?.data || response?.data || response || [];
+          if (active) {
+            setCategories(Array.isArray(unwrap(categoryResponse)) ? unwrap(categoryResponse) : []);
+            setBrands(Array.isArray(unwrap(brandResponse)) ? unwrap(brandResponse) : []);
+          }
         })
-        .catch((error) => console.error("Error loading filter categories:", error));
+        .catch((error) => console.error("Error loading sidebar data:", error));
       return () => { active = false; };
     }, []);
 
-    const { flavorOptions, dietaryOptions } = useMemo(() => {
+    const { rootCategories, flavorOptions, dietaryOptions } = useMemo(() => {
       const idOf = (value) => typeof value === "string" ? value : value?._id;
       const roots = categories.filter((category) => !idOf(category.parentId || category.parent || category.parentCategory));
       const childrenOf = (root) => categories.filter((category) => idOf(category.parentId || category.parent || category.parentCategory) === root._id);
@@ -36,10 +43,13 @@ export default function SideBar ({isOpen, onClose}) {
         count: child.productCount ?? child.productsCount ?? child.count ?? 0,
       })) : [];
       return {
+        rootCategories: roots,
         flavorOptions: optionsFor(findRoot(["flavor", "flavors", "hương vị"])),
         dietaryOptions: optionsFor(findRoot(["dietary", "diet", "chế độ ăn"])),
       };
     }, [categories]);
+
+    const displayName = (item) => item?.name || item?.title || item?.brandName || item?.label || "Unnamed";
 
     return (
     <>
@@ -73,6 +83,32 @@ export default function SideBar ({isOpen, onClose}) {
         </div>
 
         <div className="p-6 space-y-6">
+          {/* Categories Section */}
+          <div className="border-b border-gray-200 pb-4">
+            <button onClick={() => toggleSection('categories')} className="flex items-center justify-between w-full mb-4">
+              <h3 className="font-semibold text-gray-900">Categories</h3>
+              {openSections.includes('categories') ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+            </button>
+            {openSections.includes('categories') && (
+              <div className="flex flex-col gap-3">
+                {rootCategories.map((category) => <a key={category._id} href={`/categories/${category._id}`} className="text-sm text-gray-700 hover:text-[#0F172A]">{displayName(category)}</a>)}
+              </div>
+            )}
+          </div>
+
+          {/* Brands Section */}
+          <div className="border-b border-gray-200 pb-4">
+            <button onClick={() => toggleSection('brands')} className="flex items-center justify-between w-full mb-4">
+              <h3 className="font-semibold text-gray-900">Brands</h3>
+              {openSections.includes('brands') ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+            </button>
+            {openSections.includes('brands') && (
+              <div className="flex flex-col gap-3">
+                {brands.map((brand) => <a key={brand._id} href={`/products?brand=${brand._id}`} className="text-sm text-gray-700 hover:text-[#0F172A]">{displayName(brand)}</a>)}
+              </div>
+            )}
+          </div>
+
           {/* Flavor Section */}
           <div className="border-b border-gray-200 pb-4">
             <button
