@@ -43,7 +43,7 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
-  { title: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+  { title: "Tổng quan", icon: LayoutDashboard, href: "/dashboard" },
   {
     title: "Sản phẩm",
     icon: ShoppingCart,

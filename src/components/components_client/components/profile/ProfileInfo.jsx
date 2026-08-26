@@ -21,11 +21,11 @@ export function ProfileInfo({ name, email, avatarUrl, onSave, saving }) {
 
   const handleSubmit = async () => {
     if (!form.name.trim()) {
-      setError("Name is required");
+      setError("Vui lòng nhập họ tên");
       return;
     }
     if (!/^\S+@\S+\.\S+$/.test(form.email)) {
-      setError("Please enter a valid email");
+      setError("Vui lòng nhập email hợp lệ");
       return;
     }
     setError(null);
@@ -35,7 +35,7 @@ export function ProfileInfo({ name, email, avatarUrl, onSave, saving }) {
   return (
     <Card className="border-emerald-100">
       <CardHeader>
-        <CardTitle className="text-emerald-700">Profile Information</CardTitle>
+        <CardTitle className="text-emerald-700">Thông tin hồ sơ</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -54,7 +54,7 @@ export function ProfileInfo({ name, email, avatarUrl, onSave, saving }) {
             />
             <span className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50">
               <Camera className="h-4 w-4" />
-              Upload Avatar
+              Tải ảnh đại diện
             </span>
           </label>
         </div>
@@ -90,7 +90,7 @@ export function ProfileInfo({ name, email, avatarUrl, onSave, saving }) {
           disabled={saving}
         >
           {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Save Profile
+          Lưu hồ sơ
         </Button>
       </CardContent>
     </Card>
