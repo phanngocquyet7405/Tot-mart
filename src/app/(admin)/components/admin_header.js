@@ -32,7 +32,7 @@ export function AdminHeader() {
           className="h-9 w-9"
         >
           <Menu className="h-5 w-5" />
-          <span className="sr-only">Toggle sidebar</span>
+          <span className="sr-only">Mở hoặc đóng thanh bên</span>
         </Button>
 
         {/* Thanh tìm kiếm có hiệu ứng co giãn */}
@@ -46,7 +46,7 @@ export function AdminHeader() {
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search products, orders..."
+                placeholder="Tìm kiếm sản phẩm, đơn hàng..."
                 className="h-9 w-full pl-9 pr-9"
                 autoFocus
                 onBlur={() => setSearchExpanded(false)}
@@ -68,7 +68,7 @@ export function AdminHeader() {
               onClick={() => setSearchExpanded(true)}
             >
               <Search className="h-5 w-5" />
-              <span className="sr-only">Search</span>
+              <span className="sr-only">Tìm kiếm</span>
             </Button>
           )}
         </div>
@@ -96,13 +96,13 @@ export function AdminHeader() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem>Hồ sơ</DropdownMenuItem>
+            <DropdownMenuItem>Cài đặt</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive">
-              Log out
+              Đăng xuất
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

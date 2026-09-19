@@ -6,23 +6,23 @@ import Link from "next/link";
 // Các mục chưa có page → giữ href="#" để dễ cập nhật sau
 
 const INFORMATION_LINKS = [
-  { label: "About Us", href: "/pages/about" },
-  { label: "Today's Offers", href: "/pages/offers-discounts-coupons" },
-  { label: "Refer a Friend", href: "#" },
-  { label: "Corporate Gifts", href: "#" },
-  { label: "Rewards", href: "#" },
-  { label: "Blogs", href: "/pages/our-blog" },
-  { label: "Careers", href: "#" },
+  { label: "Về chúng tôi", href: "/pages/about" },
+  { label: "Ưu đãi hôm nay", href: "/pages/offers-discounts-coupons" },
+  { label: "Giới thiệu bạn bè", href: "#" },
+  { label: "Quà tặng doanh nghiệp", href: "#" },
+  { label: "Ưu đãi thành viên", href: "#" },
+  { label: "Bài viết", href: "/pages/our-blog" },
+  { label: "Tuyển dụng", href: "#" },
 ];
 
 const SUPPORT_LINKS = [
-  { label: "Contact Us", href: "/pages/contact-us" },
-  { label: "Community", href: "#" },
-  { label: "Privacy Policy", href: "/pages/information" },
-  { label: "Terms", href: "/pages/information" },
-  { label: "FAQ", href: "/pages/faq" },
-  { label: "Shipping Policy", href: "/pages/information" },
-  { label: "Accessibility Statement", href: "#" },
+  { label: "Liên hệ", href: "/pages/contact-us" },
+  { label: "Cộng đồng", href: "#" },
+  { label: "Chính sách bảo mật", href: "/pages/information" },
+  { label: "Điều khoản sử dụng", href: "/pages/information" },
+  { label: "Câu hỏi thường gặp", href: "/pages/faq" },
+  { label: "Chính sách vận chuyển", href: "/pages/information" },
+  { label: "Hỗ trợ tiếp cận", href: "#" },
 ];
 
 const BRAND_LINKS = [
@@ -91,11 +91,11 @@ export default function Footer() {
             </Link>
 
             <p className="text-xs text-gray-200 mb-4 font-medium leading-relaxed">
-              Download our app to get
+              Tải ứng dụng để nhận
               <br />
-              app-exclusive offers and
+              ưu đãi và giảm giá
               <br />
-              discounts!
+              độc quyền trên app!
             </p>
 
             <div className="w-24 h-24 bg-white p-1 rounded-sm flex items-center justify-center">

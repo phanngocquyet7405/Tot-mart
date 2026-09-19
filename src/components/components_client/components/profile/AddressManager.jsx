@@ -52,7 +52,7 @@ export function AddressManager({
   return (
     <Card className="border-emerald-100">
       <CardHeader>
-        <CardTitle className="text-emerald-700">Address Management</CardTitle>
+        <CardTitle className="text-emerald-700">Quản lý địa chỉ</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* ── CREATE FORM ─────────────────────────────────────────────── */}
@@ -107,13 +107,13 @@ export function AddressManager({
           className="bg-emerald-600 hover:bg-emerald-700"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add Address
+          Thêm địa chỉ
         </Button>
 
         {/* ── LIST ────────────────────────────────────────────────────── */}
         <div className="space-y-3">
           {addresses.length === 0 && (
-            <p className="text-sm text-slate-500">No addresses saved yet.</p>
+            <p className="text-sm text-slate-500">Chưa có địa chỉ nào được lưu.</p>
           )}
 
           {addresses.map((item) => {
@@ -146,7 +146,7 @@ export function AddressManager({
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Edit Address</DialogTitle>
+                          <DialogTitle>Chỉnh sửa địa chỉ</DialogTitle>
                           <DialogDescription>
                             Update your delivery information.
                           </DialogDescription>
@@ -220,7 +220,7 @@ export function AddressManager({
                             }}
                             className="bg-emerald-600 hover:bg-emerald-700"
                           >
-                            Save Changes
+                            Lưu thay đổi
                           </Button>
                         </DialogFooter>
                       </DialogContent>

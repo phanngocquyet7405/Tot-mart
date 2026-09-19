@@ -3,7 +3,7 @@ import { ProductCard } from "./product_card";
 import CollectionLayout from "./product_layout";
 
 export default function FeaturedProducts({
-  title = "Featured Products",
+  title = "Sản phẩm nổi bật",
   initialData = [],
 }) {
   const products = initialData;
@@ -11,7 +11,7 @@ export default function FeaturedProducts({
   if (!products || products.length === 0) return null;
 
   return (
-    <CollectionLayout title={title} linkText="View All" linkHref="/products">
+    <CollectionLayout title={title} linkText="Xem tất cả" linkHref="/products">
       {products.map((product, index) => (
         <ProductCard
           // Fallback: nếu không có id, dùng _id hoặc fallback cuối cùng là index
