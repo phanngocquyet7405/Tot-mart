@@ -45,13 +45,29 @@ export const API_ENDPOINTS = {
   CHECKOUT: {
     CREATE: "/checkout/check-out",
 
-    // ─── VNPay ────────────────────────────────────────────────────────────
-    // BE cần bổ sung 3 route tương ứng:
-    //   POST /checkout/create-vnpay-url  -> build URL thanh toán (HMAC signed)
-    //   GET  /checkout/vnpay-ipn         -> VNPay gọi server-to-server, chốt trạng thái đơn
-    //   GET  /checkout/vnpay-return      -> verify khi user redirect về, CHỈ để hiển thị
-    CREATE_VNPAY_URL: "/checkout/create-vnpay-url",
-    VERIFY_VNPAY_RETURN: "/checkout/vnpay-return",
+    // ─── SePay ────────────────────────────────────────────────────────────
+    // Khác VNPay: không có bước "tạo URL thanh toán" riêng — BE trả qrUrl
+    // NGAY trong response của CREATE. Webhook SePay (/checkout/sepay-webhook)
+    // chạy server-to-server, FE không gọi route đó.
+    ORDER_STATUS: (paymentCode) => `/checkout/order-status/${paymentCode}`,
+
+    // ─── Actions có side-effect (hoàn kho/hoàn coupon/hoàn tiền, hoặc set
+    // paymentStatus) — nằm ở /checkout chứ không phải /admin/orders bên
+    // dưới, xem ghi chú ở ORDERS.UPDATE_STATUS ─────────────────────────────
+    CANCEL: (id) => `/checkout/cancel/${id}`,
+    CONFIRM_COD: (id) => `/checkout/confirm-cod/${id}`,
+    MARK_COD_DELIVERED: (id) => `/checkout/mark-cod-delivered/${id}`,
+  },
+
+  // ─── Admin: quản lý đơn hàng ──────────────────────────────────────────────
+  ORDERS: {
+    GET_ALL: "/admin/orders",
+    GET_BY_ID: (id) => `/admin/orders/${id}`,
+    // CHỈ dùng cho các bước KHÔNG có side-effect (processing→shipped,
+    // shipped→delivered cho đơn online, on_hold→processing). "cancelled",
+    // "processing" từ COD pending, "delivered" cho COD → dùng CHECKOUT.CANCEL
+    // / CONFIRM_COD / MARK_COD_DELIVERED ở trên (có side-effect thật).
+    UPDATE_STATUS: (id) => `/admin/orders/${id}/status`,
   },
 
   PRODUCTS: {

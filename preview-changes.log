@@ -1,0 +1,137 @@
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Robust File Copy for Windows                              
+-------------------------------------------------------------------------------
+
+  Started : Saturday, September 19, 2026 9:17:24 AM
+   Source : C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\
+     Dest : C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\
+
+    Files : *.*
+	    
+ Exc Dirs : .git
+	    node_modules
+	    
+  Options : *.* /FP /L /TEE /S /E /DCOPY:DA /COPY:DAT /NP /R:1000000 /W:30 
+
+------------------------------------------------------------------------------
+
+	                   0	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\components\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\components_box\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\hooks\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\i18n\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\lib\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\messages\
+	                   0	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\actions\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\context\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\middleware\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\util\
+	  *EXTRA File 		   25931	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\favicon.ico
+	  *EXTRA File 		    8033	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\globals.css
+	  *EXTRA File 		    2816	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\layout.js
+	  *EXTRA File 		    1257	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\page.js
+	  *EXTRA File 		     443	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\robots.js
+	  *EXTRA File 		    2991	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\sitemap.js
+	                   0	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(admin)\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\admin-box\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\admin-brands\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\admin-categories\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\admin-products\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\admin-subscribe-plan\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\admin-users\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\dashboard\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\utils\
+	  *EXTRA File 		     881	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\layout.js
+	                   0	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(admin)\admin-orders\
+	  *EXTRA File 		    3426	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\admin-orders\page.js
+	                   1	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(admin)\admin-orders\hooks\
+	    Newer     		    4155	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(admin)\admin-orders\hooks\useAdminOrdersTable.js
+	                   1	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(admin)\admin-orders\services\
+	    Newer     		    7821	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(admin)\admin-orders\services\ordersAdminService.js
+	                   0	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(admin)\components\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\components\box\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\components\brands\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\components\categories\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\components\notifications\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\components\products\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\components\shared\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\components\SubscribePlans\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\components\ui\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\components\users\
+	  *EXTRA File 		    4083	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\components\admin_header.js
+	  *EXTRA File 		    7203	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\components\app_sidebar.js
+	                   2	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(admin)\components\orders\
+	  *EXTRA File 		    1135	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(admin)\components\orders\OrderStatusBadge.jsx
+	    Newer     		    6022	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(admin)\components\orders\OrderDetailDialog.jsx
+	    Newer     		    3463	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(admin)\components\orders\OrderTable.jsx
+	                   0	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(client)\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\brands\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\cart\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\categories\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\homepage\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\login\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\pages\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\products\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\profile\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\register\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\utils\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\wishlist\
+	                   1	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(client)\checkout\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\checkout\payment-result\
+	  *EXTRA File 		    1138	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\checkout\layout.js
+	    Newer     		    7321	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(client)\checkout\page.jsx
+	                   0	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(client)\components\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\Cart_component\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\Category_component\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\hero_section_page\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\layout\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\Product\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\profile\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\Subsciber_components\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\ui\
+	                   1	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(client)\components\Checkout_component\
+	  *EXTRA File 		    7670	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\Checkout_component\AddressStep.js
+	  *EXTRA File 		    2508	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\Checkout_component\CheckoutStepper.js
+	  *EXTRA File 		    3783	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\Checkout_component\OrderSuccessScreen.js
+	  *EXTRA File 		    4588	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\Checkout_component\OrderSummary.js
+	  *EXTRA File 		    4308	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\Checkout_component\ReviewStep.js
+	  *EXTRA File 		     621	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\(client)\components\Checkout_component\SectionCard.js
+	    Newer     		   10962	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\(client)\components\Checkout_component\PaymentStep.js
+	                   0	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\hook\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\hook\adminSub\
+	*EXTRA Dir        -1	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\hook\clientSub\
+	  *EXTRA File 		    1665	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\hook\useAddToCart.js
+	  *EXTRA File 		    2282	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\hook\useAdminBrands.js
+	  *EXTRA File 		    1992	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\hook\useBoxes.js
+	  *EXTRA File 		     754	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\hook\useDebounce.js
+	  *EXTRA File 		    6404	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\hook\useProductDetail.js
+	  *EXTRA File 		    2208	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\hook\useProductSearch.js
+	                   1	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\hook\checkout\
+	    Newer     		   13804	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\hook\checkout\useCheckout.js
+	                   0	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\services\
+	                   4	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\services\api\
+	  *EXTRA File 		    3407	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\services\api\AdminSubscriptionService.js
+	  *EXTRA File 		     759	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\services\api\authService.js
+	  *EXTRA File 		     389	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\services\api\axiosConfig.jsx
+	  *EXTRA File 		     913	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\services\api\boxService.js
+	  *EXTRA File 		     408	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\services\api\checkoutService.js
+	  *EXTRA File 		    3042	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\services\api\MySubscriptionService.js
+	  *EXTRA File 		    2999	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\services\api\productServices.js
+	  *EXTRA File 		    4439	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\services\api\subscribePlanService.js
+	  *EXTRA File 		    1712	C:\Users\84862\Desktop\WorkSpace\totmart\fe_totmart\src\app\services\api\userService.js
+	    Newer     		    5508	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\services\api\apiEndpoints.js
+	    Newer     		   11493	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\services\api\Checkoutpageservice.js
+	    Newer     		    2211	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\services\api\orderService.js
+	    Newer     		    1548	C:\Users\84862\Downloads\totmart-sepay-full\totmart-sepay-full\frontend\src\app\services\api\paymentGatewayService.js
+
+------------------------------------------------------------------------------
+
+               Total    Copied   Skipped  Mismatch    FAILED    Extras
+    Dirs :        16         0        16         0         0        49
+   Files :        11        11         0         0         0        33
+   Bytes :    72.5 k    72.5 k         0         0         0   113.4 k
+   Times :   0:00:00   0:00:00                       0:00:00   0:00:00
+   Ended : Saturday, September 19, 2026 9:17:24 AM
+

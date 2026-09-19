@@ -82,15 +82,18 @@ export function useAdminOrdersTable() {
   }, []);
 
   // ─── Đổi trạng thái ───────────────────────────────────────────────────────
+  // `opt` đến từ getNextStatusOptions() ở ordersAdminService.js — đã có sẵn
+  // {value, label, action}, nên updateAdminOrderStatus() biết gọi đúng API
+  // nào (status chung / cancel / confirm-cod / mark-cod-delivered).
   const changeStatus = useCallback(
-    async (order, nextStatus) => {
+    async (order, opt) => {
       if (!order?.id) return;
       setIsUpdatingStatus(true);
       try {
-        await updateAdminOrderStatus(order.id, nextStatus);
-        toast.success(`Đã cập nhật đơn ${order.code} sang trạng thái mới`);
+        await updateAdminOrderStatus(order, opt);
+        toast.success(`Đã cập nhật đơn ${order.code}: ${opt.label}`);
         setSelectedOrder((prev) =>
-          prev && prev.id === order.id ? { ...prev, status: nextStatus } : prev,
+          prev && prev.id === order.id ? { ...prev, status: opt.value } : prev,
         );
         refresh();
       } catch (error) {

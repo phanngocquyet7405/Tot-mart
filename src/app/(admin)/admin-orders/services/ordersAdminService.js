@@ -3,26 +3,27 @@
  * Service layer cho admin-orders — wrap orderService (raw API), chuẩn hoá
  * shape đơn hàng, và định nghĩa cấu hình trạng thái.
  *
- * LƯU Ý: BE cho module orders CHƯA tồn tại (xem TODO trong apiEndpoints.js).
- * normalizeOrder() dùng optional-chaining + fallback field name theo đúng
- * tinh thần defensive-check đã áp dụng ở Checkoutpageservice.js (placeOrder),
- * vì chưa biết chắc BE sẽ trả field tên gì (_id/orderId, status, v.v).
- * Khi BE xong, chỉ cần chỉnh lại các fallback trong normalizeOrder().
+ * Khớp đúng enum + field thật của Order model (TotMartAPI/src/models/Order.js).
+ * status và paymentStatus là 2 field TÁCH BIỆT — status là vòng đời giao
+ * hàng (pending/processing/shipped/delivered/cancelled/returned/on_hold),
+ * paymentStatus là trạng thái tiền (pending/paid/failed). Không gộp 2 field
+ * này làm một như bản cũ (từng có "pending_payment" là 1 giá trị của status,
+ * SAI — đó thực ra là paymentStatus = "pending").
  */
 
 import { orderService } from "@/app/services/api/orderService";
 import { parseApiResponse, parseApiItem } from "../../utils/parseApiResponse";
 
-// ─── Trạng thái đơn hàng ────────────────────────────────────────────────────
+// ─── Trạng thái đơn hàng (khớp enum thật ở Order.js) ────────────────────────
 
 export const ORDER_STATUS = {
   PENDING: "pending",
-  PENDING_PAYMENT: "pending_payment", // riêng cho VNPay, trước khi IPN xác nhận
-  CONFIRMED: "confirmed",
   PROCESSING: "processing",
-  SHIPPING: "shipping",
+  SHIPPED: "shipped",
   DELIVERED: "delivered",
   CANCELLED: "cancelled",
+  RETURNED: "returned",
+  ON_HOLD: "on_hold",
 };
 
 export const ORDER_STATUS_CONFIG = {
@@ -33,20 +34,6 @@ export const ORDER_STATUS_CONFIG = {
     border: "#FDE1B0",
     dot: "#D97706",
   },
-  [ORDER_STATUS.PENDING_PAYMENT]: {
-    label: "Chờ thanh toán",
-    bg: "#FEF2F2",
-    text: "#B91C1C",
-    border: "#FECACA",
-    dot: "#DC2626",
-  },
-  [ORDER_STATUS.CONFIRMED]: {
-    label: "Đã xác nhận",
-    bg: "#EFF6FF",
-    text: "#1D4ED8",
-    border: "#BFDBFE",
-    dot: "#2563EB",
-  },
   [ORDER_STATUS.PROCESSING]: {
     label: "Đang chuẩn bị hàng",
     bg: "#F5F3FF",
@@ -54,7 +41,7 @@ export const ORDER_STATUS_CONFIG = {
     border: "#DDD6FE",
     dot: "#7C3AED",
   },
-  [ORDER_STATUS.SHIPPING]: {
+  [ORDER_STATUS.SHIPPED]: {
     label: "Đang giao hàng",
     bg: "#ECFEFF",
     text: "#0E7490",
@@ -75,30 +62,96 @@ export const ORDER_STATUS_CONFIG = {
     border: "#E2E8F0",
     dot: "#94A3B8",
   },
+  [ORDER_STATUS.RETURNED]: {
+    label: "Đã hoàn trả",
+    bg: "#FFF1F2",
+    text: "#BE123C",
+    border: "#FECDD3",
+    dot: "#E11D48",
+  },
+  [ORDER_STATUS.ON_HOLD]: {
+    label: "Cần xử lý (thiếu hàng)",
+    bg: "#FEF2F2",
+    text: "#B91C1C",
+    border: "#FECACA",
+    dot: "#DC2626",
+  },
 };
 
 export const ORDER_STATUS_OPTIONS = Object.entries(ORDER_STATUS_CONFIG).map(
   ([value, cfg]) => ({ value, label: cfg.label }),
 );
 
-// Các bước chuyển trạng thái hợp lệ — chặn admin đổi lung tung (vd đã giao
-// thì không lùi lại pending). Chỉnh lại nếu BE có rule nghiệp vụ khác.
-export const ORDER_STATUS_TRANSITIONS = {
-  [ORDER_STATUS.PENDING]: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.CANCELLED],
-  [ORDER_STATUS.PENDING_PAYMENT]: [ORDER_STATUS.CANCELLED], // confirm tự động qua VNPay IPN
-  [ORDER_STATUS.CONFIRMED]: [ORDER_STATUS.PROCESSING, ORDER_STATUS.CANCELLED],
-  [ORDER_STATUS.PROCESSING]: [ORDER_STATUS.SHIPPING, ORDER_STATUS.CANCELLED],
-  [ORDER_STATUS.SHIPPING]: [ORDER_STATUS.DELIVERED],
-  [ORDER_STATUS.DELIVERED]: [],
-  [ORDER_STATUS.CANCELLED]: [],
-};
+/**
+ * Danh sách action khả dụng cho đơn hiện tại — mỗi action gắn với ĐÚNG 1
+ * route BE (xem updateAdminOrderStatus bên dưới). Một số transition có
+ * side-effect (hoàn kho, hoàn coupon, hoàn tiền, hoặc set paymentStatus)
+ * nên KHÔNG đi qua route "status" chung — nếu sửa transition ở đây, nhớ
+ * đối chiếu lại orderAdminController.GENERIC_TRANSITIONS ở BE cho khớp.
+ */
+export function getNextStatusOptions(order) {
+  if (!order) return [];
+  const { status, paymentMethod } = order;
+  const options = [];
 
-export function getNextStatusOptions(currentStatus) {
-  const next = ORDER_STATUS_TRANSITIONS[currentStatus] ?? [];
-  return next.map((value) => ({
-    value,
-    label: ORDER_STATUS_CONFIG[value]?.label ?? value,
-  }));
+  if (status === ORDER_STATUS.PENDING) {
+    if (paymentMethod === "cod") {
+      options.push({
+        value: ORDER_STATUS.PROCESSING,
+        label: "Xác nhận đơn (COD)",
+        action: "confirm-cod",
+      });
+    }
+    // Đơn online "pending" nghĩa là chưa thanh toán — tự động chuyển
+    // "processing" qua webhook SePay khi khách chuyển khoản, không có action
+    // thủ công nào cho admin ở trạng thái này ngoài huỷ.
+    options.push({
+      value: ORDER_STATUS.CANCELLED,
+      label: "Huỷ đơn",
+      action: "cancel",
+    });
+  }
+
+  if (status === ORDER_STATUS.PROCESSING) {
+    options.push({
+      value: ORDER_STATUS.SHIPPED,
+      label: "Chuyển sang đang giao",
+      action: "status",
+    });
+    options.push({
+      value: ORDER_STATUS.CANCELLED,
+      label: "Huỷ đơn",
+      action: "cancel",
+    });
+  }
+
+  if (status === ORDER_STATUS.SHIPPED) {
+    options.push(
+      paymentMethod === "cod"
+        ? {
+            value: ORDER_STATUS.DELIVERED,
+            label: "Xác nhận đã giao (thu tiền COD)",
+            action: "mark-cod-delivered",
+          }
+        : {
+            value: ORDER_STATUS.DELIVERED,
+            label: "Xác nhận đã giao",
+            action: "status",
+          },
+    );
+  }
+
+  if (status === ORDER_STATUS.ON_HOLD) {
+    options.push({
+      value: ORDER_STATUS.PROCESSING,
+      label: "Xử lý tiếp (đã bổ sung hàng)",
+      action: "status",
+    });
+  }
+
+  // "delivered", "cancelled", "returned" — trạng thái cuối, không có action
+  // tiếp theo.
+  return options;
 }
 
 // ─── Chuẩn hoá dữ liệu ──────────────────────────────────────────────────────
@@ -106,28 +159,46 @@ export function getNextStatusOptions(currentStatus) {
 function normalizeOrder(raw) {
   if (!raw) return null;
 
-  const id = raw._id ?? raw.id ?? raw.orderId;
+  const id = raw._id ?? raw.id;
+  const addr = raw.shippingAddress ?? {};
 
   return {
     id,
-    code: raw.code ?? raw.orderCode ?? (id ? `#${String(id).slice(-6).toUpperCase()}` : "—"),
+    code: raw.orderId ?? (id ? `#${String(id).slice(-6).toUpperCase()}` : "—"),
     status: raw.status ?? ORDER_STATUS.PENDING,
-    items: Array.isArray(raw.items) ? raw.items : [],
-    address: raw.address ?? raw.deliveryAddress ?? null,
+    // Tách riêng khỏi status — xem ghi chú đầu file.
+    paymentStatus: raw.paymentStatus ?? "pending",
     paymentMethod: raw.paymentMethod ?? "cod",
+    items: Array.isArray(raw.products)
+      ? raw.products.map((p) => ({
+          productId: p.productId,
+          name: p.name,
+          quantity: p.quantity ?? 1,
+          price: p.unitPrice ?? 0,
+        }))
+      : [],
+    // Reshape từ shippingAddress thật (fullName/phone/address/district/city)
+    // sang shape mà AddressBlock (OrderDetailDialog.jsx) đang dùng
+    // (fullName/phone/street/district/province).
+    address: {
+      fullName: addr.fullName ?? "—",
+      phone: addr.phone ?? "—",
+      street: addr.address ?? "",
+      district: addr.district ?? "",
+      province: addr.city ?? "",
+    },
     note: raw.note ?? "",
     shippingFee: raw.shippingFee ?? 0,
-    discount: raw.discount ?? 0,
-    totalPrice: raw.totalPrice ?? raw.total ?? 0,
+    discount: raw.discountAmount ?? 0,
+    totalPrice: raw.totalAmount ?? 0,
     customer: {
-      name:
-        raw.user?.name ?? raw.customer?.name ?? raw.address?.fullName ?? "—",
-      phone:
-        raw.user?.phone ?? raw.customer?.phone ?? raw.address?.phone ?? "—",
-      email: raw.user?.email ?? raw.customer?.email ?? null,
+      // raw.userId đã được BE populate("userId", "name email phone")
+      name: raw.userId?.name ?? addr.fullName ?? "—",
+      phone: raw.userId?.phone ?? addr.phone ?? "—",
+      email: raw.userId?.email ?? raw.customerEmail ?? null,
     },
-    createdAt: raw.createdAt ?? raw.created_at ?? null,
-    updatedAt: raw.updatedAt ?? raw.updated_at ?? null,
+    createdAt: raw.createdAt ?? null,
+    updatedAt: raw.updatedAt ?? null,
   };
 }
 
@@ -151,10 +222,21 @@ export async function fetchAdminOrderById(id) {
   return normalizeOrder(parseApiItem(res?.data ?? res));
 }
 
-export async function updateAdminOrderStatus(id, status) {
-  return orderService.updateOrderStatus(id, status);
-}
-
-export async function deleteAdminOrder(id) {
-  return orderService.deleteOrder(id);
+/**
+ * Đổi trạng thái — nhận cả `order` (cần paymentMethod để chọn đúng action)
+ * và `opt` (option user vừa bấm, lấy từ getNextStatusOptions() ở trên, đã
+ * có sẵn `action`). Route đúng action tới đúng API — KHÔNG tự suy luận lại
+ * transition ở đây để tránh lệch với getNextStatusOptions().
+ */
+export async function updateAdminOrderStatus(order, opt) {
+  switch (opt.action) {
+    case "confirm-cod":
+      return orderService.confirmCod(order.id);
+    case "cancel":
+      return orderService.cancelOrder(order.id);
+    case "mark-cod-delivered":
+      return orderService.markCodDelivered(order.id);
+    default:
+      return orderService.updateOrderStatus(order.id, opt.value);
+  }
 }

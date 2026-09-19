@@ -55,7 +55,7 @@ export function OrderDetailDialog({
 }) {
   if (!order) return null;
 
-  const nextOptions = getNextStatusOptions(order.status);
+  const nextOptions = getNextStatusOptions(order);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -77,11 +77,13 @@ export function OrderDetailDialog({
             </div>
             <div>
               <SectionLabel
-                icon={order.paymentMethod === "vnpay" ? CreditCard : Wallet}
+                icon={order.paymentMethod === "online" ? CreditCard : Wallet}
                 label="Thanh toán"
               />
               <p className="text-sm font-medium">
-                {order.paymentMethod === "vnpay" ? "VNPay" : "COD - Tiền mặt"}
+                {order.paymentMethod === "online"
+                  ? "Chuyển khoản (SePay)"
+                  : "COD - Tiền mặt"}
               </p>
               <p className="text-xs text-muted-foreground">
                 Đặt lúc {formatDateTime(order.createdAt)}
@@ -162,7 +164,7 @@ export function OrderDetailDialog({
                       size="sm"
                       variant="outline"
                       disabled={isUpdatingStatus}
-                      onClick={() => onChangeStatus(order, opt.value)}
+                      onClick={() => onChangeStatus(order, opt)}
                     >
                       {isUpdatingStatus && (
                         <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />

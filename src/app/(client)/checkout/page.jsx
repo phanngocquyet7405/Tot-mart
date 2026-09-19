@@ -8,6 +8,7 @@
 
 "use client";
 
+import { Suspense } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -37,8 +38,14 @@ function LoadingScreen() {
  * page.jsx — Trang Checkout
  * Route: /checkout
  * Palette: indigo-600 primary, slate colors, rose-600 accent
+ *
+ * useCheckout() gọi useSearchParams() bên trong (đọc ?code= để resume sau
+ * refresh — xem Ngày 3) — Next.js App Router BẮT BUỘC phần dùng
+ * useSearchParams() phải nằm trong <Suspense>, nếu không `next build` lỗi
+ * ngay ("missing-suspense-with-csr-bailout"). Vì vậy tách hẳn phần thân
+ * trang ra CheckoutPageInner, default export chỉ còn wrap Suspense.
  */
-export default function CheckoutPage() {
+function CheckoutPageInner() {
   const router = useRouter();
   const checkout = useCheckout();
 
@@ -46,7 +53,8 @@ export default function CheckoutPage() {
   if (checkout.orderSuccess) return <OrderSuccessScreen />;
 
   // Loading screen
-  if (!checkout.isMounted || checkout.loading) return <LoadingScreen />;
+  if (!checkout.isMounted || checkout.loading || checkout.resuming)
+    return <LoadingScreen />;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -132,9 +140,13 @@ export default function CheckoutPage() {
                   finalTotal={checkout.finalTotal}
                   submitting={checkout.submitting}
                   paymentStatus={checkout.paymentStatus}
+                  paymentCode={checkout.paymentCode}
+                  qrUrl={checkout.qrUrl}
+                  onlineAmount={checkout.onlineAmount}
                   onApplyCoupon={checkout.handleApplyCoupon}
                   onBack={() => checkout.setStep("review")}
                   onPlaceOrder={checkout.handlePlaceOrder}
+                  onRecheckPayment={checkout.handleRecheckPayment}
                 />
               )}
             </AnimatePresence>
@@ -152,5 +164,13 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <CheckoutPageInner />
+    </Suspense>
   );
 }

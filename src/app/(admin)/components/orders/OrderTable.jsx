@@ -16,10 +16,10 @@ import { getOrderItemsCount } from "../../admin-orders/services/ordersAdminServi
 import { formatCurrency, formatDateTime } from "@/app/util/formatter";
 
 function PaymentMethodTag({ method }) {
-  if (method === "vnpay") {
+  if (method === "online") {
     return (
       <span className="inline-flex items-center gap-1 text-xs text-indigo-600">
-        <CreditCard size={13} /> VNPay
+        <CreditCard size={13} /> SePay
       </span>
     );
   }

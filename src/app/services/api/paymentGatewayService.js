@@ -1,8 +1,21 @@
 /**
  * paymentGatewayService.js
- * Service layer — giao tiếp API cổng thanh toán (VNPay).
+ * Service layer — giao tiếp API liên quan xác nhận thanh toán (SePay).
  * Chỉ gọi API thô + chuẩn hoá request, KHÔNG xử lý logic nghiệp vụ
  * (logic nghiệp vụ nằm ở Checkoutpageservice.js, theo đúng convention hiện tại).
+ *
+ * Khác với VNPay: SePay không có bước "tạo URL thanh toán" riêng bằng API —
+ * qrUrl được BE trả về NGAY trong response của checkoutService.createOrder()
+ * (xem placeOrder() ở Checkoutpageservice.js). Service này chỉ còn nhiệm vụ
+ * hỏi BE xem thanh toán đã về chưa, dùng cho polling khi đang hiển thị QR.
+ *
+ * ⚠️ CHƯA DÙNG ĐƯỢC — endpoint bên dưới hiện CHƯA tồn tại ở TotMartAPI.
+ * Cần bổ sung ở BE trước:
+ *   GET /checkout/order-status/:paymentCode  (authMiddleware, check order.userId === req.userId)
+ *   → { success: true, data: { paymentStatus: "pending" | "paid", orders: [...] } }
+ * Một paymentCode có thể tách thành nhiều Order theo merchantId (xem
+ * checkOutController.js) — paymentStatus trả về nên là "paid" chỉ khi TẤT CẢ
+ * order con cùng paymentCode đã paid.
  */
 
 import { axiosConfig } from "./axiosConfig";
@@ -10,28 +23,9 @@ import { API_ENDPOINTS } from "./apiEndpoints";
 
 export const paymentGatewayService = {
   /**
-   * Yêu cầu BE tạo URL thanh toán VNPay cho MỘT đơn hàng đã tồn tại
-   * (đơn phải ở trạng thái "pending_payment" — được tạo trước đó qua checkoutApi).
-   * @param {string} orderId
-   * @param {number} amount - số tiền VND, số nguyên, không có dấu phẩy/chấm
+   * Kiểm tra trạng thái thanh toán của một paymentCode.
+   * @param {string} paymentCode
    */
-  createVnpayUrl: (orderId, amount) =>
-    axiosConfig.post(API_ENDPOINTS.CHECKOUT.CREATE_VNPAY_URL, {
-      orderId,
-      amount,
-    }),
-
-  /**
-   * Xác thực kết quả trả về từ VNPay (toàn bộ query params trên returnUrl).
-   *
-   * Lưu ý: hàm này CHỈ phục vụ hiển thị kết quả cho user ngay lúc đó.
-   * Nguồn xác nhận chính thức để chốt trạng thái đơn hàng là IPN
-   * (VNPay gọi thẳng server-to-server tới BE) — vì user có thể tắt trình
-   * duyệt/mất mạng giữa chừng trước khi redirect về được.
-   * @param {URLSearchParams} params
-   */
-  verifyVnpayReturn: (params) =>
-    axiosConfig.get(
-      `${API_ENDPOINTS.CHECKOUT.VERIFY_VNPAY_RETURN}?${params.toString()}`,
-    ),
+  getOrderStatus: (paymentCode) =>
+    axiosConfig.get(API_ENDPOINTS.CHECKOUT.ORDER_STATUS(paymentCode)),
 };
