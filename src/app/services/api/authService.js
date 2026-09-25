@@ -15,4 +15,4 @@ export const forgotPasswordApi = (email) =>
 
 // Đặt lại mật khẩu với token nhận từ email
 export const resetPasswordApi = (token, newPassword) =>
-  axiosConfig.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, { token, newPassword });
+  axiosConfig.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, { password: newPassword }, { params: { token } });

@@ -60,7 +60,7 @@ export function OrderSuccessScreen() {
           className="flex flex-col gap-3"
         >
           <button
-            onClick={() => router.push("/profile")}
+            onClick={() => router.push("/profile/orders")}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-black uppercase tracking-widest text-[12px] transition-all duration-200 active:scale-[0.98] shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
           >
             <ShoppingBag size={15} />

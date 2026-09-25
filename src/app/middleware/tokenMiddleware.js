@@ -72,7 +72,7 @@ export function handleExpiredToken() {
   if (typeof window === "undefined") return;
 
   const currentPath = window.location.pathname;
-  const isAuthPage = ["/login", "/register"].includes(currentPath);
+  const isAuthPage = ["/login", "/register", "/forgot-password", "/reset-password"].includes(currentPath);
   if (isAuthPage) return;
 
   window.location.href = "/login?session=expired";

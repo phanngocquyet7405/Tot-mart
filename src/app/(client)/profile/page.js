@@ -9,6 +9,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 
 import { AddressManager } from "../components/profile/AddressManager";
@@ -275,6 +276,7 @@ export default function ProfilePage() {
         <p className="text-sm text-stone-500">
           Quản lý thông tin cá nhân, địa chỉ giao hàng và giỏ hàng.
         </p>
+        <Link href="/profile/orders" className="inline-block text-green-700 underline">Xem đơn hàng của tôi</Link>
       </div>
 
       {/* Content */}

@@ -6,7 +6,9 @@ export default function FormInput({
     onChange,
     placeholder,
     required = false,
-    disabled = false
+    disabled = false,
+    minLength,
+    autoComplete
 }) {
     return (
         <div className="space-y-2">
@@ -20,6 +22,9 @@ export default function FormInput({
             type={type}
             id={id}
             name={id}
+            value={value}
+            minLength={minLength}
+            autoComplete={autoComplete}
             onChange={onChange}
             placeholder={placeholder}
             required={required}

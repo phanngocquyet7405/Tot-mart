@@ -9,6 +9,8 @@ import logger from "../util/Logger";
 
 const PUBLIC_ENDPOINTS = [
   API_ENDPOINTS.AUTH.LOGIN,
+  API_ENDPOINTS.AUTH.FORGOT_PASSWORD,
+  API_ENDPOINTS.AUTH.RESET_PASSWORD,
   API_ENDPOINTS.AUTH.HEALTH,
   API_ENDPOINTS.USERS.REGISTER,
   API_ENDPOINTS.PRODUCTS.GET_ALL,
@@ -33,8 +35,6 @@ export function setupAxiosMiddleware(axiosInstance) {
 
   axiosInstance.interceptors.request.use(
     (config) => {
-      console.log("DEBUG: [Axios Request] URL:", config.url);
-      console.log("DEBUG: [Axios Request] Data:", config.data);
 
       if (typeof window === "undefined") return config; // SSR: bỏ qua
 
