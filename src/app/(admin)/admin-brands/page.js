@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { useAdminBrands } from "@/app/hook/useAdminBrands";
-import { BrandTable } from "@/components/components_admin/components/brands/BrandTable";
-import DeleteBrandModal from "../components/brands/DeleteBrandModal";
+import { useAdminBrandsList } from "./hooks/useAdminBrandsList";
+import { BrandTable } from "./components/BrandTable";
+import DeleteBrandModal from "./components/DeleteBrandModal";
 import { AdminPageHeader, AdminLoadingState } from "../components/shared";
 
 export default function BrandsPage() {
@@ -27,7 +27,7 @@ export default function BrandsPage() {
     closeDeleteTarget,
     handleConfirmDelete,
     fetchData,
-  } = useAdminBrands();
+  } = useAdminBrandsList();
 
   return (
     <div className="space-y-6 p-6">
@@ -48,7 +48,7 @@ export default function BrandsPage() {
                 className={isRefreshing ? "animate-spin" : ""}
               />
             </Button>
-            <Button asChild className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+            <Button asChild className="gap-2 bg-orange-600 hover:bg-orange-700">
               <Link href="/admin-brands/create">
                 <Plus size={16} />
                 Thêm thương hiệu
