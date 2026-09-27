@@ -25,9 +25,7 @@ export default function DeleteBrandModal({
           <AlertDialogTitle>Xóa thương hiệu?</AlertDialogTitle>
           <AlertDialogDescription>
             Bạn sắp xóa thương hiệu{" "}
-            <span className="font-semibold text-foreground">
-              {brand?.name}
-            </span>
+            <span className="font-semibold text-foreground">{brand?.name}</span>
             . Hành động này không thể hoàn tác.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -35,9 +33,14 @@ export default function DeleteBrandModal({
           <AlertDialogCancel disabled={isLoading}>Hủy</AlertDialogCancel>
           <AlertDialogAction
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            disabled={isLoading}
+            disabled={isLoading || !brand}
             onClick={(e) => {
               e.preventDefault();
+              // Guard: trong lúc AlertDialog chạy animation đóng, Radix vẫn
+              // giữ nút này trong DOM một nhịp dù `brand` đã bị set về null
+              // (xem useAdminBrandsList.handleConfirmDelete) — không guard
+              // sẽ crash "Cannot read properties of null (reading '_id')".
+              if (!brand) return;
               onConfirm(brand._id);
             }}
           >

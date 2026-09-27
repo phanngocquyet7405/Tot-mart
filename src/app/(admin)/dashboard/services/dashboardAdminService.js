@@ -7,21 +7,15 @@ import { getAllTemplatesApi } from "@/app/services/api/subscribePlanService";
 import { parseApiResponse } from "../../utils/parseApiResponse";
 
 export async function fetchDashboardStats() {
-  const [
-    productsRes,
-    categoriesRes,
-    brandsRes,
-    boxesRes,
-    usersRes,
-    plansRes,
-  ] = await Promise.allSettled([
-    getAllProductsApi(),
-    getAllCategoriesApi(),
-    getAllBrandsApi(),
-    getAllBoxesApi(),
-    userService.getAllUsers(1, 1000),
-    getAllTemplatesApi(),
-  ]);
+  const [productsRes, categoriesRes, brandsRes, boxesRes, usersRes, plansRes] =
+    await Promise.allSettled([
+      getAllProductsApi(),
+      getAllCategoriesApi(),
+      getAllBrandsApi(),
+      getAllBoxesApi(),
+      userService.getAllUsers(1, 1000),
+      getAllTemplatesApi(),
+    ]);
 
   const products =
     productsRes.status === "fulfilled"
@@ -32,28 +26,18 @@ export async function fetchDashboardStats() {
       ? parseApiResponse(categoriesRes.value)
       : [];
   const brands =
-    brandsRes.status === "fulfilled"
-      ? parseApiResponse(brandsRes.value)
-      : [];
+    brandsRes.status === "fulfilled" ? parseApiResponse(brandsRes.value) : [];
   const boxes =
-    boxesRes.status === "fulfilled"
-      ? parseApiResponse(boxesRes.value)
-      : [];
+    boxesRes.status === "fulfilled" ? parseApiResponse(boxesRes.value) : [];
   const users =
-    usersRes.status === "fulfilled"
-      ? parseApiResponse(usersRes.value)
-      : [];
+    usersRes.status === "fulfilled" ? parseApiResponse(usersRes.value) : [];
   const plans =
-    plansRes.status === "fulfilled"
-      ? parseApiResponse(plansRes.value)
-      : [];
+    plansRes.status === "fulfilled" ? parseApiResponse(plansRes.value) : [];
 
   const lowStockProducts = products.filter(
     (p) => (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 10,
   ).length;
-  const outOfStockProducts = products.filter(
-    (p) => (p.stock ?? 0) <= 0,
-  ).length;
+  const outOfStockProducts = products.filter((p) => (p.stock ?? 0) <= 0).length;
 
   return {
     products: products.length,

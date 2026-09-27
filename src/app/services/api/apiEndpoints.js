@@ -1,5 +1,6 @@
 export const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://totmartapi-7z4s.onrender.com/api";
+  //process.env.NEXT_PUBLIC_API_URL || "https://totmartapi-7z4s.onrender.com/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://totmartapi.onrender.com/api";
 
 export const API_ENDPOINTS = {
   AUTH: {

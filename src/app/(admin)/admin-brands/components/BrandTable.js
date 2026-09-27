@@ -2,14 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowUpDown,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  Globe,
-  ExternalLink,
-} from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -27,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AdminEmptyState } from "@/app/(admin)/components/shared";
+import { AdminEmptyState } from "../../components/shared";
 
 export function BrandTable({ brands, onDelete }) {
   if (brands.length === 0) {
@@ -40,13 +33,9 @@ export function BrandTable({ brands, onDelete }) {
         <TableHeader>
           <TableRow>
             <TableHead className="w-20">Logo</TableHead>
-            <TableHead>
-              <div className="flex items-center gap-1 cursor-pointer">
-                Tên thương hiệu <ArrowUpDown size={14} />
-              </div>
-            </TableHead>
+            <TableHead>Tên thương hiệu</TableHead>
             <TableHead className="hidden md:table-cell">Mô tả</TableHead>
-            <TableHead>Website</TableHead>
+            <TableHead className="hidden sm:table-cell">Địa chỉ</TableHead>
             <TableHead className="text-right">Hành động</TableHead>
           </TableRow>
         </TableHeader>
@@ -79,20 +68,12 @@ export function BrandTable({ brands, onDelete }) {
               <TableCell className="max-w-50 truncate hidden md:table-cell text-muted-foreground">
                 {brand.description || "—"}
               </TableCell>
-              <TableCell>
-                {brand.website ? (
-                  <a
-                    href={brand.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-indigo-500 hover:underline text-xs"
-                  >
-                    <Globe size={12} />
-                    <span className="max-w-30 truncate">
-                      {brand.website.replace(/^https?:\/\//, "")}
-                    </span>
-                    <ExternalLink size={10} />
-                  </a>
+              <TableCell className="hidden sm:table-cell text-muted-foreground">
+                {brand.cityAddress ? (
+                  <span className="flex items-center gap-1 text-xs">
+                    <MapPin size={12} />
+                    {brand.cityAddress}
+                  </span>
                 ) : (
                   "—"
                 )}
