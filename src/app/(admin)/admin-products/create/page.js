@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCurrency } from "@/app/util/formatter";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -359,15 +360,15 @@ export default function AddProductPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="price">Giá bán ($) *</Label>
+                <Label htmlFor="price">Giá bán (đ) *</Label>
                 <Input
                   id="price"
                   type="number"
                   min="0"
-                  step="0.01"
+                  step="1"
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  placeholder="0.00"
+                  placeholder="0"
                 />
               </div>
               <div className="space-y-2">
@@ -461,7 +462,7 @@ export default function AddProductPage() {
                   {form.name || "Tên sản phẩm"}
                 </h3>
                 <p className="text-lg font-bold text-primary">
-                  ${form.price || "0.00"}
+                  {formatCurrency(Number(form.price) || 0)}
                 </p>
                 <div className="flex items-center justify-between pt-2">
                   <span

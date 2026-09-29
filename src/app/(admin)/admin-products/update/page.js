@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCurrency } from "@/app/util/formatter";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
@@ -233,7 +234,7 @@ export default function UpdateProductPage() {
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-primary font-bold text-sm">
-                        ${Number(p.price).toLocaleString()}
+                        {formatCurrency(Number(p.price) || 0)}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         | Kho: {p.quantity || p.stock || 0}
@@ -311,7 +312,7 @@ export default function UpdateProductPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Giá bán ($)</Label>
+                      <Label>Giá bán (đ)</Label>
                       <Input
                         type="number"
                         value={formData.price}
@@ -399,7 +400,7 @@ export default function UpdateProductPage() {
                     {formData.name || "Tên sản phẩm"}
                   </h3>
                   <p className="text-2xl font-bold text-primary">
-                    ${formData.price || "0"}
+                    {formatCurrency(Number(formData.price) || 0)}
                   </p>
                 </CardContent>
               </Card>

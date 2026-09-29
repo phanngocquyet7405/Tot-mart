@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AdminEmptyState } from "../../components/shared";
+import { stripHtml } from "../../utils/stripHtml";
 
 export function BrandTable({ brands, onDelete }) {
   if (brands.length === 0) {
@@ -66,7 +67,7 @@ export function BrandTable({ brands, onDelete }) {
                 </div>
               </TableCell>
               <TableCell className="max-w-50 truncate hidden md:table-cell text-muted-foreground">
-                {brand.description || "—"}
+                {stripHtml(brand.description) || "—"}
               </TableCell>
               <TableCell className="hidden sm:table-cell text-muted-foreground">
                 {brand.cityAddress ? (

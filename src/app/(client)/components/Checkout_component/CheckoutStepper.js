@@ -1,11 +1,12 @@
 /**
  * CheckoutStepper.js
- * Thanh bước tiến (Step indicator) — 3 bước: Địa chỉ → Kiểm tra → Thanh toán
- * Palette: indigo-600 primary, slate-600 secondary
+ * Thanh bước: Địa chỉ → Kiểm tra → Thanh toán (đây là một chuỗi thật nên
+ * dùng dấu mốc bước). Bước đã xong bấm để quay lại.
  */
 
-import { MapPin, Package, CreditCard, CheckCircle2 } from "lucide-react";
+import { MapPin, Package, CreditCard, Check } from "lucide-react";
 import { STEPS } from "@/app/services/api/Checkoutpageservice";
+import { FOCUS_RING } from "./checkoutStyles";
 
 const ICONS = { MapPin, Package, CreditCard };
 
@@ -13,54 +14,58 @@ export function CheckoutStepper({ currentStep, onGoBack }) {
   const stepIndex = STEPS.findIndex((s) => s.id === currentStep);
 
   return (
-    <div className="flex items-center max-w-sm mb-10">
+    <ol className="flex items-start w-full max-w-lg mb-8" aria-label="Các bước thanh toán">
       {STEPS.map((s, i) => {
         const Icon = ICONS[s.icon];
         const isActive = s.id === currentStep;
         const isDone = i < stepIndex;
+        const isLast = i === STEPS.length - 1;
 
         return (
-          <div key={s.id} className="flex items-center flex-1 last:flex-none">
-            <div className="flex flex-col items-center gap-1.5">
+          <li
+            key={s.id}
+            className={["flex items-start", isLast ? "" : "flex-1"].join(" ")}
+            aria-current={isActive ? "step" : undefined}
+          >
+            <div className="flex flex-col items-center gap-2">
               <button
+                type="button"
                 onClick={() => isDone && onGoBack(s.id)}
                 disabled={!isDone}
+                aria-label={isDone ? `Quay lại bước ${s.label}` : s.label}
                 className={[
-                  "w-9 h-9 rounded-full flex items-center justify-center border font-black transition-all duration-200",
+                  "grid place-items-center w-10 h-10 rounded-full border transition-colors duration-200",
+                  FOCUS_RING,
                   isActive
-                    ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-600/25"
+                    ? "bg-[#C85C3C] border-[#C85C3C] text-white"
                     : isDone
-                      ? "bg-indigo-50 border-indigo-600/40 text-indigo-600 cursor-pointer hover:border-indigo-600 hover:bg-indigo-100"
-                      : "bg-slate-100 border-slate-200 text-slate-300 cursor-default",
+                      ? "bg-[#FFF0EB] border-[#C85C3C]/50 text-[#C85C3C] hover:bg-[#F0DDD5] cursor-pointer"
+                      : "bg-white border-[#F0DDD5] text-stone-300 cursor-default",
                 ].join(" ")}
               >
-                {isDone ? <CheckCircle2 size={16} /> : <Icon size={15} />}
+                {isDone ? <Check size={17} strokeWidth={2.5} /> : <Icon size={16} />}
               </button>
               <span
                 className={[
-                  "text-[10px] font-bold uppercase tracking-wider transition-colors duration-200",
-                  isActive
-                    ? "text-indigo-600"
-                    : isDone
-                      ? "text-slate-600"
-                      : "text-slate-400",
+                  "text-xs font-semibold",
+                  isActive || isDone ? "text-[#2C1810]" : "text-stone-400",
                 ].join(" ")}
               >
                 {s.label}
               </span>
             </div>
-
-            {i < STEPS.length - 1 && (
+            {!isLast && (
               <div
                 className={[
-                  "flex-1 h-px mx-2 mb-4 transition-colors duration-200",
-                  isDone ? "bg-indigo-600/30" : "bg-slate-200",
+                  "flex-1 h-px mt-5 mx-3 transition-colors duration-300",
+                  isDone ? "bg-[#C85C3C]/60" : "bg-[#F0DDD5]",
                 ].join(" ")}
+                aria-hidden="true"
               />
             )}
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ol>
   );
 }

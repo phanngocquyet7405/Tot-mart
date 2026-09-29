@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCurrency } from "@/app/util/formatter";
 import { useState } from "react";
 import { X, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 // Dữ liệu mặc định nếu props không truyền xuống
 const DEFAULT_STATUSES = ["In Stock", "Low Stock", "Out of Stock"];
 
+// Khoảng giá tính bằng VND. Kéo tới mức tối đa = không giới hạn trên.
+const PRICE_MAX = 2_000_000;
+const PRICE_STEP = 10_000;
+
 export function AdvancedFilterDrawer({
   open,
   onOpenChange,
@@ -33,7 +38,7 @@ export function AdvancedFilterDrawer({
   brands = [], // Nhận từ API hoặc cha
 }) {
   // --- States ---
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, PRICE_MAX]);
   const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [category, setCategory] = useState("all");
   const [brand, setBrand] = useState("all");
@@ -54,7 +59,7 @@ export function AdvancedFilterDrawer({
       category: category === "all" ? null : category,
       brand: brand === "all" ? null : brand,
       minPrice: priceRange[0],
-      maxPrice: priceRange[1],
+      maxPrice: priceRange[1] >= PRICE_MAX ? Infinity : priceRange[1],
       status: selectedStatuses.length > 0 ? selectedStatuses : null,
       dateRange: { from: dateFrom, to: dateTo },
     });
@@ -62,7 +67,7 @@ export function AdvancedFilterDrawer({
   };
 
   const handleReset = () => {
-    setPriceRange([0, 1000]);
+    setPriceRange([0, PRICE_MAX]);
     setSelectedStatuses([]);
     setCategory("all");
     setBrand("all");
@@ -125,15 +130,15 @@ export function AdvancedFilterDrawer({
             <div className="flex justify-between items-center">
               <Label className="text-sm font-semibold">Khoảng giá</Label>
               <span className="text-xs font-mono bg-muted px-2 py-1 rounded">
-                ${priceRange[0]} - ${priceRange[1]}
+                {formatCurrency(priceRange[0])} - {formatCurrency(priceRange[1])}
               </span>
             </div>
             <Slider
               value={priceRange}
               onValueChange={setPriceRange}
-              max={2000}
+              max={PRICE_MAX}
               min={0}
-              step={50}
+              step={PRICE_STEP}
               className="py-4"
             />
           </div>

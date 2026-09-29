@@ -45,7 +45,7 @@ export const ProductCard = ({
             src={
               product.images && product.images[0]?.url
                 ? product.images[0].url
-                : "/placeholder.svg"
+                : "/assets/placeholder.png"
             }
             alt={product.name || "product"}
             fill

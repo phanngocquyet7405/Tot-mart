@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   ShoppingCart,
+  ClipboardList,
   Users,
   Tags,
   FolderTree,
@@ -53,6 +54,7 @@ const menuItems = [
     ],
   },
   { title: "Người dùng", icon: Users, href: "/admin-users" },
+  { title: "Đơn hàng", icon: ClipboardList, href: "/admin-orders" },
   {
     title: "Thương hiệu",
     icon: Tags,

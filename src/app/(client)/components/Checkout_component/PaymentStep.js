@@ -1,16 +1,15 @@
 /**
  * PaymentStep.js
- * Bước 3 — Chọn phương thức thanh toán + mã giảm giá + đặt hàng
- * Palette: indigo-600 primary, slate colors, rose-600 accent
+ * Bước 3 — Chọn phương thức thanh toán + mã giảm giá + đặt hàng.
  *
  * Khi paymentMethod = "online" (SePay) và đơn đã được tạo (paymentStatus
- * "awaiting_payment" | "timeout"), toàn bộ form chọn phương thức/coupon/CTA
- * được thay bằng SepayQrPanel — vì đơn đã chốt ở BE, không cho đổi phương
- * thức hay quay lại nữa ở bước này.
+ * "awaiting_payment" | "timeout"), toàn bộ form được thay bằng SepayQrPanel —
+ * đơn đã chốt ở BE nên không cho đổi phương thức hay quay lại ở bước này.
  */
 
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   CreditCard,
@@ -21,47 +20,72 @@ import {
   QrCode,
   RefreshCw,
   AlertTriangle,
+  Banknote,
+  Smartphone,
+  Copy,
+  ExternalLink,
 } from "lucide-react";
 import { SectionCard } from "./SectionCard";
+import { BTN_PRIMARY, BTN_SECONDARY, INPUT } from "./checkoutStyles";
 import { PAYMENT_METHODS } from "@/app/services/api/Checkoutpageservice";
+import { formatCurrency } from "@/app/util/formatter";
+import logger from "@/app/util/Logger";
 
-const fmt = (n) => (n ?? 0).toLocaleString("vi-VN");
+const METHOD_ICONS = { cod: Banknote, online: QrCode, momo: Smartphone };
 
 // ─── Payment method radio ─────────────────────────────────────────────────────
 function PaymentMethodCard({ method, selected, onSelect }) {
+  const Icon = METHOD_ICONS[method.id] ?? CreditCard;
+  const disabled = method.available === false;
+
   return (
     <label
       className={[
-        "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
-        selected
-          ? "border-indigo-600 bg-indigo-50"
-          : "border-slate-200 bg-white hover:border-indigo-600/40 hover:shadow-sm",
+        "flex items-center gap-4 p-4 rounded-xl border transition-colors duration-200",
+        "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[#C85C3C]",
+        disabled
+          ? "border-[#F0DDD5] bg-stone-50 opacity-60 cursor-not-allowed"
+          : selected
+            ? "border-[#C85C3C] bg-[#FFF0EB] cursor-pointer"
+            : "border-[#F0DDD5] bg-white hover:border-[#C85C3C]/50 cursor-pointer",
       ].join(" ")}
     >
-      {/* Custom radio */}
-      <div
-        className={[
-          "w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors duration-200",
-          selected
-            ? "border-indigo-600 bg-indigo-600"
-            : "border-slate-300 bg-white",
-        ].join(" ")}
-      >
-        {selected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-      </div>
       <input
         type="radio"
         name="payment"
         value={method.id}
         checked={selected}
+        disabled={disabled}
         onChange={onSelect}
         className="sr-only"
       />
-      <span className="text-xl">{method.icon}</span>
-      <div>
-        <p className="text-sm font-bold text-slate-900">{method.label}</p>
-        <p className="text-xs text-slate-600">{method.desc}</p>
-      </div>
+      <span
+        className={[
+          "grid place-items-center w-11 h-11 rounded-full shrink-0",
+          selected && !disabled ? "bg-[#C85C3C] text-white" : "bg-[#FFF0EB] text-[#C85C3C]",
+        ].join(" ")}
+      >
+        <Icon size={19} aria-hidden="true" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-[#2C1810]">{method.label}</span>
+        <span className="block text-xs text-stone-500 mt-0.5">{method.desc}</span>
+      </span>
+      {disabled ? (
+        <span className="text-[11px] font-semibold text-stone-500 bg-stone-200/70 rounded-full px-2.5 py-1 shrink-0">
+          Sắp ra mắt
+        </span>
+      ) : (
+        <span
+          className={[
+            "grid place-items-center w-5 h-5 rounded-full border-2 shrink-0 transition-colors duration-200",
+            selected ? "border-[#C85C3C] bg-[#C85C3C]" : "border-stone-300 bg-white",
+          ].join(" ")}
+          aria-hidden="true"
+        >
+          {selected && <Check size={11} strokeWidth={3} className="text-white" />}
+        </span>
+      )}
     </label>
   );
 }
@@ -74,23 +98,25 @@ function CouponInput({ coupon, setCoupon, couponApplied, discount, onApply }) {
         <input
           value={coupon}
           onChange={(e) => setCoupon(e.target.value.toUpperCase())}
-          placeholder="Nhập mã (thử: TOTMART10)"
+          placeholder="Nhập mã giảm giá"
+          aria-label="Mã giảm giá"
           disabled={couponApplied}
-          className="flex-1 bg-white border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 transition-all duration-200 uppercase disabled:opacity-60"
+          className={`${INPUT} flex-1 uppercase`}
         />
         <button
+          type="button"
           onClick={onApply}
           disabled={!coupon.trim() || couponApplied}
           className={[
-            "px-4 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all duration-200",
+            "rounded-xl px-5 text-xs font-extrabold uppercase tracking-[0.14em] transition-colors duration-200",
             couponApplied
-              ? "bg-emerald-500 text-white cursor-default"
-              : "bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white",
+              ? "bg-[#15803d] text-white cursor-default"
+              : "bg-[#2C1810] text-white hover:bg-[#4a2c1f] disabled:bg-stone-200 disabled:text-stone-400",
           ].join(" ")}
         >
           {couponApplied ? (
             <span className="flex items-center gap-1">
-              <Check size={12} /> Đã áp
+              <Check size={13} /> Đã áp dụng
             </span>
           ) : (
             "Áp dụng"
@@ -98,76 +124,182 @@ function CouponInput({ coupon, setCoupon, couponApplied, discount, onApply }) {
         </button>
       </div>
       {couponApplied && (
-        <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1">
-          <Check size={11} /> Đã giảm {fmt(discount)}₫
+        <p className="text-sm text-[#15803d] font-semibold mt-2.5 flex items-center gap-1.5">
+          <Check size={14} /> Giảm {formatCurrency(discount)}
         </p>
       )}
     </>
   );
 }
 
-// ─── SePay QR panel (Ngày 2) ────────────────────────────────────────────────────
-// ⚠️ onlineAmount đến từ grandTotalAmount do BE trả về — KHÔNG dùng finalTotal
-// (finalTotal có cộng shippingFee mà BE hiện chưa tính vào số tiền yêu cầu).
+// ─── SePay QR panel ──────────────────────────────────────────────────────────
+// BE dựng qrUrl dạng https://qr.sepay.vn/img?acc=…&bank=…&amount=…&des=… nên FE
+// đọc lại các tham số đó để hiện thông tin chuyển khoản thủ công (sao chép được)
+// — khách vẫn thanh toán được khi không quét được ảnh QR.
+function parseQr(qrUrl) {
+  try {
+    const params = new URL(qrUrl).searchParams;
+    return {
+      acc: params.get("acc"),
+      bank: params.get("bank"),
+      amount: Number(params.get("amount")) || 0,
+      des: params.get("des"),
+    };
+  } catch {
+    return {};
+  }
+}
+
+const isBlank = (v) => !v || v === "undefined" || v === "null";
+
+function CopyRow({ label, value, display, strong }) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const t = setTimeout(() => setCopied(false), 1800);
+    return () => clearTimeout(t);
+  }, [copied]);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(String(value));
+      setCopied(true);
+    } catch (err) {
+      logger.error("[PaymentStep] copy failed:", err);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-3 py-3">
+      <div className="min-w-0 flex-1">
+        <p className="text-xs text-stone-500">{label}</p>
+        <p
+          className={[
+            "mt-0.5 break-all text-[#2C1810] tabular-nums",
+            strong ? "font-mono text-base font-bold" : "text-sm font-semibold",
+          ].join(" ")}
+        >
+          {display ?? value}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={copy}
+        aria-label={`Sao chép ${label.toLowerCase()}`}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-[#F0DDD5] px-2.5 py-1.5 text-xs font-semibold text-[#B14B2D] hover:bg-[#FFF0EB] transition-colors duration-200 shrink-0"
+      >
+        {copied ? <Check size={13} /> : <Copy size={13} />}
+        {copied ? "Đã chép" : "Chép"}
+      </button>
+    </div>
+  );
+}
+
 function SepayQrPanel({ qrUrl, onlineAmount, paymentCode, paymentStatus, onRecheck }) {
   const isTimeout = paymentStatus === "timeout";
+  const parsed = useMemo(() => parseQr(qrUrl), [qrUrl]);
+  const [failedUrl, setFailedUrl] = useState(null);
+
+  // qrUrl thiếu/hỏng (vd. BE chưa cấu hình SEPAY_BANK_ACCOUNT / SEPAY_BANK_NAME
+  // → acc=undefined&bank=undefined): không vẽ ảnh vỡ, báo rõ cho khách.
+  const configBroken = !qrUrl || isBlank(parsed.acc) || isBlank(parsed.bank);
+  const imageFailed = failedUrl === qrUrl;
+  const showImage = !configBroken && !imageFailed;
+
+  useEffect(() => {
+    if (configBroken) {
+      logger.error("[PaymentStep] qrUrl thiếu tài khoản/ngân hàng:", qrUrl);
+    }
+  }, [configBroken, qrUrl]);
+
+  const amount = onlineAmount || parsed.amount || 0;
+  const content = paymentCode || parsed.des;
 
   return (
     <SectionCard title="Quét mã để thanh toán" icon={<QrCode size={16} />}>
-      <div className="flex flex-col items-center gap-4">
-        {/* QR image — BE dựng sẵn qua qr.sepay.vn, FE chỉ hiển thị */}
-        <div className="w-56 h-56 rounded-lg border-2 border-slate-200 overflow-hidden bg-white flex items-center justify-center shrink-0">
-          {qrUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={qrUrl}
-              alt="Mã QR chuyển khoản SePay"
-              className="w-full h-full object-contain"
-            />
-          ) : (
-            <Loader2 size={24} className="animate-spin text-slate-300" />
+      <div className="grid gap-6 md:grid-cols-[232px_1fr]">
+        {/* QR */}
+        <div className="mx-auto md:mx-0 w-full max-w-[232px]">
+          <div className="rounded-2xl border border-[#F0DDD5] bg-white p-3">
+            <div className="relative aspect-square w-full grid place-items-center bg-white">
+              {showImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={qrUrl}
+                  alt="Mã QR chuyển khoản SePay"
+                  className="w-full h-full object-contain"
+                  onError={() => setFailedUrl(qrUrl)}
+                />
+              ) : (
+                <div className="px-3 text-center">
+                  <AlertTriangle size={22} className="mx-auto text-amber-600" aria-hidden="true" />
+                  <p className="mt-2 text-xs text-stone-600 leading-relaxed">
+                    {configBroken
+                      ? "Chưa tạo được mã QR. Hãy liên hệ hỗ trợ kèm mã đơn bên cạnh."
+                      : "Không tải được ảnh QR. Bạn có thể mở mã ở tab mới hoặc chuyển khoản theo thông tin bên cạnh."}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          <p className="mt-2.5 text-center text-xs text-stone-500">
+            Mở app ngân hàng và quét mã
+          </p>
+          {imageFailed && !configBroken && (
+            <a
+              href={qrUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#C85C3C] underline underline-offset-4"
+            >
+              <ExternalLink size={12} /> Mở mã QR
+            </a>
           )}
         </div>
 
-        <div className="text-center">
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1">
-            Số tiền cần chuyển
-          </p>
-          <p className="text-2xl font-black text-indigo-600">
-            {fmt(onlineAmount)}₫
+        {/* Thông tin chuyển khoản */}
+        <div className="min-w-0">
+          <div className="rounded-xl bg-[#FFF5F2] border border-[#F0DDD5] px-4 py-3">
+            <p className="text-xs text-stone-500">Số tiền cần chuyển</p>
+            <p className="font-serif text-3xl font-semibold text-[#C85C3C] tabular-nums">
+              {formatCurrency(amount)}
+            </p>
+          </div>
+
+          <div className="mt-2 divide-y divide-dashed divide-[#F0DDD5]">
+            {!isBlank(parsed.bank) && <CopyRow label="Ngân hàng" value={parsed.bank} />}
+            {!isBlank(parsed.acc) && <CopyRow label="Số tài khoản" value={parsed.acc} />}
+            {amount > 0 && <CopyRow label="Số tiền" value={amount} display={formatCurrency(amount)} />}
+            {content && <CopyRow label="Nội dung chuyển khoản" value={content} strong />}
+          </div>
+
+          <p className="mt-2 text-xs text-stone-500 leading-relaxed">
+            Nhập đúng nội dung chuyển khoản để đơn được xác nhận tự động.
           </p>
         </div>
+      </div>
 
-        <div className="w-full bg-slate-50 rounded-lg px-4 py-3">
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-0.5">
-            Nội dung chuyển khoản (đã có sẵn trong QR)
-          </p>
-          <p className="text-sm font-bold text-slate-900 font-mono break-all">
-            {paymentCode}
-          </p>
-        </div>
-
+      <div className="mt-6 space-y-3">
         {isTimeout ? (
-          <div className="w-full flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3.5 py-3">
-            <AlertTriangle size={15} className="text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-700 leading-relaxed">
-              Chưa nhận được thanh toán sau 10 phút. Nếu bạn đã chuyển khoản,
-              hãy bấm kiểm tra lại — hoặc liên hệ hỗ trợ nếu tiền đã bị trừ.
+          <div
+            role="alert"
+            className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3"
+          >
+            <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-amber-800 leading-relaxed">
+              Chưa nhận được thanh toán sau 10 phút. Nếu đã chuyển khoản, bấm kiểm tra lại;
+              nếu tiền đã bị trừ, hãy liên hệ hỗ trợ kèm mã đơn.
             </p>
           </div>
         ) : (
-          <div className="w-full flex items-center gap-2 text-slate-500">
-            <Loader2 size={14} className="animate-spin shrink-0" />
-            <p className="text-xs">
-              Đang chờ thanh toán — hệ thống tự kiểm tra mỗi vài giây...
-            </p>
-          </div>
+          <p role="status" className="flex items-center gap-2 text-sm text-stone-600">
+            <Loader2 size={15} className="animate-spin shrink-0 text-[#C85C3C]" />
+            Đang chờ thanh toán, hệ thống tự kiểm tra mỗi vài giây.
+          </p>
         )}
 
-        <button
-          onClick={onRecheck}
-          className="w-full flex items-center justify-center gap-2 border-2 border-indigo-600 text-indigo-600 py-3 rounded-lg font-bold uppercase tracking-widest text-[11px] hover:bg-indigo-50 transition-all duration-200"
-        >
+        <button type="button" onClick={onRecheck} className={`${BTN_SECONDARY} w-full`}>
           <RefreshCw size={14} />
           Tôi đã chuyển khoản, kiểm tra lại
         </button>
@@ -204,9 +336,9 @@ export function PaymentStep({
   return (
     <motion.div
       key="payment"
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -16 }}
+      exit={{ opacity: 0, y: -12 }}
       className="space-y-4"
     >
       {isAwaitingPayment ? (
@@ -219,12 +351,8 @@ export function PaymentStep({
         />
       ) : (
         <>
-          {/* Phương thức thanh toán */}
-          <SectionCard
-            title="Phương thức thanh toán"
-            icon={<CreditCard size={16} />}
-          >
-            <div className="space-y-2">
+          <SectionCard title="Phương thức thanh toán" icon={<CreditCard size={16} />}>
+            <div className="space-y-3">
               {PAYMENT_METHODS.map((pm) => (
                 <PaymentMethodCard
                   key={pm.id}
@@ -236,7 +364,6 @@ export function PaymentStep({
             </div>
           </SectionCard>
 
-          {/* Mã giảm giá */}
           <SectionCard title="Mã giảm giá" icon={<Gift size={16} />}>
             <CouponInput
               coupon={coupon}
@@ -247,35 +374,36 @@ export function PaymentStep({
             />
           </SectionCard>
 
-          {/* Security note */}
-          <div className="flex items-center gap-2 text-slate-600 px-1">
-            <ShieldCheck size={13} className="text-emerald-500 shrink-0" />
-            <p className="text-xs">
-              Thông tin thanh toán được mã hóa và bảo mật tuyệt đối.
-            </p>
-          </div>
+          <p className="flex items-center gap-2 text-xs text-stone-600 px-1">
+            <ShieldCheck size={14} className="text-[#15803d] shrink-0" />
+            Thông tin thanh toán được mã hóa và bảo mật.
+          </p>
 
-          {/* CTA */}
           <div className="flex gap-3">
             <button
+              type="button"
               onClick={onBack}
               disabled={submitting}
-              className="flex-1 border-2 border-slate-200 text-slate-600 py-3.5 rounded-lg font-bold uppercase tracking-widest text-[11px] hover:border-indigo-600/30 hover:text-indigo-600 transition-all duration-200 disabled:opacity-50"
+              className={`${BTN_SECONDARY} flex-1`}
             >
-              ← Quay lại
+              Quay lại
             </button>
             <button
+              type="button"
               onClick={onPlaceOrder}
               disabled={submitting}
-              className="flex-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white py-3.5 rounded-lg font-black uppercase tracking-widest text-[12px] transition-all duration-200 active:scale-[0.98] shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
+              className={`${BTN_PRIMARY} flex-[2]`}
             >
               {submitting ? (
                 <>
                   <Loader2 size={15} className="animate-spin" />
-                  Đang xử lý...
+                  Đang xử lý
                 </>
               ) : (
-                <>Đặt hàng · {fmt(finalTotal)}₫</>
+                <>
+                  {paymentMethod === "online" ? "Tạo mã QR" : "Đặt hàng"} ·{" "}
+                  {formatCurrency(finalTotal)}
+                </>
               )}
             </button>
           </div>

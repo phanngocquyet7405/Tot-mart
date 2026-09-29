@@ -201,7 +201,7 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
                   id: p._id || p.id,
                   name: p.name,
                   slug: p.slug,
-                  image: p.images?.[0]?.url || "/placeholder.svg",
+                  image: p.images?.[0]?.url || "/assets/placeholder.png",
                   price: p.price,
                 });
                 toast.success(

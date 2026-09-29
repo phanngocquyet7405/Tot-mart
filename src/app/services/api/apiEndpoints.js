@@ -32,6 +32,7 @@ export const API_ENDPOINTS = {
     GET_ALL: "/carts/get-all-cart",
     GET_BY_USER: (id) => `/carts/get-cart/${id}`,
     ADD: "/carts/add-to-cart",
+    SYNC: "/carts/sync",
     UPDATE: (id) => `/carts/update-cart/${id}`,
     DELETE: (id) => `/carts/delete-from-cart/${id}`,
 

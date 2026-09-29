@@ -57,7 +57,7 @@ export default function CartDrawer({ open, setOpen }) {
             _id: item._id, // Giữ nguyên _id để đồng bộ giỏ hàng
             name: item.name,
             price: item.price || 0,
-            image: item.images?.[0]?.url || "/placeholder.jpg", // Lấy ảnh đầu tiên hoặc ảnh mặc định
+            image: item.images?.[0]?.url || "/assets/placeholder.png", // Lấy ảnh đầu tiên hoặc ảnh mặc định
           }));
           setSuggestions(limitProducts);
         }

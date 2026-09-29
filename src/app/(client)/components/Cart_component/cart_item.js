@@ -10,7 +10,7 @@ export default function CartItem({ product }) {
 
   // Xử lý lấy ảnh từ cấu trúc dữ liệu schema của Box hoặc Product
   const imageUrl =
-    product.images?.[0]?.url || product.image || "/placeholder.svg";
+    product.images?.[0]?.url || product.image || "/assets/placeholder.png";
   const productId = product._id || product.id;
 
   return (

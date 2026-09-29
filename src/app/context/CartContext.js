@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
+import { normalizeCartProduct } from "@/app/util/cartItem";
 
 const CartContext = createContext();
 
@@ -23,7 +24,9 @@ export const CartProvider = ({ children }) => {
     if (savedCart) {
       try {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setCartItems(JSON.parse(savedCart));
+        // Chuẩn hoá lại giỏ cũ trong localStorage (thiếu `image`, giá chưa trừ sale)
+        const parsed = JSON.parse(savedCart);
+        setCartItems(Array.isArray(parsed) ? parsed.map(normalizeCartProduct) : []);
       } catch {
         localStorage.removeItem("totmart_cart"); // Dữ liệu hỏng → xóa
       }
@@ -42,8 +45,9 @@ export const CartProvider = ({ children }) => {
   // nhiều lần liên tiếp như cách cũ ở useProductDetail/box detail.
   const addToCart = (product, quantity = 1) => {
     if (quantity < 1) return;
+    const item = normalizeCartProduct(product);
     setCartItems((prev) => {
-      const id = product._id || product.id;
+      const id = item._id || item.id;
       const existing = prev.find((item) => (item._id || item.id) === id);
       if (existing) {
         return prev.map((item) =>
@@ -52,7 +56,7 @@ export const CartProvider = ({ children }) => {
             : item,
         );
       }
-      return [...prev, { ...product, quantity }];
+      return [...prev, { ...item, quantity }];
     });
   };
 

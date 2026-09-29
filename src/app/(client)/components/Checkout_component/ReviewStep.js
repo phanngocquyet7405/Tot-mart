@@ -1,73 +1,46 @@
 /**
  * ReviewStep.js
- * Bước 2 — Kiểm tra đơn hàng: sản phẩm, gói subscribe, địa chỉ đã chọn
- * Palette: indigo-600 primary, slate colors
+ * Bước 2 — Kiểm tra đơn: TẤT CẢ sản phẩm (kèm ảnh) + địa chỉ đã chọn.
  */
 
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { Package, MapPin } from "lucide-react";
 import { SectionCard } from "./SectionCard";
+import { CartLine } from "./CartLine";
+import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING } from "./checkoutStyles";
 
-const fmt = (n) => (n ?? 0).toLocaleString("vi-VN");
-
-// ─── Product item row ─────────────────────────────────────────────────────────
-function ProductRow({ item }) {
-  return (
-    <div className="flex gap-3 items-center">
-      <div className="w-14 h-14 rounded-lg bg-indigo-50 overflow-hidden shrink-0 border border-slate-200 relative">
-        {item.image && (
-          <Image
-            src={item.image}
-            alt={item.name}
-            fill
-            className="object-contain p-1.5"
-            sizes="56px"
-          />
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-slate-900 line-clamp-1">{item.name}</p>
-        <p className="text-xs text-slate-600 mt-0.5">
-          x{item.quantity} · {fmt(item.price)}₫/sp
-        </p>
-      </div>
-      <p className="text-sm font-black text-indigo-600 shrink-0">
-        {fmt(item.price * item.quantity)}₫
-      </p>
-    </div>
-  );
-}
-
-
-// ─── Address summary ──────────────────────────────────────────────────────────
 function AddressSummary({ addr, user, onEdit }) {
+  const line = [addr?.street, addr?.ward, addr?.district, addr?.province]
+    .filter(Boolean)
+    .join(", ");
+
   return (
     <div>
-      <p className="text-sm font-bold text-slate-900">
-        {addr.fullName || user?.name}
+      <p className="text-sm font-semibold text-[#2C1810]">
+        {addr?.fullName || user?.name}
       </p>
-      {addr.phone && (
-        <p className="text-xs text-slate-600 mt-0.5">{addr.phone}</p>
+      {addr?.phone && (
+        <p className="text-sm text-stone-600 mt-0.5">{addr.phone}</p>
       )}
-      <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-        {[addr.street, addr.ward, addr.district, addr.province]
-          .filter(Boolean)
-          .join(", ")}
-      </p>
+      {line && (
+        <p className="text-sm text-stone-500 mt-1 leading-relaxed">{line}</p>
+      )}
       <button
+        type="button"
         onClick={onEdit}
-        className="text-xs text-indigo-600 hover:text-indigo-700 font-bold mt-2 transition-colors duration-200"
+        className={[
+          "mt-3 text-sm font-semibold text-[#C85C3C] underline underline-offset-4 hover:text-[#B14B2D]",
+          FOCUS_RING,
+        ].join(" ")}
       >
-        Thay đổi
+        Đổi địa chỉ
       </button>
     </div>
   );
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
 export function ReviewStep({
   cartItems,
   cartCount,
@@ -83,47 +56,37 @@ export function ReviewStep({
   return (
     <motion.div
       key="review"
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -16 }}
+      exit={{ opacity: 0, y: -12 }}
       className="space-y-4"
     >
-      {/* Sản phẩm thường */}
       {hasProducts && (
         <SectionCard
-          title={`Sản phẩm (${cartCount})`}
+          title="Sản phẩm"
           icon={<Package size={16} />}
+          aside={`${cartCount} sản phẩm`}
         >
-          <div className="space-y-3">
+          <ul className="divide-y divide-dashed divide-[#F0DDD5]">
             {cartItems.map((item, i) => (
-              <ProductRow key={item._id || item.id || i} item={item} />
+              <li key={item._id || item.id || i} className="py-4 first:pt-0 last:pb-0">
+                <CartLine item={item} />
+              </li>
             ))}
-          </div>
+          </ul>
         </SectionCard>
       )}
 
-      {/* Địa chỉ đã chọn */}
-      <SectionCard title="Địa chỉ giao hàng" icon={<MapPin size={16} />}>
-        <AddressSummary
-          addr={deliveryAddr}
-          user={user}
-          onEdit={onBack}
-        />
+      <SectionCard title="Giao tới" icon={<MapPin size={16} />}>
+        <AddressSummary addr={deliveryAddr} user={user} onEdit={onBack} />
       </SectionCard>
 
-      {/* CTA */}
       <div className="flex gap-3">
-        <button
-          onClick={onBack}
-          className="flex-1 border-2 border-slate-200 text-slate-600 py-3.5 rounded-lg font-bold uppercase tracking-widest text-[11px] hover:border-indigo-600/30 hover:text-indigo-600 transition-all duration-200"
-        >
-          ← Quay lại
+        <button type="button" onClick={onBack} className={`${BTN_SECONDARY} flex-1`}>
+          Quay lại
         </button>
-        <button
-          onClick={onNext}
-          className="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-lg font-black uppercase tracking-widest text-[12px] transition-all duration-200 active:scale-[0.98] shadow-lg shadow-indigo-600/20"
-        >
-          Tiếp theo → Thanh toán
+        <button type="button" onClick={onNext} className={`${BTN_PRIMARY} flex-[2]`}>
+          Tiếp tục thanh toán
         </button>
       </div>
     </motion.div>

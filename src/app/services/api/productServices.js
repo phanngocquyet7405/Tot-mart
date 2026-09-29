@@ -70,6 +70,11 @@ export const getCartByUserApi = (userId) =>
 export const addToCartApi = (data) =>
   axiosConfig.post(API_ENDPOINTS.CART.ADD, data);
 
+// Thay thế toàn bộ giỏ sản phẩm trên BE bằng giỏ localStorage — gọi trước checkout.
+// items: [{ productId, quantity }]
+export const syncCartApi = (items) =>
+  axiosConfig.put(API_ENDPOINTS.CART.SYNC, { items });
+
 export const updateCartItemApi = (cartId, data) =>
   axiosConfig.put(API_ENDPOINTS.CART.UPDATE(cartId), data);
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatCurrency } from "@/app/util/formatter";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -285,7 +286,7 @@ export default function DeleteProductPage() {
                           {p.category?.name || "N/A"}
                         </TableCell>
                         <TableCell className="text-right font-mono">
-                          ${Number(p.price).toFixed(2)}
+                          {formatCurrency(Number(p.price) || 0)}
                         </TableCell>
                         <TableCell className="text-right">
                           {p.stock || p.quantity || 0}

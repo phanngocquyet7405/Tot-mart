@@ -64,7 +64,7 @@ function WishlistItemCard({ item, onRemove, onAddToCart }) {
     <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden group flex flex-col">
       <Link href={productHref} className="block relative aspect-square bg-stone-50 overflow-hidden">
         <Image
-          src={item.image || "/placeholder.svg"}
+          src={item.image || "/assets/placeholder.png"}
           alt={item.name}
           fill
           sizes="(max-width: 768px) 50vw, 25vw"

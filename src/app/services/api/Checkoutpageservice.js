@@ -6,6 +6,7 @@
 
 import { userService } from "@/app/services/api/userService";
 import { checkoutService } from "@/app/services/api/checkoutService";
+import { syncCartApi } from "@/app/services/api/productServices";
 import { paymentGatewayService } from "@/app/services/api/paymentGatewayService";
 import { getTokenUserId } from "@/app/middleware/tokenMiddleware";
 import logger from "@/app/util/Logger";
@@ -162,10 +163,35 @@ export function calcShippingFee(cartTotal, hasProducts) {
  *   error?: string,
  * }}
  */
-export async function placeOrder({ addressId, paymentMethod, note, couponCode }) {
+export async function placeOrder({
+  addressId,
+  paymentMethod,
+  note,
+  couponCode,
+  cartItems = [],
+}) {
   try {
     if (!addressId) {
       return { success: false, error: "Thiếu địa chỉ giao hàng (addressId)" };
+    }
+
+    // Giỏ hàng FE chỉ nằm ở localStorage, còn BE đọc giỏ từ DB — nên phải đẩy
+    // giỏ lên (PUT /carts/sync, thay thế toàn bộ) trước khi checkout, nếu không
+    // BE trả 400 "Giỏ hàng trống".
+    const syncRes = await syncCartApi(
+      cartItems.map((item) => ({
+        productId: item._id || item.id,
+        quantity: item.quantity,
+      })),
+    );
+    const skipped = syncRes?.data?.skipped ?? [];
+    if (skipped.length > 0) {
+      return {
+        success: false,
+        skipped,
+        error:
+          "Một số sản phẩm trong giỏ không còn bán, đã được gỡ khỏi giỏ. Vui lòng kiểm tra lại.",
+      };
     }
 
     const payload = {

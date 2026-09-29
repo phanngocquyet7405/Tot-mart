@@ -23,7 +23,8 @@ import {
 export function useCheckout() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { cartItems, cartTotal, cartCount, isMounted, clearCart } = useCart();
+  const { cartItems, cartTotal, cartCount, isMounted, clearCart, removeFromCart } =
+    useCart();
 
   // ─── UI state ─────────────────────────────────────────────────────────────
   const [step, setStep] = useState("address");
@@ -231,9 +232,12 @@ export function useCheckout() {
       paymentMethod,
       note,
       couponCode: couponApplied ? coupon : undefined,
+      cartItems,
     });
 
     if (!result.success) {
+      // Gỡ các sản phẩm BE báo không còn tồn tại để user không bị kẹt
+      result.skipped?.forEach((id) => removeFromCart(id));
       toast.error(result.error || "Đặt hàng thất bại, vui lòng thử lại");
       setSubmitting(false);
       return;
@@ -275,7 +279,9 @@ export function useCheckout() {
     note,
     couponApplied,
     coupon,
+    cartItems,
     clearCart,
+    removeFromCart,
     router,
     startPollingPayment,
   ]);

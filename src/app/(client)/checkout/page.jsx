@@ -24,10 +24,10 @@ import { OrderSuccessScreen } from "../components/Checkout_component/OrderSucces
 // ─── Loading screen ────────────────────────────────────────────────────────────
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="animate-spin text-indigo-600" size={32} />
-        <p className="text-sm text-slate-600 font-medium">Đang tải...</p>
+    <div className="min-h-screen bg-[#FFFAF8] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4" role="status">
+        <Loader2 className="animate-spin text-[#C85C3C]" size={32} />
+        <p className="text-sm text-stone-600 font-medium">Đang tải...</p>
       </div>
     </div>
   );
@@ -37,7 +37,8 @@ function LoadingScreen() {
 /**
  * page.jsx — Trang Checkout
  * Route: /checkout
- * Palette: indigo-600 primary, slate colors, rose-600 accent
+ * Palette: quầy "atelier" của TotMart — cream #FFFAF8, terracotta #C85C3C,
+ * clay #F0DDD5, espresso #2C1810 (xem DESIGN.md).
  *
  * useCheckout() gọi useSearchParams() bên trong (đọc ?code= để resume sau
  * refresh — xem Ngày 3) — Next.js App Router BẮT BUỘC phần dùng
@@ -57,29 +58,27 @@ function CheckoutPageInner() {
     return <LoadingScreen />;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      {/* Ambient background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 right-0 w-80 h-80 bg-indigo-100/30 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-[#FFFAF8] text-[#2C1810]">
+      <div className="max-w-6xl mx-auto px-4 py-8 sm:py-10">
         {/* ── Header ── */}
-        <div className="flex items-center gap-4 mb-10">
+        <div className="flex items-center gap-4 mb-8">
           <button
+            type="button"
             onClick={() => router.back()}
-            className="w-9 h-9 rounded-full border-2 border-slate-200 flex items-center justify-center text-slate-600 hover:border-indigo-600/50 hover:text-indigo-600 transition-all duration-200 bg-white"
+            aria-label="Quay lại"
+            className="grid place-items-center w-10 h-10 rounded-full border border-[#F0DDD5] bg-white text-[#2C1810] hover:border-[#C85C3C]/60 hover:text-[#B14B2D] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C85C3C]"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={17} />
           </button>
           <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight">
+            <h1 className="font-serif text-3xl font-semibold text-[#2C1810] leading-tight">
               Thanh toán
             </h1>
-            <p className="text-xs text-slate-600 mt-0.5">
-              {checkout.hasProducts && `${checkout.cartCount} sản phẩm`}
-            </p>
+            {checkout.hasProducts && (
+              <p className="text-sm text-stone-500 mt-0.5">
+                {checkout.cartItems.length} loại · {checkout.cartCount} sản phẩm
+              </p>
+            )}
           </div>
         </div>
 
@@ -90,7 +89,7 @@ function CheckoutPageInner() {
         />
 
         {/* ── Layout 2 cột ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-6 lg:gap-8">
           {/* Cột trái — Steps */}
           <div className="space-y-4">
             <AnimatePresence mode="wait">

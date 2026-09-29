@@ -37,8 +37,13 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
       {/* Tab: Mô tả */}
       {activeTab === "details" && (
         <div className="space-y-4">
-          <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-6 text-sm text-stone-700 leading-relaxed whitespace-pre-line">
-            {product.description || (
+          <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-6 text-sm text-stone-700 leading-relaxed">
+            {product.description ? (
+              <div
+                className="prose prose-sm max-w-none prose-p:my-2 prose-p:leading-relaxed prose-stone"
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
+            ) : (
               <span className="italic text-stone-400">
                 Chưa có mô tả chi tiết cho sản phẩm này.
               </span>
