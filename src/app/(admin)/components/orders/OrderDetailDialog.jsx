@@ -120,6 +120,9 @@ export function OrderDetailDialog({
                   <div>
                     <p className="font-medium">{item.name}</p>
                     <p className="text-xs text-muted-foreground">
+                      Thương hiệu: {item.brandName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
                       SL: {item.quantity} × {formatCurrency(item.price)}
                     </p>
                   </div>

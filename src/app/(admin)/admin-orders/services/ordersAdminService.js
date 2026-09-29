@@ -173,6 +173,10 @@ function normalizeOrder(raw) {
       ? raw.products.map((p) => ({
           productId: p.productId,
           name: p.name,
+          brandName:
+            typeof p.brand?.name === "string" && p.brand.name.trim()
+              ? p.brand.name.trim()
+              : "—",
           quantity: p.quantity ?? 1,
           price: p.unitPrice ?? 0,
         }))

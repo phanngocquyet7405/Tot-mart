@@ -43,6 +43,7 @@ export function OrderTable({ orders, onViewDetail }) {
             <TableHead>Mã đơn</TableHead>
             <TableHead>Khách hàng</TableHead>
             <TableHead>Thanh toán</TableHead>
+            <TableHead>Thương hiệu</TableHead>
             <TableHead className="text-center">SL sản phẩm</TableHead>
             <TableHead className="text-right">Tổng tiền</TableHead>
             <TableHead>Trạng thái</TableHead>
@@ -68,6 +69,9 @@ export function OrderTable({ orders, onViewDetail }) {
               </TableCell>
               <TableCell>
                 <PaymentMethodTag method={order.paymentMethod} />
+              </TableCell>
+              <TableCell className="text-sm">
+                {[...new Set(order.items.map((item) => item.brandName))].join(", ") || "—"}
               </TableCell>
               <TableCell className="text-center text-sm">
                 {getOrderItemsCount(order)}
