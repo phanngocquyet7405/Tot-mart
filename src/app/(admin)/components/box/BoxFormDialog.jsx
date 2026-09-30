@@ -355,9 +355,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     if (selected.length === 0) return;
 
     const valid = selected.filter((f) => {
-      const ok =
-        ["image/jpeg", "image/png", "image/webp"].includes(f.type) &&
-        f.size <= 5 * 1024 * 1024;
+      const ok = ["image/jpeg", "image/png", "image/webp"].includes(f.type) && f.size <= 5 * 1024 * 1024;
       if (!ok) toast.error(`${f.name}: ảnh phải < 5MB`);
       return ok;
     });
@@ -485,9 +483,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     } catch (err) {
       const msg =
         err?.response?.data?.errors?.map((e) => e.message).join(" | ") ||
-        err?.response?.data?.message ||
-        err?.message ||
-        "Đã có lỗi xảy ra";
+        err?.response?.data?.message || err?.message || "Đã có lỗi xảy ra";
       toast.error(msg);
     } finally {
       setIsSaving(false);

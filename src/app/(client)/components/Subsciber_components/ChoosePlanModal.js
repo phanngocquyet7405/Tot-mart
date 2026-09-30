@@ -266,7 +266,9 @@ function StepIndicator({ step }) {
 }
 
 // ─── Main Component ──────────────────────────────────────────────────────────
-export default function ChoosePlanModal({ box, onClose, plansProps = [] }) {
+const EMPTY_PLANS = [];
+
+export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS }) {
   const router = useRouter();
 
   // ── Plan state ──
@@ -386,7 +388,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = [] }) {
     if (!addr.address?.trim()) errors.address = true;
     if (!addr.district?.trim()) errors.district = true;
     if (!addr.city?.trim()) errors.city = true;
-    if (!addr.phone?.trim()) errors.phone = true;
+    if (!/^[0-9()+\s-]{7,20}$/.test(addr.phone?.trim() || "")) errors.phone = true;
     return errors;
   };
 
@@ -424,14 +426,19 @@ export default function ChoosePlanModal({ box, onClose, plansProps = [] }) {
 
   // ── Submit ──
   const handleSubscribe = async () => {
+    if (submitting) return;
+    if (!selectedPlan?._isReal || !selectedPlan?._id) {
+      toast.error("Gói này chưa khả dụng!");
+      return;
+    }
     const resolved = getResolvedAddress();
     if (!resolved) {
       toast.error("Vui lòng chọn hoặc nhập địa chỉ giao hàng!");
       return;
     }
 
-    if (useManual) {
-      const errors = validateAddress(manualAddress);
+    {
+      const errors = validateAddress(resolved);
       if (Object.keys(errors).length > 0) {
         setAddressErrors(errors);
         toast.error("Vui lòng điền đầy đủ thông tin địa chỉ!");
@@ -440,11 +447,11 @@ export default function ChoosePlanModal({ box, onClose, plansProps = [] }) {
     }
 
     const shippingAddress = {
-      address: resolved.address,
-      district: resolved.district,
-      city: resolved.city,
+      address: resolved.address.trim(),
+      district: resolved.district.trim(),
+      city: resolved.city.trim(),
       country: resolved.country || "Vietnam",
-      phone: resolved.phone,
+      phone: resolved.phone.trim(),
       zipCode: resolved.zipCode || "",
     };
 
@@ -460,14 +467,15 @@ export default function ChoosePlanModal({ box, onClose, plansProps = [] }) {
         shippingAddress,
       });
 
-      if (res) {
+      if (res?.success && res?.data?._id) {
         toast.success("Đăng ký thành viên thành công!");
         onClose();
-        router.push("/my-subscriptions");
+        router.push("/profile/my-subscriptions");
       }
     } catch (err) {
       logger.error("[ChoosePlanModal] Lỗi subscribe:", err);
       toast.error(
+        err?.response?.data?.errors?.map((e) => e.message).join(" | ") ||
         err?.response?.data?.message ||
           "Đăng ký thất bại, vui lòng thử lại sau.",
       );

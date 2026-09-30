@@ -12,7 +12,7 @@ import { formatCurrency } from "@/app/util/formatter";
 
 const INITIAL_FORM = {
   name: "",
-  descriptions: "",
+  description: "",
   boxId: "",
   planType: "1_month", // phải khớp enum BE: 1_month | 3_month | 6_month | 12_month
   discountPercent: 0,
@@ -60,7 +60,7 @@ export function useTemplateForm({
     if (editTarget) {
       setForm({
         name: editTarget.name ?? "",
-        descriptions: editTarget.descriptions ?? "",
+        description: editTarget.description ?? "",
         boxId: editTarget.boxId?._id ?? editTarget.boxId ?? "",
         planType: editTarget.planType ?? "1_month",
         discountPercent: editTarget.discountPercent ?? 0,
@@ -139,6 +139,7 @@ export function useTemplateForm({
 
   // Submit
   const handleSave = async () => {
+    if (isSaving) return;
     const errs = validate(form);
     if (Object.keys(errs).length) {
       setErrors(errs);
@@ -148,7 +149,7 @@ export function useTemplateForm({
 
     const payload = {
       name: form.name.trim(),
-      descriptions: form.descriptions.trim(),
+      description: form.description.trim(),
       boxId: form.boxId,
       planType: form.planType,
       discountPercent: Number(form.discountPercent),
@@ -172,6 +173,7 @@ export function useTemplateForm({
       onSuccess?.();
     } catch (err) {
       const msg =
+        err?.response?.data?.errors?.map((e) => e.message).join(" | ") ||
         err?.response?.data?.message ||
         err?.message ||
         "Lưu mẫu gói thất bại, vui lòng thử lại.";

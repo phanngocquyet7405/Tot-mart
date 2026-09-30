@@ -37,7 +37,7 @@ export default function UpdateBoxPage() {
         setForm({
           name: box.name || "",
           stock: box.stock || 1,
-          description: box.description || "",
+          description: box.descriptions || "",
           validFrom: box.validFrom?.slice(0, 10) || "",
           validTo: box.validTo?.slice(0, 10) || "",
           discountPercent: box.discountPercent || 0,
@@ -45,7 +45,7 @@ export default function UpdateBoxPage() {
         });
         setProducts(
           (box.products || []).map((p) => ({
-            productId: p._id || p.productId || "",
+            productId: p.productId?._id || p.productId || "",
             name: p.name || "",
             quantity: p.quantity || 1,
             price: p.price || 0,
@@ -136,7 +136,7 @@ export default function UpdateBoxPage() {
       const formData = new FormData();
       formData.append("name", form.name.trim());
       formData.append("stock", Number(form.stock));
-      formData.append("description", form.description.trim());
+      formData.append("descriptions", form.description.trim());
       formData.append("discountPercent", Number(form.discountPercent) || 0);
       formData.append("isGift", String(form.isGift));
 
@@ -154,7 +154,8 @@ export default function UpdateBoxPage() {
       products
         .filter((p) => p.productId)
         .forEach((p, index) => {
-          formData.append(`products[${index}]`, p.productId);
+          formData.append(`products[${index}][productId]`, p.productId);
+          formData.append(`products[${index}][quantity]`, String(p.quantity || 1));
         });
 
       await updateBoxApi(id, formData);
