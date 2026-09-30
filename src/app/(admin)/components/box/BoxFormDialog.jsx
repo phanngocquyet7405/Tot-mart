@@ -355,11 +355,18 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     if (selected.length === 0) return;
 
     const valid = selected.filter((f) => {
-      const ok = f.type.startsWith("image/") && f.size <= 5 * 1024 * 1024;
+      const ok =
+        ["image/jpeg", "image/png", "image/webp"].includes(f.type) &&
+        f.size <= 5 * 1024 * 1024;
       if (!ok) toast.error(`${f.name}: ảnh phải < 5MB`);
       return ok;
     });
 
+    if (existingImages.length + images.length + valid.length > 10) {
+      toast.error("Tối đa 10 ảnh");
+      e.target.value = "";
+      return;
+    }
     const newPreviews = valid.map((f) => URL.createObjectURL(f));
     setImages((prev) => [...prev, ...valid]);
     setImagePreviews((prev) => [...prev, ...newPreviews]);
@@ -427,7 +434,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
 
   // ── Submit ───────────────────────────────────────────────────────────────────
   const handleSave = async () => {
-    if (!validate()) {
+    if (isSaving || !validate()) {
       toast.error("Vui lòng kiểm tra lại thông tin");
       return;
     }
@@ -465,6 +472,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
       });
 
       if (isEdit) {
+        formData.append("existingImages", JSON.stringify(existingImages));
         await updateBoxApi(box._id, formData);
         toast.success("Cập nhật box thành công!");
       } else {
@@ -476,7 +484,10 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
       onOpenChange(false);
     } catch (err) {
       const msg =
-        err?.response?.data?.message || err?.message || "Đã có lỗi xảy ra";
+        err?.response?.data?.errors?.map((e) => e.message).join(" | ") ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Đã có lỗi xảy ra";
       toast.error(msg);
     } finally {
       setIsSaving(false);
@@ -498,7 +509,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-6xl sm:max-w-6xl max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b shrink-0">
           <DialogTitle className="text-lg font-semibold flex items-center gap-2">
@@ -676,7 +687,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 className="hidden"
                 onChange={handleImageSelect}
               />
@@ -776,7 +787,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
         </div>
 
         {/* Footer */}
-        <DialogFooter className="px-6 py-4 border-t shrink-0 bg-gray-50/50">
+        <DialogFooter className="mx-0 mb-0 px-6 py-4 border-t shrink-0 bg-gray-50/50">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
