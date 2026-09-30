@@ -12,9 +12,9 @@ import { formatCurrency } from "@/app/util/formatter";
 
 const INITIAL_FORM = {
   name: "",
-  description: "",
+  descriptions: "",
   boxId: "",
-  planType: "monthly",
+  planType: "1_month", // phải khớp enum BE: 1_month | 3_month | 6_month | 12_month
   discountPercent: 0,
   isActive: true,
   gift: [], // [{ boxId: '', quantity: 1 }]
@@ -60,9 +60,9 @@ export function useTemplateForm({
     if (editTarget) {
       setForm({
         name: editTarget.name ?? "",
-        description: editTarget.description ?? "",
+        descriptions: editTarget.descriptions ?? "",
         boxId: editTarget.boxId?._id ?? editTarget.boxId ?? "",
-        planType: editTarget.planType ?? "monthly",
+        planType: editTarget.planType ?? "1_month",
         discountPercent: editTarget.discountPercent ?? 0,
         isActive: editTarget.isActive ?? true,
         gift: (editTarget.gift ?? []).map((g) => ({
@@ -148,7 +148,7 @@ export function useTemplateForm({
 
     const payload = {
       name: form.name.trim(),
-      description: form.description.trim(),
+      descriptions: form.descriptions.trim(),
       boxId: form.boxId,
       planType: form.planType,
       discountPercent: Number(form.discountPercent),

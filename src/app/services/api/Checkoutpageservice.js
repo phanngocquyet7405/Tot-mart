@@ -136,6 +136,23 @@ export async function placeOrder({
   }
 }
 
+function readOrderStatus(res) {
+  const data = res?.data ?? {};
+  const orders = data.orders ?? [];
+  return {
+    status: data.paymentStatus === "paid" ? "paid" : "pending",
+    // BE vẫn trả paymentStatus "pending" cho đơn đã huỷ/hết hạn → tự nhận diện ở FE
+    cancelled:
+      orders.length > 0 &&
+      orders.every((order) => order.status === "cancelled"),
+    qrUrl: data.qrUrl,
+    totalAmount: orders.reduce(
+      (sum, order) => sum + (order.totalAmount ?? 0),
+      0,
+    ),
+  };
+}
+
 export function pollPaymentStatus(
   paymentCode,
   { intervalMs = 4000, timeoutMs = 10 * 60 * 1000, onStatusChange } = {},
@@ -153,10 +170,15 @@ export function pollPaymentStatus(
 
     try {
       const res = await paymentGatewayService.getOrderStatus(paymentCode);
-      const status = res.data?.data?.paymentStatus ?? res.data?.paymentStatus;
+      if (cancelled) return;
+      const info = readOrderStatus(res);
 
-      if (status === "paid") {
+      if (info.status === "paid") {
         onStatusChange?.({ status: "paid" });
+        return;
+      }
+      if (info.cancelled) {
+        onStatusChange?.({ status: "cancelled" });
         return;
       }
     } catch (err) {
@@ -179,18 +201,15 @@ export function pollPaymentStatus(
 export async function checkPaymentNow(paymentCode) {
   try {
     const res = await paymentGatewayService.getOrderStatus(paymentCode);
-    const data = res.data?.data ?? {};
-    const orders = data.orders ?? [];
-    return {
-      status: data.paymentStatus === "paid" ? "paid" : "pending",
-      qrUrl: data.qrUrl,
-      totalAmount: orders.reduce((sum, o) => sum + (o.totalAmount ?? 0), 0),
-    };
+    return readOrderStatus(res);
   } catch (err) {
     logger.error("[checkoutPageService] checkPaymentNow:", err);
     return {
-      status: "pending",
-      error: err?.response?.data?.message || err.message,
+      status: "error",
+      error:
+        err?.response?.data?.message ||
+        err?.message ||
+        "Không kiểm tra được thanh toán",
     };
   }
 }

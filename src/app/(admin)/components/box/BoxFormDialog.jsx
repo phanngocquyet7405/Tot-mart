@@ -51,7 +51,7 @@ const EMPTY_PRODUCT = () => ({
 
 const INITIAL_FORM = {
   name: "",
-  description: "",
+  descriptions: "",
   stock: 1,
   discountPercent: 0,
   validFrom: "",
@@ -86,9 +86,9 @@ function ProductPicker({ onSelect, availableProducts }) {
       >
         <Search size={14} className="text-slate-400 shrink-0" />
         <span className="truncate text-slate-500">Tìm và chọn sản phẩm...</span>
-        <ChevronDown 
-          size={14} 
-          className={`ml-auto text-slate-400 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+        <ChevronDown
+          size={14}
+          className={`ml-auto text-slate-400 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -217,7 +217,9 @@ function ProductRow({
         <div className="space-y-3 pt-2 border-t border-slate-100">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-2">
-              <Label className="text-xs font-medium text-slate-600 shrink-0">Số lượng</Label>
+              <Label className="text-xs font-medium text-slate-600 shrink-0">
+                Số lượng
+              </Label>
               <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
                 <button
                   type="button"
@@ -299,7 +301,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     if (isEdit && box) {
       setForm({
         name: box.name || "",
-        description: box.description || box.descriptions || "",
+        descriptions: box.descriptions || box.description || "",
         stock: box.stock ?? 1,
         discountPercent: box.discountPercent ?? 0,
         validFrom: box.validFrom ? box.validFrom.split("T")[0] : "",
@@ -401,9 +403,9 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
   // ── Validation ───────────────────────────────────────────────────────────────
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = "Tên box là bắt buộc";
+    if (!(form.name ?? "").trim()) e.name = "Tên box là bắt buộc";
     if (form.stock < 1) e.stock = "Tồn kho phải ≥ 1";
-    if (!form.description.trim()) e.description = "Mô tả là bắt buộc";
+    if (!(form.descriptions ?? "").trim()) e.descriptions = "Mô tả là bắt buộc";
     if (!form.validFrom) e.validFrom = "Ngày bắt đầu là bắt buộc";
     if (!form.validTo) e.validTo = "Ngày kết thúc là bắt buộc";
     if (form.validFrom && form.validTo) {
@@ -435,8 +437,8 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
       const formData = new FormData();
 
       // Thông tin cơ bản
-      formData.append("name", form.name.trim());
-      formData.append("description", form.description.trim());
+      formData.append("name", (form.name ?? "").trim());
+      formData.append("descriptions", (form.descriptions ?? "").trim());
       formData.append("stock", String(Number(form.stock)));
       formData.append("discountPercent", String(Number(form.discountPercent)));
       formData.append("isGift", String(form.isGift));
@@ -541,14 +543,14 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
                 <Textarea
                   rows={3}
                   placeholder="Mô tả nội dung và điểm nổi bật của box..."
-                  value={form.description}
+                  value={form.descriptions}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, description: e.target.value }))
+                    setForm((f) => ({ ...f, descriptions: e.target.value }))
                   }
-                  className={`resize-none ${errors.description ? "border-red-400" : ""}`}
+                  className={`resize-none ${errors.descriptions ? "border-red-400" : ""}`}
                 />
-                {errors.description && (
-                  <p className="text-xs text-red-500">{errors.description}</p>
+                {errors.descriptions && (
+                  <p className="text-xs text-red-500">{errors.descriptions}</p>
                 )}
               </div>
 

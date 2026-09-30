@@ -130,11 +130,11 @@ export function BasicInfoSection({ form, errors, onChange }) {
         <div className="space-y-1.5">
           <Label className="text-[#2C1810]/80">Mô tả *</Label>
           <RichTextEditor
-            value={form.description} // Đã sửa từ form.descriptions
-            onChange={(html) => onChange("description", html)} // Đã sửa từ "descriptions"
+            value={form.descriptions}
+            onChange={(html) => onChange("descriptions", html)}
             placeholder="Mô tả nội dung box..."
             minHeight={140}
-            error={errors.description}
+            error={errors.descriptions}
           />
         </div>
 

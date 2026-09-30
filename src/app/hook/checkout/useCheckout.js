@@ -9,18 +9,15 @@ import {
   validateCoupon,
   calcShippingFee,
   placeOrder,
+  pollPaymentStatus,
+  checkPaymentNow,
   EMPTY_NEW_ADDRESS,
 } from "@/app/services/api/Checkoutpageservice";
-import {
-  buildVietQrUrl,
-  getPaymentOrder,
-  pollOrderPayment,
-} from "@/app/services/api/qrPaymentService";
 
 export function useCheckout() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const resumeId = searchParams.get("orderId");
+  const resumeCode = searchParams.get("code");
   const {
     cartItems,
     cartTotal,
@@ -29,16 +26,20 @@ export function useCheckout() {
     clearCart,
     removeFromCart,
   } = useCart();
+
   const [step, setStep] = useState("address");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
-  const [resuming, setResuming] = useState(Boolean(resumeId));
-  const [orderInfo, setOrderInfo] = useState(null);
-  const [isQrOpen, setIsQrOpen] = useState(false);
+  const [resuming, setResuming] = useState(Boolean(resumeCode));
+
+  // ── Thanh toán online (SePay QR) ──
   const [paymentStatus, setPaymentStatus] = useState("idle");
-  const [paymentError, setPaymentError] = useState("");
+  const [paymentCode, setPaymentCode] = useState(null);
+  const [qrUrl, setQrUrl] = useState("");
+  const [onlineAmount, setOnlineAmount] = useState(0);
   const [pollAttempt, setPollAttempt] = useState(0);
+
   const [user, setUser] = useState(null);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -50,8 +51,12 @@ export function useCheckout() {
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [discount, setDiscount] = useState(0);
+
   const submittingRef = useRef(false);
+  const recheckingRef = useRef(false);
   const mounted = useRef(false);
+  const activeCodeRef = useRef(null);
+
   const hasProducts = cartItems.length > 0;
   const shippingFee = calcShippingFee(cartTotal, hasProducts);
 
@@ -81,45 +86,78 @@ export function useCheckout() {
     };
   }, [router]);
 
-  // Resume the same checkout after refresh; never create a replacement order.
+  // ── Kết thúc: đã thanh toán / đơn bị huỷ ──
+  // Giỏ hàng đã được xoá ngay lúc tạo đơn (BE tiêu thụ giỏ) nên không xoá lại ở đây.
+  const finishPaid = useCallback(() => {
+    setPaymentStatus("paid");
+    setOrderSuccess(true);
+  }, []);
+
+  const handleCancelled = useCallback(() => {
+    activeCodeRef.current = null;
+    setPaymentStatus("idle");
+    setPaymentCode(null);
+    setQrUrl("");
+    setOnlineAmount(0);
+    toast.error(
+      "Đơn đã bị huỷ hoặc hết hạn thanh toán. Vui lòng không chuyển khoản cho mã này.",
+    );
+    router.replace("/");
+  }, [router]);
+
+  // ── Khôi phục đơn sau refresh: /checkout?code=<paymentCode> ──
   useEffect(() => {
-    if (!resumeId) return;
-    const controller = new AbortController();
-    getPaymentOrder(resumeId, controller.signal)
+    if (!resumeCode || activeCodeRef.current === resumeCode) return;
+    let active = true;
+    checkPaymentNow(resumeCode)
       .then((info) => {
-        if (controller.signal.aborted) return;
-        if (info.status === "paid") {
-          router.replace(
-            `/checkout/success?orderId=${encodeURIComponent(resumeId)}`,
-          );
-          return;
-        }
-        setOrderInfo(info);
-        setPaymentMethod("online");
-        setStep("payment");
-        setIsQrOpen(true);
-      })
-      .catch((error) => {
-        if (!controller.signal.aborted) {
-          setPaymentError(error?.response?.data?.message || error.message);
+        if (!active) return;
+        if (info.status === "error") {
           toast.error(
             "Không thể khôi phục đơn. Vui lòng kiểm tra lịch sử đơn hàng.",
           );
+          router.replace("/profile/orders");
+          return;
         }
+        if (info.status === "paid") {
+          activeCodeRef.current = resumeCode;
+          finishPaid();
+          return;
+        }
+        if (info.cancelled) {
+          handleCancelled();
+          return;
+        }
+        if (!info.qrUrl) {
+          // Đơn không phải online-pending (vd. COD) → không có gì để quét
+          toast.error("Đơn này không có mã QR để thanh toán.");
+          router.replace("/profile/orders");
+          return;
+        }
+        activeCodeRef.current = resumeCode;
+        setPaymentMethod("online");
+        setPaymentCode(resumeCode);
+        setQrUrl(info.qrUrl);
+        setOnlineAmount(info.totalAmount);
+        setPaymentStatus("awaiting_payment");
+        setStep("payment");
       })
       .finally(() => {
-        if (!controller.signal.aborted) setResuming(false);
+        if (active) setResuming(false);
       });
-    return () => controller.abort();
-  }, [resumeId, router]);
+    return () => {
+      active = false;
+    };
+  }, [resumeCode, router, finishPaid, handleCancelled]);
 
+  // ── Chưa có giỏ hàng và không có đơn đang chờ → về trang chủ ──
   useEffect(() => {
     if (
       isMounted &&
       !loading &&
       !resuming &&
-      !resumeId &&
-      !orderInfo &&
+      !resumeCode &&
+      !paymentCode &&
       cartCount === 0 &&
       !orderSuccess
     )
@@ -128,55 +166,41 @@ export function useCheckout() {
     isMounted,
     loading,
     resuming,
-    resumeId,
-    orderInfo,
+    resumeCode,
+    paymentCode,
     cartCount,
     orderSuccess,
     router,
   ]);
 
+  // ── Polling trạng thái thanh toán khi đang hiện QR ──
   useEffect(() => {
-    if (!isQrOpen || !orderInfo?.orderId) return;
-    return pollOrderPayment(orderInfo.orderId, {
-      onPaid: () => {
-        setIsQrOpen(false);
-        setPaymentStatus("paid");
-        router.replace(
-          `/checkout/success?orderId=${encodeURIComponent(orderInfo.orderId)}`,
-        );
-      },
-      onError: (error) => {
-        setPaymentStatus("error");
-        setPaymentError(error?.response?.data?.message || error.message);
+    if (!paymentCode || paymentStatus !== "awaiting_payment") return;
+    return pollPaymentStatus(paymentCode, {
+      onStatusChange: ({ status }) => {
+        if (status === "paid") finishPaid();
+        else if (status === "cancelled") handleCancelled();
+        else if (status === "timeout") setPaymentStatus("timeout");
       },
     });
-  }, [isQrOpen, orderInfo?.orderId, pollAttempt, router]);
+  }, [paymentCode, paymentStatus, pollAttempt, finishPaid, handleCancelled]);
 
   const handlePlaceOrder = useCallback(
     async (event) => {
       event?.preventDefault();
       if (submittingRef.current) return;
-      if (orderInfo) {
-        setPaymentError("");
-        setIsQrOpen(true);
+      // Đơn đã tạo ở BE: không tạo đơn thay thế, chỉ hiện lại màn QR
+      if (paymentCode) {
+        setPaymentStatus("awaiting_payment");
         return;
       }
-      if (resumeId) {
+      if (resumeCode) {
         toast.error("Vui lòng tải lại để kiểm tra đơn hiện tại.");
         return;
       }
       if (addingNew || !selectedAddress) {
         toast.error("Vui lòng chọn địa chỉ đã lưu trong tài khoản.");
         return;
-      }
-      // Fail configuration checks BEFORE committing a checkout.
-      if (paymentMethod === "online") {
-        try {
-          buildVietQrUrl({ totalAmount: 1, orderCode: "CHECK" });
-        } catch (error) {
-          toast.error(error.message);
-          return;
-        }
       }
       submittingRef.current = true;
       setSubmitting(true);
@@ -198,18 +222,26 @@ export function useCheckout() {
           setOrderSuccess(true);
           return;
         }
-        const info = {
-          orderId: result.orderId,
-          orderCode: result.orderCode,
-          totalAmount: result.totalAmount,
-        };
-        setOrderInfo(info);
-        setPaymentStatus("awaiting_payment");
-        setPaymentError("");
-        setIsQrOpen(true);
-        // The cart has been consumed on the server; keep the order ID for recovery.
+
+        // ── Online: lấy qrUrl từ BE ──
+        const code = result.orderCode;
+        activeCodeRef.current = code;
+        const info = await checkPaymentNow(code);
+        if (!mounted.current) return;
+        if (info.status === "error") {
+          // Đơn đã tạo; vẫn vào màn QR — nút "kiểm tra lại" sẽ lấy lại qrUrl
+          toast.error(
+            'Đã tạo đơn nhưng chưa lấy được mã QR. Bấm "kiểm tra lại" để thử lần nữa.',
+          );
+        }
+        setPaymentCode(code);
+        setQrUrl(info.qrUrl ?? "");
+        setOnlineAmount(result.totalAmount ?? info.totalAmount ?? 0);
+        setPaymentStatus(info.status === "paid" ? "paid" : "awaiting_payment");
+        // Giỏ đã được tiêu thụ ở BE; giữ paymentCode trên URL để khôi phục sau refresh
         clearCart();
-        router.replace(`/checkout?orderId=${encodeURIComponent(info.orderId)}`);
+        router.replace(`/checkout?code=${encodeURIComponent(code)}`);
+        if (info.status === "paid") setOrderSuccess(true);
       } catch (error) {
         if (mounted.current) toast.error(error.message);
       } finally {
@@ -218,8 +250,8 @@ export function useCheckout() {
       }
     },
     [
-      orderInfo,
-      resumeId,
+      paymentCode,
+      resumeCode,
       addingNew,
       selectedAddress,
       paymentMethod,
@@ -240,11 +272,34 @@ export function useCheckout() {
     if (result.valid) toast.success(result.message);
     else toast.error(result.message);
   };
-  const handleRecheckPayment = () => {
-    setPaymentError("");
-    setPaymentStatus("awaiting_payment");
-    setPollAttempt((value) => value + 1);
-  };
+
+  const handleRecheckPayment = useCallback(async () => {
+    if (!paymentCode || recheckingRef.current) return;
+    recheckingRef.current = true;
+    try {
+      const info = await checkPaymentNow(paymentCode);
+      if (!mounted.current) return;
+      if (info.status === "error") {
+        toast.error(info.error);
+        return;
+      }
+      if (info.status === "paid") {
+        finishPaid();
+        return;
+      }
+      if (info.cancelled) {
+        handleCancelled();
+        return;
+      }
+      if (info.qrUrl) setQrUrl(info.qrUrl);
+      setPaymentStatus("awaiting_payment");
+      setPollAttempt((value) => value + 1);
+      toast.info("Chưa nhận được thanh toán. Hệ thống sẽ tiếp tục kiểm tra.");
+    } finally {
+      recheckingRef.current = false;
+    }
+  }, [paymentCode, finishPaid, handleCancelled]);
+
   return {
     cartItems,
     cartTotal,
@@ -258,13 +313,12 @@ export function useCheckout() {
     loading,
     submitting,
     orderSuccess,
-    paymentStatus,
-    paymentError,
     resuming,
     isMounted,
-    orderInfo,
-    isQrOpen,
-    setIsQrOpen,
+    paymentStatus,
+    paymentCode,
+    qrUrl,
+    onlineAmount,
     handleRecheckPayment,
     user,
     addresses,

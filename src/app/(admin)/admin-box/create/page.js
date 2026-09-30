@@ -30,7 +30,7 @@ export default function CreateBoxPage() {
   const [form, setForm] = useState({
     name: "",
     stock: 1,
-    description: "",
+    descriptions: "",
     validFrom: "",
     validTo: "",
     discountPercent: 0,
@@ -110,8 +110,8 @@ export default function CreateBoxPage() {
     if (!form.name || !form.name.trim()) newErrors.name = "Tên box là bắt buộc";
     if (form.stock < 1)
       newErrors.stock = "Số lượng tồn kho phải lớn hơn hoặc bằng 1";
-    if (!form.description || !form.description.trim())
-      newErrors.description = "Mô tả là bắt buộc";
+    if (!form.descriptions || !form.descriptions.trim())
+      newErrors.descriptions = "Mô tả là bắt buộc";
     if (!form.validFrom) newErrors.validFrom = "Ngày bắt đầu là bắt buộc";
     if (!form.validTo) newErrors.validTo = "Ngày kết thúc là bắt buộc";
 
@@ -161,7 +161,7 @@ export default function CreateBoxPage() {
       // 1. Thông tin cơ bản
       formData.append("name", form.name.trim());
       formData.append("stock", Number(form.stock) || 0);
-      formData.append("description", form.description.trim());
+      formData.append("descriptions", form.descriptions.trim());
       formData.append("discountPercent", Number(form.discountPercent) || 0);
       formData.append("isGift", String(form.isGift));
 
@@ -258,6 +258,18 @@ export default function CreateBoxPage() {
     }
   };
 
+  // Giá trị box hiển thị cho admin (BE tự tính lại theo giá trong DB khi lưu)
+  const subtotal = products
+    .filter((p) => p.productId)
+    .reduce(
+      (acc, p) => acc + (Number(p.price) || 0) * (Number(p.quantity) || 1),
+      0,
+    );
+  const computedValue =
+    Number(form.discountPercent) > 0
+      ? subtotal * (1 - Number(form.discountPercent) / 100)
+      : subtotal;
+
   if (!mounted) return null;
 
   return (
@@ -290,6 +302,7 @@ export default function CreateBoxPage() {
               products={products}
               availableProducts={availableProducts}
               errors={errors}
+              computedValue={computedValue}
               discountPercent={form.discountPercent}
               fmtPrice={fmtPrice}
               onChangeProduct={handleChangeProduct}
