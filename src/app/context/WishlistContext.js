@@ -1,5 +1,6 @@
 "use client";
 
+import { AppContext } from "./AppContext";
 import { createContext, useContext, useState, useEffect } from "react";
 
 /**
@@ -14,29 +15,36 @@ import { createContext, useContext, useState, useEffect } from "react";
  */
 const WishlistContext = createContext(null);
 
-const STORAGE_KEY = "totmart_wishlist";
+
 
 export const WishlistProvider = ({ children }) => {
+  const { user, isLoading } = useContext(AppContext);
+  const STORAGE_KEY = user ? `totmart_wishlist_user_${user._id}` : "totmart_wishlist_guest";
+  const [loadedScope, setLoadedScope] = useState(null);
   const [wishlistItems, setWishlistItems] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    if (isLoading) return;
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
+        const value = JSON.parse(saved);
+        // Reading the external persisted store hydrates the account scope.
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setWishlistItems(JSON.parse(saved));
+        setWishlistItems(Array.isArray(value) ? value : []);
       } catch {
         localStorage.removeItem(STORAGE_KEY);
       }
-    }
+    } else setWishlistItems([]);
+    setLoadedScope(STORAGE_KEY);
     setIsMounted(true);
-  }, []);
+  }, [STORAGE_KEY, isLoading]);
 
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isMounted || loadedScope !== STORAGE_KEY) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(wishlistItems));
-  }, [wishlistItems, isMounted]);
+  }, [wishlistItems, isMounted, loadedScope, STORAGE_KEY]);
 
   const isInWishlist = (productId) =>
     wishlistItems.some((item) => (item._id || item.id) === productId);
@@ -74,12 +82,12 @@ export const WishlistProvider = ({ children }) => {
     localStorage.removeItem(STORAGE_KEY);
   };
 
-  const wishlistCount = isMounted ? wishlistItems.length : 0;
+  const wishlistCount = isMounted && loadedScope === STORAGE_KEY ? wishlistItems.length : 0;
 
   return (
     <WishlistContext.Provider
       value={{
-        wishlistItems: isMounted ? wishlistItems : [],
+        wishlistItems: isMounted && loadedScope === STORAGE_KEY ? wishlistItems : [],
         wishlistCount,
         isMounted,
         isInWishlist,

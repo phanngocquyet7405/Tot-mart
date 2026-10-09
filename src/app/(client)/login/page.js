@@ -41,7 +41,7 @@ function LoginPage() {
     setError("");
 
     try {
-      const res = await loginApi(formData.email, formData.password);
+      const res = await loginApi(formData.email, formData.password, rememberMe);
       const token = res?.token ?? res?.data?.token;
 
       if (!token) {
@@ -50,7 +50,7 @@ function LoginPage() {
       }
 
       saveToken(token, { persistent: rememberMe });
-      refreshUser();
+      await refreshUser();
 
       const role = getTokenRole();
       router.push(role === "admin" ? "/dashboard" : "/homepage");

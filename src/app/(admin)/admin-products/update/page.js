@@ -107,7 +107,7 @@ export default function UpdateProductPage() {
     setFormData({
       name: product.name || "",
       price: product.price || "",
-      stock: product.quantity || product.stock || "",
+      stock: product.stock ?? "",
       category:
         product.categoryId || product.category?._id || product.category || "",
       brand: product.brandId || product.brand?._id || product.brand || "",

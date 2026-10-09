@@ -16,7 +16,7 @@ import { AdminPageHeader, AdminLoadingState } from "../components/shared";
 
 export default function ProductListPage() {
   const {
-    products,
+    products, page, setPage, pagination,
     categories,
     brands,
     loading,
@@ -101,6 +101,7 @@ export default function ProductListPage() {
           )}
         </CardContent>
       </Card>
+      <div className="flex justify-between items-center"><Button disabled={page <= 1 || loading} onClick={() => setPage(page - 1)}>Trang trước</Button><span>Trang {page}/{Math.max(1, pagination.totalPages)} · {pagination.total} sản phẩm</span><Button disabled={page >= pagination.totalPages || loading} onClick={() => setPage(page + 1)}>Trang sau</Button></div>
 
       {/* Các component hỗ trợ — vẫn dùng bản chung cũ, chưa có bản thay thế trong scaffold mới */}
       <BulkActionsBar

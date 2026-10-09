@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -43,7 +43,10 @@ import {
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { AppContext } from '@/app/context/AppContext';
+
 const menuItems = [
+  { title: 'Giao hàng & đối soát', icon: CreditCard, href: '/admin-operations' },
   { title: "Tổng quan", icon: LayoutDashboard, href: "/dashboard" },
   {
     title: "Sản phẩm",
@@ -100,22 +103,11 @@ const menuItems = [
 
 export function AppSidebar() {
   const router = useRouter();
+  const { logout } = useContext(AppContext);
   const pathname = usePathname();
   const [openMenus, setOpenMenus] = useState(["Sản phẩm"]);
 
-  const handleLogout = () => {
-    // Xóa cả localStorage và sessionStorage
-    // (saveToken lưu vào sessionStorage khi không chọn "Ghi nhớ")
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-
-    // Dùng window.location.href thay vì router.push để:
-    // 1. Force reload hoàn toàn → AppContext reset về null
-    // 2. Tránh withGuest thấy user cũ trong state rồi redirect ngược lại /dashboard
-    window.location.href = "/login";
-  };
+  const handleLogout = () => { void logout(); };
 
   const toggleMenu = (title) => {
     setOpenMenus((prev) =>

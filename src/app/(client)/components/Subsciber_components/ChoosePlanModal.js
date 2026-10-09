@@ -72,16 +72,16 @@ function buildDisplayPlans(apiPlans, fallbackBasePrice = 0) {
   });
 
   const baseMonthlyPrice =
-    apiMap["1_month"]?.basePrice || apiPlans[0]?.basePrice || fallbackBasePrice;
+    apiMap["1_month"]?.basePrice || (apiPlans[0]?.basePrice / (PLAN_MONTHS[apiPlans[0]?.planType] || 1)) || fallbackBasePrice;
 
-  return ALL_PLAN_TYPES.map((type) => {
+  return ALL_PLAN_TYPES.filter(type => apiMap[type]).map((type) => {
     const months = PLAN_MONTHS[type];
     const meta = PLAN_META[type];
 
     if (apiMap[type]) {
       const p = apiMap[type];
-      const pricePerMonth = p.discountPrice ?? p.basePrice;
-      const totalPrice = pricePerMonth * months;
+      const totalPrice = p.discountPrice ?? p.basePrice;
+      const pricePerMonth = totalPrice / months;
       const totalOriginal = baseMonthlyPrice * months;
       const savings = totalOriginal - totalPrice;
       const saveText =
@@ -464,13 +464,14 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
       setSubmitting(true);
       const res = await subscriptionApi.subscribe({
         templateId: selectedPlan._id,
+          expectedTotalAmount: Math.round(selectedPlan._totalPrice),
         shippingAddress,
       });
 
       if (res?.success && res?.data?._id) {
-        toast.success("Đăng ký thành viên thành công!");
+        toast.success("Đã tạo gói chờ thanh toán.");
         onClose();
-        router.push("/profile/my-subscriptions");
+        router.push(`/checkout?code=${encodeURIComponent(res.data.paymentCode)}`);
       }
     } catch (err) {
       logger.error("[ChoosePlanModal] Lỗi subscribe:", err);

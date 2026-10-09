@@ -111,14 +111,14 @@ export function useMySubscriptions() {
   const filteredSubscriptions =
     activeTab === "all"
       ? subscriptions
-      : subscriptions.filter((s) => s.status === activeTab);
+      : subscriptions.filter((s) => s.status === (activeTab === "completed" ? "expired" : activeTab));
 
   // ─── Tab counts ───────────────────────────────────────────────────────────
   const tabCounts = {
     all: subscriptions.length,
     active: subscriptions.filter((s) => s.status === "active").length,
     cancelled: subscriptions.filter((s) => s.status === "cancelled").length,
-    completed: subscriptions.filter((s) => s.status === "completed").length,
+    completed: subscriptions.filter((s) => s.status === "expired").length,
   };
 
   return {

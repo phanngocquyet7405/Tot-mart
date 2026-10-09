@@ -1,3 +1,4 @@
+import { getTokenUserId } from '@/app/middleware/tokenMiddleware';
 import { axiosConfig } from "./axiosConfig";
 import { API_ENDPOINTS } from "./apiEndpoints";
 
@@ -38,7 +39,14 @@ export const getActiveTemplatesApi = () => axiosConfig.get(EP.GET_ACTIVE);
 // ============================================================
 
 /** Đăng ký gói dịch vụ từ mẫu */
-export const userSubscribeApi = (data) => axiosConfig.post(EP.SUBSCRIBE, data);
+export const userSubscribeApi = async (data) => {
+  const keyName = 'totmart_subscription_attempt_' + getTokenUserId() + '_' + data.templateId;
+  const signature = JSON.stringify(data);
+  let attempt; try { attempt = JSON.parse(sessionStorage.getItem(keyName) || 'null'); } catch { attempt = null; }
+  if (!attempt || attempt.signature !== signature) { attempt = { signature, key: crypto.randomUUID() }; sessionStorage.setItem(keyName, JSON.stringify(attempt)); }
+  try { const response = await axiosConfig.post(EP.SUBSCRIBE, data, { headers: { 'Idempotency-Key': attempt.key } }); sessionStorage.removeItem(keyName); return response; }
+  catch (err) { if (err.response?.status < 500) sessionStorage.removeItem(keyName); throw err; }
+};
 
 /** Lấy tất cả gói đăng ký của user hiện tại đang đăng nhập */
 export const getMySubscriptionsApi = () => axiosConfig.get(EP.MY_SUBSCRIPTIONS);

@@ -1,147 +1,27 @@
-import {
-  handleExpiredToken,
-  checkTokenValid,
-  getTokenUserId,
-} from "./tokenMiddleware";
-import { API_ENDPOINTS } from "../services/api/apiEndpoints";
-import axios from "axios";
-import logger from "../util/Logger";
-
-const PUBLIC_ENDPOINTS = [
-  API_ENDPOINTS.AUTH.LOGIN,
-  API_ENDPOINTS.AUTH.FORGOT_PASSWORD,
-  API_ENDPOINTS.AUTH.RESET_PASSWORD,
-  API_ENDPOINTS.AUTH.HEALTH,
-  API_ENDPOINTS.USERS.REGISTER,
-  API_ENDPOINTS.PRODUCTS.GET_ALL,
-  API_ENDPOINTS.BRANDS.GET_ALL,
-  API_ENDPOINTS.CATEGORIES.GET_ALL,
-  API_ENDPOINTS.CATEGORIES.GET_ROOT,
-  API_ENDPOINTS.BOXES.GET_ALL,
-  API_ENDPOINTS.SUBSCRIBE_PLANS.GET_ACTIVE,
-];
-
-function isPublicEndpoint(url = "") {
-  return PUBLIC_ENDPOINTS.some((endpoint) => {
-    if (typeof endpoint === "string") {
-      return url.includes(endpoint);
-    }
-    return false;
+import axios from 'axios';
+import { getAccessToken, saveToken, clearSession } from './tokenMiddleware';
+let refreshing = null;
+export function setupAxiosMiddleware(instance) {
+  instance.interceptors.request.use(config => {
+    config.withCredentials = true;
+    config.headers['X-TotMart-Request'] = '1';
+    const token = getAccessToken();
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    else delete config.headers.Authorization;
+    return config;
   });
-}
-
-export function setupAxiosMiddleware(axiosInstance) {
-  // ── REQUEST MIDDLEWARE ────────────────────────────────────────────────────
-
-  axiosInstance.interceptors.request.use(
-    (config) => {
-
-      if (typeof window === "undefined") return config; // SSR: bỏ qua
-
-      const shouldSkipToken = isPublicEndpoint(config.url);
-
-      if (!shouldSkipToken) {
-        const tokenOk = checkTokenValid();
-
-        if (!tokenOk) {
-          handleExpiredToken();
-          const cancelToken = new axios.CanceledError(
-            "Token expired before request",
-          );
-          return Promise.reject(cancelToken);
-        }
-
-        const accessToken = localStorage.getItem("token");
-        if (accessToken) {
-          config.headers.Authorization = `Bearer ${accessToken}`;
-
-          // Workaround: BE controller đọc req.user.id nhưng JWT payload dùng field "userId"
-          // authMiddleware chỉ set req.userId chứ không set req.user.id
-          // → inject x-user-id để BE fallback: req.user.id || req.userId || req.headers['x-user-id']
-          const uid = getTokenUserId(); // decode từ token: decoded._id || decoded.id || decoded.userId
-          if (uid) config.headers["x-user-id"] = uid;
-        }
-      }
-
-      return config;
-    },
-    (error) => Promise.reject(error),
-  );
-
-  axiosInstance.interceptors.response.use(
-    (response) => response.data,
-
-    (error) => {
-      if (error?.code === "ERR_CANCELED") {
-        return Promise.reject(error);
-      }
-
-      const status = error.response?.status;
-      const message = error.response?.data?.message || "Lỗi không xác định";
-      const requestUrl = error.config?.url || "";
-
-      switch (status) {
-        case 401:
-          logger.warn(`[401] Unauthorized tại ${requestUrl}:`, message);
-          if (typeof window !== "undefined") {
-            const hasToken =
-              localStorage.getItem("token") || sessionStorage.getItem("token");
-            if (!isPublicEndpoint(requestUrl) && hasToken) {
-              handleExpiredToken();
-            } else if (!hasToken) {
-              logger.warn(
-                "[401] Token không có trong storage, bỏ qua handleExpiredToken",
-              );
-            }
-          }
-          break;
-        case 403:
-          logger.warn(`[403] Forbidden tại ${requestUrl}:`, message);
-          if (typeof window !== "undefined") {
-            const isLocked = message.toLowerCase().includes("locked");
-            if (isLocked) {
-              localStorage.removeItem("token");
-              localStorage.removeItem("user");
-              window.location.href = "/login?error=account_locked";
-            } else {
-              const currentPath = window.location.pathname;
-              if (currentPath !== "/homepage") {
-                window.location.href = "/homepage?error=forbidden";
-              }
-            }
-          }
-          break;
-
-        case 404:
-          logger.warn(`[404] Not Found tại ${requestUrl}:`, message);
-          break;
-
-        case 422:
-          logger.warn(
-            `[422] Validation Error tại ${requestUrl}:`,
-            error.response?.data,
-          );
-          break;
-
-        case 500:
-          logger.error(`[500] Server Error tại ${requestUrl}:`, message);
-          break;
-
-        default:
-          if (!status) {
-            if (error.code === "ECONNABORTED") {
-              logger.error(
-                "[Timeout] Request quá thời gian, vui lòng thử lại.",
-              );
-            } else {
-              logger.error(
-                "[Network Error] Không thể kết nối server. Kiểm tra internet.",
-              );
-            }
-          }
-      }
-
-      return Promise.reject(error);
-    },
-  );
+  instance.interceptors.response.use(response => response.data, async error => {
+    const config = error.config;
+    if (error.response?.status === 401 && config && !config._retried && !/\/home\/(login|refresh|forgot-password|reset-password)/.test(config.url || '')) {
+      config._retried = true;
+      try {
+        if (!refreshing) refreshing = axios.post(`${instance.defaults.baseURL.replace(/\/$/, '')}/home/refresh`, {}, { withCredentials: true, headers: { 'X-TotMart-Request': '1' } })
+          .then(response => { saveToken(response.data.token); return response.data.token; }).finally(() => { refreshing = null; });
+        const token = await refreshing;
+        config.headers.Authorization = `Bearer ${token}`;
+        return instance(config);
+      } catch { clearSession(); }
+    }
+    return Promise.reject(error);
+  });
 }

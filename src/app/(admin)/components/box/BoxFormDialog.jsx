@@ -333,7 +333,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     setErrors({});
   }, [open, box, isEdit]);
 
-  // Cleanup object URLs when component unmounts or previews change
+  // Cleanup the previews captured by this effect when they change or unmount
   useEffect(() => {
     return () => {
       imagePreviews.forEach((p) => {
@@ -346,7 +346,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
         }
       });
     };
-  }, []);
+  }, [imagePreviews]);
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 

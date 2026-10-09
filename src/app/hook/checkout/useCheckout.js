@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { AppContext } from "@/app/context/AppContext";
 import { useCart } from "@/app/context/CartContext";
 import {
   loadCheckoutUser,
   validateCoupon,
+  quoteCart,
   calcShippingFee,
   placeOrder,
   pollPaymentStatus,
@@ -16,10 +18,12 @@ import {
 
 export function useCheckout() {
   const router = useRouter();
+  const { isLoading: sessionLoading } = useContext(AppContext);
   const searchParams = useSearchParams();
   const resumeCode = searchParams.get("code");
   const {
     cartItems,
+    cartVersion, setCartVersion,
     cartTotal,
     cartCount,
     isMounted,
@@ -51,6 +55,8 @@ export function useCheckout() {
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [discount, setDiscount] = useState(0);
+  const [quote, setQuote] = useState(null);
+  const [quoteGeneration, setQuoteGeneration] = useState(0);
 
   const submittingRef = useRef(false);
   const recheckingRef = useRef(false);
@@ -58,7 +64,7 @@ export function useCheckout() {
   const activeCodeRef = useRef(null);
 
   const hasProducts = cartItems.length > 0;
-  const shippingFee = calcShippingFee(cartTotal, hasProducts);
+  const shippingFee = quote?.shippingFee ?? calcShippingFee(cartTotal, hasProducts);
 
   useEffect(() => {
     mounted.current = true;
@@ -68,6 +74,7 @@ export function useCheckout() {
   }, []);
 
   useEffect(() => {
+    if (sessionLoading) return;
     let active = true;
     loadCheckoutUser().then((result) => {
       if (!active) return;
@@ -84,7 +91,17 @@ export function useCheckout() {
     return () => {
       active = false;
     };
-  }, [router]);
+  }, [router, sessionLoading]);
+
+  useEffect(() => {
+    if (!isMounted || !user || !cartItems.length || paymentCode || resumeCode) return;
+    let active = true;
+    setQuote(null);
+    quoteCart(cartItems, couponApplied ? coupon : undefined).then(data => {
+      if (active) { setQuote(data); setDiscount(data.discountAmount); }
+    }).catch(err => { if (active) toast.error(err.response?.data?.message || 'Không lấy được báo giá'); });
+    return () => { active = false; };
+  }, [isMounted, user, cartItems, paymentCode, resumeCode, couponApplied, coupon, quoteGeneration]);
 
   // ── Kết thúc: đã thanh toán / đơn bị huỷ ──
   // Giỏ hàng đã được xoá ngay lúc tạo đơn (BE tiêu thụ giỏ) nên không xoá lại ở đây.
@@ -198,6 +215,7 @@ export function useCheckout() {
         toast.error("Vui lòng tải lại để kiểm tra đơn hiện tại.");
         return;
       }
+      if (!quote) { toast.error("Vui lòng chờ báo giá hoặc kiểm tra lại giỏ hàng."); return; }
       if (addingNew || !selectedAddress) {
         toast.error("Vui lòng chọn địa chỉ đã lưu trong tài khoản.");
         return;
@@ -210,10 +228,12 @@ export function useCheckout() {
           paymentMethod,
           note,
           couponCode: couponApplied ? coupon : undefined,
-          cartItems,
+          cartItems, cartVersion, quoteFingerprint: quote.fingerprint,
         });
         if (!mounted.current) return;
         if (!result.success) {
+          if (result.cartVersion !== undefined) setCartVersion(result.cartVersion);
+          if (result.status === 409) { setQuote(null); setQuoteGeneration(value => value + 1); }
           result.skipped?.forEach(removeFromCart);
           throw new Error(result.error || "Không thể đặt hàng.");
         }
@@ -258,15 +278,16 @@ export function useCheckout() {
       note,
       couponApplied,
       coupon,
-      cartItems,
+      cartItems, cartVersion, quote, setCartVersion,
       removeFromCart,
       clearCart,
       router,
     ],
   );
 
-  const handleApplyCoupon = () => {
-    const result = validateCoupon(coupon, cartTotal);
+  const handleApplyCoupon = async () => {
+    const result = await validateCoupon(coupon, cartItems);
+    if (result.quote) setQuote(result.quote);
     setDiscount(result.valid ? result.discount : 0);
     setCouponApplied(result.valid);
     if (result.valid) toast.success(result.message);
@@ -301,13 +322,13 @@ export function useCheckout() {
   }, [paymentCode, finishPaid, handleCancelled]);
 
   return {
-    cartItems,
-    cartTotal,
+    cartItems: quote ? cartItems.map(item => { const line = quote.lines.find(line => line.itemId === String(item._id || item.id) && line.itemType === (item.itemType || "product")); return line ? { ...item, price: line.unitPrice } : item; }) : cartItems,
+    cartTotal: quote?.subtotal ?? cartTotal,
     cartCount,
     hasProducts,
     shippingFee,
     discount,
-    finalTotal: cartTotal - discount + shippingFee,
+    finalTotal: quote?.totalAmount ?? cartTotal - discount + shippingFee,
     step,
     setStep,
     loading,
@@ -343,7 +364,7 @@ export function useCheckout() {
     note,
     setNote,
     coupon,
-    setCoupon,
+    setCoupon: value => { setCoupon(value); setCouponApplied(false); setDiscount(0); },
     couponApplied,
     handleApplyCoupon,
     handlePlaceOrder,

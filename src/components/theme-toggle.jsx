@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 
@@ -11,10 +11,10 @@ import { Sun, Moon } from "lucide-react";
  */
 export function ThemeToggle({ className = "" }) {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
 
   // Tránh hydration mismatch — next-themes chỉ biết theme thật sau khi mount ở client
-  useEffect(() => setMounted(true), []);
+
 
   if (!mounted) {
     return <div className={`w-8 h-8 ${className}`} aria-hidden="true" />;

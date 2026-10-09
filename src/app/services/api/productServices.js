@@ -49,8 +49,8 @@ export const createProductApi = (formData) =>
     headers: { "Content-Type": "multipart/form-data" },
   });
 
-export const getAllProductsApi = () =>
-  axiosConfig.get(API_ENDPOINTS.PRODUCTS.GET_ALL);
+export const getAllProductsApi = (params = {}) =>
+  axiosConfig.get(API_ENDPOINTS.PRODUCTS.GET_ALL, { params });
 
 export const getProductByIdApi = (id) =>
   axiosConfig.get(API_ENDPOINTS.PRODUCTS.GET_BY_ID(id));
@@ -72,8 +72,8 @@ export const addToCartApi = (data) =>
 
 // Thay thế toàn bộ giỏ sản phẩm trên BE bằng giỏ localStorage — gọi trước checkout.
 // items: [{ productId, quantity }]
-export const syncCartApi = (items) =>
-  axiosConfig.put(API_ENDPOINTS.CART.SYNC, { items });
+export const syncCartApi = (items, version) =>
+  axiosConfig.put(API_ENDPOINTS.CART.SYNC, { items, ...(version !== undefined ? { version } : {}) });
 
 export const updateCartItemApi = (cartId, data) =>
   axiosConfig.put(API_ENDPOINTS.CART.UPDATE(cartId), data);

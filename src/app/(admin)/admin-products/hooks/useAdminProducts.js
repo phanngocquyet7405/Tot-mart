@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import {
-  fetchAdminProducts,
+  fetchAdminProductsPage,
   fetchAdminProductFilters,
   deleteAdminProduct,
   deleteAdminProducts,
@@ -17,6 +17,8 @@ const DEFAULT_FILTERS = {
 };
 
 export function useAdminProducts() {
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({total: 0, totalPages: 0});
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -39,10 +41,10 @@ export function useAdminProducts() {
     setError(null);
     try {
       const [prodData, filterData] = await Promise.all([
-        fetchAdminProducts(),
+        fetchAdminProductsPage({page, limit: 20, keyword: searchQuery, sortBy: sortField, sortDirection, minPrice: activeFilters.minPrice, maxPrice: activeFilters.maxPrice, category: activeFilters.category === 'all' ? undefined : activeFilters.category, brand: activeFilters.brand === 'all' ? undefined : activeFilters.brand}),
         fetchAdminProductFilters(),
       ]);
-      setProducts(prodData);
+      setProducts(prodData.products); setPagination(prodData.pagination); setSelectedIds([]);
       setCategories(filterData.categories);
       setBrands(filterData.brands);
     } catch (err) {
@@ -53,49 +55,17 @@ export function useAdminProducts() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, searchQuery, sortField, sortDirection, activeFilters]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products.filter((p) => {
-      const matchSearch = p.name
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase());
-
-      const pCatId = p.category?._id || p.category;
-      const pBrandId = p.brand?._id || p.brand;
-
-      const matchCategory =
-        activeFilters.category === "all" ||
-        String(pCatId) === activeFilters.category;
-      const matchBrand =
-        activeFilters.brand === "all" ||
-        String(pBrandId) === activeFilters.brand;
-
-      const price = Number(p.price ?? 0);
-      const matchPrice =
-        price >= activeFilters.minPrice && price <= activeFilters.maxPrice;
-
-      return matchSearch && matchCategory && matchBrand && matchPrice;
-    });
-
-    filtered.sort((a, b) => {
-      const aValue = a[sortField];
-      const bValue = b[sortField];
-      const modifier = sortDirection === "asc" ? 1 : -1;
-      if (typeof aValue === "string")
-        return aValue.localeCompare(bValue) * modifier;
-      return ((aValue ?? 0) - (bValue ?? 0)) * modifier;
-    });
-
-    return filtered;
-  }, [products, searchQuery, sortField, sortDirection, activeFilters]);
+  const filteredAndSortedProducts = products;
 
   const toggleSort = useCallback(
     (field) => {
+      setPage(1);
       if (sortField === field) {
         setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
       } else {
@@ -131,6 +101,7 @@ export function useAdminProducts() {
   }, []);
 
   const applyFilters = useCallback((f) => {
+    setPage(1);
     setActiveFilters({
       category: f.category || "all",
       brand: f.brand || "all",
@@ -167,7 +138,8 @@ export function useAdminProducts() {
     loading,
     error,
     searchQuery,
-    setSearchQuery,
+    setSearchQuery: value => {setSearchQuery(value); setPage(1);},
+    page, setPage, pagination,
     selectedIds,
     setSelectedIds,
     sortField,

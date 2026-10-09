@@ -30,7 +30,9 @@ export const ProductCard = ({
     if (callback) callback(product);
   };
 
-  const discountPercent = product.discountPercent || 0;
+  const discountPercent = product.salePercent || 0;
+  const salePrice = Math.round(product.price * (1 - discountPercent / 100));
+  const originalPrice = discountPercent > 0 ? product.price : product.originalPrice;
   // product.stock có thể undefined với dữ liệu cũ/thiếu — coi như 0 (hết
   // hàng) để nhất quán với cách trang chi tiết sản phẩm đang xử lý
   // (ProductPurchasePanel.js: const stock = product.stock ?? 0).
@@ -122,11 +124,11 @@ export const ProductCard = ({
           {/* Price */}
           <div className="flex items-baseline gap-2 mb-4">
             <span className="text-lg font-bold text-gray-900">
-              {formatPrice(product.price)}
+              {formatPrice(salePrice)}
             </span>
-            {product.originalPrice && (
+             {originalPrice && (
               <span className="text-xs text-gray-400 line-through">
-                {formatPrice(product.originalPrice)}
+                 {formatPrice(originalPrice)}
               </span>
             )}
           </div>

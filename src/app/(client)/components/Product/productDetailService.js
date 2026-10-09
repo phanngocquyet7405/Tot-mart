@@ -54,9 +54,9 @@ export function formatPrice(price) {
  */
 export function getFinalPrice(product) {
   if (!product) return 0;
-  const discount = product.discount || 0;
+  const discount = product.salePercent || 0;
   if (discount > 0) {
-    return product.price - (product.price * discount) / 100;
+    return Math.round(product.price * (1 - discount / 100));
   }
   return product.price;
 }

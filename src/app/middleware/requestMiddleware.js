@@ -1,3 +1,4 @@
+import { getAccessToken } from "./tokenMiddleware";
 import { checkTokenValid } from "./tokenMiddleware";
 
 // ─── buildHeaders ─────────────────────────────────────────────────────────────
@@ -36,7 +37,7 @@ export function buildHeaders(contentType = "json", requireAuth = true) {
   // Authorization
   if (requireAuth && typeof window !== "undefined") {
     if (checkTokenValid()) {
-      const token = localStorage.getItem("token");
+      const token = getAccessToken();
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
@@ -92,9 +93,9 @@ export function buildFormData(data = {}) {
       // FIX Chú ý quan trọng:
       // Nếu trường dữ liệu là mảng ảnh 'images', ta cần bọc kèm chỉ mục index ví dụ: images[0], images[1]...
       // Điều này giúp Backend (multer) nhận diện chính xác tên trường fieldname có chứa số để xử lý update/ghi đè.
-      value.forEach((item, index) => {
+      value.forEach((item) => {
         if (key === "images") {
-          formData.append(`images[${index}]`, item);
+          formData.append("images", item);
         } else {
           // Các loại mảng text/id thông thường khác giữ nguyên cấu trúc trùng key
           formData.append(key, item);

@@ -28,7 +28,7 @@ export function getCartItemImage(item) {
 export function normalizeCartProduct(product) {
   if (!product || typeof product !== "object") return product;
 
-  const { images, description, ...rest } = product; // eslint-disable-line no-unused-vars
+  const { images, description, ...rest } = product;
   const image = getCartItemImage(product) || undefined;
 
   const isRaw = !product.image && Array.isArray(images);

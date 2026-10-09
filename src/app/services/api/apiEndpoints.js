@@ -1,6 +1,6 @@
-export const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://totmartapi-7z4s.onrender.com/api";
-  //process.env.NEXT_PUBLIC_API_URL || "https://totmartapi.onrender.com/api";
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+process.env.NEXT_PUBLIC_API_URL || "https://totmartapi.onrender.com/api";
+//process.env.NEXT_PUBLIC_API_URL || "https://totmartapi-7z4s.onrender.com";
 
 export const API_ENDPOINTS = {
   AUTH: {
@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
     LOGOUT: "/home/logout",
     FORGOT_PASSWORD: "/home/forgot-password",
     RESET_PASSWORD: "/home/reset-password",
+    REFRESH: "/home/refresh",
   },
 
   USERS: {
@@ -37,25 +38,19 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/carts/delete-from-cart/${id}`,
 
     SUBSCRIBE: {
-      ADD: "/carts/add-subcribe-plan-to-cart",
-      UPDATE: "/carts/update-subcribe-cart",
-      DELETE: (id) => `/carts/delete-from-subcribe-cart/${id}`,
-      GET_BY_USER: (id) => `/carts/get-subcribe-cart/${id}`,
+      ADD: "/carts/add-subscribe-plan-to-cart",
+      UPDATE: "/carts/update-subscribe-cart",
+      DELETE: (id) => `/carts/delete-from-subscribe-cart/${id}`,
+      GET_BY_USER: (id) => `/carts/get-subscribe-cart/${id}`,
     },
   },
 
   CHECKOUT: {
     CREATE: "/checkout/check-out",
+    QUOTE: "/checkout/quote",
 
-    // ─── SePay ────────────────────────────────────────────────────────────
-    // Khác VNPay: không có bước "tạo URL thanh toán" riêng — BE trả qrUrl
-    // NGAY trong response của CREATE. Webhook SePay (/checkout/sepay-webhook)
-    // chạy server-to-server, FE không gọi route đó.
     ORDER_STATUS: (paymentCode) => `/checkout/order-status/${paymentCode}`,
 
-    // ─── Actions có side-effect (hoàn kho/hoàn coupon/hoàn tiền, hoặc set
-    // paymentStatus) — nằm ở /checkout chứ không phải /admin/orders bên
-    // dưới, xem ghi chú ở ORDERS.UPDATE_STATUS ─────────────────────────────
     CANCEL: (id) => `/checkout/cancel/${id}`,
     CONFIRM_COD: (id) => `/checkout/confirm-cod/${id}`,
     MARK_COD_DELIVERED: (id) => `/checkout/mark-cod-delivered/${id}`,
@@ -65,10 +60,6 @@ export const API_ENDPOINTS = {
   ORDERS: {
     GET_ALL: "/admin/orders",
     GET_BY_ID: (id) => `/admin/orders/${id}`,
-    // CHỈ dùng cho các bước KHÔNG có side-effect (processing→shipped,
-    // shipped→delivered cho đơn online, on_hold→processing). "cancelled",
-    // "processing" từ COD pending, "delivered" cho COD → dùng CHECKOUT.CANCEL
-    // / CONFIRM_COD / MARK_COD_DELIVERED ở trên (có side-effect thật).
     UPDATE_STATUS: (id) => `/admin/orders/${id}/status`,
   },
 
@@ -100,6 +91,7 @@ export const API_ENDPOINTS = {
   BOXES: {
     GET_ALL: "/boxes/get-all-box",
     GET_BY_ID: (id) => `/boxes/get-box-by-id/${id}`,
+    PUBLIC_BY_ID: (id) => `/boxes/public/${id}`,
     GET_PRODUCTS: (id) => `/boxes/get-products-in-box/${id}`,
     GET_OFFERS: "/boxes/get-box-offer-discount-coupons",
     CREATE: "/boxes/create-box",

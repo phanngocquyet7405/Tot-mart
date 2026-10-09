@@ -6,6 +6,8 @@ import {
 } from "@/app/services/api/productServices";
 import { parseApiResponse } from "../../utils/parseApiResponse";
 
+export async function fetchAdminProductsPage(params) { const res = await getAllProductsApi(params); return { products: parseApiResponse(res), pagination: res.pagination }; }
+
 export async function fetchAdminProducts() {
   const res = await getAllProductsApi();
   return parseApiResponse(res);

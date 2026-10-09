@@ -144,8 +144,8 @@ export function getNextStatusOptions(order) {
   if (status === ORDER_STATUS.ON_HOLD) {
     options.push({
       value: ORDER_STATUS.PROCESSING,
-      label: "Xử lý tiếp (đã bổ sung hàng)",
-      action: "status",
+      label: "Kiểm tra và giữ hàng để xử lý tiếp",
+      action: "reserve-stock",
     });
   }
 
@@ -234,6 +234,7 @@ export async function fetchAdminOrderById(id) {
  */
 export async function updateAdminOrderStatus(order, opt) {
   switch (opt.action) {
+    case "reserve-stock": return orderService.resolveInventoryHold(order.id);
     case "confirm-cod":
       return orderService.confirmCod(order.id);
     case "cancel":

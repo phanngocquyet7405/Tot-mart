@@ -6,6 +6,6 @@ export const checkoutApi = (payload) =>
 
 // Object export (giữ lại pattern cũ nếu đang dùng ở nơi khác)
 export const checkoutService = {
-  createOrder: (payload) =>
-    axiosConfig.post(API_ENDPOINTS.CHECKOUT.CREATE, payload),
+  createOrder: (payload, key) =>
+    axiosConfig.post(API_ENDPOINTS.CHECKOUT.CREATE, payload, { headers: { "Idempotency-Key": key } }),
 };

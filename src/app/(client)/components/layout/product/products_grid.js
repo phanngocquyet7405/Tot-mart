@@ -1,21 +1,13 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ProductCard } from "./product_card";
 import {
   getAllProductsApi,
-  getProductsByCategoryApi,
-  getAllBrandsApi,
 } from "@/app/services/api/productServices";
 import { useAddToCart } from "@/app/hook/useAddToCart";
 import { useWishlist } from "@/app/context/WishlistContext";
-
-function extractRefId(ref) {
-  if (!ref) return null;
-  if (typeof ref === "string") return ref;
-  return ref._id || null;
-}
 
 export default function ProductsGrid({ categoryId, brandSlug }) {
   const { addToCart } = useAddToCart();
@@ -28,11 +20,9 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 12;
 
-  const totalPages = Math.ceil(products.length / pageSize);
-  const visibleProducts = useMemo(
-    () => products.slice((currentPage - 1) * pageSize, currentPage * pageSize),
-    [products, currentPage],
-  );
+  const [pagination, setPagination] = useState({ total: 0, totalPages: 0 });
+  const totalPages = pagination.totalPages;
+  const visibleProducts = products;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -43,55 +33,25 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
   }, [currentPage, totalPages]);
 
   useEffect(() => {
+    let active = true;
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError(null);
-        let data;
-
-        if (categoryId) {
-          const res = await getProductsByCategoryApi(categoryId);
-          data = res?.data?.data || res?.data || res;
-        } else if (brandSlug) {
-          // Chưa có endpoint lấy sản phẩm theo brand -> resolve slug thành
-          // brandId rồi lọc phía client trên toàn bộ danh sách sản phẩm.
-          const [brandRes, prodRes] = await Promise.all([
-            getAllBrandsApi(),
-            getAllProductsApi(),
-          ]);
-          const brands = brandRes?.data?.data || brandRes?.data || brandRes || [];
-          const allProducts = prodRes?.data?.data || prodRes?.data || prodRes || [];
-          const matched = Array.isArray(brands)
-            ? brands.find((b) => b.slug === brandSlug || b._id === brandSlug)
-            : null;
-          data = matched
-            ? allProducts.filter((p) => extractRefId(p.brandId || p.brand) === matched._id)
-            : [];
-        } else {
-          const res = await getAllProductsApi();
-          data = res?.data?.data || res?.data || res;
-        }
-
-        if (Array.isArray(data)) {
-          let sorted = [...data];
-          if (sortBy === "price-asc") {
-            sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
-          } else if (sortBy === "price-desc") {
-            sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
-          }
-          setProducts(sorted);
-        } else {
-          setProducts([]);
-        }
+        const res = await getAllProductsApi({ page: currentPage, limit: pageSize, category: categoryId || undefined, brandSlug: brandSlug || undefined, sort: sortBy === 'price-asc' ? 'price_asc' : sortBy === 'price-desc' ? 'price_desc' : undefined });
+        if (!active) return;
+        setProducts(res.data || []); setPagination(res.pagination);
       } catch (err) {
+        if (!active) return;
         console.error("Error fetching products:", err);
         setError("Could not load products.");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
     fetchProducts();
-  }, [categoryId, brandSlug, sortBy]);
+    return () => { active = false; };
+  }, [categoryId, brandSlug, sortBy, currentPage]);
 
   if (loading)
     return (
@@ -113,7 +73,7 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
             {categoryId ? "Category Products" : "All Products"}
           </h2>
           <p className="text-gray-600 text-sm mt-1">
-            Showing {products.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, products.length)} of {products.length} results
+            Showing {products.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, pagination.total)} of {pagination.total} results
           </p>
         </div>
 
@@ -126,7 +86,7 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
             <select
               id="sort"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
             >
               <option value="newest">Newest</option>
@@ -202,7 +162,7 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
                   name: p.name,
                   slug: p.slug,
                   image: p.images?.[0]?.url || "/assets/placeholder.png",
-                  price: p.price,
+                  price: Math.round(p.price * (1 - (p.salePercent || 0) / 100)),
                 });
                 toast.success(
                   added
@@ -231,7 +191,7 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
           >
             Previous
           </button>
-          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+          {Array.from({ length: Math.min(5, totalPages) }, (_, index) => Math.max(1, Math.min(currentPage - 2, totalPages - 4)) + index).map((page) => (
             <button
               key={page}
               type="button"

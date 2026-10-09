@@ -30,6 +30,7 @@ export const orderService = {
    * shipped→delivered đơn online, on_hold→processing). Validate transition
    * thật nằm ở BE (orderAdminController.updateOrderStatus).
    */
+  resolveInventoryHold: (id) => axiosConfig.post(`/checkout/resolve-inventory/${id}`),
   updateOrderStatus: (id, status) =>
     axiosConfig.post(API_ENDPOINTS.ORDERS.UPDATE_STATUS(id), { status }),
 

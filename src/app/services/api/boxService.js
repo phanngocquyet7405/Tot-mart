@@ -5,7 +5,7 @@ export const getAllBoxesApi = () =>
   axiosConfig.get(API_ENDPOINTS.BOXES.GET_ALL);
 
 export const getBoxByIdApi = (id) =>
-  axiosConfig.get(API_ENDPOINTS.BOXES.GET_BY_ID(id));
+  axiosConfig.get(API_ENDPOINTS.BOXES.PUBLIC_BY_ID(id));
 
 export const getProductsInBoxApi = (id) =>
   axiosConfig.get(API_ENDPOINTS.BOXES.GET_PRODUCTS(id));

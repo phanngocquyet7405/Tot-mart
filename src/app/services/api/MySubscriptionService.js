@@ -7,6 +7,8 @@ import { subscriptionApi } from "@/app/services/api/subscribePlanService";
 import logger from "@/app/util/Logger";
 
 export const STATUS_CONFIG = {
+  pending_payment: { label: "Chờ thanh toán", color: "orange", dot: "#F59E0B", bg: "#FFFBEB", text: "#92400E", border: "#FDE68A" },
+  expired: { label: "Hoàn thành", color: "blue", dot: "#3B82F6", bg: "#EFF6FF", text: "#1E40AF", border: "#BFDBFE" },
   active: {
     label: "Đang hoạt động",
     dot: "#22C55E",

@@ -1,8 +1,8 @@
 import { axiosConfig } from "./axiosConfig";
 import { API_ENDPOINTS } from "./apiEndpoints";
 
-export const loginApi = (email, password) =>
-  axiosConfig.post(API_ENDPOINTS.AUTH.LOGIN, { email, password });
+export const loginApi = (email, password, rememberMe = false) =>
+  axiosConfig.post(API_ENDPOINTS.AUTH.LOGIN, { email, password, rememberMe });
 
 export const logoutApi = () => axiosConfig.post(API_ENDPOINTS.AUTH.LOGOUT);
 

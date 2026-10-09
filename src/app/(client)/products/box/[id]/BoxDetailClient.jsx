@@ -130,6 +130,7 @@ export default function BoxDetailPage() {
     const finalPrice = getFinalPrice();
     const itemToAdd = {
       _id: box._id,
+      itemType: "box",
       name: box.name,
       image: box.images?.[0]?.url || PLACEHOLDER_IMAGE,
       price: finalPrice,

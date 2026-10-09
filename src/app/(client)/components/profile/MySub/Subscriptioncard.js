@@ -54,7 +54,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
   const config = STATUS_CONFIG[sub.status] ?? STATUS_CONFIG["cancelled"];
   const planLabel = PLAN_TYPE_LABELS[sub.planType] ?? sub.planType;
   const daysLeft = getDaysRemaining(sub.currentPeriodEnd);
-  const canCancel = sub.status === "active" && !sub.cancelAtPeriodEnd;
+  const canCancel = ["active", "pending_payment"].includes(sub.status);
 
   const formatDate = (d) =>
     d
@@ -74,6 +74,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
           : "border-stone-100 opacity-75",
       )}
     >
+      {sub.status === "pending_payment" && <div className="p-4"><Link className="underline font-semibold" href={`/checkout?code=${encodeURIComponent(sub.paymentCode)}`}>Thanh toán để kích hoạt gói</Link></div>}
       {/* ─── Card Header ─── */}
       <div className="p-5 flex items-start gap-4">
         {/* Box image */}
