@@ -1,18 +1,16 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { getProductsInBoxApi } from "@/app/services/api/boxService";
 
 /**
- * useBoxProducts
- * Lazy-loads products contained within a subscription box.
- * Useful for avoiding unnecessary API calls on initial page load.
+ * useBoxProducts — sản phẩm nằm trong một box (GET /boxes/get-products-in-box/:id).
+ * BE trả { success, data: [{ product, quantity }] } (axios interceptor đã unwrap
+ * response.data). Hook làm phẳng thành [{ ...product, quantity }].
  *
- * @param {string} boxId - The ID of the box to fetch products for
- * @param {Object} options - Configuration options
- * @param {boolean} options.lazy - If true, don't fetch on mount (default: false)
- * @returns {Object} - { products, isLoading, error, hasFetched, refetch }
+ * @param {string} boxId
+ * @param {{ lazy?: boolean }} options  lazy=true: không tự tải khi mount
  */
 export function useBoxProducts(boxId, options = {}) {
   const { lazy = false } = options;
-
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,40 +22,29 @@ export function useBoxProducts(boxId, options = {}) {
       setError("Box ID is required");
       return;
     }
-
     try {
       setIsLoading(true);
       setError(null);
-
-      // Fetch products from the box API
-      const response = await fetch(`/api/boxes/${boxId}/products`);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch products: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      setProducts(data.products || []);
-      setHasFetched(true);
+      const res = await getProductsInBoxApi(boxId);
+      const list = Array.isArray(res?.data) ? res.data : [];
+      setProducts(
+        list
+          .filter((item) => item?.product)
+          .map((item) => ({ ...item.product, quantity: item.quantity ?? 1 })),
+      );
     } catch (err) {
       console.error("[useBoxProducts] Error fetching products:", err);
-      setError(err.message || "Failed to fetch products");
+      setError(err?.response?.data?.message || err?.message || "Failed to fetch products");
       setProducts([]);
     } finally {
+      setHasFetched(true); // đã thử (kể cả lỗi) để effect của caller không lặp vô hạn
       setIsLoading(false);
     }
   }, [boxId]);
 
-  // If not lazy, fetch on mount/boxId change
-  if (!lazy && boxId && !hasFetched && !isLoading) {
-    refetch();
-  }
+  useEffect(() => {
+    if (!lazy && boxId) refetch();
+  }, [lazy, boxId, refetch]);
 
-  return {
-    products,
-    isLoading,
-    error,
-    hasFetched,
-    refetch,
-  };
+  return { products, isLoading, error, hasFetched, refetch };
 }

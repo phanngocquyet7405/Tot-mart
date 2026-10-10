@@ -1,8 +1,17 @@
 import { axiosConfig } from "./axiosConfig";
 import { API_ENDPOINTS } from "./apiEndpoints";
 
+// Timeout mặc định 10s quá ngắn khi API Render đang cold start (30–60s).
 export const loginApi = (email, password, rememberMe = false) =>
-  axiosConfig.post(API_ENDPOINTS.AUTH.LOGIN, { email, password, rememberMe });
+  axiosConfig.post(
+    API_ENDPOINTS.AUTH.LOGIN,
+    { email, password, rememberMe },
+    { timeout: 60000 },
+  );
+
+// Đánh thức server (endpoint công khai)
+export const pingApi = () =>
+  axiosConfig.get(API_ENDPOINTS.AUTH.HEALTH, { timeout: 60000 });
 
 export const logoutApi = () => axiosConfig.post(API_ENDPOINTS.AUTH.LOGOUT);
 

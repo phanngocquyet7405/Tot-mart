@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
-import { getBoxByIdApi, updateBoxApi } from "@/app/services/api/boxService";
+import { getAdminBoxByIdApi, updateBoxApi } from "@/app/services/api/boxService";
 import { getAllProductsApi } from "@/app/services/api/productServices";
 import RichTextEditor from "../../components/ui/RichTextEditor";
 
@@ -30,7 +30,7 @@ export default function UpdateBoxPage() {
     async function fetchData() {
       try {
         const [boxRes, productsRes] = await Promise.all([
-          getBoxByIdApi(id),
+          getAdminBoxByIdApi(id),
           getAllProductsApi(),
         ]);
         const box = boxRes.data;

@@ -7,6 +7,11 @@ export const getAllBoxesApi = () =>
 export const getBoxByIdApi = (id) =>
   axiosConfig.get(API_ENDPOINTS.BOXES.PUBLIC_BY_ID(id));
 
+// Trang quản trị cần xem MỌI box (hết hạn, chưa tới hạn, quà tặng) → endpoint admin.
+// getBoxByIdApi (public) chỉ trả box đang bán, không phải quà tặng.
+export const getAdminBoxByIdApi = (id) =>
+  axiosConfig.get(API_ENDPOINTS.BOXES.GET_BY_ID(id));
+
 export const getProductsInBoxApi = (id) =>
   axiosConfig.get(API_ENDPOINTS.BOXES.GET_PRODUCTS(id));
 

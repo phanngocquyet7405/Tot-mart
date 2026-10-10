@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useContext, useCallback } from "react";
+import { useState, useContext, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Loader2, Eye, EyeOff } from "lucide-react";
@@ -10,7 +10,7 @@ import AuthCard from "@/app/(client)/components/ui/auth/auth_card";
 import FormInput from "@/app/(client)/components/ui/auth/form_input";
 import AuthButton from "@/app/(client)/components/ui/auth/auth_button";
 import { AppContext } from "@/app/context/AppContext";
-import { loginApi } from "../../services/api/authService";
+import { loginApi, pingApi } from "../../services/api/authService";
 import { saveToken, getTokenRole } from "@/app/middleware/tokenMiddleware";
 import { withGuest } from "@/app/middleware/authMiddleware";
 
@@ -23,6 +23,11 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Đánh thức API (Render cold start) trong lúc người dùng nhập thông tin.
+  useEffect(() => {
+    pingApi().catch(() => {});
+  }, []);
 
   const handleChange = useCallback(
     (e) => {

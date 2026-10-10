@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { AlertCircle, Trash2, Package } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
-import { getBoxByIdApi, deleteBoxApi } from "@/app/services/api/boxService";
+import { getAdminBoxByIdApi, deleteBoxApi } from "@/app/services/api/boxService";
 import { getExcerpt } from "@/app/util/formatter";
 
 const fmtPrice = (val) =>
@@ -26,7 +26,7 @@ export default function DeleteBoxPage() {
   useEffect(() => {
     async function fetchBox() {
       try {
-        const res = await getBoxByIdApi(id);
+        const res = await getAdminBoxByIdApi(id);
         setBox(res.data);
       } catch (err) {
         setApiError(err.response?.data?.message || err.message);

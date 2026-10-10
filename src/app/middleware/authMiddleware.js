@@ -12,56 +12,15 @@ export function withAuth(WrappedComponent, options = {}) {
     const router = useRouter();
     const { user, isLoading } = useContext(AppContext);
 
-    // ── DEBUG: trace mỗi lần AuthGuard render ──────────────────────────────
-    console.log(
-      "DEBUG [withAuth] render —",
-      "isLoading:",
-      isLoading,
-      "| user:",
-      user,
-      "| checkTokenValid:",
-      checkTokenValid(),
-    );
-
     useLayoutEffect(() => {
-      console.log(
-        "DEBUG [withAuth] useLayoutEffect fired —",
-        "isLoading:",
-        isLoading,
-        "| user:",
-        user,
-      );
-
-      if (isLoading) {
-        console.log("DEBUG [withAuth] → đang loading, bỏ qua");
-        return;
-      }
-
-      const tokenOk = checkTokenValid();
-      console.log("DEBUG [withAuth] tokenOk:", tokenOk, "| user:", !!user);
-
-      if (!user || !tokenOk) {
-        console.warn(
-          "DEBUG [withAuth] → REDIRECT vì",
-          !user ? "user null" : "token invalid",
-          "→",
-          `${redirectTo}?session=expired`,
-        );
+      if (isLoading) return;
+      if (!user || !checkTokenValid()) {
         router.replace(`${redirectTo}?session=expired`);
-      } else {
-        console.log("DEBUG [withAuth] → OK, render component");
       }
     }, [user, isLoading, router]);
 
-    if (isLoading) {
-      console.log("DEBUG [withAuth] render null (isLoading)");
-      return null;
-    }
-
-    if (!user || !checkTokenValid()) {
-      console.log("DEBUG [withAuth] render null (no user/token)");
-      return null;
-    }
+    if (isLoading) return null;
+    if (!user || !checkTokenValid()) return null;
 
     return <WrappedComponent {...props} />;
   }

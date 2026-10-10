@@ -49,8 +49,51 @@ export const createProductApi = (formData) =>
     headers: { "Content-Type": "multipart/form-data" },
   });
 
-export const getAllProductsApi = (params = {}) =>
+// BE phân trang danh sách sản phẩm (mặc định 10/trang, tối đa 100). Nhiều màn
+// hình (trang chủ, danh mục, thương hiệu, giỏ hàng, menu, dashboard, form box…)
+// gọi getAllProductsApi() không tham số và cần TOÀN BỘ sản phẩm, nên khi không có
+// params hàm này gom đủ mọi trang.
+const PRODUCTS_PAGE_SIZE = 100;
+
+/** Đúng một trang: params = { page, limit, keyword, category, brand, sort… } */
+export const getProductsPageApi = (params = {}) =>
   axiosConfig.get(API_ENDPOINTS.PRODUCTS.GET_ALL, { params });
+
+let allProductsInflight = null;
+
+async function fetchEveryProductPage() {
+  const first = await getProductsPageApi({ page: 1, limit: PRODUCTS_PAGE_SIZE });
+  const totalPages = first?.pagination?.totalPages ?? 1;
+  if (totalPages <= 1) return first;
+
+  const rest = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, i) =>
+      getProductsPageApi({ page: i + 2, limit: PRODUCTS_PAGE_SIZE }),
+    ),
+  );
+  const data = [first, ...rest].flatMap((r) => (Array.isArray(r?.data) ? r.data : []));
+  return {
+    ...first,
+    data,
+    pagination: { ...first.pagination, page: 1, limit: data.length, totalPages: 1 },
+  };
+}
+
+/**
+ * - Có params (page/limit/keyword/…) → đúng một request theo tham số.
+ * - Không có params → toàn bộ sản phẩm. Các lời gọi đồng thời dùng chung một
+ *   lượt tải; mỗi nơi nhận bản sao riêng của mảng data.
+ */
+export const getAllProductsApi = async (params = {}) => {
+  if (params && Object.keys(params).length > 0) return getProductsPageApi(params);
+  if (!allProductsInflight) {
+    allProductsInflight = fetchEveryProductPage().finally(() => {
+      allProductsInflight = null;
+    });
+  }
+  const res = await allProductsInflight;
+  return { ...res, data: Array.isArray(res?.data) ? [...res.data] : res?.data };
+};
 
 export const getProductByIdApi = (id) =>
   axiosConfig.get(API_ENDPOINTS.PRODUCTS.GET_BY_ID(id));
