@@ -5,7 +5,17 @@ import { useRouter, useParams } from "next/navigation";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
-import { getAdminBoxByIdApi, updateBoxApi } from "@/app/services/api/boxService";
+import {
+  adjustBoxStockApi,
+  getAdminBoxByIdApi,
+  updateBoxApi,
+} from "@/app/services/api/boxService";
+import {
+  BaseDialog,
+  BaseDialogBody,
+  BaseDialogFooter,
+  BaseDialogHeader,
+} from "../../components/SubscribePlans/PlanTemplate/BaseDialog.jsx";
 import { getAllProductsApi } from "@/app/services/api/productServices";
 import RichTextEditor from "../../components/ui/RichTextEditor";
 
@@ -25,6 +35,10 @@ export default function UpdateBoxPage() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [apiError, setApiError] = useState("");
+  const [stockDialogOpen, setStockDialogOpen] = useState(false);
+  const [stockDelta, setStockDelta] = useState("");
+  const [stockReason, setStockReason] = useState("");
+  const [isAdjustingStock, setIsAdjustingStock] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -113,10 +127,33 @@ export default function UpdateBoxPage() {
     }
   };
 
+  const handleAdjustStock = async (e) => {
+    e.preventDefault();
+    const delta = Number(stockDelta);
+    const currentStock = Number(form.stock) || 0;
+    if (!Number.isInteger(delta) || currentStock + delta < 0) return;
+    setIsAdjustingStock(true);
+    try {
+      const res = await adjustBoxStockApi(id, {
+        delta,
+        ...(stockReason.trim() ? { reason: stockReason.trim() } : {}),
+      });
+      const nextStock = res.data?.data?.stock ?? res.data?.stock ?? currentStock + delta;
+      setForm((prev) => ({ ...prev, stock: nextStock }));
+      setStockDialogOpen(false);
+      setStockDelta("");
+      setStockReason("");
+      toast.success(res.data?.message || "Điều chỉnh tồn kho thành công");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Điều chỉnh tồn kho thất bại");
+    } finally {
+      setIsAdjustingStock(false);
+    }
+  };
+
   const validate = () => {
     const newErrors = {};
     if (!form.name?.trim()) newErrors.name = "Tên box là bắt buộc";
-    if (form.stock < 1) newErrors.stock = "Số lượng tồn kho phải >= 1";
     if (!form.description?.trim()) newErrors.description = "Mô tả là bắt buộc";
     if (!form.validFrom) newErrors.validFrom = "Ngày bắt đầu là bắt buộc";
     if (!form.validTo) newErrors.validTo = "Ngày kết thúc là bắt buộc";
@@ -135,7 +172,6 @@ export default function UpdateBoxPage() {
     try {
       const formData = new FormData();
       formData.append("name", form.name.trim());
-      formData.append("stock", Number(form.stock));
       formData.append("descriptions", form.description.trim());
       formData.append("discountPercent", Number(form.discountPercent) || 0);
       formData.append("isGift", String(form.isGift));
@@ -235,13 +271,18 @@ export default function UpdateBoxPage() {
                   <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
                     Tồn kho *
                   </label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={form.stock}
-                    onChange={(e) => handleChange("stock", +e.target.value)}
-                    className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${errors.stock ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={form.stock}
+                      readOnly
+                      aria-label="Tồn kho hiện tại"
+                      className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 dark:text-gray-100"
+                    />
+                    <button type="button" onClick={() => setStockDialogOpen(true)} className="shrink-0 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                      Điều chỉnh
+                    </button>
+                  </div>
                   {errors.stock && (
                     <span className="text-xs text-red-500">{errors.stock}</span>
                   )}
@@ -408,6 +449,24 @@ export default function UpdateBoxPage() {
           </div>
         </Card>
       </div>
+
+      <BaseDialog open={stockDialogOpen} onOpenChange={setStockDialogOpen}>
+        <BaseDialogHeader title="Điều chỉnh tồn kho" subtitle={`Tồn kho hiện tại: ${form.stock}`} />
+        <form onSubmit={handleAdjustStock}>
+          <BaseDialogBody className="flex flex-col gap-4">
+            <label className="flex flex-col gap-2 text-sm font-medium">Thay đổi số lượng
+              <input type="number" step="1" value={stockDelta} onChange={(e) => setStockDelta(e.target.value)} placeholder="Ví dụ: 10 hoặc -3" required className="rounded-md border border-gray-200 px-3 py-2 dark:border-gray-700 dark:bg-gray-900" />
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-medium">Lý do (không bắt buộc)
+              <input value={stockReason} onChange={(e) => setStockReason(e.target.value)} placeholder="Nhập lý do điều chỉnh" className="rounded-md border border-gray-200 px-3 py-2 dark:border-gray-700 dark:bg-gray-900" />
+            </label>
+          </BaseDialogBody>
+          <BaseDialogFooter>
+            <button type="button" onClick={() => setStockDialogOpen(false)} className="rounded-md border border-gray-200 px-4 py-2 text-sm dark:border-gray-700">Hủy</button>
+            <button type="submit" disabled={isAdjustingStock} className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white disabled:opacity-50">{isAdjustingStock ? "Đang lưu..." : "Xác nhận"}</button>
+          </BaseDialogFooter>
+        </form>
+      </BaseDialog>
     </div>
   );
 }
