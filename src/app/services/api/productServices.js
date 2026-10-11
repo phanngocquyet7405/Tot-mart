@@ -103,6 +103,9 @@ export const updateProductApi = (id, formData) =>
     headers: { "Content-Type": "multipart/form-data" },
   });
 
+export const adjustProductStockApi = (id, data) =>
+  axiosConfig.patch(API_ENDPOINTS.PRODUCTS.ADJUST_STOCK(id), data);
+
 export const deleteProductApi = (id) =>
   axiosConfig.delete(API_ENDPOINTS.PRODUCTS.DELETE(id));
 

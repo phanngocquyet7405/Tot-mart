@@ -33,10 +33,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import {
+  BaseDialog,
+  BaseDialogBody,
+  BaseDialogFooter,
+  BaseDialogHeader,
+} from "../../components/SubscribePlans/PlanTemplate/BaseDialog.jsx";
 
 // API Services
 import {
   updateProductApi,
+  adjustProductStockApi,
   getAllCategoriesApi,
   getAllBrandsApi,
   getAllProductsApi,
@@ -54,6 +61,20 @@ export default function UpdateProductPage() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [stockDialogOpen, setStockDialogOpen] = useState(false);
+  const [stockDelta, setStockDelta] = useState("");
+  const [stockReason, setStockReason] = useState("");
+  const [isAdjustingStock, setIsAdjustingStock] = useState(false);
+  const stockDeltaNumber = Number(stockDelta);
+  const stockCurrent = Number(formData.stock) || 0;
+  const stockDeltaValid =
+    stockDelta.trim() !== "" &&
+    Number.isInteger(stockDeltaNumber) &&
+    stockDeltaNumber !== 0;
+  const stockNextPreview = stockCurrent + stockDeltaNumber;
+  const stockWouldBeNegative = stockDeltaValid && stockNextPreview < 0;
+  const canSubmitStockAdjust =
+    stockDeltaValid && !stockWouldBeNegative && !isAdjustingStock;
 
   // States Form
   const [currentId, setCurrentId] = useState(params?.id);
@@ -152,9 +173,9 @@ export default function UpdateProductPage() {
     setIsSubmitting(true);
 
     const submitData = new FormData();
-    Object.entries(formData).forEach(([key, value]) =>
-      submitData.append(key, value),
-    );
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key !== "stock") submitData.append(key, value);
+    });
     submitData.append("existingImages", JSON.stringify(existingImages));
     newImages.forEach((img) => submitData.append("images", img.file));
 
@@ -168,6 +189,30 @@ export default function UpdateProductPage() {
       toast.error("Cập nhật thất bại");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleAdjustStock = async (e) => {
+    e.preventDefault();
+    const delta = Number(stockDelta);
+    const currentStock = Number(formData.stock) || 0;
+    if (!canSubmitStockAdjust) return;
+    setIsAdjustingStock(true);
+    try {
+      const res = await adjustProductStockApi(currentId, {
+        delta,
+        ...(stockReason.trim() ? { reason: stockReason.trim() } : {}),
+      });
+      const nextStock = res.data?.data?.stock ?? res.data?.stock ?? currentStock + delta;
+      setFormData((prev) => ({ ...prev, stock: nextStock }));
+      setStockDialogOpen(false);
+      setStockDelta("");
+      setStockReason("");
+      toast.success(res.data?.message || "Điều chỉnh tồn kho thành công");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Điều chỉnh tồn kho thất bại");
+    } finally {
+      setIsAdjustingStock(false);
     }
   };
 
@@ -323,13 +368,12 @@ export default function UpdateProductPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>Số lượng tồn</Label>
-                      <Input
-                        type="number"
-                        value={formData.stock}
-                        onChange={(e) =>
-                          setFormData({ ...formData, stock: e.target.value })
-                        }
-                      />
+                      <div className="flex gap-2">
+                        <Input value={formData.stock} readOnly aria-label="Tồn kho hiện tại" />
+                        <Button type="button" variant="outline" onClick={() => setStockDialogOpen(true)}>
+                          Điều chỉnh
+                        </Button>
+                      </div>
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -475,6 +519,33 @@ export default function UpdateProductPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <BaseDialog open={stockDialogOpen} onOpenChange={setStockDialogOpen}>
+        <BaseDialogHeader title="Điều chỉnh tồn kho" subtitle={`Tồn kho hiện tại: ${formData.stock}`} />
+        <form onSubmit={handleAdjustStock}>
+          <BaseDialogBody className="flex flex-col gap-4">
+            <label className="flex flex-col gap-2 text-sm font-medium">Thay đổi số lượng
+              <Input type="number" step="1" value={stockDelta} onChange={(e) => setStockDelta(e.target.value)} placeholder="Ví dụ: 10 hoặc -3" required />
+            </label>
+            <p
+              className={`text-sm ${stockWouldBeNegative ? "text-red-600" : "text-gray-600 dark:text-gray-300"}`}
+            >
+              {!stockDeltaValid
+                ? "Nhập số nguyên khác 0 (số âm để giảm tồn kho)"
+                : stockWouldBeNegative
+                  ? `Không thể giảm quá tồn kho hiện tại (${stockCurrent})`
+                  : `Tồn kho sau điều chỉnh: ${stockNextPreview}`}
+            </p>
+            <label className="flex flex-col gap-2 text-sm font-medium">Lý do (không bắt buộc)
+              <Input value={stockReason} onChange={(e) => setStockReason(e.target.value)} placeholder="Nhập lý do điều chỉnh" />
+            </label>
+          </BaseDialogBody>
+          <BaseDialogFooter>
+            <Button type="button" variant="outline" onClick={() => setStockDialogOpen(false)}>Hủy</Button>
+            <Button type="submit" disabled={!canSubmitStockAdjust}>{isAdjustingStock ? "Đang lưu..." : "Xác nhận"}</Button>
+          </BaseDialogFooter>
+        </form>
+      </BaseDialog>
     </div>
   );
 }

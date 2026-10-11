@@ -28,5 +28,8 @@ export const updateBoxApi = (id, formData) =>
     headers: { "Content-Type": "multipart/form-data" },
   });
 
+export const adjustBoxStockApi = (id, data) =>
+  axiosConfig.patch(API_ENDPOINTS.BOXES.ADJUST_STOCK(id), data);
+
 export const deleteBoxApi = (id) =>
   axiosConfig.delete(API_ENDPOINTS.BOXES.DELETE(id));

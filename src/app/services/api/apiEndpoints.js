@@ -68,6 +68,7 @@ export const API_ENDPOINTS = {
     GET_ALL: "/products/get-all-products",
     GET_BY_ID: (id) => `/products/get-products-by-id/${id}`,
     UPDATE: (id) => `/products/update-product/${id}`,
+    ADJUST_STOCK: (id) => `/products/adjust-stock/${id}`,
     DELETE: (id) => `/products/delete-product/${id}`,
   },
 
@@ -96,6 +97,7 @@ export const API_ENDPOINTS = {
     GET_OFFERS: "/boxes/get-box-offer-discount-coupons",
     CREATE: "/boxes/create-box",
     UPDATE: (id) => `/boxes/update-box/${id}`,
+    ADJUST_STOCK: (id) => `/boxes/adjust-stock/${id}`,
     DELETE: (id) => `/boxes/delete-box/${id}`,
   },
 

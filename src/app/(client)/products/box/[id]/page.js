@@ -16,6 +16,7 @@ import {
   getProductsInBoxApi,
 } from "@/app/services/api/boxService";
 import { useAddToCart } from "@/app/hook/useAddToCart";
+import { boxSalePrice, boxOriginalPrice, toBoxCartItem } from "./boxPricing";
 
 // Icons từ Lucide tương thích thiết kế Shadcn cao cấp
 import {
@@ -103,14 +104,9 @@ export default function BoxDetailPage() {
     if (id) fetchData();
   }, [id]);
 
-  // Tính toán giá tiền sau khuyến mãi
-  const getFinalPrice = () => {
-    if (!box) return 0;
-    if (box.discountPercent > 0) {
-      return box.value - (box.value * box.discountPercent) / 100;
-    }
-    return box.value;
-  };
+  // box.value đã là giá bán sau khuyến mãi (xem boxPricing.js) — không trừ thêm.
+  const salePrice = boxSalePrice(box);
+  const originalPrice = boxOriginalPrice(box);
 
   // Điều khiển tăng giảm số lượng
   const increaseQty = () => {
@@ -127,13 +123,7 @@ export default function BoxDetailPage() {
   const handleAddToCart = () => {
     if (!box) return;
 
-    const finalPrice = getFinalPrice();
-    const itemToAdd = {
-      _id: box._id,
-      name: box.name,
-      image: box.images?.[0]?.url || PLACEHOLDER_IMAGE,
-      price: finalPrice,
-    };
+    const itemToAdd = toBoxCartItem(box, PLACEHOLDER_IMAGE);
 
     // 1 lời gọi duy nhất với quantity — addToCart (hook dùng chung) tự lo
     // toast báo thành công và mở Cart Drawer (dùng chung ở MainHeader).
@@ -266,11 +256,11 @@ export default function BoxDetailPage() {
             {/* Giá tiền */}
             <div className="flex items-baseline gap-3 p-4 bg-[#faf8f4] rounded-xl border border-stone-100">
               <span className="text-2xl md:text-3xl text-red-600 font-black">
-                {getFinalPrice().toLocaleString("vi-VN")}₫
+                {salePrice.toLocaleString("vi-VN")}₫
               </span>
-              {box.discountPercent > 0 && (
+              {originalPrice && (
                 <span className="text-stone-400 line-through text-sm">
-                  {box.value?.toLocaleString("vi-VN")}₫
+                  {originalPrice.toLocaleString("vi-VN")}₫
                 </span>
               )}
             </div>
