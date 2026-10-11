@@ -28,7 +28,7 @@ export function ProductPurchasePanel({
   onShare,
   fmtPrice,
 }) {
-  const discount = product.discount || 0;
+  const discount = product.salePercent || 0;
   const stock = product.stock ?? 0;
 
   return (

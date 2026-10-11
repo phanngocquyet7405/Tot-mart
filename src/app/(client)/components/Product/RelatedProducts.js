@@ -37,9 +37,9 @@ export function RelatedProducts({ products = [], fmtPrice }) {
                     e.target.src = PLACEHOLDER_IMAGE;
                   }}
                 />
-                {p.discount > 0 && (
+                {p.salePercent > 0 && (
                   <span className="absolute top-3 right-3 bg-red-600 text-white px-2 py-1 rounded-full text-[10px] font-black">
-                    -{p.discount}%
+                    -{p.salePercent}%
                   </span>
                 )}
               </div>
@@ -51,7 +51,7 @@ export function RelatedProducts({ products = [], fmtPrice }) {
                   <span className="text-base font-black text-red-600">
                     {fmtPrice(finalPrice)}
                   </span>
-                  {p.discount > 0 && (
+                  {p.salePercent > 0 && (
                     <span className="text-xs text-stone-400 line-through">
                       {fmtPrice(p.price)}
                     </span>

@@ -52,8 +52,8 @@ export default function PasswordRecovery({ reset = false, token = "" }) {
             : invalidToken ? <p role="alert" className="text-red-700 mb-6">Liên kết không hợp lệ. Vui lòng yêu cầu liên kết mới.</p>
             : <form onSubmit={submit} className="space-y-5 mb-6">
               {reset ? <>
-                <FormInput Label="Mật khẩu mới (ít nhất 6 ký tự)" id="password" name="password" type="password" minLength={6} autoComplete="new-password" required disabled={loading} />
-                <FormInput Label="Xác nhận mật khẩu" id="confirmPassword" name="confirmPassword" type="password" minLength={6} autoComplete="new-password" required disabled={loading} />
+                <FormInput Label="Mật khẩu mới (ít nhất 8 ký tự)" id="password" name="password" type="password" minLength={8} autoComplete="new-password" required disabled={loading} />
+                <FormInput Label="Xác nhận mật khẩu" id="confirmPassword" name="confirmPassword" type="password" minLength={8} autoComplete="new-password" required disabled={loading} />
               </> : <FormInput Label="Địa chỉ email" id="email" name="email" type="email" autoComplete="email" required disabled={loading} />}
               {error && <p role="alert" className="text-red-700 text-sm">{error}</p>}
               <AuthButton type="submit" disabled={loading}>{loading ? "Đang xử lý..." : reset ? "Lưu mật khẩu" : "Gửi liên kết"}</AuthButton>

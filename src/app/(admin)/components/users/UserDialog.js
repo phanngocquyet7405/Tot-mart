@@ -201,6 +201,8 @@ export default function UserDialog({ open, onOpenChange, user, onSuccess }) {
       return toast.error("Vui lòng nhập email");
     if (!isEdit && !formData.password)
       return toast.error("Vui lòng nhập mật khẩu");
+    if (!isEdit && formData.password.length < 8)
+      return toast.error("Mật khẩu phải có ít nhất 8 ký tự");
 
     setIsSaving(true);
     try {
@@ -297,7 +299,7 @@ export default function UserDialog({ open, onOpenChange, user, onSuccess }) {
                       type="password"
                       value={formData.password}
                       onChange={handleChange}
-                      placeholder="Tối thiểu 6 ký tự"
+                      placeholder="Tối thiểu 8 ký tự"
                     />
                   </div>
                 </div>

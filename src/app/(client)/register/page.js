@@ -44,8 +44,8 @@ export default function RegisterPage() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự!");
+    if (formData.password.length < 8) {
+      setError("Mật khẩu phải có ít nhất 8 ký tự!");
       return;
     }
 
@@ -71,7 +71,7 @@ export default function RegisterPage() {
   };
 
   // Password strength indicator
-  const passwordStrength = formData.password.length >= 6 ? "strong" : formData.password.length >= 3 ? "medium" : "weak";
+  const passwordStrength = formData.password.length >= 8 ? "strong" : formData.password.length >= 3 ? "medium" : "weak";
 
   return (
     <AuthContainer>

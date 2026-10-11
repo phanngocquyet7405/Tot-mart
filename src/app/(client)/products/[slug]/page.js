@@ -16,9 +16,7 @@ import { ProductInfoTabs } from "../../components/Product/ProductInfoTabs";
 import { RelatedProducts } from "../../components/Product/RelatedProducts";
 import { ProductLoadingState } from "../../components/Product/ProductLoadingState";
 import { ProductNotFoundState } from "../../components/Product/ProductNotFoundState";
-import { BulkDiscounts } from "../../components/Product/Bulk_Discounts";
 import { FrequentlyBought } from "../../components/Product/FrequentlyBought";
-import { GiftOptions } from "../../components/Product/GiftOptions";
 
 export default function ProductDetailPage({ params: paramsPromise }) {
   const params = use(paramsPromise);
@@ -36,7 +34,6 @@ export default function ProductDetailPage({ params: paramsPromise }) {
     isWishlisted,
     isAddingToCart,
     isBuyingNow,
-    selectQuantity,
     increaseQty,
     decreaseQty,
     handleAddToCart,
@@ -103,7 +100,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
             productName={product.name}
             selectedImage={selectedImage}
             onSelectImage={setSelectedImage}
-            discountPercent={product.discount || 0}
+            discountPercent={product.salePercent || 0}
           />
 
           <div className="lg:col-span-5 space-y-6">
@@ -122,13 +119,6 @@ export default function ProductDetailPage({ params: paramsPromise }) {
               onShare={handleShare}
               fmtPrice={fmtPrice}
             />
-
-            <BulkDiscounts
-              basePrice={product.price}
-              onSelectQuantity={selectQuantity}
-            />
-
-            <GiftOptions />
           </div>
         </div>
 
