@@ -114,7 +114,7 @@ export function OrderDetailDialog({
             <div className="space-y-2">
               {order.items.map((item, idx) => (
                 <div
-                  key={item.productId ?? idx}
+                  key={`${item.lineId || item.productId}:${idx}`}
                   className="flex items-center justify-between text-sm rounded-lg border border-border/60 px-3 py-2"
                 >
                   <div>
@@ -127,7 +127,7 @@ export function OrderDetailDialog({
                     </p>
                   </div>
                   <p className="font-semibold">
-                    {formatCurrency((item.price ?? 0) * (item.quantity ?? 1))}
+                    {formatCurrency(item.lineTotal)}
                   </p>
                 </div>
               ))}
@@ -140,8 +140,10 @@ export function OrderDetailDialog({
           <div className="space-y-1.5 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>Phí vận chuyển</span>
-              <span>{formatCurrency(order.shippingFee)}</span>
+              <span>{order.shippingMode === "separate" ? "Xác nhận riêng" : formatCurrency(order.shippingFee)}</span>
             </div>
+            {order.giftFee > 0 && <div className="flex justify-between text-muted-foreground"><span>Gói quà</span><span>{formatCurrency(order.giftFee)}</span></div>}
+            {order.bulkDiscountAmount > 0 && <p className="text-xs text-muted-foreground">Đã giảm số lượng {formatCurrency(order.bulkDiscountAmount)} trong tiền hàng.</p>}
             {order.discount > 0 && (
               <div className="flex justify-between text-muted-foreground">
                 <span>Giảm giá</span>

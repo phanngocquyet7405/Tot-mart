@@ -2,8 +2,7 @@
  * OrderSummary.js
  * Cột phải — "phiếu đơn hàng" (sticky). Liệt kê TẤT CẢ sản phẩm có ảnh; khi
  * nhiều hơn 4 dòng, danh sách cuộn bên trong (max-h) thay vì cắt bớt như
- * trước đây (slice(0, 3) + "+N sản phẩm khác"). Có thanh tiến độ tới mức
- * miễn phí vận chuyển.
+ * trước đây (slice(0, 3) + "+N sản phẩm khác"). Phí giao hàng xác nhận riêng.
  */
 
 "use client";
@@ -12,9 +11,6 @@ import { cartLineKey } from "@/app/util/cartLine.mjs";
 import { Truck, RotateCcw, Gift } from "lucide-react";
 import { CartLine } from "./CartLine";
 import { formatCurrency } from "@/app/util/formatter";
-
-// Khớp calcShippingFee (Checkoutpageservice) và BE: subtotal < 500.000 → tính ship
-const FREE_SHIP_THRESHOLD = 500_000;
 
 function CostRow({ label, value, tone }) {
   const toneClass =
@@ -35,7 +31,6 @@ export function OrderSummary({
   cartItems,
   hasProducts,
   cartTotal,
-  shippingFee,
   discount,
   giftFee = 0,
   bulkDiscountAmount = 0,
@@ -44,8 +39,6 @@ export function OrderSummary({
   const lineCount = cartItems.length;
   const totalQty = cartItems.reduce((sum, i) => sum + (i.quantity ?? 1), 0);
   const scrolls = lineCount > 4;
-  const remainingForFreeShip = Math.max(0, FREE_SHIP_THRESHOLD - cartTotal);
-  const progress = Math.min(100, Math.round((cartTotal / FREE_SHIP_THRESHOLD) * 100));
 
   return (
     <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
@@ -95,36 +88,12 @@ export function OrderSummary({
           {discount > 0 && (
             <CostRow label="Giảm giá" value={`-${formatCurrency(discount)}`} tone="discount" />
           )}
-          <CostRow
-            label="Vận chuyển"
-            value={shippingFee === 0 ? "Miễn phí" : formatCurrency(shippingFee)}
-            tone={shippingFee === 0 ? "free" : undefined}
-          />
+          <p className="text-xs text-stone-600">Giá trên chưa bao gồm phí giao hàng. Phí giao hàng được xác nhận riêng theo địa chỉ nhận hàng.</p>
 
-          {shippingFee > 0 && hasProducts && (
-            <div className="pt-1">
-              <div
-                className="h-1.5 rounded-full bg-[#F0DDD5] overflow-hidden"
-                role="progressbar"
-                aria-valuenow={progress}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-label="Tiến độ tới mức miễn phí vận chuyển"
-              >
-                <div
-                  className="h-full rounded-full bg-[#C85C3C] transition-[width] duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <p className="text-xs text-stone-600 mt-1.5">
-                Mua thêm {formatCurrency(remainingForFreeShip)} để được miễn phí vận chuyển
-              </p>
-            </div>
-          )}
         </div>
 
         <div className="flex items-baseline justify-between px-6 py-5 bg-white/60 border-t border-[#F0DDD5]">
-          <span className="text-sm font-semibold text-[#2C1810]">Tổng cộng</span>
+          <span className="text-sm font-semibold text-[#2C1810]">Tiền hàng</span>
           <span className="font-serif text-3xl font-semibold text-[#C85C3C] tabular-nums">
             {formatCurrency(finalTotal)}
           </span>

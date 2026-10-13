@@ -179,6 +179,9 @@ function normalizeOrder(raw) {
               : "—",
           quantity: p.quantity ?? 1,
           price: p.unitPrice ?? 0,
+          lineTotal: p.totalPrice ?? (p.unitPrice ?? 0) * (p.quantity ?? 1),
+          lineId: p.lineId,
+          gift: p.gift,
         }))
       : [],
     // Reshape từ shippingAddress thật (fullName/phone/address/district/city)
@@ -193,7 +196,10 @@ function normalizeOrder(raw) {
     },
     note: raw.note ?? "",
     shippingFee: raw.shippingFee ?? 0,
+    shippingMode: raw.shippingMode || "legacy_fixed",
     discount: raw.discountAmount ?? 0,
+    giftFee: raw.giftFee ?? 0,
+    bulkDiscountAmount: raw.bulkDiscountAmount ?? 0,
     totalPrice: raw.totalAmount ?? 0,
     customer: {
       // raw.userId đã được BE populate("userId", "name email phone")

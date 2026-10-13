@@ -159,8 +159,8 @@ export function ProductPurchasePanel({
             <Truck size={16} />
           </div>
           <div>
-            <p className="font-bold text-stone-800">Miễn phí ship</p>
-            <p className="text-[10px]">Đơn hàng toàn quốc</p>
+            <p className="font-bold text-stone-800">Phí ship xác nhận riêng</p>
+            <p className="text-[10px]">Theo địa chỉ nhận hàng</p>
           </div>
         </div>
         <div className="flex items-center gap-2.5">

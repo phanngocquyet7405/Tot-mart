@@ -6,7 +6,7 @@ import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const ANNOUNCEMENTS = [
   {
-    text: "Miễn phí vận chuyển cho đơn từ 500K",
+    text: "Phí giao hàng xác nhận riêng theo địa chỉ",
     cta: "Mua ngay →",
     href: "/homepage",
   },
@@ -16,7 +16,7 @@ const ANNOUNCEMENTS = [
     href: "/totmartbox",
   },
   {
-    text: "Tiết kiệm 20% với gói Subscribe — Dùng mã HELLO150",
+    text: "Khám phá các gói Subscribe của TotMart",
     cta: "Đăng ký →",
     href: "/products/Subscriber",
   },

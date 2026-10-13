@@ -44,7 +44,7 @@ export default function MyOrdersPage() {
           <ul className="divide-y">{order.products.map((item, index) => <li key={index} className="flex justify-between gap-4 py-2"><span>{item.name} × {item.quantity}</span><span>{money(item.totalPrice)}</span></li>)}</ul>
           <p className="text-right font-bold">Tổng cộng: {money(order.totalAmount)}</p>
           <details className="text-sm"><summary className="cursor-pointer text-green-700">Chi tiết giao hàng</summary>
-            <div className="mt-2 space-y-1"><p>{order.shippingAddress?.fullName} · {order.shippingAddress?.phone}</p><p>{[order.shippingAddress?.address, order.shippingAddress?.district, order.shippingAddress?.city].filter(Boolean).join(", ")}</p><p>Phí giao hàng: {money(order.shippingFee)} · Giảm giá: {money(order.discountAmount)}</p>{order.cancelReason && <p>Lý do hủy: {order.cancelReason}</p>}</div>
+            <div className="mt-2 space-y-1"><p>{order.shippingAddress?.fullName} · {order.shippingAddress?.phone}</p><p>{[order.shippingAddress?.address, order.shippingAddress?.district, order.shippingAddress?.city].filter(Boolean).join(", ")}</p><p>Phí giao hàng: {order.shippingMode === "separate" ? "Xác nhận riêng, chưa bao gồm trong tiền hàng" : money(order.shippingFee)} · Giảm giá: {money(order.discountAmount)}</p>{order.cancelReason && <p>Lý do hủy: {order.cancelReason}</p>}</div>
           </details>
         </article>)}
         {result.pagination.totalPages > 1 && <nav aria-label="Phân trang đơn hàng" className="flex justify-between items-center">

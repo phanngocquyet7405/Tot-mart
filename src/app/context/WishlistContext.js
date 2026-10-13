@@ -15,11 +15,11 @@ import { createContext, useContext, useState, useEffect } from "react";
  */
 const WishlistContext = createContext(null);
 
-
-
 export const WishlistProvider = ({ children }) => {
   const { user, isLoading } = useContext(AppContext);
-  const STORAGE_KEY = user ? `totmart_wishlist_user_${user._id}` : "totmart_wishlist_guest";
+  const STORAGE_KEY = user
+    ? `totmart_wishlist_user_${user._id}`
+    : "totmart_wishlist_guest";
   const [loadedScope, setLoadedScope] = useState(null);
   const [wishlistItems, setWishlistItems] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
@@ -82,12 +82,14 @@ export const WishlistProvider = ({ children }) => {
     localStorage.removeItem(STORAGE_KEY);
   };
 
-  const wishlistCount = isMounted && loadedScope === STORAGE_KEY ? wishlistItems.length : 0;
+  const wishlistCount =
+    isMounted && loadedScope === STORAGE_KEY ? wishlistItems.length : 0;
 
   return (
     <WishlistContext.Provider
       value={{
-        wishlistItems: isMounted && loadedScope === STORAGE_KEY ? wishlistItems : [],
+        wishlistItems:
+          isMounted && loadedScope === STORAGE_KEY ? wishlistItems : [],
         wishlistCount,
         isMounted,
         isInWishlist,

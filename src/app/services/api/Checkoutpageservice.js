@@ -20,7 +20,8 @@ export async function validateCoupon(code, items) {
   try { const quote = await quoteCart(items, code); return { valid: true, discount: quote.discountAmount, quote, message: 'Đã áp dụng mã giảm giá' }; }
   catch (err) { return { valid: false, discount: 0, message: err.response?.data?.message || 'Không kiểm tra được mã giảm giá' }; }
 }
-export function calcShippingFee(total, hasProducts) { return hasProducts && total < 500000 ? 30000 : 0; }
+// Delivery charge is agreed separately, never part of the new checkout total.
+export function calcShippingFee() { return 0; }
 export async function placeOrder({ addressId, paymentMethod, note, couponCode, cartItems = [], quoteFingerprint, cartVersion }) {
   const payload = { addressId, paymentMethod, ...(note ? { note } : {}), ...(couponCode ? { couponCode: couponCode.trim().toUpperCase() } : {}), ...(quoteFingerprint ? { quoteFingerprint } : {}) };
   const scope = `totmart_checkout_attempt_${getTokenUserId() || 'guest'}`;
