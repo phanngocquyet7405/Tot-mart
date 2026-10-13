@@ -135,7 +135,9 @@ function CheckoutPageInner() {
                   coupon={checkout.coupon}
                   setCoupon={checkout.setCoupon}
                   couponApplied={checkout.couponApplied}
-                  discount={checkout.discount}
+                  giftFee={checkout.giftFee}
+            bulkDiscountAmount={checkout.bulkDiscountAmount}
+            discount={checkout.discount}
                   finalTotal={checkout.finalTotal}
                   submitting={checkout.submitting}
                   paymentStatus={checkout.paymentStatus}
@@ -157,6 +159,8 @@ function CheckoutPageInner() {
             hasProducts={checkout.hasProducts}
             cartTotal={checkout.cartTotal}
             shippingFee={checkout.shippingFee}
+            giftFee={checkout.giftFee}
+            bulkDiscountAmount={checkout.bulkDiscountAmount}
             discount={checkout.discount}
             finalTotal={checkout.finalTotal}
           />

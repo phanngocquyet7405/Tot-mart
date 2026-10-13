@@ -1,4 +1,5 @@
 "use client";
+import { cartLineKey } from "@/app/util/cartLine.mjs";
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -230,8 +231,8 @@ export default function CartDrawer({ open, setOpen }) {
               {/* Danh sách sản phẩm */}
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {isMounted && cartItems.length > 0 ? (
-                  cartItems.map((p, i) => (
-                    <CartItem key={p._id || p.id || i} product={p} />
+                  cartItems.map((p) => (
+                    <CartItem key={cartLineKey(p)} product={p} />
                   ))
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-center px-4">

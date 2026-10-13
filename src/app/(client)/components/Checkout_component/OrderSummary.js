@@ -7,6 +7,7 @@
  */
 
 "use client";
+import { cartLineKey } from "@/app/util/cartLine.mjs";
 
 import { Truck, RotateCcw, Gift } from "lucide-react";
 import { CartLine } from "./CartLine";
@@ -36,6 +37,8 @@ export function OrderSummary({
   cartTotal,
   shippingFee,
   discount,
+  giftFee = 0,
+  bulkDiscountAmount = 0,
   finalTotal,
 }) {
   const lineCount = cartItems.length;
@@ -68,8 +71,8 @@ export function OrderSummary({
               tabIndex={scrolls ? 0 : undefined}
               aria-label={scrolls ? "Danh sách sản phẩm, cuộn để xem thêm" : undefined}
             >
-              {cartItems.map((item, i) => (
-                <li key={item._id || item.id || i} className="py-3 first:pt-0 last:pb-0">
+              {cartItems.map((item) => (
+                <li key={cartLineKey(item)} className="py-3 first:pt-0 last:pb-0">
                   <CartLine item={item} compact />
                 </li>
               ))}
@@ -86,6 +89,8 @@ export function OrderSummary({
         <div className="mx-6 mt-4 border-t border-dashed border-[#E8CFC4]" />
 
         <div className="px-6 py-4 space-y-2.5">
+          {bulkDiscountAmount > 0 && <p className="text-xs text-stone-600">Đã giảm số lượng: {formatCurrency(bulkDiscountAmount)}</p>}
+          {giftFee > 0 && <CostRow label="Gói quà" value={formatCurrency(giftFee)} />}
           {hasProducts && <CostRow label="Tạm tính" value={formatCurrency(cartTotal)} />}
           {discount > 0 && (
             <CostRow label="Giảm giá" value={`-${formatCurrency(discount)}`} tone="discount" />
@@ -137,7 +142,7 @@ export function OrderSummary({
         </li>
         <li className="flex items-center gap-2.5">
           <Gift size={15} className="text-[#C85C3C] shrink-0" aria-hidden="true" />
-          Đóng gói quà tặng miễn phí
+          Phí gói quà hiển thị trong báo giá
         </li>
       </ul>
     </aside>

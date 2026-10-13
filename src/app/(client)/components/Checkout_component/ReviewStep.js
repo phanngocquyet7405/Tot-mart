@@ -4,6 +4,7 @@
  */
 
 "use client";
+import { cartLineKey } from "@/app/util/cartLine.mjs";
 
 import { motion } from "framer-motion";
 import { Package, MapPin } from "lucide-react";
@@ -12,7 +13,7 @@ import { CartLine } from "./CartLine";
 import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING } from "./checkoutStyles";
 
 function AddressSummary({ addr, user, onEdit }) {
-  const line = [addr?.street, addr?.ward, addr?.district, addr?.province]
+  const line = [addr?.address || addr?.street, addr?.ward, addr?.district, addr?.city || addr?.province]
     .filter(Boolean)
     .join(", ");
 
@@ -68,8 +69,8 @@ export function ReviewStep({
           aside={`${cartCount} sản phẩm`}
         >
           <ul className="divide-y divide-dashed divide-[#F0DDD5]">
-            {cartItems.map((item, i) => (
-              <li key={item._id || item.id || i} className="py-4 first:pt-0 last:pb-0">
+            {cartItems.map((item) => (
+              <li key={cartLineKey(item)} className="py-4 first:pt-0 last:pb-0">
                 <CartLine item={item} />
               </li>
             ))}

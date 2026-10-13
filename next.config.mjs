@@ -9,6 +9,10 @@ if (!/^https?:\/\//.test(apiUrl))
   throw new Error("API_URL must be an absolute http(s) URL");
 if (process.env.NODE_ENV === "production" && !process.env.API_URL)
   throw new Error("Set API_URL for production builds");
+const target = new URL(apiUrl);
+if (process.env.NODE_ENV === 'production' && process.env.CI !== 'true' &&
+    (target.protocol !== 'https:' || /^(localhost(?:\.|$)|127\.|0\.0\.0\.0$|\[::1\]$)/.test(target.hostname))) throw new Error('Production API_URL must use an HTTPS remote host');
+if (target.username || target.password || target.search || target.hash) throw new Error('API_URL cannot contain credentials/query/hash');
 const hosts = (
   process.env.IMAGE_HOSTS ||
   "res.cloudinary.com,images.unsplash.com,qr.sepay.vn,img.vietqr.io"

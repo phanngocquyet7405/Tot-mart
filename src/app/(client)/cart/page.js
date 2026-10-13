@@ -9,6 +9,7 @@
  */
 
 "use client";
+import { cartLineKey } from "@/app/util/cartLine.mjs";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -92,8 +93,8 @@ export default function CartPage() {
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
               {/* Danh sách sản phẩm */}
               <div className="space-y-4">
-                {cartItems.map((p, i) => (
-                  <CartItem key={p._id || p.id || i} product={p} />
+                {cartItems.map((p) => (
+                  <CartItem key={cartLineKey(p)} product={p} />
                 ))}
               </div>
 

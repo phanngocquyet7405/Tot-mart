@@ -7,7 +7,7 @@ import { axiosConfig } from './axiosConfig';
 export const STEPS = [{ id: 'address', label: 'Địa chỉ', icon: 'MapPin' }, { id: 'review', label: 'Kiểm tra', icon: 'Package' }, { id: 'payment', label: 'Thanh toán', icon: 'CreditCard' }];
 export const PAYMENT_METHODS = [{ id: 'cod', label: 'Thanh toán khi nhận hàng', desc: 'Trả tiền mặt khi nhận', available: true }, { id: 'online', label: 'Chuyển khoản QR (SePay)', desc: 'Xác nhận tự động qua ngân hàng', available: true }];
 export const EMPTY_NEW_ADDRESS = { fullName: '', phone: '', street: '', ward: '', district: '', province: '' };
-export function toCartPayload(items) { return items.map(item => ({ [item.itemType === 'box' ? 'boxId' : 'productId']: item._id || item.id, quantity: item.quantity })); }
+export function toCartPayload(items) { return items.map(item => ({ [item.itemType === 'box' ? 'boxId' : 'productId']: item._id || item.id, quantity: item.quantity, gift: {wrap: item.gift?.wrap || 'none', message: item.gift?.message || ''} })); }
 export async function loadCheckoutUser() {
   try { const id = getTokenUserId(); if (!id) return { success: false, error: 'NO_TOKEN' }; const response = await userService.getUserById(id); return { success: true, user: response.data, addresses: response.data.addresses || [] }; }
   catch (err) { return { success: false, error: err.message }; }
@@ -50,14 +50,20 @@ export async function placeOrder({ addressId, paymentMethod, note, couponCode, c
 }
 export function readOrderStatus(response) {
   const data = response.data || {};
-  return { status: data.paymentStatus === 'paid' ? 'paid' : data.paymentStatus === 'cancelled' ? 'cancelled' : 'pending', cancelled: data.paymentStatus === 'cancelled' || (data.orders?.some(order => order.status === 'cancelled') ?? false), qrUrl: data.payable ? data.qrUrl : undefined, totalAmount: data.totalAmount ?? data.orders?.reduce((sum, order) => sum + order.totalAmount, 0) ?? 0, kind: data.kind, expiresAt: data.expiresAt };
+  const totalAmount = data.totalAmount ?? data.orders?.reduce((sum, order) => sum + order.totalAmount, 0) ?? 0;
+  const remainingAmount = data.remainingAmount ?? (data.paymentStatus === 'paid' ? 0 : totalAmount);
+  return { status: data.paymentStatus === 'paid' ? 'paid' : data.paymentStatus === 'cancelled' ? 'cancelled' : 'pending',
+    cancelled: data.paymentStatus === 'cancelled' || (data.orders?.some(order => order.status === 'cancelled') ?? false),
+    payable: Boolean(data.payable), qrUrl: data.payable && remainingAmount > 0 ? data.qrUrl : undefined,
+    totalAmount, receivedAmount: data.receivedAmount ?? 0, remainingAmount, kind: data.kind, expiresAt: data.expiresAt };
+
 }
 export function pollPaymentStatus(paymentCode, { intervalMs = 4000, timeoutMs = 600000, onStatusChange } = {}) {
   const controller = new AbortController(); let stopped = false, timer;
   const stop = () => { stopped = true; clearTimeout(timer); clearTimeout(deadline); controller.abort(); };
   const deadline = setTimeout(() => { if (!stopped) { stop(); onStatusChange?.({ status: 'timeout' }); } }, timeoutMs);
   const tick = async () => {
-    try { const response = await paymentGatewayService.getOrderStatus(paymentCode, controller.signal); if (stopped) return; const info = readOrderStatus(response); if (info.status === 'paid' || info.cancelled) { stop(); onStatusChange?.({ status: info.cancelled ? 'cancelled' : 'paid' }); return; } }
+    try { const response = await paymentGatewayService.getOrderStatus(paymentCode, controller.signal); if (stopped) return; const info = readOrderStatus(response); if (info.status === 'paid' || info.cancelled) { stop(); onStatusChange?.({ ...info, status: info.cancelled ? 'cancelled' : 'paid' }); return; } onStatusChange?.(info); }
     catch { if (stopped) return; } // A transient network error is retried until the wall-clock deadline.
     if (!stopped) timer = setTimeout(tick, intervalMs);
   };

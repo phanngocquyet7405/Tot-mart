@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { cartLineKey } from '@/app/util/cartLine.mjs';
 import { AppContext } from "@/app/context/AppContext";
 import { useCart } from "@/app/context/CartContext";
 import {
@@ -155,7 +156,7 @@ export function useCheckout() {
         setPaymentMethod("online");
         setPaymentCode(resumeCode);
         setQrUrl(info.qrUrl);
-        setOnlineAmount(info.totalAmount);
+        setOnlineAmount(info.remainingAmount ?? info.totalAmount);
         setPaymentStatus("awaiting_payment");
         setStep("payment");
       })
@@ -194,10 +195,12 @@ export function useCheckout() {
   useEffect(() => {
     if (!paymentCode || paymentStatus !== "awaiting_payment") return;
     return pollPaymentStatus(paymentCode, {
-      onStatusChange: ({ status }) => {
+      onStatusChange: (info) => {
+        const { status } = info;
         if (status === "paid") finishPaid();
         else if (status === "cancelled") handleCancelled();
         else if (status === "timeout") setPaymentStatus("timeout");
+        else if (status === 'pending') { setQrUrl(info.qrUrl || ''); setOnlineAmount(info.remainingAmount ?? info.totalAmount); }
       },
     });
   }, [paymentCode, paymentStatus, pollAttempt, finishPaid, handleCancelled]);
@@ -234,7 +237,7 @@ export function useCheckout() {
         if (!result.success) {
           if (result.cartVersion !== undefined) setCartVersion(result.cartVersion);
           if (result.status === 409) { setQuote(null); setQuoteGeneration(value => value + 1); }
-          result.skipped?.forEach(removeFromCart);
+
           throw new Error(result.error || "Không thể đặt hàng.");
         }
         if (paymentMethod === "cod") {
@@ -256,7 +259,7 @@ export function useCheckout() {
         }
         setPaymentCode(code);
         setQrUrl(info.qrUrl ?? "");
-        setOnlineAmount(result.totalAmount ?? info.totalAmount ?? 0);
+        setOnlineAmount(info.remainingAmount ?? result.totalAmount ?? info.totalAmount ?? 0);
         setPaymentStatus(info.status === "paid" ? "paid" : "awaiting_payment");
         // Giỏ đã được tiêu thụ ở BE; giữ paymentCode trên URL để khôi phục sau refresh
         clearCart();
@@ -279,7 +282,6 @@ export function useCheckout() {
       couponApplied,
       coupon,
       cartItems, cartVersion, quote, setCartVersion,
-      removeFromCart,
       clearCart,
       router,
     ],
@@ -312,7 +314,8 @@ export function useCheckout() {
         handleCancelled();
         return;
       }
-      if (info.qrUrl) setQrUrl(info.qrUrl);
+      setQrUrl(info.qrUrl || "");
+      setOnlineAmount(info.remainingAmount ?? info.totalAmount);
       setPaymentStatus("awaiting_payment");
       setPollAttempt((value) => value + 1);
       toast.info("Chưa nhận được thanh toán. Hệ thống sẽ tiếp tục kiểm tra.");
@@ -322,11 +325,13 @@ export function useCheckout() {
   }, [paymentCode, finishPaid, handleCancelled]);
 
   return {
-    cartItems: quote ? cartItems.map(item => { const line = quote.lines.find(line => line.itemId === String(item._id || item.id) && line.itemType === (item.itemType || "product")); return line ? { ...item, price: line.unitPrice } : item; }) : cartItems,
+    cartItems: quote ? cartItems.map(item => { const line = quote.lines.find(line => cartLineKey({id:line.itemId,itemType:line.itemType,gift:line.gift}) === cartLineKey(item)); return line ? { ...item, price: line.unitPrice, lineTotal:line.totalPrice, bulkDiscountAmount:line.bulkDiscountAmount, giftFee:line.giftFee } : item; }) : cartItems,
     cartTotal: quote?.subtotal ?? cartTotal,
     cartCount,
     hasProducts,
     shippingFee,
+    giftFee: quote?.giftFee || 0,
+    bulkDiscountAmount: quote?.bulkDiscountAmount || 0,
     discount,
     finalTotal: quote?.totalAmount ?? cartTotal - discount + shippingFee,
     step,

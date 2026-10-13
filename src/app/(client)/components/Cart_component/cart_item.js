@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React from 'react';
+import { cartLineKey } from '@/app/util/cartLine.mjs';
 import { Plus, Minus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useCart } from "@/app/context/CartContext";
@@ -11,7 +12,7 @@ export default function CartItem({ product }) {
   // Xử lý lấy ảnh từ cấu trúc dữ liệu schema của Box hoặc Product
   const imageUrl =
     product.images?.[0]?.url || product.image || "/assets/placeholder.png";
-  const productId = product._id || product.id;
+  const productId = cartLineKey(product);
 
   return (
     <div className="flex flex-col bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">

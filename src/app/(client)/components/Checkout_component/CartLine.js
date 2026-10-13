@@ -75,7 +75,7 @@ export function CartLine({ item, compact = false }) {
         </p>
       </div>
       <p className="text-sm font-bold text-[#2C1810] shrink-0 tabular-nums">
-        {formatCurrency(unitPrice * quantity)}
+        {formatCurrency(item.lineTotal ?? unitPrice * quantity)}
       </p>
     </div>
   );
