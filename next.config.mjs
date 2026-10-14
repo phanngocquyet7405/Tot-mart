@@ -2,18 +2,27 @@ import { fileURLToPath } from "node:url";
 import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin();
 const configuredApiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
-const apiUrl = (configuredApiUrl || "http://localhost:3001/api").replace(
-  /\/$/,
-  "",
-);
-if (!/^https?:\/\//.test(apiUrl))
-  throw new Error("API_URL must be an absolute http(s) URL");
-if (process.env.NODE_ENV === "production" && !configuredApiUrl)
-  throw new Error("Set API_URL or NEXT_PUBLIC_API_URL for production builds");
-const target = new URL(apiUrl);
-if (process.env.NODE_ENV === 'production' && process.env.CI !== 'true' &&
-    (target.protocol !== 'https:' || /^(localhost(?:\.|$)|127\.|0\.0\.0\.0$|\[::1\]$)/.test(target.hostname))) throw new Error('Production API_URL must use an HTTPS remote host');
-if (target.username || target.password || target.search || target.hash) throw new Error('API_URL cannot contain credentials/query/hash');
+const apiUrl = configuredApiUrl
+  ? configuredApiUrl.replace(/\/$/, "")
+  : null;
+
+if (apiUrl) {
+  if (!/^https?:\/\//.test(apiUrl))
+    throw new Error("API_URL must be an absolute http(s) URL");
+
+  const target = new URL(apiUrl);
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.CI !== "true" &&
+    (target.protocol !== "https:" ||
+      /^(localhost(?:\.|$)|127\.|0\.0\.0\.0$|\[::1\]$)/.test(
+        target.hostname,
+      ))
+  )
+    throw new Error("Production API_URL must use an HTTPS remote host");
+  if (target.username || target.password || target.search || target.hash)
+    throw new Error("API_URL cannot contain credentials/query/hash");
+}
 const hosts = (
   process.env.IMAGE_HOSTS ||
   "res.cloudinary.com,images.unsplash.com,qr.sepay.vn,img.vietqr.io"
@@ -29,7 +38,9 @@ export default withNextIntl({
       : {},
   reactCompiler: true,
   async rewrites() {
-    return [{ source: "/api/:path*", destination: apiUrl + "/:path*" }];
+    return apiUrl
+      ? [{ source: "/api/:path*", destination: apiUrl + "/:path*" }]
+      : [];
   },
   images: {
     remotePatterns: hosts.map((hostname) => ({ protocol: "https", hostname })),
