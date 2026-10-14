@@ -16,7 +16,7 @@ function ProfileLayout({ children }) {
 
       {/* ── Scrollable body ── */}
       <div
-        className="min-h-screen bg-[#FFFAF8]"
+        className="page-canvas min-h-screen"
         style={{ paddingTop: HEADER_H }}
       >
         {children}
