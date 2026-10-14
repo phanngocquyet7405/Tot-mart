@@ -14,7 +14,7 @@ import Footer from "./(client)/components/ui/footer";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="page-canvas min-h-screen">
       {/* Announcement */}
       <AnnouncementBarBox />
 
