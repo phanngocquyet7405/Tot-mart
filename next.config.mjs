@@ -1,14 +1,15 @@
 import { fileURLToPath } from "node:url";
 import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin();
-const apiUrl = (process.env.API_URL || "http://localhost:3001/api").replace(
+const configuredApiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = (configuredApiUrl || "http://localhost:3001/api").replace(
   /\/$/,
   "",
 );
 if (!/^https?:\/\//.test(apiUrl))
   throw new Error("API_URL must be an absolute http(s) URL");
-if (process.env.NODE_ENV === "production" && !process.env.API_URL)
-  throw new Error("Set API_URL for production builds");
+if (process.env.NODE_ENV === "production" && !configuredApiUrl)
+  throw new Error("Set API_URL or NEXT_PUBLIC_API_URL for production builds");
 const target = new URL(apiUrl);
 if (process.env.NODE_ENV === 'production' && process.env.CI !== 'true' &&
     (target.protocol !== 'https:' || /^(localhost(?:\.|$)|127\.|0\.0\.0\.0$|\[::1\]$)/.test(target.hostname))) throw new Error('Production API_URL must use an HTTPS remote host');
