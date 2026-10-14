@@ -40,9 +40,9 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-canvas min-h-screen">
       {/* Header Section */}
-      <div className="sticky top-0 bg-white shadow-sm z-1000">
+      <div className="sticky top-0 bg-background/95 shadow-sm backdrop-blur-md z-1000">
         <AnnouncementBar />
         <MainHeader />
         <div className="cursor-pointer">
@@ -88,7 +88,7 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="pt-10 bg-white">
+      <div className="page-canvas pt-10">
         <TotmartLanding />
       </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -17,9 +18,12 @@ import { useCart } from "@/app/context/CartContext"; // <-- Thêm import này (H
 
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Eye, Box } from "lucide-react";
+import { boxSalePrice, boxOriginalPrice, toBoxCartItem } from "./[id]/boxPricing";
 import { toast } from "sonner";
 
-export default function BoxPage() {
+function BoxPage() {
+  const params = useSearchParams();
+  const kind = params.get("type") === "gift" ? "gift" : "combo";
   const [boxes, setBoxes] = useState([]);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart(); // <-- Lấy hàm addToCart từ Context
@@ -27,8 +31,11 @@ export default function BoxPage() {
   useEffect(() => {
     const fetchBoxes = async () => {
       try {
-        const res = await getAllBoxesApi();
-        const data = res?.data?.data || res?.data || [];
+        const res = await getAllBoxesApi({ kind, limit: 100 });
+        const data = [...(res.data || [])];
+        for (let page = 2; page <= (res.pagination?.totalPages || 1); page++) {
+          const extra = await getAllBoxesApi({ kind, limit: 100, page }); data.push(...extra.data);
+        }
         setBoxes(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Lỗi tải boxes:", err);
@@ -39,21 +46,10 @@ export default function BoxPage() {
     };
 
     fetchBoxes();
-  }, []);
+  }, [kind]);
 
   const handleAddToCart = (box) => {
-    const finalPrice =
-      box.discountPercent > 0
-        ? box.value - (box.value * box.discountPercent) / 100
-        : box.value;
-
-    // Truyền object đúng cấu trúc để CartContext nhận diện (_id hoặc id)
-    addToCart({
-      _id: box._id,
-      name: box.name,
-      image: box.images?.[0]?.url,
-      price: finalPrice,
-    });
+    addToCart(toBoxCartItem(box));
 
     toast.success("Đã thêm vào giỏ hàng 🛒");
   };
@@ -68,7 +64,7 @@ export default function BoxPage() {
       <HeroSection />
 
       <div className="max-w-7xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold mb-8">Tất cả Hộp Sản Phẩm</h1>
+        <h1 className="text-3xl font-bold mb-8">{kind === "gift" ? "Hộp quà" : "Combo sản phẩm"}</h1>
 
         {loading ? (
           <div className="py-20 text-center text-gray-500 italic">
@@ -81,11 +77,8 @@ export default function BoxPage() {
         ) : (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {boxes.map((box) => {
-              const finalPrice =
-                box.discountPercent > 0
-                  ? box.value - (box.value * box.discountPercent) / 100
-                  : box.value;
-
+              const finalPrice = boxSalePrice(box);
+              const originalPrice = boxOriginalPrice(box);
               return (
                 <div
                   key={box._id}
@@ -131,9 +124,9 @@ export default function BoxPage() {
 
                     {/* Price */}
                     <div className="mt-2">
-                      {box.discountPercent > 0 && box.value && (
+                      {originalPrice !== null && (
                         <span className="text-gray-400 line-through mr-2 text-sm">
-                          {box.value.toLocaleString("vi-VN")}đ
+                          {originalPrice.toLocaleString("vi-VN")}đ
                         </span>
                       )}
                       <span className="text-red-500 font-bold">
@@ -182,3 +175,5 @@ export default function BoxPage() {
     </>
   );
 }
+
+export default function BoxListing() { return <Suspense fallback={<p className="p-8">Đang tải danh mục…</p>}><BoxPage /></Suspense>; }

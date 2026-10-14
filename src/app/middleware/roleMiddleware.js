@@ -29,7 +29,7 @@ export function withAdmin(WrappedComponent) {
       }
 
       if (user && user.role !== "admin") {
-        router.replace("/homepage?error=forbidden");
+        router.replace(user.role === "merchant" ? "/manager" : "/homepage?error=forbidden");
       }
     }, [user, isLoading, router]);
 

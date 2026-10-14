@@ -12,6 +12,7 @@ const INITIAL_FORM = {
   name: "",
   description: "",
   cityAddress: "",
+  ownerId: "",
 };
 
 export function useCreateBrand() {

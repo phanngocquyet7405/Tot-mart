@@ -108,6 +108,9 @@ export default function BoxDetailPage() {
   const salePrice = boxSalePrice(box);
   const originalPrice = boxOriginalPrice(box);
 
+  const giftPercent = (box?.giftPolicy?.bulkTiers || []).filter(t => quantity >= t.minQuantity).sort((a, b) => b.minQuantity - a.minQuantity)[0]?.percent || 0;
+  const amenityFee = (box?.giftPolicy?.amenities || []).reduce((sum, a) => sum + a.fee, 0);
+  const giftTotal = Math.round(salePrice * quantity * (1 - giftPercent / 100)) + amenityFee * quantity;
   // Điều khiển tăng giảm số lượng
   const increaseQty = () => {
     if (!box) return;
@@ -156,7 +159,7 @@ export default function BoxDetailPage() {
             Không tìm thấy dữ liệu
           </h2>
           <p className="text-stone-500 text-sm mb-6">
-            Hộp quà này không tồn tại hoặc đã bị gỡ khỏi hệ thống.
+            Combo/hộp quà này không tồn tại hoặc đã bị gỡ khỏi hệ thống.
           </p>
           <Button
             onClick={() => window.history.back()}
@@ -183,7 +186,7 @@ export default function BoxDetailPage() {
         <div className="flex items-center gap-2 text-xs text-stone-400 mb-8 uppercase tracking-widest font-semibold">
           <span>Cửa hàng</span>
           <ChevronRight size={12} />
-          <span>Hộp quà cao cấp</span>
+          <span>{box.isGift ? "Hộp quà" : "Combo"}</span>
           <ChevronRight size={12} />
           <span className="text-stone-800 truncate max-w-xs">{box.name}</span>
         </div>
@@ -214,6 +217,12 @@ export default function BoxDetailPage() {
               )}
             </div>
 
+            {box.sourceComboId && <div className="rounded border bg-green-50 p-4 space-y-2">
+              <p className="font-semibold">Hộp quà từ combo</p>
+              {(box.giftPolicy?.bulkTiers || []).map(t => <p key={t.minQuantity}>Từ {t.minQuantity} hộp: giảm {t.percent}%</p>)}
+              {(box.giftPolicy?.amenities || []).map((a, i) => <p key={i}>{a.name}: {a.fee.toLocaleString('vi-VN')} ₫/hộp</p>)}
+              <p>Tạm tính {quantity} hộp: {giftTotal.toLocaleString('vi-VN')} ₫. Giỏ hàng xác nhận giá khi mua.</p>
+            </div>}
             {/* Ảnh thu nhỏ (Thumbnails) */}
             {box.images && box.images.length > 0 && (
               <div className="flex gap-3 overflow-x-auto py-2 scrollbar-none">

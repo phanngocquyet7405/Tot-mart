@@ -58,7 +58,7 @@ function LoginPage() {
       await refreshUser();
 
       const role = getTokenRole();
-      router.push(role === "admin" ? "/dashboard" : "/homepage");
+      router.push(role === "admin" ? "/dashboard" : role === "merchant" ? "/manager" : "/homepage");
     } catch (err) {
       setError(
         err.response?.data?.message || "Email hoặc mật khẩu không đúng.",

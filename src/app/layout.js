@@ -1,4 +1,11 @@
-import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import "@fontsource/playfair-display/latin-400.css";
+import "@fontsource/playfair-display/vietnamese-400.css";
+import "@fontsource/playfair-display/latin-700.css";
+import "@fontsource/playfair-display/vietnamese-700.css";
+import "@fontsource/plus-jakarta-sans/latin-400.css";
+import "@fontsource/plus-jakarta-sans/vietnamese-400.css";
+import "@fontsource/plus-jakarta-sans/latin-700.css";
+import "@fontsource/plus-jakarta-sans/vietnamese-700.css";
 import { Analytics } from "@vercel/analytics/next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
@@ -7,18 +14,6 @@ import { AdminNotificationProvider } from "./context/NotificationContext";
 import { CartProvider } from "@/app/context/CartContext";
 import { WishlistProvider } from "@/app/context/WishlistContext";
 import "./globals.css";
-
-// Cấu hình font cho Vietnamese
-const playfairDisplay = Playfair_Display({
-  subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-serif",
-});
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin", "vietnamese"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-sans",
-});
 
 export const metadata = {
   title: "TotMart - Sản Phẩm Hữu Cơ Chất Lượng Cao",
@@ -55,7 +50,7 @@ export default async function RootLayout({ children }) {
   return (
     <html
       lang={locale}
-      className={`${playfairDisplay.variable} ${plusJakartaSans.variable}`}
+      style={{ "--font-serif": "\"Playfair Display\", Georgia, serif", "--font-sans": "\"Plus Jakarta Sans\", Arial, sans-serif" }}
     >
       <body className="font-sans antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>

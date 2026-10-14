@@ -21,16 +21,16 @@ import { BAR_H } from "@/components_box/announcement-bar"; // import hằng số
 // ─── Nav data ─────────────────────────────────────────────────────────────────
 
 const shopLinks = [
-  { name: "TotMartBox", desc: "Hộp quà tinh tuyển", href: "/" },
+  { name: "Combo", desc: "Combo sản phẩm", href: "/products/box?type=combo" },
+  { name: "Hộp quà", desc: "Combo kèm tiện ích", href: "/products/box?type=gift" },
   { name: "ShopTotMart", desc: "Cửa hàng chính", href: "/homepage" },
-  // Chưa có page riêng cho Gift trong repo — tạm trỏ về trang danh mục
-  // sản phẩm để không bị link chết, đổi lại khi có page/category riêng.
-  { name: "Gift", desc: "Quà tặng đặc biệt", href: "/categories" },
   { name: "Subscribe", desc: "Gói hàng tháng", href: "/products/Subscriber" },
   { name: "TotMart", desc: "Thương hiệu TotMart", href: "/brands" },
-  // Chưa có page riêng cho Past Themes — MonthlyThemes hiện chỉ là 1 section
-  // trong trang Subscriber, nên trỏ về đó thay vì route không tồn tại.
-  { name: "Past Themes", desc: "Chủ đề đã qua", href: "/products/Subscriber" },
+];
+
+const blogLinks = [
+  { name: "Our Blog", desc: "Câu chuyện & chia sẻ", href: "/pages/our-blog" },
+  { name: "Đăng ký hàng tháng", desc: "Các gói đăng ký", href: "/products/Subscriber" },
 ];
 
 const aboutMega = {
@@ -184,6 +184,7 @@ export function Navigation() {
   const [open, setOpen] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileShopOpen, setMobileShopOpen] = useState(false);
+  const [mobileBlogOpen, setMobileBlogOpen] = useState(false);
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -373,15 +374,54 @@ export function Navigation() {
                 {open === "about" && <AboutMegaMenu onClose={close} />}
               </div>
 
-              <Link
-                href="/pages/our-blog"
-                className={cn(
-                  "px-3 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider transition-all duration-300",
-                  textCls,
-                )}
+              <div
+                className="relative"
+                onMouseEnter={() => setOpen("blog")}
+                onMouseLeave={() => setOpen(null)}
               >
-                Blog
-              </Link>
+                <button
+                  className={cn(
+                    "flex items-center gap-1 px-3 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider transition-all duration-300",
+                    textCls,
+                  )}
+                >
+                  Blog
+                  <ChevronDown
+                    size={13}
+                    className={cn(
+                      "transition-transform",
+                      open === "blog" && "rotate-180",
+                    )}
+                  />
+                </button>
+                {open === "blog" && (
+                  <div className="absolute top-full left-0 pt-1 w-60 z-50">
+                    <div className="bg-[#faf8f4] border border-stone-200 shadow-xl rounded-xl overflow-hidden">
+                      <div className="h-0.5 bg-linear-to-r from-amber-300 to-amber-500" />
+                      <div className="py-1.5">
+                        {blogLinks.map((link) => (
+                          <Link
+                            key={link.name}
+                            href={link.href}
+                            onClick={close}
+                            className="group flex items-start gap-2.5 px-4 py-2.5 hover:bg-amber-50 transition-colors"
+                          >
+                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 group-hover:scale-125 transition-transform" />
+                            <div>
+                              <span className="text-[13px] font-bold text-stone-800 group-hover:text-amber-800 uppercase tracking-wide block leading-snug">
+                                {link.name}
+                              </span>
+                              <span className="text-[11px] text-stone-400 group-hover:text-amber-600 transition-colors">
+                                {link.desc}
+                              </span>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <Link
                 href="/brands"
@@ -546,20 +586,53 @@ export function Navigation() {
                 )}
               </div>
 
-              {[
-                { label: "Blog", href: "/pages/our-blog" },
-                { label: "Thương hiệu", href: "/brands" },
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-between px-4 py-3 bg-white border border-stone-200 rounded-xl text-sm font-black text-stone-800 uppercase tracking-wider hover:bg-amber-50 hover:text-amber-800 transition-colors"
+              <div className="rounded-xl border border-stone-200 overflow-hidden">
+                <button
+                  onClick={() => setMobileBlogOpen((v) => !v)}
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-stone-800 uppercase tracking-wider bg-white hover:bg-amber-50 transition-colors"
                 >
-                  {item.label}
-                  <ChevronRight size={16} className="text-stone-300" />
-                </Link>
-              ))}
+                  Blog
+                  <ChevronRight
+                    size={16}
+                    className={cn(
+                      "text-stone-400 transition-transform",
+                      mobileBlogOpen && "rotate-90",
+                    )}
+                  />
+                </button>
+                {mobileBlogOpen && (
+                  <div className="bg-stone-50 border-t border-stone-100 divide-y divide-stone-100">
+                    {blogLinks.map((link) => (
+                      <Link
+                        key={link.name}
+                        href={link.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center justify-between px-4 py-3 hover:bg-amber-50 transition-colors group"
+                      >
+                        <div>
+                          <span className="text-sm font-bold text-stone-800 uppercase tracking-wide block group-hover:text-amber-800 transition-colors">
+                            {link.name}
+                          </span>
+                          <span className="text-xs text-stone-400">{link.desc}</span>
+                        </div>
+                        <ChevronRight
+                          size={14}
+                          className="text-stone-300 group-hover:text-amber-500 transition-colors"
+                        />
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Link
+                href="/brands"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-between px-4 py-3 bg-white border border-stone-200 rounded-xl text-sm font-black text-stone-800 uppercase tracking-wider hover:bg-amber-50 hover:text-amber-800 transition-colors"
+              >
+                Thương hiệu
+                <ChevronRight size={16} className="text-stone-300" />
+              </Link>
 
               <div className="space-y-2 pt-1 border-t border-stone-200">
                 <Button

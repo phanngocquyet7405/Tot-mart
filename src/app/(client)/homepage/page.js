@@ -40,7 +40,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-canvas min-h-screen">
       {/* Header Section */}
       <div className="sticky top-0 bg-white shadow-sm z-1000">
         <AnnouncementBar />

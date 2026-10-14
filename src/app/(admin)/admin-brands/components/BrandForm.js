@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { axiosConfig } from "@/app/services/api/axiosConfig";
 import Image from "next/image";
 import { Tag, FileText, MapPin, ImageIcon, Upload, X, Loader2 } from "lucide-react";
 
@@ -30,6 +31,13 @@ export default function BrandForm({
   onCancel,
 }) {
   const fileInputRef = useRef(null);
+  const [merchants, setMerchants] = useState([]);
+  const [merchantError, setMerchantError] = useState('');
+  useEffect(() => {
+    let active = true;
+    axiosConfig.get('/brands/merchant-options').then(result => { if (active) setMerchants(result.data); }).catch(() => { if (active) setMerchantError('Không tải được danh sách merchant. Tải lại trang để thử lại.'); });
+    return () => { active = false; };
+  }, []);
   const displayedLogo = logoPreview || existingLogoUrl;
 
   return (
@@ -65,6 +73,16 @@ export default function BrandForm({
               )}
             </div>
 
+            <div className="space-y-1.5">
+              <Label htmlFor="brand-owner">Merchant quản lý</Label>
+              <select id="brand-owner" className="w-full rounded border p-2" value={form.ownerId || ''} onChange={updateField('ownerId')}>
+                <option value="">Admin quản lý / giữ chủ hiện tại</option>
+                {form.ownerId && !merchants.some(m => m._id === form.ownerId) && <option value={form.ownerId}>Chủ hiện tại</option>}
+                {merchants.map(m => <option key={m._id} value={m._id}>{m.name} ({m.email})</option>)}
+              </select>
+              {merchantError && <p role="alert" className="text-sm text-red-700">{merchantError}</p>}
+              <p className="text-xs text-muted-foreground">Thương hiệu có sản phẩm của chủ khác cần xử lý chuyển chủ trước khi gán.</p>
+            </div>
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5">
                 <MapPin className="h-3.5 w-3.5 text-muted-foreground" />

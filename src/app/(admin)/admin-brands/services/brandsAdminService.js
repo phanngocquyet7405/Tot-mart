@@ -1,3 +1,4 @@
+import { axiosConfig } from "@/app/services/api/axiosConfig";
 import {
   getAllBrandsApi,
   createBrandApi,
@@ -17,19 +18,20 @@ export async function fetchAdminBrands() {
 }
 
 export async function fetchAdminBrandById(id) {
-  const brands = await fetchAdminBrands();
-  return brands.find((b) => b._id === id) || null;
+  const result = await axiosConfig.get(`/brands/manage/${id}`);
+  return result.data;
 }
 
 /**
  * Dựng FormData cho create/update. `logoFile` là File object (từ <input type="file">),
  * chỉ được đính kèm khi người dùng thực sự chọn ảnh mới.
  */
-function buildBrandFormData({ name, description, cityAddress, logoFile }) {
+function buildBrandFormData({ name, description, cityAddress, ownerId, logoFile }) {
   const formData = new FormData();
   if (name != null) formData.append("name", name.trim());
   if (description) formData.append("description", description.trim());
   if (cityAddress) formData.append("cityAddress", cityAddress.trim());
+  if (ownerId) formData.append("ownerId", ownerId);
   if (logoFile) formData.append("logo", logoFile);
   return formData;
 }

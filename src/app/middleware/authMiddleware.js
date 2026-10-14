@@ -38,7 +38,7 @@ export function withGuest(WrappedComponent) {
       if (isLoading) return;
 
       if (user && checkTokenValid()) {
-        const destination = user.role === "admin" ? "/dashboard" : "/homepage";
+        const destination = user.role === "admin" ? "/dashboard" : user.role === "merchant" ? "/manager" : "/homepage";
         router.replace(destination);
       }
     }, [user, isLoading, router]);

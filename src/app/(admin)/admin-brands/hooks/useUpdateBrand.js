@@ -17,7 +17,7 @@ export function useUpdateBrand() {
   const brandId = searchParams.get("id");
 
   const [original, setOriginal] = useState(null);
-  const [form, setForm] = useState({ name: "", description: "", cityAddress: "" });
+  const [form, setForm] = useState({ name: "", description: "", cityAddress: "", ownerId: "" });
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const [errors, setErrors] = useState({});
@@ -44,6 +44,7 @@ export function useUpdateBrand() {
             name: brand.name || "",
             description: brand.description || "",
             cityAddress: brand.cityAddress || "",
+            ownerId: brand.ownerId?._id || brand.ownerId || "",
           });
         }
       } catch {
@@ -108,7 +109,8 @@ export function useUpdateBrand() {
     !!logoFile ||
     form.name !== (original?.name || "") ||
     form.description !== (original?.description || "") ||
-    form.cityAddress !== (original?.cityAddress || "");
+    form.cityAddress !== (original?.cityAddress || "") ||
+    form.ownerId !== (original?.ownerId?._id || original?.ownerId || "");
 
   const validate = useCallback(() => {
     const e = {};
@@ -126,7 +128,7 @@ export function useUpdateBrand() {
       }
       setIsSubmitting(true);
       try {
-        await updateAdminBrand(brandId, { ...form, logoFile });
+        await updateAdminBrand(brandId, { ...form, ownerId: form.ownerId === (original?.ownerId?._id || original?.ownerId || "") ? undefined : form.ownerId, logoFile });
         toast.success("Cập nhật thương hiệu thành công!");
         router.push("/admin-brands");
         router.refresh();
@@ -138,7 +140,7 @@ export function useUpdateBrand() {
         setIsSubmitting(false);
       }
     },
-    [brandId, form, logoFile, validate, router],
+    [brandId, form, original, logoFile, validate, router],
   );
 
   return {
