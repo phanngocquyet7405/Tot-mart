@@ -12,7 +12,7 @@ const faqs = [
   {
     question: "Chính sách vận chuyển như thế nào?",
     answer:
-      "TotMart miễn phí vận chuyển cho đơn hàng từ 500.000đ trong nội thành. Đơn hàng tỉnh sẽ được giao qua đối tác vận chuyển trong 2-4 ngày.",
+      "Phí giao hàng được xác nhận riêng theo địa chỉ nhận hàng và đơn vị vận chuyển, chưa bao gồm trong tiền hàng hiển thị.",
   },
   {
     question: "Tôi có thể mua sỉ hoặc làm quà tặng doanh nghiệp không?",

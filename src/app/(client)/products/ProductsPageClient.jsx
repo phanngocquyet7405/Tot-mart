@@ -16,7 +16,7 @@ function ProductPageContent() {
   const searchQuery = searchParams.get("search") || "";
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="page-canvas min-h-screen">
       <div className="sticky top-0 bg-white shadow-sm z-1000">
         <AnnouncementBar />
 

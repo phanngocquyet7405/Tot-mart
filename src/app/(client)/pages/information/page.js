@@ -34,7 +34,7 @@ const POLICIES = [
       },
       {
         heading: "Phí vận chuyển",
-        body: "Miễn phí vận chuyển cho đơn hàng từ 500.000đ trở lên. Đơn hàng dưới 500.000đ: phí 30.000đ (nội thành) và 50.000đ (tỉnh ngoài).",
+        body: "Giá hiển thị chưa bao gồm phí giao hàng. Phí giao hàng được xác nhận riêng theo địa chỉ nhận hàng và đơn vị vận chuyển.",
       },
       {
         heading: "Theo dõi đơn hàng",

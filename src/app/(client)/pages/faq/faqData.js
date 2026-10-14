@@ -31,7 +31,7 @@ export const FAQS = [
       },
       {
         q: "Phí vận chuyển được tính như thế nào?",
-        a: "Miễn phí vận chuyển cho đơn từ 500.000đ. Đơn dưới mức này: 30.000đ (nội thành) và 50.000đ (tỉnh thành).",
+        a: "Phí giao hàng được xác nhận riêng theo địa chỉ nhận hàng; không cộng phí ship cố định vào tiền hàng khi checkout.",
       },
       {
         q: "TotMart có giao quốc tế không?",

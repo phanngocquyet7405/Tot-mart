@@ -22,6 +22,13 @@ function loadService(raw) {
   return context;
 }
 
+test('admin details preserve net line totals, gift fees and separate delivery contract', async () => {
+  const service=loadService({_id:'order',shippingMode:'separate',shippingFee:0,giftFee:45000,bulkDiscountAmount:15000,discountAmount:28500,totalAmount:301500,
+    products:[{productId:'product',unitPrice:100000,quantity:3,totalPrice:285000,lineId:'gift-variant',gift:{wrap:'classic',message:'Hi'}}]});
+  const order=await service.fetchAdminOrderById('order');
+  assert.equal(order.items[0].lineTotal,285000);assert.equal(order.shippingMode,'separate');assert.equal(order.giftFee,45000);assert.equal(order.totalPrice,301500);
+});
+
 for (const [label, brand, expected] of [
   ["populated Brand", { _id: "brand-id", name: "  Test Brand  " }, "Test Brand"],
   ["deleted Brand", null, "—"],

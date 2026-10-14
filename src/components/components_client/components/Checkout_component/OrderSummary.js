@@ -4,7 +4,7 @@
  * Hiển thị danh sách items rút gọn + breakdown chi phí
  */
 
-import { Package, Truck } from "lucide-react";
+import { Package } from "lucide-react";
 import { SectionCard } from "./SectionCard";
 
 const fmt = (n) => (n ?? 0).toLocaleString("vi-VN");
@@ -38,7 +38,6 @@ export function OrderSummary({
   hasSubscribes,
   cartTotal,
   subscribeTotal,
-  shippingFee,
   discount,
   finalTotal,
 }) {
@@ -108,17 +107,8 @@ export function OrderSummary({
               highlight="green"
             />
           )}
-          <CostRow
-            label="Vận chuyển"
-            value={shippingFee === 0 ? "Miễn phí" : `${fmt(shippingFee)}₫`}
-            highlight={shippingFee === 0 ? "green" : null}
-            icon={<Truck size={12} />}
-          />
-          {shippingFee > 0 && (
-            <p className="text-[10px] text-stone-400 pl-4">
-              Miễn phí ship cho đơn sản phẩm từ 500.000₫
-            </p>
-          )}
+          <p className="text-xs text-stone-500">Phí giao hàng xác nhận riêng theo địa chỉ, chưa bao gồm trong tiền hàng.</p>
+
         </div>
 
         {/* Total */}
@@ -137,7 +127,7 @@ export function OrderSummary({
         {[
           { icon: "🚚", text: "Giao hàng trong 2–5 ngày" },
           { icon: "🔄", text: "Đổi trả miễn phí trong 7 ngày" },
-          { icon: "🎁", text: "Đóng gói quà tặng miễn phí" },
+          { icon: "🎁", text: "Phí gói quà theo báo giá" },
         ].map(({ icon, text }) => (
           <div key={text} className="flex items-center gap-2 text-stone-400">
             <span className="text-base">{icon}</span>
