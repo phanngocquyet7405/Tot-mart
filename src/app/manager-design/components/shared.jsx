@@ -1,0 +1,12 @@
+"use client"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Plus, PackageOpen } from "lucide-react"
+import { statusLabels, paymentStatusLabels, statusTone, stockTone, stockText } from "../lib/data"
+export function PageHeader({ eyebrow="QUẢN LÝ CỬA HÀNG", title, description, action, onAction }) { return <div className="mb-7 flex items-end justify-between gap-4"><div><p className="mb-2 text-sm font-medium text-primary">{eyebrow}</p><h2 className="font-serif text-4xl font-semibold tracking-tight">{title}</h2><p className="mt-2 text-muted-foreground">{description}</p></div>{action && <Button onClick={onAction} className="hidden sm:flex"><Plus data-icon="inline-start" />{action}</Button>}</div> }
+export function StatusBadge({ status, payment=false }) { const label = payment ? paymentStatusLabels[status] : statusLabels[status]; const tone = payment ? (status === "paid" ? "success" : status === "failed" ? "destructive" : "warning") : statusTone[status]; return <Badge variant={tone === "destructive" ? "destructive" : "secondary"} className={tone === "success" ? "border-primary/20 bg-primary/10 text-primary" : tone === "warning" ? "border-chart-4/30 bg-chart-4/10 text-chart-4" : tone === "accent" ? "border-accent bg-accent text-accent-foreground" : tone === "primary" ? "border-primary/20 bg-primary/10 text-primary" : ""}>{label || status}</Badge> }
+export function StockBadge({ stock }) { return <Badge variant={stockTone(stock) === "destructive" ? "destructive" : "secondary"} className={stock > 0 && stock <= 10 ? "border-chart-4/30 bg-chart-4/10 text-chart-4" : stock > 10 ? "border-primary/20 bg-primary/10 text-primary" : ""}>{stockText(stock)}</Badge> }
+export function EmptyState({ title="Chưa có dữ liệu", description="Hãy thử thay đổi bộ lọc hoặc thêm dữ liệu mới.", action, onAction }) { return <Card><CardContent className="flex flex-col items-center gap-3 py-16 text-center"><PackageOpen className="size-10 text-muted-foreground" /><h3 className="font-semibold">{title}</h3><p className="max-w-sm text-sm text-muted-foreground">{description}</p>{action && <Button onClick={onAction}>{action}</Button>}</CardContent></Card> }
+export function LoadingRows() { return <div className="grid gap-3">{Array.from({ length: 5 }).map((_, index) => <Skeleton key={index} className="h-16 w-full" />)}</div> }
