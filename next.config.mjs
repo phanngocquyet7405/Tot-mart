@@ -6,8 +6,6 @@ const apiUrl = configuredApiUrl
   ? configuredApiUrl.replace(/\/$/, "")
   : null;
 
-if (process.env.NODE_ENV === "production" && !apiUrl) throw new Error("API_URL is required for production builds");
-
 if (apiUrl) {
   if (!/^https?:\/\//.test(apiUrl))
     throw new Error("API_URL must be an absolute http(s) URL");
