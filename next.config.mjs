@@ -1,7 +1,11 @@
 import { fileURLToPath } from "node:url";
 import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin();
-const configuredApiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
+// API_URL belongs to the Next server only. Browser traffic always uses /api.
+const configuredApiUrl = process.env.API_URL;
+if (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL !== '/api') {
+  throw new Error('NEXT_PUBLIC_API_URL must be /api; configure the backend with server-only API_URL');
+}
 const apiUrl = configuredApiUrl
   ? configuredApiUrl.replace(/\/$/, "")
   : null;
@@ -13,6 +17,8 @@ if (apiUrl) {
     throw new Error("API_URL must be an absolute http(s) URL");
 
   const target = new URL(apiUrl);
+  if (target.pathname !== '/api') throw new Error('API_URL must end with exactly /api (not /api/api) for the TotMart backend');
+  if (/^(?:.*\.)?(?:example\.com|example\.org|example\.net)$/.test(target.hostname)) throw new Error('API_URL is a placeholder; configure the actual backend for this deployment scope');
   if (
     process.env.NODE_ENV === "production" &&
     process.env.CI !== "true" &&

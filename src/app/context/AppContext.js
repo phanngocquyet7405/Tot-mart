@@ -27,6 +27,11 @@ export const AppContextProvider = ({ children }) => {
   useEffect(() => {
     void fetchUserProfile();
   }, [fetchUserProfile]);
+  useEffect(() => {
+    const expired = () => setUser(null);
+    window.addEventListener('totmart:session-expired', expired);
+    return () => window.removeEventListener('totmart:session-expired', expired);
+  }, [setUser]);
   const logout = useCallback(async () => {
     try {
       await axiosConfig.post("/home/logout");

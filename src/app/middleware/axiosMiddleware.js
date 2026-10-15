@@ -20,7 +20,10 @@ export function setupAxiosMiddleware(instance) {
         const token = await refreshing;
         config.headers.Authorization = `Bearer ${token}`;
         return instance(config);
-      } catch { clearSession(); }
+      } catch (failure) {
+        clearSession();
+        if (typeof window !== 'undefined' && [401,403].includes(failure.response?.status)) window.dispatchEvent(new Event('totmart:session-expired'));
+      }
     }
     return Promise.reject(error);
   });

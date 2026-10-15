@@ -1,4 +1,5 @@
-export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+// One browser origin for login, refresh, cookies and catalog requests.
+export const BASE_URL = "/api";
 
 export const API_ENDPOINTS = {
   AUTH: {

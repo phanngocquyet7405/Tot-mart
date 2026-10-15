@@ -15,6 +15,7 @@
 
 # next.js
 /.next/
+/artifacts/
 /out/
 
 # production
@@ -45,3 +46,10 @@ next-env.d.ts
 verification-*.log
 audit-*.json
 !.env.example
+
+
+# AI Agents & Tools
+.agents/
+.impeccable/
+.codex/
+AGENTS.md
