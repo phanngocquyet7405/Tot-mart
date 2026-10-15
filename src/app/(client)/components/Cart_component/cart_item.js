@@ -6,7 +6,7 @@ import { Plus, Minus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useCart } from "@/app/context/CartContext";
 
-export default function CartItem({ product }) {
+export default function CartItem({ product, lineTotal }) {
   const { updateQuantity, removeFromCart } = useCart();
 
   // Xử lý lấy ảnh từ cấu trúc dữ liệu schema của Box hoặc Product
@@ -74,7 +74,7 @@ export default function CartItem({ product }) {
             </button>
           </div>
           <p className="font-black text-slate-800 text-sm">
-            {(product.price * product.quantity).toLocaleString("vi-VN")}₫
+            {(lineTotal ?? product.price * product.quantity).toLocaleString("vi-VN")}₫
           </p>
         </div>
       )}

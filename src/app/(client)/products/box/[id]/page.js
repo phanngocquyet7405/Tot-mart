@@ -221,7 +221,7 @@ export default function BoxDetailPage() {
               <p className="font-semibold">Hộp quà từ combo</p>
               {(box.giftPolicy?.bulkTiers || []).map(t => <p key={t.minQuantity}>Từ {t.minQuantity} hộp: giảm {t.percent}%</p>)}
               {(box.giftPolicy?.amenities || []).map((a, i) => <p key={i}>{a.name}: {a.fee.toLocaleString('vi-VN')} ₫/hộp</p>)}
-              <p>Tạm tính {quantity} hộp: {giftTotal.toLocaleString('vi-VN')} ₫. Giỏ hàng xác nhận giá khi mua.</p>
+              <p>Tạm tính {quantity} hộp: {giftTotal.toLocaleString('vi-VN')} ₫. Thanh toán xác nhận giá cuối cùng.</p>
             </div>}
             {/* Ảnh thu nhỏ (Thumbnails) */}
             {box.images && box.images.length > 0 && (

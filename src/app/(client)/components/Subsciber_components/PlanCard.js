@@ -8,7 +8,7 @@ const PLACEHOLDER =
 
 export default function PlanCard({ box, onOpenPlan, isFirst = false }) {
   // Lấy giá trị cơ bản của box (từ API trả về)
-  const price = box.value || 0;
+  const price = box.minimumMonthlyPrice ?? box.value ?? 0;
 
   // Hình ảnh từ object box
   const coverImage = box.images?.[0]?.url || box.image || PLACEHOLDER;
@@ -71,25 +71,26 @@ export default function PlanCard({ box, onOpenPlan, isFirst = false }) {
         <p className="text-xs leading-relaxed text-[#7A645D] line-clamp-2 mb-5 min-h-9">
           {box.descriptions ||
             box.description ||
-            "Trải nghiệm văn hóa ẩm thực Nhật Bản cao cấp với bánh kẹo, trà đặc sản chính gốc được chọn lọc thủ công."}
+            "Giao hàng mỗi tháng theo cấu phần của gói đăng ký."}
         </p>
 
         {/* Feature Pill Tags */}
         <div className="flex flex-wrap gap-1.5 mb-6 mt-auto">
           <span className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold bg-[#FFF0EB] text-[#C85C3C] border border-[#F0DDD5]">
             <Package size={11} />
-            {box.totalItem || 20}+ sản phẩm
+            {box.totalItem ? `${box.totalItem} loại sản phẩm` : "Cấu phần theo gói"}
           </span>
           <span className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-            ✓ Free Ship toàn quốc
+            Phí giao hàng xác nhận riêng
           </span>
         </div>
 
+        <p className="text-xs mb-3">Thu tiền trước theo kỳ đăng ký.</p>
         {/* Price & CTA section inside Card */}
         <div className="pt-4 border-t border-[#F5E6E0] flex items-center justify-between">
           <div>
             <span className="text-[9px] uppercase tracking-wider text-[#A08880] block font-bold mb-0.5">
-              Chỉ từ
+              Bình quân từ
             </span>
             <div className="flex items-baseline gap-1">
               <span className="font-serif text-2xl font-black text-[#C85C3C]">

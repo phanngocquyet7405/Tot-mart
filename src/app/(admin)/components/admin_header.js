@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Menu, Search, Bell, X } from "lucide-react";
+import { useContext, useState } from "react";
+import { AppContext } from "@/app/context/AppContext";
+import { useRouter } from "next/navigation";
+import { Menu, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,6 +20,8 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 export function AdminHeader() {
+  const { user, logout } = useContext(AppContext);
+  const router = useRouter();
   const { toggleSidebar } = useSidebar();
   const [searchExpanded, setSearchExpanded] = useState(false);
 
@@ -82,15 +86,15 @@ export function AdminHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-3 px-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder-avatar.jpg" alt="Admin" />
+                <AvatarImage src="/placeholder-avatar.jpg" alt={user?.name || "Admin"} />
                 <AvatarFallback className="bg-primary text-primary-foreground">
-                  AD
+                  {(user?.name || "Admin").slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden flex-col items-start md:flex">
-                <span className="text-sm font-medium">Admin</span>
+                <span className="text-sm font-medium">{user?.name || "Admin"}</span>
                 <span className="text-xs text-muted-foreground">
-                  admin@totbox.com
+                  {user?.email || ""}
                 </span>
               </div>
             </Button>
@@ -98,10 +102,9 @@ export function AdminHeader() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Hồ sơ</DropdownMenuItem>
-            <DropdownMenuItem>Cài đặt</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => router.push("/profile")}>Hồ sơ</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem className="text-destructive" onSelect={logout}>
               Đăng xuất
             </DropdownMenuItem>
           </DropdownMenuContent>

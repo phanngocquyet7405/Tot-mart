@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, Gift } from "lucide-react";
+import { normalizeSubscriptionPlans } from "@/app/util/subscriptionDisplay.mjs";
 import { subscriptionApi } from "@/app/services/api/subscribePlanService";
 
 // Layout Components
@@ -18,27 +19,6 @@ import { MonthlyThemes } from "@/app/(client)/components/Subsciber_components/Mo
 import { SubscriptionShowcase } from "@/components_box/product-showcase";
 
 /** --- LOGIC XỬ LÝ DỮ LIỆU TỪ API --- */
-function normalizePlansToBoxes(plans) {
-  const boxMap = new Map();
-
-  plans.forEach((plan) => {
-    const boxRef = plan.boxId;
-    if (!boxRef || typeof boxRef !== "object" || !boxRef._id) return;
-    const boxId = boxRef._id;
-
-    if (!boxMap.has(boxId)) {
-      boxMap.set(boxId, {
-        ...boxRef,
-        value: plan.basePrice || boxRef.value || 0,
-        discountPercent: plan.discountPercent || 0,
-        apiPlans: [],
-      });
-    }
-    boxMap.get(boxId).apiPlans.push(plan);
-  });
-
-  return Array.from(boxMap.values());
-}
 
 /** --- MAIN COMPONENT --- */
 export default function SubscriberPage() {
@@ -58,7 +38,7 @@ export default function SubscriberPage() {
             ? raw.data
             : [];
 
-        const uniqueBoxes = normalizePlansToBoxes(allPlans);
+        const uniqueBoxes = normalizeSubscriptionPlans(allPlans);
         setBoxes(uniqueBoxes);
       } catch (err) {
         console.error("Lỗi tải dữ liệu gói đăng ký:", err);
@@ -101,7 +81,7 @@ export default function SubscriberPage() {
             Premium Subscription Experience
           </span>
           <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-[#2C1810] leading-tight">
-            Chọn Hộp Quà Thành Viên Của Bạn
+            Chọn gói đăng ký hàng tháng
           </h1>
           <p className="text-sm text-[#7A645D] mt-4 leading-relaxed max-w-2xl mx-auto">
             Các gói đăng ký thành viên giúp mang tinh hoa của những nghệ nhân

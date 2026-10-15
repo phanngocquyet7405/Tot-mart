@@ -1,4 +1,5 @@
 "use client";
+import { matchQuoteLine } from "@/app/util/cartQuote.mjs";
 import { cartLineKey } from "@/app/util/cartLine.mjs";
 
 import { useEffect, useState } from "react";
@@ -23,7 +24,7 @@ import { toast } from "sonner";
 export default function CartDrawer({ open, setOpen }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { cartItems, cartTotal, addToCart, isMounted } = useCart();
+  const { cartItems, cartTotal, cartQuote, cartPriceConfirmed, addToCart, isMounted } = useCart();
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
@@ -232,7 +233,7 @@ export default function CartDrawer({ open, setOpen }) {
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {isMounted && cartItems.length > 0 ? (
                   cartItems.map((p) => (
-                    <CartItem key={cartLineKey(p)} product={p} />
+                    <CartItem key={cartLineKey(p)} product={p} lineTotal={matchQuoteLine(p, cartQuote)?.totalPrice} />
                   ))
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-center px-4">
@@ -262,14 +263,14 @@ export default function CartDrawer({ open, setOpen }) {
                   <div className="space-y-1 mb-5">
                     <div className="flex justify-between items-end">
                       <span className="text-[12px] text-stone-500 uppercase tracking-widest font-bold">
-                        Tạm tính
+                        {cartPriceConfirmed ? "Tiền hàng và tiện ích" : "Giá hàng niêm yết"}
                       </span>
                       <span className="text-xl font-black text-amber-800">
                         {cartTotal.toLocaleString("vi-VN")}₫
                       </span>
                     </div>
                     <p className="text-[11px] text-stone-400 text-right">
-                      Phí vận chuyển được tính ở bước thanh toán.
+                      {cartPriceConfirmed ? "Phí giao hàng được xác nhận riêng." : "Giảm theo số lượng và phí tiện ích được xác nhận khi thanh toán."}
                     </p>
                   </div>
 

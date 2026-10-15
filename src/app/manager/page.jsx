@@ -2,18 +2,15 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { withRole } from '@/app/middleware/roleMiddleware';
 import { AppContext } from '@/app/context/AppContext';
+import ProductForm from './components/ProductForm';
+import ComboForm from './components/ComboForm';
+import SubscriptionForm from './components/SubscriptionForm';
+import GiftForm from './components/GiftForm';
+import { collect, saveManagerForm } from './services/managerApi';
 import { axiosConfig } from '@/app/services/api/axiosConfig';
 
 const labels = { products: 'Sản phẩm', combos: 'Combo', subscriptions: 'Đăng ký hàng tháng', gifts: 'Hộp quà', orders: 'Đơn hàng' };
 const empty = () => ({ name: '', description: '', price: '', stock: '0', category: '', brand: '', discountPercent: '0', validTo: '', planType: '1_month', boxId: '', comboId: '', sourceType: 'combo', products: [], bulkTiers: [], amenities: [] });
-async function collect(resource) {
-  const first = await axiosConfig.get(resource + '&page=1');
-  const rows = [...first.data];
-  for (let page = 2; page <= (first.pagination?.totalPages || 1); page++) {
-    const result = await axiosConfig.get(resource + '&page=' + page); rows.push(...result.data);
-  }
-  return rows;
-}
 const money = n => Number(n || 0).toLocaleString('vi-VN') + ' ₫';
 function Manager() {
   const { logout } = useContext(AppContext);
@@ -41,27 +38,7 @@ function Manager() {
   async function save(event) {
     event.preventDefault(); setBusy(true); setError('');
     try {
-      const f = form, products = f.products.map(p => ({ productId: p.productId, quantity: Number(p.quantity) }));
-      let resource = tab, payload, method = editing ? (tab === 'subscriptions' || tab === 'gifts' ? 'patch' : 'put') : 'post';
-      if (tab === 'products') {
-        payload = { name: f.name, description: f.description, price: Number(f.price), stock: Number(f.stock), category: f.category, brand: f.brand };
-      } else if (tab === 'combos') {
-        payload = { name: f.name, descriptions: f.description, stock: Number(f.stock), validTo: new Date(f.validTo + 'T23:59:59+07:00').toISOString(), discountPercent: Number(f.discountPercent), products };
-      } else if (tab === 'gifts') {
-        payload = { name: f.name, validTo: new Date(f.validTo + 'T23:59:59+07:00').toISOString(), giftPolicy: { bulkTiers: f.bulkTiers.map(t => ({ minQuantity: Number(t.minQuantity), percent: Number(t.percent) })), amenities: f.amenities.map(a => ({ name: a.name, fee: Number(a.fee) })) } };
-        if (!editing) Object.assign(payload, { comboId: f.comboId, stock: Number(f.stock) });
-      } else {
-        payload = { name: f.name, description: f.description, planType: f.planType, discountPercent: Number(f.discountPercent) };
-        if (!editing && f.sourceType === 'retail') {
-          resource = 'retail-subscriptions'; Object.assign(payload, { products, stock: Number(f.stock), validTo: new Date(f.validTo + 'T23:59:59+07:00').toISOString() });
-        } else if (!editing || f.sourceType !== 'retail') payload.boxId = f.boxId;
-      }
-      if (tab === 'products' || tab === 'combos') {
-        const data = new FormData();
-        for (const [key, value] of Object.entries(payload)) data.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
-        images.forEach(image => data.append('images', image)); payload = data;
-      }
-      await axiosConfig[method](`/manager/${resource}${editing ? '/' + editing : ''}`, payload, payload instanceof FormData ? { headers: { 'Content-Type': undefined } } : undefined);
+      await saveManagerForm({ tab, form, editing, images });
       setForm(null); await load();
     } catch (e) { setError(e.response?.data?.errors?.map(x => x.message).join('; ') || e.response?.data?.message || 'Không thể lưu'); }
     finally { setBusy(false); }
@@ -94,20 +71,15 @@ function Manager() {
       <h2 className="text-xl font-semibold">{editing ? 'Chỉnh sửa' : 'Tạo'} {labels[tab].toLowerCase()}</h2>
       {field('name', 'Tên')}
       {tab !== 'gifts' && field('description', 'Mô tả')}
-      {tab === 'products' && <>{field('price', 'Giá (VND)', 'number')}{!editing && field('stock', 'Tồn kho', 'number')}{select('brand', 'Thương hiệu', options.brands)}{select('category', 'Danh mục', options.categories)}{!options.brands.length && <p>Admin cần tạo thương hiệu và gán cho tài khoản merchant trước.</p>}</>}
-      {tab === 'combos' && <>{productPicker}{!editing && field('stock', 'Tồn kho combo', 'number')}{field('validTo', 'Ngày kết thúc bán', 'date')}{field('discountPercent', 'Giảm giá combo (%)', 'number')}</>}
+      {tab === 'products' && <ProductForm field={field} select={select} editing={editing} options={options} />}
+
+      {tab === 'combos' && <ComboForm field={field} editing={editing} productPicker={productPicker} />}
+
       {(tab === 'products' || tab === 'combos') && <label>Thêm ảnh<input className="block" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e => setImages(Array.from(e.target.files))} /></label>}
-      {tab === 'subscriptions' && <>
-        {!editing && <label>Nguồn gói<select className="ml-2 rounded border p-2" value={form.sourceType} onChange={e => change('sourceType', e.target.value)}><option value="combo">Combo</option><option value="retail">Hàng lẻ</option></select></label>}
-        {form.sourceType === 'retail' ? !editing && <>{productPicker}{field('stock', 'Số gói khả dụng', 'number')}{field('validTo', 'Ngày kết thúc nhận đăng ký', 'date')}</> : select('boxId', 'Combo', combos)}
-        <label>Kỳ đăng ký<select className="ml-2 rounded border p-2" value={form.planType} onChange={e => change('planType', e.target.value)}>{[1,3,6,12].map(n => <option key={n} value={`${n}_month`}>{n} tháng</option>)}</select></label>{field('discountPercent', 'Giảm giá kỳ đăng ký (%)', 'number')}
-      </>}
-      {tab === 'gifts' && <>
-        {!editing && <>{select('comboId', 'Combo nguồn', combos)}{field('stock', 'Số hộp quà khả dụng', 'number')}</>}{field('validTo', 'Ngày kết thúc bán', 'date')}
-        <p>Hộp quà giữ cấu phần và giá của combo tại lúc tạo. Các tiện ích được bao gồm trong mỗi hộp quà.</p>
-        <fieldset className="space-y-2"><legend>Giảm giá theo số hộp quà</legend>{form.bulkTiers.map((t, i) => <div className="flex gap-2" key={i}><input aria-label="Từ số lượng" placeholder="Từ số lượng" className="w-36 rounded border p-2" type="number" min="2" required value={t.minQuantity} onChange={e => change('bulkTiers', form.bulkTiers.map((x, j) => j === i ? { ...x, minQuantity: e.target.value } : x))} /><input aria-label="Giảm phần trăm" className="w-36 rounded border p-2" type="number" min="0" max="100" required value={t.percent} onChange={e => change('bulkTiers', form.bulkTiers.map((x, j) => j === i ? { ...x, percent: e.target.value } : x))} /><button type="button" onClick={() => change('bulkTiers', form.bulkTiers.filter((_, j) => j !== i))}>Bỏ</button></div>)}<button type="button" onClick={() => change('bulkTiers', [...form.bulkTiers, { minQuantity: 3, percent: 5 }])}>+ Mức giảm giá</button></fieldset>
-        <fieldset className="space-y-2"><legend>Tiện ích kèm theo</legend>{form.amenities.map((a, i) => <div className="flex gap-2" key={i}><input aria-label="Tên tiện ích" placeholder="Thiệp, gói quà…" className="rounded border p-2" required value={a.name} onChange={e => change('amenities', form.amenities.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} /><input aria-label="Phí tiện ích VND" className="w-36 rounded border p-2" type="number" min="0" required value={a.fee} onChange={e => change('amenities', form.amenities.map((x, j) => j === i ? { ...x, fee: e.target.value } : x))} /><button type="button" onClick={() => change('amenities', form.amenities.filter((_, j) => j !== i))}>Bỏ</button></div>)}<button type="button" onClick={() => change('amenities', [...form.amenities, { name: '', fee: 0 }])}>+ Tiện ích</button></fieldset>
-      </>}
+      {tab === 'subscriptions' && <SubscriptionForm field={field} select={select} editing={editing} form={form} change={change} productPicker={productPicker} combos={combos} />}
+
+      {tab === 'gifts' && <GiftForm field={field} select={select} editing={editing} form={form} change={change} combos={combos} />}
+
       <div className="flex gap-3"><button disabled={busy} className="rounded bg-green-800 px-4 py-2 text-white">{busy ? 'Đang lưu…' : 'Lưu'}</button><button type="button" disabled={busy} onClick={() => setForm(null)}>Hủy</button></div>
     </form>}
     <label className="block">{tab === "products" ? "Tìm sản phẩm" : "Tìm trong trang hiện tại"}<input className="ml-2 rounded border p-2" value={draftSearch} onChange={e => setDraftSearch(e.target.value)} /></label>

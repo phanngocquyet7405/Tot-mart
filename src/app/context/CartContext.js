@@ -4,7 +4,7 @@ import { AppContext } from "./AppContext";
 import { axiosConfig } from "../services/api/axiosConfig";
 import { normalizeCartProduct } from "@/app/util/cartItem";
 const CartContext = createContext();
-import { cartLineKey, giftOptions } from "@/app/util/cartLine.mjs";
+import { cartLineKey, giftOptions, toCartPayload } from "@/app/util/cartLine.mjs";
 const identity = cartLineKey;
 function read(key) {
   try {
@@ -48,6 +48,20 @@ export const CartProvider = ({ children }) => {
     [loadedScope, setLoadedScope] = useState(null),
     [cartVersion, setCartVersion] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [quoteResult, setQuoteResult] = useState(null);
+  const signature = JSON.stringify(cartItems);
+  useEffect(() => {
+    if (isLoading || loadedScope !== key || !user || !cartItems.length) return;
+    let active = true;
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const result = await axiosConfig.post('/checkout/quote', { items: toCartPayload(cartItems) }, { signal: controller.signal });
+        if (active) setQuoteResult({ scope: key, signature, data: result.data });
+      } catch { if (active) setQuoteResult({ scope: key, signature, data: null }); }
+    }, 250);
+    return () => { active = false; clearTimeout(timer); controller.abort(); };
+  }, [cartItems, signature, key, user, isLoading, loadedScope]);
   useEffect(() => {
     if (isLoading) return;
     let active = true;
@@ -154,6 +168,7 @@ export const CartProvider = ({ children }) => {
     store(key, null);
   };
   const visible = isMounted ? cartItems : [];
+  const cartQuote = isMounted && quoteResult?.scope === key && quoteResult.signature === signature ? quoteResult.data : null;
   return (
     <CartContext.Provider
       value={{
@@ -165,7 +180,9 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         clearCart,
         cartCount: visible.reduce((sum, item) => sum + item.quantity, 0),
-        cartTotal: visible.reduce(
+        cartQuote,
+        cartPriceConfirmed: Boolean(cartQuote),
+        cartTotal: cartQuote?.totalAmount ?? visible.reduce(
           (sum, item) => sum + item.price * item.quantity,
           0,
         ),
