@@ -1,5 +1,7 @@
 # Bàn giao merchant — 16/10/2026
 
+Cập nhật sau đồng bộ admin–merchant: cả hai khu vực đã dùng shared workspace shell; xem [triển khai và kiểm chứng mới](MERCHANT-ADMIN-IMPLEMENTATION.md). Nội dung và kết quả kiểm thử bên dưới giữ lịch sử tại thời điểm bàn giao ban đầu; không thay thế checklist browser mới.
+
 ## Source đã hoàn thiện
 
 - `/manager`: Tổng quan lấy `pagination.total` từ năm API merchant, đơn gần đây lấy danh sách thật; lỗi từng nguồn không biến thành số 0. Không tính doanh thu/sắp hết hàng khi thiếu hợp đồng. Liên kết tới danh sách tương ứng.
@@ -10,7 +12,7 @@
 - `/manager/orders`: phân trang và mở chi tiết chỉ đọc, trạng thái đơn/thanh toán, mặt hàng/giá BE, người nhận/địa chỉ được cấp. Không bộ lọc hoặc quyền đổi trạng thái chưa có BE; không dựng vận đơn/lịch sử/phí vận chuyển thiếu trong projection.
 - Layout chung: sidebar desktop và Sheet mobile, tài khoản thật/đăng xuất, guard merchant, trạng thái đang xác minh phiên, tín hiệu phiên hết hạn từ refresh 401/403. Trang có loading/empty/error/retry/saving, field errors và giữ dữ liệu khi save lỗi. Các URL hash cũ được chuyển từ `/manager#...` sang trang con.
 
-Các route sử dụng thật không import dữ liệu mock. `manager-design` và legacy component được giữ làm tham chiếu, không dùng làm backend fallback. Không thay đổi storefront/cart/checkout hay các sửa giá đã nghiệm thu.
+Các route sử dụng thật không import dữ liệu mock. Ngày 16/10/2026 đã loại bỏ prototype `src/app/manager-design`, `src/app/manager/lib/mock.js` và `src/app/manager/components/LegacyManager.jsx` sau khi kiểm tra import, re-export, dynamic import, liên kết, test và script: chỉ prototype tham chiếu mock, không có phụ thuộc từ manager thật. Giữ nguyên các component/form đang dùng. Không thay đổi storefront/cart/checkout hay các sửa giá đã nghiệm thu. Xem [CI-MANAGER-VERIFICATION.md](CI-MANAGER-VERIFICATION.md) cho lần kiểm chứng mới; kết quả cũ dưới đây là lịch sử.
 
 ## Kiểm thử thực sự đã chạy
 
@@ -49,4 +51,4 @@ Không có browser kết nối tại lần kiểm tra inventory cuối (apps/bro
 
 ZIP được tạo bởi `python scripts/package-fe.py`: allowlist source/config/public/tests/scripts/docs, chỉ `.env.example` an toàn; không `.env` thật, node_modules, .next, git, bộ nhớ agent, cloud config, logs hoặc private-key files. Có kiểm CRC và manifest SHA-256/tên file. Scan pattern secret chỉ là kiểm tra bổ sung, không thay thế việc giữ secret ngoài source.
 
-Không commit, push, deploy hoặc sửa biến cloud. Người dùng review ZIP/diff rồi làm theo `STAGING-DEPLOYMENT.md` để deploy đúng Preview/staging và rollback. Production chưa được xác minh, nằm ngoài đợt này.
+Không commit, push, deploy hoặc sửa biến cloud. Người dùng review ZIP/diff rồi làm theo [STAGING-DEPLOYMENT.md](STAGING-DEPLOYMENT.md) để deploy đúng Preview/staging và rollback. Production chưa được xác minh, nằm ngoài đợt này.

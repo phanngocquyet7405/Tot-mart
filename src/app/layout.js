@@ -10,7 +10,6 @@ import { Analytics } from "@vercel/analytics/next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { AppContextProvider } from "./context/AppContext";
-import { AdminNotificationProvider } from "./context/NotificationContext";
 import { CartProvider } from "@/app/context/CartContext";
 import { WishlistProvider } from "@/app/context/WishlistContext";
 import "./globals.css";
@@ -58,8 +57,7 @@ export default async function RootLayout({ children }) {
           <AppContextProvider>
             <CartProvider>
               <WishlistProvider>
-                {/* Toast notification — render vào document.body qua portal */}
-                <AdminNotificationProvider>{children}</AdminNotificationProvider>
+                {children}
               </WishlistProvider>
             </CartProvider>
           </AppContextProvider>

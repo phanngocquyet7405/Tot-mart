@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { ImageIcon, MoreHorizontal, Pencil, Plus, Search, Trash2, Warehouse, X, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import WorkspacePageHeader from '@/components/workspace/WorkspacePageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -64,11 +65,6 @@ function ProductEditor({ product, options, onClose, onSaved, onDirtyChange }) {
     if (locked.current) return;
     if (!dirty.current || window.confirm('Bỏ các thay đổi chưa lưu?')) onClose();
   }
-  useEffect(() => {
-    function beforeUnload(event) { if (dirty.current || locked.current) event.preventDefault(); }
-    window.addEventListener('beforeunload', beforeUnload);
-    return () => window.removeEventListener('beforeunload', beforeUnload);
-  }, []);
   function change(key, value) {
     markDirty(); setForm(previous => ({ ...previous, [key]: value }));
     setErrors(previous => ({ ...previous, [key]: undefined }));
@@ -84,12 +80,12 @@ function ProductEditor({ product, options, onClose, onSaved, onDirtyChange }) {
       requestAnimationFrame(() => document.getElementById(`product-${Object.keys(next)[0]}`)?.focus());
       return;
     }
-    locked.current = true; setSaving(true);
+    locked.current = true; setSaving(true); onDirtyChange(true, true);
     try {
       await saveManagerForm({ tab: 'products', form: { ...form, name: form.name.trim(), description: form.description.trim() }, editing, images: files });
       dirty.current = false; onDirtyChange(false); onSaved(editing ? 'Đã lưu sản phẩm.' : 'Đã tạo sản phẩm.');
     } catch (failure) { setErrors(fieldErrors(failure)); setError(managerError(failure, 'Không thể lưu sản phẩm. Vui lòng thử lại.')); }
-    finally { locked.current = false; setSaving(false); }
+    finally { locked.current = false; setSaving(false); onDirtyChange(dirty.current); }
   }
   const field = (key, label, type = 'text', required = true) => <div className="grid gap-2" key={key}>
     <label htmlFor={`product-${key}`} className="text-sm font-medium">{label}{required && ' *'}</label>
@@ -212,7 +208,7 @@ export default function ProductsWorkspace({ onDirtyChange }) {
   const hasFilters=!!(filter.keyword||filter.brand||filter.category||filter.minPrice!==undefined||filter.maxPrice!==undefined);
   const rows = result.rows;
   return <section aria-labelledby="products-heading" className="space-y-6">
-    <div className="flex flex-wrap items-start justify-between gap-4"><div><h1 id="products-heading" className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">Sản phẩm</h1><p className="mt-2 text-sm text-muted-foreground sm:text-base">Quản lý danh mục và tồn kho của cửa hàng.</p></div><Button className="min-h-11" disabled={!catalog.options} onClick={() => openEditor(null)}><Plus />Thêm sản phẩm</Button></div>
+    <WorkspacePageHeader id="products-heading" title="Sản phẩm" description="Quản lý danh mục và tồn kho của cửa hàng." actions={<Button className="min-h-11" disabled={!catalog.options} onClick={() => openEditor(null)}><Plus />Thêm sản phẩm</Button>} />
     {notice && <p role="status" className="rounded-lg border bg-card px-4 py-3 text-sm">{notice}</p>}
     {catalog.error ? <ErrorMessage onRetry={() => { setCatalog({ options: null, error: '' }); setCatalogVersion(previous => previous + 1); }}>Không tải được thương hiệu và danh mục: {catalog.error}</ErrorMessage> : !catalog.options ? <p role="status" className="text-sm text-muted-foreground">Đang tải thương hiệu và danh mục…</p> : null}
     <div className="overflow-hidden rounded-xl border bg-card">

@@ -1,6 +1,6 @@
 # Đề xuất hoàn thiện merchant `/manager`
 
-Ngày đề xuất: 15/10/2026. Người dùng đã duyệt thứ tự và cho triển khai. Cập nhật 16/10/2026: source sáu route merchant đã được thực hiện; xem `MERCHANT-HANDOFF.md` cho kết quả và các phần chưa nghiệm thu browser. Nội dung dưới giữ brief đã duyệt, không phải lời khẳng định mọi kiểm tra trong kế hoạch đã hoàn tất.
+Ngày đề xuất: 15/10/2026. Người dùng đã duyệt thứ tự và cho triển khai. Cập nhật 16/10/2026: source sáu route merchant đã được thực hiện; xem [MERCHANT-HANDOFF.md](MERCHANT-HANDOFF.md) cho kết quả và các phần chưa nghiệm thu browser. Nội dung dưới giữ brief đã duyệt, không phải lời khẳng định mọi kiểm tra trong kế hoạch đã hoàn tất.
 
 ## Mục tiêu và phạm vi
 
@@ -8,7 +8,9 @@ Merchant quản lý sản phẩm và gói của chính mình bằng tiếng Vi�
 
 Giữ hệ thống hiện có; không mở một hướng thẩm mỹ mới, không sửa storefront/admin hay luồng thanh toán trong bước này. `PRODUCT.md` giữ sự thật sản phẩm; tài liệu này giữ đề xuất bố cục, tương tác và thứ tự làm. Không thay `DESIGN.md` ở bước đề xuất.
 
-## Cơ sở từ source
+## Cơ sở từ source (lịch sử tại thời điểm đề xuất)
+
+Cập nhật 16/10/2026: prototype `manager-design`, dữ liệu `manager/lib/mock.js` và `LegacyManager.jsx` đã được loại bỏ vì không còn phụ thuộc thật. Các nhắc đến prototype bên dưới giữ lại lý do và hướng triển khai ban đầu; tham chiếu giao diện hiện tại là sáu route `/manager` và các workspace/component đang dùng.
 
 - `/manager/page.jsx` đang có năm tab, API thật, phân trang, tìm sản phẩm chờ 300 ms, thao tác lưu/xóa/tồn kho và guard merchant; chưa có Tổng quan.
 - `manager/services/managerApi.js` và bốn form ProductForm, ComboForm, GiftForm, SubscriptionForm là điểm tái sử dụng nghiệp vụ. Không thay bằng logic lưu mẫu của prototype.

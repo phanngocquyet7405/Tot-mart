@@ -42,7 +42,7 @@ export default function OperationsPage() {
     finally { setBusy(null); }
   };
   const referenceInput = (key, placeholder) => <Input aria-label={placeholder} value={references[key] || ''} onChange={event => setReferences(prev => ({...prev,[key]:event.target.value}))} placeholder={placeholder} />;
-  return <main className="p-6 space-y-8">
+  return <section className="space-y-8">
     <div className="flex justify-between items-center"><h1 className="text-2xl font-bold">Giao định kỳ & đối soát tiền</h1><Button disabled={loading || !!busy} onClick={load}>Tải lại</Button></div>
     {error && <p role="alert" className="text-red-700">{error}</p>}
     {loading && <p>Đang tải...</p>}
@@ -84,6 +84,6 @@ export default function OperationsPage() {
       <div className="flex gap-4"><Button disabled={loading || page <= 1} onClick={() => setPage(page - 1)}>Trang trước</Button><span>Trang {page}/{Math.max(1,eventPages)}</span><Button disabled={loading || page >= eventPages} onClick={() => setPage(page + 1)}>Trang sau</Button></div>
     </section>
     <section className="space-y-3"><h2 className="text-xl font-semibold">50 audit gần nhất</h2>{audits.map(item => <div key={item._id} className="border rounded p-3"><p>{item.action} · {new Date(item.createdAt).toLocaleString('vi-VN')}</p><p>{item.reason}</p></div>)}</section>
-  </main>;
+  </section>;
 }
 

@@ -22,6 +22,22 @@ colors:
   destructive: "oklch(0.577 0.245 27.325)"
   stone-text: "#57534e"
 typography:
+  workspace-heading:
+    fontFamily: "Plus Jakarta Sans, system-ui, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 700
+    lineHeight: "2rem"
+    letterSpacing: "-0.025em"
+  workspace-navigation:
+    fontFamily: "Plus Jakarta Sans, system-ui, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 400
+    lineHeight: "1.25rem"
+  workspace-brand:
+    fontFamily: "Plus Jakarta Sans, system-ui, sans-serif"
+    fontSize: "1.125rem"
+    fontWeight: 700
+    lineHeight: "1.75rem"
   display:
     fontFamily: "Playfair Display, Georgia, serif"
     fontSize: "clamp(2.25rem, 5vw, 3.75rem)"
@@ -68,6 +84,43 @@ spacing:
   xl: "32px"
   2xl: "48px"
 components:
+  workspace-sidebar:
+    backgroundColor: "var(--sidebar)"
+    textColor: "var(--sidebar-foreground)"
+    width: "256px"
+  workspace-mobile-sidebar:
+    backgroundColor: "var(--sidebar)"
+    textColor: "var(--sidebar-foreground)"
+    width: "min(90vw, 18rem)"
+  workspace-nav-item:
+    typography: "{typography.workspace-navigation}"
+    rounded: "{rounded.md}"
+    padding: "8px 12px"
+    height: "auto"
+  workspace-nav-item-active:
+    backgroundColor: "var(--sidebar-accent)"
+    textColor: "var(--sidebar-accent-foreground)"
+  workspace-header:
+    backgroundColor: "var(--background)"
+    padding: "8px 16px"
+    height: "auto"
+  workspace-shell-control:
+    size: "44px"
+  workspace-brand-emblem:
+    backgroundColor: "var(--primary)"
+    textColor: "var(--primary-foreground)"
+    rounded: "{rounded.lg}"
+    size: "40px"
+  workspace-brand-name:
+    typography: "{typography.workspace-brand}"
+  workspace-page-heading:
+    typography: "{typography.workspace-heading}"
+  workspace-content:
+    padding: "16px"
+  workspace-content-desktop:
+    padding: "24px"
+  workspace-merchant-content:
+    width: "min(100%, 1440px)"
   button-shop:
     backgroundColor: "{colors.terracotta}"
     textColor: "#ffffff"
@@ -186,6 +239,8 @@ The palette is two shops sharing paper and stone, not a single accent with tints
 
 ## Layout
 
+Admin and merchant share the presentation shell in `src/components/workspace`. At the medium breakpoint (768px), the fixed desktop sidebar is 256px wide and can be hidden. Below it, navigation opens in a left Sheet of `min(90vw, 18rem)`. Logo and logout remain outside the independently scrolling menu. The sticky header has a minimum height of 64px. Content uses 16px padding, increasing to 24px at 768px; merchant content is centered with a 1440px maximum, while admin uses the available width. These are workspace-scoped decisions; storefront layout and global CSS remain unchanged.
+
 Storefront shells cap around `max-w-7xl` (header, footer, product detail) with `px-4`–`px-8`. Editorial/story pages often sit at `max-w-5xl` / `max-w-6xl` with larger vertical rhythm (`py-24`). Catalog product grids are 1 / 2 / 3 / 4 columns with `gap-6` (24px). Admin uses padded containers (`p-4`–`p-6`) and denser tables, not the atelier vertical luxury.
 
 Sticky white header with a bottom hairline is the market shop’s masthead. Box routes may swap in the TotMartBox nav, but width and padding stay in the same 7xl family.
@@ -239,7 +294,15 @@ Two registers. Storefront CTAs are plump, uppercase, clay or leaf. Admin/shadcn 
 ### Navigation
 - **Market header:** sticky white bar, gray-200 hairline, logo ~48px, search in the middle, icon actions on the right. Promo chip is Forest Canopy.
 - **Box nav:** same 7xl width; atelier pages may drop the green promo chip.
-- **Admin sidebar:** quiet shadcn sidebar tokens; current item uses sidebar-accent fill, not terracotta, unless the screen is already a box-plan tool that already uses clay.
+- **Workspace sidebar (admin and merchant):** shared neutral sidebar tokens, 14px sans labels, 16px icons, minimum 44px targets, 8px corners, and 8px/12px vertical/horizontal padding. Current leaf uses sidebar-accent fill and medium weight; hover uses the same neutral family, with a visible 2px sidebar-ring focus indicator. Admin keeps grouped navigation; merchant keeps its six flat work areas.
+
+### Shared workspace chrome
+
+- **Identity:** a 40px primary emblem with a 24px Box icon and an 18px bold sans wordmark. Admin retains `TotBoxAdmin` / `Management`; merchant retains `TotMart` / `Quản lý cửa hàng`. Supporting brand labels are 12px. Brand geometry is shared while names remain role-specific.
+- **Header and account:** shell menu controls are 44px; the account trigger and logout have a 44px minimum height. Account uses a 32px initials avatar, real-session name and role, with an account dropdown and explicit logout pending/error feedback. Admin alone supplies the notification slot.
+- **Page heading:** shared sans heading at 24px, weight 700, tight tracking; supporting copy is 14px. This applies to merchant workspace headings and consumers of AdminPageHeader; it does not assert every legacy admin page has migrated.
+- **Interaction:** labeled mobile menu/close controls, current-page semantics, skip link and focusable main; navigation can be vetoed by the merchant draft adapter. The shared shell receives presentation props, while role guards, account data, logout and draft decisions stay in role adapters. The direct Sheet implementation replaces admin's prior shell without changing the UI sidebar primitive.
+- **Scope and evidence:** approved alignment is recorded in [MERCHANT-ADMIN-DESIGN-ALIGNMENT.md](docs/MERCHANT-ADMIN-DESIGN-ALIGNMENT.md). Dimensions above come from source, not rendered measurements. Desktop/mobile captures and keyboard/touch verification remain pending; the finish disposition is recapture, without a rendered-QA or WCAG claim. Existing storefront palette/font and unrelated token drift are retained.
 
 ### Product card (signature)
 The catalog’s unit of merchandise: white tile, square photo, green discount, gold badge, heart/cart on hover. It must not inherit plan-card cream or 24px corners.

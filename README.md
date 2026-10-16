@@ -8,6 +8,10 @@ axios
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## Tài liệu
+
+Xem [mục lục tài liệu dự án](docs/README.md) để tìm báo cáo kiểm chứng, bàn giao merchant và hướng dẫn staging/Render. [PRODUCT.md](PRODUCT.md), [DESIGN.md](DESIGN.md) và [AGENTS.md](AGENTS.md) được giữ tại gốc.
+
 ## Getting Started
 
 First, run the development server:

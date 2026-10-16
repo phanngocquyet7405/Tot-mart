@@ -2,7 +2,7 @@
 
 ## Kết quả mới nhất — 16/10/2026
 
-Source hiện có đủ sáu route merchant. Lần chạy mới nhất: **60/60 test FE**, lint phần sửa sạch, **38 tình huống BE thật + MongoDB tạm** qua; build sáu route thành công. Chi tiết hiện hành ở `MERCHANT-HANDOFF.md` và `STAGING-DEPLOYMENT.md`. Các số 53/16 trong phần lịch sử dưới đây là kết quả các đợt trước, không phải tổng hiện tại.
+Source hiện có đủ sáu route merchant. Lần chạy mới nhất: **60/60 test FE**, lint phần sửa sạch, **38 tình huống BE thật + MongoDB tạm** qua; build sáu route thành công. Chi tiết hiện hành ở [MERCHANT-HANDOFF.md](MERCHANT-HANDOFF.md) và [STAGING-DEPLOYMENT.md](STAGING-DEPLOYMENT.md). Các số 53/16 trong phần lịch sử dưới đây là kết quả các đợt trước, không phải tổng hiện tại.
 
 Origin staging đã được người dùng xác nhận: `https://tot-mart-git-staging-furiousfast189-3255s-projects.vercel.app`; GET BE health với đúng Origin trả 200, exact CORS match và credentials=true. FE staging trả 302 sang xác thực Vercel cho truy cập công khai; chưa nghiệm thu phiên browser. Không có browser kết nối; chỉ cung cấp checklist thủ công, không công bố E2E đã qua.
 

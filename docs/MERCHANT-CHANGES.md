@@ -70,7 +70,7 @@ npm start
 - Frontend: 45 bài qua, 0 lỗi; lint các phần sửa và production build webpack thành công.
 - Đã nghiệm thu các đường đi cụ thể với hai merchant, admin và khách hàng trên trình duyệt. Giỏ gift đúng 555.000; gói hàng lẻ 270.000/3 tháng hiển thị 90.000/tháng.
 - Đã tách managerService và bốn form; có health probe, summary vận hành, script backup/restore và quy trình vận hành.
-- Chi tiết phạm vi và giới hạn trong ACCEPTANCE.md; backend có thêm OPERATIONS.md. Chưa xác nhận ngân hàng/email/upload thật hoặc chạy backup/restore drill.
+- Chi tiết phạm vi và giới hạn trong [ACCEPTANCE.md](ACCEPTANCE.md); backend có thêm OPERATIONS.md. Chưa xác nhận ngân hàng/email/upload thật hoặc chạy backup/restore drill.
 
 Backend dùng TEST_MONGODB_URI=mongodb://127.0.0.1:27018/totmart_test?replicaSet=rs0&directConnection=true và TEST_REDIS_URL=redis://127.0.0.1:6380 rồi chạy npm test. Database test sẽ bị làm sạch; chỉ dùng môi trường test riêng.
 

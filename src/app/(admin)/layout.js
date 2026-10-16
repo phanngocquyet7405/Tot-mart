@@ -1,26 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { AppSidebar } from "./components/app_sidebar";
-import { AdminHeader } from "./components/admin_header";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { withAdmin } from "../middleware/roleMiddleware";
-import { AdminNotificationProvider } from "../context/NotificationContext";
+import { useContext } from 'react';
+import { usePathname } from 'next/navigation';
+import { withAdmin } from '../middleware/roleMiddleware';
+import { AppContext } from '../context/AppContext';
+import { AdminNotificationProvider } from '../context/NotificationContext';
+import { NotificationBell } from './components/notifications/NotificationBell';
+import { adminNavigation } from './components/adminNavigation.mjs';
+import WorkspaceShell from '@/components/workspace/WorkspaceShell';
+import { useWorkspaceLogout } from '@/components/workspace/useWorkspaceLogout';
 
-const AdminLayout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  return (
-    <AdminNotificationProvider>
-      <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <AppSidebar />
-        <SidebarInset>
-          <AdminHeader />
-          <main className="page-canvas flex-1 overflow-auto p-6">{children}</main>
-        </SidebarInset>
-      </SidebarProvider>
-    </AdminNotificationProvider>
-  );
-};
+function AdminLayout({ children }) {
+  const { user, logout } = useContext(AppContext);
+  const pathname = usePathname();
+  const session = useWorkspaceLogout(logout);
+  const account = { name: user?.fullName || user?.name || user?.username || user?.email || 'Admin', email: user?.email, roleLabel: 'Quản trị viên' };
+  return <AdminNotificationProvider><WorkspaceShell brand={{ name: 'TotBoxAdmin', label: 'Management', href: '/dashboard' }}
+    navigation={adminNavigation} pathname={pathname} account={account} onLogout={session.signOut}
+    logoutPending={session.pending} logoutError={session.error} headerActions={<NotificationBell />}>
+    {children}
+  </WorkspaceShell></AdminNotificationProvider>;
+}
 
 export default withAdmin(AdminLayout);

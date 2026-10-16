@@ -4,7 +4,7 @@
 
 Origin thực tế do người dùng xác nhận: **https://tot-mart-git-staging-furiousfast189-3255s-projects.vercel.app**. Người dùng cho biết Render CORS_ORIGINS và FRONTEND_URL cùng dùng origin này. GET BE health với đúng Origin trả **200**, Access-Control-Allow-Origin khớp chính xác, Access-Control-Allow-Credentials=true. GET FE staging chưa xác thực trả **302 tới vercel.com**, nên chưa kiểm tra ứng dụng sau lớp Vercel Authentication.
 
-Không cần đoán/thêm origin mới hay sửa Render trong đợt này. Dùng đúng alias staging, không lấy URL deployment ngẫu nhiên chưa được cho phép. Cấu hình Preview/staging, thứ tự ưu tiên và rollback nằm trong `STAGING-DEPLOYMENT.md`; Production chưa được xác minh và không bị thay đổi.
+Không cần đoán/thêm origin mới hay sửa Render trong đợt này. Dùng đúng alias staging, không lấy URL deployment ngẫu nhiên chưa được cho phép. Cấu hình Preview/staging, thứ tự ưu tiên và rollback nằm trong [STAGING-DEPLOYMENT.md](STAGING-DEPLOYMENT.md); Production chưa được xác minh và không bị thay đổi.
 
 ## Cấu hình đã áp dụng
 

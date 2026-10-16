@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-26T00:59:00.000+07:00",
+  "generatedAt": "2026-10-16T00:00:00.000+07:00",
   "title": "Design System: TotMart",
   "extensions": {
     "colorMeta": {
@@ -291,6 +291,9 @@
       }
     },
     "typographyMeta": {
+      "workspace-heading": {"displayName": "Workspace heading", "purpose": "Shared admin/merchant page heading; 24px bold sans."},
+      "workspace-navigation": {"displayName": "Workspace navigation", "purpose": "Shared 14px sans navigation; active leaf uses medium weight."},
+      "workspace-brand": {"displayName": "Workspace brand", "purpose": "Shared 18px bold sans role-specific wordmark."},
       "display": { "displayName": "Display", "purpose": "Story and box heroes only. Playfair Display." },
       "headline": { "displayName": "Headline", "purpose": "Section titles on atelier pages." },
       "title": { "displayName": "Title", "purpose": "Product names, admin row titles, card headings." },
@@ -350,6 +353,9 @@
     ]
   },
   "components": [
+    {"name": "Workspace navigation item", "kind": "nav", "refersTo": "workspace-nav-item", "description": "Shared admin/merchant navigation: 44px minimum target, neutral active and focus.", "html": "<nav aria-label=\"Workspace\"><a class=\"ds-workspace-nav\" href=\"#products\" aria-current=\"page\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m12 3 9 5-9 5-9-5 9-5Z M3 8v8l9 5 9-5V8 M12 13v8\"/></svg><span>Sản phẩm</span></a></nav>", "css": ".ds-workspace-nav { display:flex; align-items:center; gap:12px; min-height:44px; padding:8px 12px; border-radius:8px; color:var(--sidebar-foreground); font-family:\"Plus Jakarta Sans\",system-ui,sans-serif; font-size:14px; line-height:20px; text-decoration:none; } .ds-workspace-nav[aria-current=\"page\"], .ds-workspace-nav:hover { background:var(--sidebar-accent); color:var(--sidebar-accent-foreground); } .ds-workspace-nav[aria-current=\"page\"] { font-weight:500; } .ds-workspace-nav:focus-visible { outline:2px solid var(--sidebar-ring); outline-offset:2px; }"},
+    {"name": "Workspace page heading", "kind": "custom", "refersTo": "workspace-page-heading", "description": "Shared sans page heading for workspace header consumers.", "html": "<h1 class=\"ds-workspace-heading\">Sản phẩm</h1>", "css": ".ds-workspace-heading { margin:0; font-family:\"Plus Jakarta Sans\",system-ui,sans-serif; font-size:24px; line-height:32px; font-weight:700; letter-spacing:-0.025em; overflow-wrap:break-word; color:var(--foreground); }"},
+    {"name": "Workspace header", "kind": "custom", "refersTo": "workspace-header", "description": "Sticky shared shell header, minimum 64px; notification content is admin-only.", "html": "<header class=\"ds-workspace-header\"><button class=\"ds-workspace-toggle\" aria-label=\"Mở menu\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M4 6h16M4 12h16M4 18h16\"/></svg></button><span>Quản lý cửa hàng</span></header>", "css": ".ds-workspace-header { position:sticky; top:0; display:flex; align-items:center; gap:8px; min-height:64px; padding:8px 16px; background:var(--background); border-bottom:1px solid var(--border); color:var(--muted-foreground); font-family:\"Plus Jakarta Sans\",system-ui,sans-serif; font-size:14px; } .ds-workspace-toggle { display:grid; place-items:center; width:44px; height:44px; border:0; border-radius:10px; background:transparent; color:var(--foreground); cursor:pointer; } .ds-workspace-toggle:hover { background:var(--accent); } .ds-workspace-toggle:focus-visible { outline:2px solid var(--ring); outline-offset:2px; }"},
     {
       "name": "Shop primary button",
       "kind": "button",
@@ -434,6 +440,7 @@
       "Vietnamese-capable Playfair Display + Plus Jakarta Sans pairing, already loaded with Vietnamese subsets."
     ],
     "rules": [
+      {"name": "The Shared Workspace Rule", "body": "Admin and merchant share neutral shell geometry, sans headings and navigation states; role menus, guards and business behavior remain in adapters. Storefront identity stays unchanged.", "section": "components"},
       { "name": "The Dual Shop Rule", "body": "Gift/subscribe/checkout speak clay. Catalog/header speak leaf. Do not average them into one accent per page.", "section": "colors" },
       { "name": "The Seal Not Flood Rule", "body": "Terracotta or leaf occupies a small share of any screen — buttons, chips, rules, selected states. Large fields stay cream, paper, or white.", "section": "colors" },
       { "name": "The No Third Accent Rule", "body": "No neon, glassmorphism, purple, or cyan families. Stay clay, leaf, cream, stone, espresso.", "section": "colors" },

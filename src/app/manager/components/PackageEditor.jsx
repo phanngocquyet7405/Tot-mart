@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -20,7 +20,6 @@ export default function PackageEditor({ kind, row, products, combos, onClose, on
   const editing=row?._id;
   function changed(key,value){dirty.current=true;onDirtyChange(true);setForm(previous=>({...previous,[key]:value}));setErrors(previous=>({...previous,[key]:undefined}));}
   function close(){if(!locked.current&&(!dirty.current||window.confirm('Bỏ các thay đổi chưa lưu?')))onClose();}
-  useEffect(()=>{function warn(event){if(dirty.current||locked.current)event.preventDefault();}window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[]);
   const field=(key,label,type='text',required=true)=><div key={key} className={`grid gap-2 ${key==='description'?'sm:col-span-2':''}`}><label htmlFor={`package-${key}`} className="text-sm font-medium">{label}{required?' *':''}</label>{key==='description'?<textarea id={`package-${key}`} className="min-h-28 w-full rounded-lg border bg-background p-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring" value={form[key]} onChange={event=>changed(key,event.target.value)} aria-invalid={!!errors[key]} aria-describedby={errors[key]?`package-error-${key}`:undefined} />:<Input id={`package-${key}`} type={type} min={type==='number'?0:undefined} step={key==='discountPercent'?'any':type==='number'?1:undefined} className="min-h-11 text-base" value={form[key]??''} onChange={event=>changed(key,event.target.value)} aria-invalid={!!errors[key]} aria-describedby={errors[key]?`package-error-${key}`:undefined} />}<FieldError id={`package-error-${key}`} error={errors[key]} /></div>;
   const select=(key,label,items)=><div className="grid gap-2" key={key}><label htmlFor={`package-${key}`} className="text-sm font-medium">{label} *</label><select id={`package-${key}`} value={form[key]} onChange={event=>changed(key,event.target.value)} aria-invalid={!!errors[key]} className="min-h-11 w-full rounded-lg border bg-background px-3 text-base"><option value="">Chọn {label.toLowerCase()}</option>{form[key]&&!items.some(item=>item._id===form[key])&&<option value={form[key]}>Nguồn hiện tại (không còn trong danh sách khả dụng)</option>}{items.map(item=><option key={item._id} value={item._id}>{item.name}</option>)}</select><FieldError error={errors[key]} /></div>;
   const filtered=products.filter(product=>product.name.toLocaleLowerCase('vi').includes(pickerQuery.toLocaleLowerCase('vi')));
@@ -36,10 +35,10 @@ export default function PackageEditor({ kind, row, products, combos, onClose, on
     const next=validatePackage(kind,form,editing,products,combos);
     if(files.length>10||files.some(file=>file.size>5*1024*1024||!['image/jpeg','image/jpg','image/png','image/webp'].includes(file.type)||!/\.(jpe?g|png|webp)$/i.test(file.name)))next.images='Tối đa 10 ảnh JPEG/PNG/WebP, mỗi ảnh không quá 5 MB.';
     setErrors(next);setError('');if(Object.keys(next).length){requestAnimationFrame(()=>document.getElementById(`package-${Object.keys(next)[0]}`)?.focus());return;}
-    locked.current=true;setBusy(true);
+    locked.current=true;setBusy(true);onDirtyChange(true,true);
     try{await saveManagerForm({tab:kind,form:{...form,name:form.name.trim()},editing,images:files});dirty.current=false;onDirtyChange(false);onSaved(`Đã ${editing?'lưu':'tạo'} ${labels[kind].toLocaleLowerCase('vi')}.`);}
     catch(failure){setErrors(fieldErrors(failure));setError(managerError(failure));}
-    finally{locked.current=false;setBusy(false);}
+    finally{locked.current=false;setBusy(false);onDirtyChange(dirty.current);}
   }
   return <Sheet open onOpenChange={open=>{if(!open)close();}}><SheetContent showCloseButton={false} className="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-3xl" onEscapeKeyDown={event=>{event.preventDefault();close();}}>
     <div className="border-b p-5"><SheetTitle className="text-xl">{editing?'Chỉnh sửa':'Tạo'} {labels[kind].toLocaleLowerCase('vi')}</SheetTitle><SheetDescription className="mt-2">{kind==='combos'?'Cấu phần, thời hạn và giá của combo.':kind==='gifts'?'Quà tặng từ combo, giảm theo lượng và tiện ích.':'Giao mỗi tháng, thu tiền trước cho cả kỳ.'}</SheetDescription></div>

@@ -6,10 +6,13 @@ const { pathToFileURL } = require('node:url');
 const axios = require('axios');
 
 test('Next rewrite uses server API_URL; browser base cannot point at a second backend', async () => {
-  const original = Object.fromEntries(['API_URL','NEXT_PUBLIC_API_URL','NODE_ENV'].map(key => [key, process.env[key]]));
+  const original = Object.fromEntries(['API_URL','NEXT_PUBLIC_API_URL','NODE_ENV','CI'].map(key => [key, process.env[key]]));
   let seq = 0;
   const load = () => import(`${pathToFileURL(require.resolve('../next.config.mjs')).href}?connection-test=${seq++}`);
   try {
+    // Exercise deployment validation even when the runner (GitHub Actions) sets CI.
+    // Restore the runner's environment in finally, like the other config inputs.
+    delete process.env.CI;
     process.env.NODE_ENV = 'production';
     process.env.API_URL = 'https://totmartapi-1.onrender.com/api/';
     process.env.NEXT_PUBLIC_API_URL = '/api';

@@ -45,8 +45,8 @@ Các biến ảnh (nếu cần): `IMAGE_HOSTS=res.cloudinary.com,images.unsplash
 5. Kiểm tra hai biến **Preview + staging**; giữ CORS Render nguyên origin đã xác nhận. Không tự thay bất kỳ cấu hình Production nào.
 6. Sau khi review source, người dùng tự commit/push nhánh staging hoặc redeploy deployment của nhánh staging với source đã đưa lên. Agent không commit/push/deploy. Không chọn Promote to Production. Deployment cũ không tự nhận ZIP hay source local.
 7. Mở đúng branch alias `https://tot-mart-git-staging-furiousfast189-3255s-projects.vercel.app`, vượt lớp Vercel Authentication bằng quyền của chính bạn; không dùng origin URL deployment ngẫu nhiên chưa có trong allowlist.
-8. GET `/api/home/health` phải ready qua FE. Tự đăng nhập merchant hiện hữu; xác minh cookie/profile/refresh theo `RENDER-CONNECTION.md`. Chỉ xem dữ liệu được phép trên Render; chưa nghiệm thu CRUD bằng deployment này.
-9. CRUD/giá/tồn/hủy lỗi chỉ thử trên BE + DB test riêng đã được xác nhận. Kiểm tra desktop/mobile theo `MERCHANT-HANDOFF.md`.
+8. GET `/api/home/health` phải ready qua FE. Tự đăng nhập merchant hiện hữu; xác minh cookie/profile/refresh theo [RENDER-CONNECTION.md](RENDER-CONNECTION.md). Chỉ xem dữ liệu được phép trên Render; chưa nghiệm thu CRUD bằng deployment này.
+9. CRUD/giá/tồn/hủy lỗi chỉ thử trên BE + DB test riêng đã được xác nhận. Kiểm tra desktop/mobile theo [MERCHANT-HANDOFF.md](MERCHANT-HANDOFF.md).
 
 ## Rollback staging
 
