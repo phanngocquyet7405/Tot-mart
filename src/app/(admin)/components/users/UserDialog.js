@@ -257,7 +257,7 @@ export default function UserDialog({ open, onOpenChange, user, onSuccess }) {
               {isEdit && user.addresses?.length > 0 && (
                 <Badge
                   variant="secondary"
-                  className="ml-1.5 h-4 px-1.5 text-[10px]"
+                  className="ml-1.5 h-4 px-1.5 text-[11px]"
                 >
                   {user.addresses.length}
                 </Badge>

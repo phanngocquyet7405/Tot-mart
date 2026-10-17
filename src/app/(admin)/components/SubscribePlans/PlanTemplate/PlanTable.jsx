@@ -166,7 +166,7 @@ export function PlanTable({
                     {formatCurrency(template.discountPrice)}
                   </p>
                   {template.discountPercent > 0 && (
-                    <Badge className="mt-0.5 bg-red-50 text-red-600 border-red-100 text-[10px] py-0">
+                    <Badge className="mt-0.5 bg-red-50 text-red-600 border-red-100 text-[11px] py-0">
                       −{template.discountPercent}%
                     </Badge>
                   )}

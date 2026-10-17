@@ -49,7 +49,7 @@ function TabBar({ activeTab, setActiveTab, tabCounts }) {
         >
           {tab.label}
           <span
-            className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${
+            className={`text-[11px] font-black px-1.5 py-0.5 rounded-full ${
               activeTab === tab.key
                 ? "bg-[#C85C3C] text-white"
                 : "bg-stone-200 text-stone-500"
@@ -175,7 +175,7 @@ export default function MySubscriptionsPage() {
                 <h1 className="text-base font-black text-stone-800 leading-tight">
                   Gói đăng ký của tôi
                 </h1>
-                <p className="text-[10px] text-stone-400">
+                <p className="text-[11px] text-stone-400">
                   Quản lý các gói subscription box
                 </p>
               </div>

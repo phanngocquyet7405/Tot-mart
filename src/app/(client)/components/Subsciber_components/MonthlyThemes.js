@@ -86,7 +86,7 @@ export function MonthlyThemes() {
     <section className="mb-20">
       {/* Section Header */}
       <div className="text-center max-w-2xl mx-auto mb-10">
-        <span className="text-[10px] font-black uppercase tracking-widest text-[#C85C3C]">
+        <span className="text-[11px] font-black uppercase tracking-widest text-[#C85C3C]">
           DISCOVER MONTHLY THEMES
         </span>
         <h2 className="font-serif text-2xl lg:text-3xl font-black text-[#2C1810] mt-1">

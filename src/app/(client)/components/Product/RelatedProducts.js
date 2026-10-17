@@ -38,7 +38,7 @@ export function RelatedProducts({ products = [], fmtPrice }) {
                   }}
                 />
                 {p.salePercent > 0 && (
-                  <span className="absolute top-3 right-3 bg-red-600 text-white px-2 py-1 rounded-full text-[10px] font-black">
+                  <span className="absolute top-3 right-3 bg-red-600 text-white px-2 py-1 rounded-full text-[11px] font-black">
                     -{p.salePercent}%
                   </span>
                 )}

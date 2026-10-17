@@ -58,22 +58,22 @@ export function SubscriberTable({ subscriptions, onViewDetail }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-stone-100 bg-stone-50">
-              <th className="text-left px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-stone-400">
+              <th className="text-left px-5 py-3.5 text-[11px] font-black uppercase tracking-widest text-stone-400">
                 #
               </th>
-              <th className="text-left px-4 py-3.5 text-[10px] font-black uppercase tracking-widest text-stone-400">
+              <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-widest text-stone-400">
                 Người dùng
               </th>
-              <th className="text-left px-4 py-3.5 text-[10px] font-black uppercase tracking-widest text-stone-400">
+              <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-widest text-stone-400">
                 Gói
               </th>
-              <th className="text-left px-4 py-3.5 text-[10px] font-black uppercase tracking-widest text-stone-400">
+              <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-widest text-stone-400">
                 Trạng thái
               </th>
-              <th className="text-left px-4 py-3.5 text-[10px] font-black uppercase tracking-widest text-stone-400">
+              <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-widest text-stone-400">
                 Giao tiếp theo
               </th>
-              <th className="text-right px-4 py-3.5 text-[10px] font-black uppercase tracking-widest text-stone-400">
+              <th className="text-right px-4 py-3.5 text-[11px] font-black uppercase tracking-widest text-stone-400">
                 Giá
               </th>
               <th className="px-5 py-3.5" />
@@ -107,7 +107,7 @@ export function SubscriberTable({ subscriptions, onViewDetail }) {
                         <p className="text-xs font-semibold text-stone-800 leading-tight">
                           {sub.userId?.name ?? "—"}
                         </p>
-                        <p className="text-[10px] text-stone-400 leading-tight">
+                        <p className="text-[11px] text-stone-400 leading-tight">
                           {sub.userId?.email ?? "—"}
                         </p>
                       </div>
@@ -120,7 +120,7 @@ export function SubscriberTable({ subscriptions, onViewDetail }) {
                       <p className="text-xs font-semibold text-stone-700">
                         {sub.templateId?.name ?? "—"}
                       </p>
-                      <p className="text-[10px] text-stone-400">
+                      <p className="text-[11px] text-stone-400">
                         {PLAN_TYPE_LABELS[sub.planType] ?? sub.planType}
                         {" · "}
                         {sub.remainDeliveries ?? 0}/{sub.totalDeliveries ?? 0}{" "}
@@ -134,7 +134,7 @@ export function SubscriberTable({ subscriptions, onViewDetail }) {
                     <div className="flex flex-col gap-1">
                       <SubscriberStatusBadge status={sub.status} size="sm" />
                       {sub.cancelAtPeriodEnd && (
-                        <span className="text-[9px] font-bold text-amber-600">
+                        <span className="text-[11px] font-bold text-amber-600">
                           ⚠ Hủy cuối kỳ
                         </span>
                       )}
@@ -159,7 +159,7 @@ export function SubscriberTable({ subscriptions, onViewDetail }) {
                         {formatCurrency(sub.price ?? 0)}
                       </p>
                       {sub.discountPercent > 0 && (
-                        <p className="text-[9px] text-stone-400 line-through">
+                        <p className="text-[11px] text-stone-400 line-through">
                           {formatCurrency(sub.oldPrice ?? 0)}
                         </p>
                       )}

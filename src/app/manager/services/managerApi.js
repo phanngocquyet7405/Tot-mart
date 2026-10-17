@@ -1,5 +1,9 @@
 import { axiosConfig } from '@/app/services/api/axiosConfig';
 
+export async function updateManagerOrderStatus(id, status, expectedStatus) {
+  return confirmed(await axiosConfig.patch(`/manager/orders/${encodeURIComponent(id)}/status`, { status, expectedStatus }));
+}
+
 function confirmed(response) {
   if (response?.success === false) throw new Error(response.message || 'Hệ thống chưa xác nhận thao tác thành công.');
   return response;

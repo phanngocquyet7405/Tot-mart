@@ -31,10 +31,10 @@ export function DeliveryTimeline({ totalDeliveries, remainDeliveries }) {
     <div className="space-y-2">
       {/* Progress bar */}
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] font-black uppercase tracking-widest text-stone-400">
+        <span className="text-[11px] font-black uppercase tracking-widest text-stone-400">
           Tiến độ giao hàng
         </span>
-        <span className="text-[10px] font-bold text-stone-500">
+        <span className="text-[11px] font-bold text-stone-500">
           {done}/{totalDeliveries} lần
         </span>
       </div>
@@ -76,7 +76,7 @@ export function DeliveryTimeline({ totalDeliveries, remainDeliveries }) {
       {remainDeliveries > 0 && (
         <div className="flex items-center gap-1.5 mt-1">
           <Clock size={10} className="text-stone-400" />
-          <span className="text-[10px] text-stone-400">
+          <span className="text-[11px] text-stone-400">
             Còn{" "}
             <span className="font-bold text-stone-600">{remainDeliveries}</span>{" "}
             lần giao hàng

@@ -60,7 +60,7 @@ export function BasicInfoSection({ form, errors, onChange }) {
             >
               <X size={16} />
             </button>
-            <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded-md backdrop-blur-sm">
+            <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[11px] px-2 py-1 rounded-md backdrop-blur-sm">
               Ảnh đại diện
             </div>
           </div>

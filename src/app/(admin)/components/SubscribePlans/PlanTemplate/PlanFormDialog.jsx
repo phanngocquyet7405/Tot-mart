@@ -239,7 +239,7 @@ export function PlanFormDialog({
                     }`}
                   >
                     <p className="text-xs font-medium leading-tight">{l}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
+                    <p className="text-[11px] text-slate-400 mt-0.5">
                       {PLAN_TYPE_DELIVERY_HINT[v]}
                     </p>
                   </button>
@@ -306,7 +306,7 @@ export function PlanFormDialog({
               {/* Price preview */}
               {pricePreview ? (
                 <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-4 space-y-2.5">
-                  <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-wide flex items-center gap-1">
+                  <p className="text-[11px] font-bold text-indigo-400 uppercase tracking-wide flex items-center gap-1">
                     <Info size={10} /> Xem trước giá
                   </p>
 
@@ -338,7 +338,7 @@ export function PlanFormDialog({
                     )}
                   </div>
 
-                  <p className="text-[10px] text-indigo-300 leading-relaxed pt-1 border-t border-indigo-100">
+                  <p className="text-[11px] text-indigo-300 leading-relaxed pt-1 border-t border-indigo-100">
                     Giá gốc do hệ thống lấy tự động từ box — admin không cần
                     nhập thủ công.
                   </p>
@@ -362,7 +362,7 @@ export function PlanFormDialog({
                   <Gift size={12} className="text-pink-500" />
                   Box quà tặng kèm gói
                   {form.gift.length > 0 && (
-                    <Badge className="ml-1 bg-pink-100 text-pink-700 border-0 text-[10px] py-0 h-4">
+                    <Badge className="ml-1 bg-pink-100 text-pink-700 border-0 text-[11px] py-0 h-4">
                       {form.gift.length}
                     </Badge>
                   )}
@@ -408,7 +408,7 @@ export function PlanFormDialog({
                           ))}
                         </select>
                         {errors[`gift_${i}_boxId`] && (
-                          <p className="text-[10px] text-red-500">
+                          <p className="text-[11px] text-red-500">
                             {errors[`gift_${i}_boxId`]}
                           </p>
                         )}
@@ -425,7 +425,7 @@ export function PlanFormDialog({
                           placeholder="SL"
                         />
                         {errors[`gift_${i}_qty`] && (
-                          <p className="text-[10px] text-red-500">
+                          <p className="text-[11px] text-red-500">
                             {errors[`gift_${i}_qty`]}
                           </p>
                         )}

@@ -1,18 +1,64 @@
 "use client";
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { useManagerList } from '../lib/useManagerList';
-import { money } from '../lib/productModel.mjs';
+import { managerError, money } from '../lib/productModel.mjs';
+import { managerOrderActions, orderActionMessage } from '../lib/orderActions.mjs';
+import { updateManagerOrderStatus } from '../services/managerApi';
 import { PageTitle, LoadingList, EmptyList, ErrorPanel, Pagination } from './WorkspaceUI';
-export const orderStatuses={pending:'Chờ xử lý',processing:'Đang xử lý',shipped:'Đang giao',delivered:'Đã giao',cancelled:'Đã hủy',returned:'Trả hàng',on_hold:'Tạm giữ'};
-const payments={pending:'Chờ thanh toán',paid:'Đã thanh toán',failed:'Thanh toán lỗi'};
-export default function OrdersWorkspace(){
-  const list=useManagerList('orders');
-  return <section><PageTitle title="Đơn hàng" description="Theo dõi đơn trong phạm vi BE cấp cho cửa hàng. Merchant chỉ xem, không cập nhật trạng thái hoặc xử lý hoàn tiền." />
-    {list.loading?<LoadingList />:list.error?<ErrorPanel onRetry={list.reload}>{list.error}</ErrorPanel>:!list.rows.length?<EmptyList title="Chưa có đơn hàng">Đơn thuộc cửa hàng sẽ xuất hiện khi BE cấp quyền xem.</EmptyList>:<div className="divide-y rounded-xl border bg-card">{list.rows.map(order=><details key={order._id} className="group p-4 sm:p-5"><summary className="cursor-pointer rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"><span className="inline-grid w-[calc(100%-1.5rem)] gap-3 align-top sm:grid-cols-[1fr_auto]"><span><span className="font-semibold">{order.orderId}</span><span className="mt-1 block text-xs text-muted-foreground">{order.createdAt?new Date(order.createdAt).toLocaleString('vi-VN'):'Chưa có ngày'} · Xem chi tiết</span></span><span className="flex flex-wrap items-center gap-2"><span className="tabular-nums font-semibold">{money(order.totalAmount)}</span><Badge variant="secondary">{orderStatuses[order.status]||order.status}</Badge></span></span></summary>
-      <div className="mt-5 space-y-5 border-t pt-5"><dl className="grid gap-3 text-sm sm:grid-cols-2"><div><dt className="text-muted-foreground">Thanh toán</dt><dd className="mt-1">{order.paymentMethod==='cod'?'COD':order.paymentMethod==='online'?'Online':order.paymentMethod} · {payments[order.paymentStatus]||order.paymentStatus}</dd></div><div><dt className="text-muted-foreground">Trạng thái giao hàng</dt><dd className="mt-1">{orderStatuses[order.status]||order.status}</dd></div></dl>
-        <section aria-label="Sản phẩm trong đơn"><h2 className="mb-3 font-semibold">Sản phẩm</h2><ul className="divide-y rounded-lg border">{(order.products||[]).map((item,index)=><li key={item._id||index} className="space-y-2 p-3 text-sm"><p className="break-words font-medium">{item.name} × {item.quantity}</p><dl className="grid gap-1 text-xs text-muted-foreground sm:grid-cols-2"><div><dt className="inline">Đơn giá phân bổ: </dt><dd className="inline tabular-nums">{money(item.unitPrice)}</dd></div><div><dt className="inline">Thành tiền BE: </dt><dd className="inline tabular-nums">{money(item.totalPrice)}</dd></div>{item.bulkDiscountAmount>0&&<div><dt className="inline">Giảm theo lượng: </dt><dd className="inline">{money(item.bulkDiscountAmount)}</dd></div>}{item.giftFee>0&&<div><dt className="inline">Phí gift: </dt><dd className="inline">{money(item.giftFee)}</dd></div>}</dl></li>)}</ul>{!(order.products||[]).length&&<p className="text-sm text-muted-foreground">BE chưa trả chi tiết sản phẩm.</p>}</section>
-        <section className="text-sm" aria-label="Giao hàng"><h2 className="mb-2 font-semibold">Giao đến</h2><p>{order.shippingAddress?.fullName||'Chưa có người nhận'} · {order.shippingAddress?.phone||'Chưa có số điện thoại'}</p><p className="mt-1 break-words text-muted-foreground">{[order.shippingAddress?.address,order.shippingAddress?.district,order.shippingAddress?.city,order.shippingAddress?.country].filter(Boolean).join(', ')||'BE chưa trả địa chỉ'}</p><p className="mt-2 text-xs text-muted-foreground">API merchant chưa trả vận đơn, phí giao hàng hay lịch sử chuyển trạng thái; không suy đoán các thông tin này từ tổng đơn.</p></section>
-      </div></details>)}</div>}
-    {!list.error&&<Pagination page={list.page} pages={list.pages} onChange={list.setPage} disabled={list.loading} />}
+export const orderStatuses = { pending:'Chờ xử lý', processing:'Đang chuẩn bị', shipped:'Đang giao', delivered:'Đã giao', cancelled:'Đã hủy', returned:'Trả hàng', on_hold:'Tạm giữ' };
+const payments = { pending:'Chờ thanh toán', paid:'Đã thanh toán', failed:'Thanh toán lỗi' };
+const noop = () => {};
+
+export default function OrdersWorkspace({ onDirtyChange = noop }) {
+  const list = useManagerList('orders');
+  const [action, setAction] = useState(null), [busy, setBusy] = useState(false), [error, setError] = useState('');
+  const lock = useRef(false), mounted = useRef(false);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; onDirtyChange(false, false); }; }, [onDirtyChange]);
+  function close() { if (!lock.current) { setAction(null); setError(''); } }
+  async function confirm() {
+    if (lock.current || !action) return;
+    lock.current = true; setBusy(true); setError(''); onDirtyChange(false, true);
+    try {
+      await updateManagerOrderStatus(action.order._id, action.status, action.order.status);
+      if (mounted.current) { setAction(null); toast.success('Đã cập nhật tiến độ đơn hàng'); list.reload(); }
+    } catch (failure) {
+      if (mounted.current) { setError(managerError(failure)); list.reload(); }
+    } finally {
+      lock.current = false; onDirtyChange(false, false);
+      if (mounted.current) setBusy(false);
+    }
+  }
+  return <section className="space-y-5">
+    <PageTitle title="Đơn hàng" description="Vận hành đơn của cửa hàng. Merchant không xác nhận tiền, hủy đơn hay hoàn tiền." />
+    {list.loading ? <LoadingList /> : list.error ? <ErrorPanel onRetry={list.reload}>{list.error}</ErrorPanel> : !list.rows.length ? <EmptyList title="Chưa có đơn hàng">Đơn của cửa hàng sẽ xuất hiện tại đây. Đơn online chưa thanh toán được hệ thống ẩn mặc định.</EmptyList> : <div className="divide-y rounded-xl border bg-card">
+      {list.rows.map(order => <div key={order._id} className="p-4 sm:p-5">
+        <details><summary className="cursor-pointer rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <span className="inline-grid w-[calc(100%-1.5rem)] gap-3 align-top sm:grid-cols-[1fr_auto]"><span className="font-semibold">{order.orderId}</span><span className="flex flex-wrap gap-2"><span>{money(order.totalAmount)}</span><Badge variant="secondary">{orderStatuses[order.status] || order.status}</Badge></span></span>
+        </summary><div className="mt-4 space-y-4 border-t pt-4 text-sm">
+          <p>{order.paymentMethod === 'cod' ? 'COD' : 'Online'} · {payments[order.paymentStatus] || order.paymentStatus}</p>
+          {order.codCollectionStatus === 'pending_review' && <p role="status" className="font-medium">Đã báo giao hàng; tiền COD đang chờ admin đối soát.</p>}
+          {order.trackingReference && <p>Vận đơn: {order.trackingReference}</p>}
+          <p>{order.shippingAddress?.fullName} · {order.shippingAddress?.phone}</p>
+          <p>{[order.shippingAddress?.address, order.shippingAddress?.district, order.shippingAddress?.city, order.shippingAddress?.country].filter(Boolean).join(', ')}</p>
+          <ul className="divide-y rounded-lg border">{(order.products || []).map((item, i) => <li key={item._id || i} className="p-3"><p>{item.name} × {item.quantity}</p><p>Đơn giá phân bổ: {money(item.unitPrice)} · Thành tiền: {money(item.totalPrice)}</p>{item.giftFee > 0 && <p>Phí gift: {money(item.giftFee)}</p>}{item.bulkDiscountAmount > 0 && <p>Đã giảm theo lượng: {money(item.bulkDiscountAmount)}</p>}</li>)}</ul>
+          <p>Phí giao hàng: {money(order.shippingFee)}</p>
+          {order.createdAt && <p>Ngày tạo: {new Date(order.createdAt).toLocaleString('vi-VN')}</p>}
+        </div></details>
+        <div className="mt-4 flex flex-wrap gap-2">{managerOrderActions(order).map(option => <Button key={option.status} className="min-h-11" disabled={busy} onClick={() => { setError(''); setAction({ order, ...option }); }}>{option.label}</Button>)}</div>
+      </div>)}
+    </div>}
+    {!list.error && <Pagination page={list.page} pages={list.pages} onChange={list.setPage} disabled={list.loading || busy} />}
+    <Dialog open={Boolean(action)} onOpenChange={open => { if (!open) close(); }}>
+      {action && <DialogContent showCloseButton={false} onEscapeKeyDown={event => { if (lock.current) event.preventDefault(); }}>
+        <DialogTitle>{action.label} · {action.order.orderId}</DialogTitle>
+        <DialogDescription>{orderActionMessage(action.order, action.status)}</DialogDescription>
+        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+        <DialogFooter><Button variant="outline" disabled={busy} onClick={close}>Đóng</Button><Button disabled={busy} onClick={confirm}>{busy ? 'Đang xử lý…' : 'Xác nhận'}</Button></DialogFooter>
+      </DialogContent>}
+    </Dialog>
   </section>;
 }

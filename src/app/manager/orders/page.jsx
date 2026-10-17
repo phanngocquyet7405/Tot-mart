@@ -1,2 +1,4 @@
+"use client";
 import OrdersWorkspace from '../components/OrdersWorkspace';
-export default function Page(){return <OrdersWorkspace />;}
+import { useManagerDraft } from '../components/ManagerLayout';
+export default function Page(){return <OrdersWorkspace onDirtyChange={useManagerDraft()} />;}

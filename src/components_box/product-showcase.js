@@ -126,7 +126,7 @@ export function SubscriptionShowcase() {
           <div className="flex flex-col gap-8">
             {/* Header */}
             <div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#C85C3C]">
+              <span className="text-[11px] font-black uppercase tracking-widest text-[#C85C3C]">
                 Your First Box Includes
               </span>
               <h2 className="font-serif text-3xl md:text-4xl font-black text-[#2C1810] mt-2 leading-tight">

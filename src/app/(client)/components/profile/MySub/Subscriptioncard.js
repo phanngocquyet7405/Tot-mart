@@ -104,7 +104,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
 
             {/* Status badge */}
             <span
-              className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide shrink-0"
+              className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide shrink-0"
               style={{
                 backgroundColor: config.bg,
                 color: config.text,
@@ -129,7 +129,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
                 <span className="text-xs text-stone-300 line-through">
                   {formatCurrency(sub.oldPrice ?? 0)}
                 </span>
-                <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                <span className="text-[11px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
                   -{sub.discountPercent}%
                 </span>
               </>
@@ -177,7 +177,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
         )}
 
         {sub.cancelAtPeriodEnd && (
-          <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+          <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
             ⚠ Hủy vào {formatDate(sub.currentPeriodEnd)}
           </span>
         )}
@@ -191,7 +191,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
             <div className="flex items-start gap-2">
               <MapPin size={12} className="text-[#C85C3C] mt-0.5 shrink-0" />
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-0.5">
+                <p className="text-[11px] font-black uppercase tracking-widest text-stone-400 mb-0.5">
                   Địa chỉ giao hàng
                 </p>
                 <p className="text-xs text-stone-600">
@@ -208,7 +208,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
 
           {/* Sản phẩm trong hộp */}
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-1.5 flex items-center gap-1.5">
+            <p className="text-[11px] font-black uppercase tracking-widest text-stone-400 mb-1.5 flex items-center gap-1.5">
               <Package size={12} className="text-[#C85C3C]" />
               Sản phẩm trong hộp
             </p>
@@ -244,7 +244,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
                       <span className="flex-1 min-w-0 text-xs text-stone-600 truncate">
                         {p.name || "Sản phẩm"}
                       </span>
-                      <span className="text-[10px] text-stone-400 shrink-0">
+                      <span className="text-[11px] text-stone-400 shrink-0">
                         x{p.quantity || 1}
                       </span>
                       {href && (
@@ -275,7 +275,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
                 {boxProducts.length > 4 && boxId && (
                   <Link
                     href={`/products/box/${boxId}`}
-                    className="inline-flex items-center gap-1 text-[10px] font-bold text-[#C85C3C] hover:text-[#B14B2D] mt-1"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#C85C3C] hover:text-[#B14B2D] mt-1"
                   >
                     Xem tất cả {boxProducts.length} sản phẩm
                     <ChevronRight size={11} />
@@ -294,14 +294,14 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
             <div className="flex items-start gap-2">
               <Gift size={12} className="text-[#C85C3C] mt-0.5 shrink-0" />
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-1.5">
+                <p className="text-[11px] font-black uppercase tracking-widest text-stone-400 mb-1.5">
                   Quà tặng đi kèm
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {sub.gift.map((g, i) => (
                     <span
                       key={i}
-                      className="text-[10px] font-semibold px-2 py-0.5 bg-[#FFF0EB] text-[#C85C3C] rounded-full border border-[#F0DDD5]"
+                      className="text-[11px] font-semibold px-2 py-0.5 bg-[#FFF0EB] text-[#C85C3C] rounded-full border border-[#F0DDD5]"
                     >
                       {g.boxId?.name ?? `Quà ${i + 1}`}
                       {g.deliverAtMonth && ` · T${g.deliverAtMonth}`}
@@ -315,7 +315,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
           {/* Dates */}
           <div className="flex gap-6">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">
+              <p className="text-[11px] font-black uppercase tracking-widest text-stone-400">
                 Bắt đầu
               </p>
               <p className="text-xs font-semibold text-stone-600 mt-0.5">
@@ -323,7 +323,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">
+              <p className="text-[11px] font-black uppercase tracking-widest text-stone-400">
                 Kết thúc kỳ
               </p>
               <p className="text-xs font-semibold text-stone-600 mt-0.5">
@@ -342,7 +342,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
             <>
               <button
                 onClick={() => onCancel(sub, "at_end")}
-                className="text-[10px] font-bold text-stone-400 hover:text-amber-600 transition-colors flex items-center gap-1"
+                className="text-[11px] font-bold text-stone-400 hover:text-amber-600 transition-colors flex items-center gap-1"
               >
                 <XCircle size={11} />
                 Hủy cuối kỳ
@@ -350,7 +350,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
               <span className="text-stone-200">|</span>
               <button
                 onClick={() => onCancel(sub, "immediately")}
-                className="text-[10px] font-bold text-stone-400 hover:text-red-500 transition-colors flex items-center gap-1"
+                className="text-[11px] font-bold text-stone-400 hover:text-red-500 transition-colors flex items-center gap-1"
               >
                 <Zap size={11} />
                 Hủy ngay
@@ -362,7 +362,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
         {/* Expand toggle */}
         <button
           onClick={() => setExpanded((p) => !p)}
-          className="flex items-center gap-1 text-[10px] font-bold text-stone-400 hover:text-stone-600 transition-colors"
+          className="flex items-center gap-1 text-[11px] font-bold text-stone-400 hover:text-stone-600 transition-colors"
         >
           {expanded ? (
             <>

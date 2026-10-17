@@ -49,7 +49,7 @@ export default function ProductListPage() {
         icon={Package}
         backHref="/admin"
         actions={
-          <Button asChild className="bg-indigo-600 hover:bg-indigo-700">
+          <Button asChild>
             <Link href="/admin-products/create">
               <Plus className="mr-2 h-4 w-4" /> Thêm mới
             </Link>

@@ -64,10 +64,10 @@ typography:
     letterSpacing: "normal"
   label:
     fontFamily: "Plus Jakarta Sans, system-ui, sans-serif"
-    fontSize: "0.625rem"
+    fontSize: "0.6875rem"
     fontWeight: 800
     lineHeight: 1.2
-    letterSpacing: "0.2em"
+    letterSpacing: "0.14em"
 rounded:
   sm: "6px"
   md: "8px"
@@ -275,7 +275,7 @@ Two registers. Storefront CTAs are plump, uppercase, clay or leaf. Admin/shadcn 
 - **Ghost / Outline:** muted fill or hairline border; no terracotta wash unless the control is on an atelier page.
 
 ### Chips
-- **Promo (header):** Forest Canopy, white, tracked 10px type, tight radius.
+- **Promo (header):** Forest Canopy, white, tracked 11px type, tight radius.
 - **Discount (catalog):** Market Leaf, white, pill.
 - **Product badge:** Harvest Gold on near-black type, pill, uppercase.
 - **Recommended plan:** terracotta pill with tracked label.

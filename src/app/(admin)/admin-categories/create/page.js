@@ -146,11 +146,11 @@ export default function AddCategoryPage() {
                         <p className="text-sm font-semibold text-zinc-700">
                           {cat.name}
                         </p>
-                        <p className="text-[10px] text-zinc-400 font-mono italic">
+                        <p className="text-[11px] text-zinc-400 font-mono italic">
                           {cat._id}
                         </p>
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-1 rounded bg-zinc-100 text-zinc-500 uppercase">
+                      <span className="text-[11px] font-bold px-2 py-1 rounded bg-zinc-100 text-zinc-500 uppercase">
                         {cat.childrenIds?.length || 0} Children
                       </span>
                     </div>
@@ -190,7 +190,7 @@ export default function AddCategoryPage() {
 
           <Card className="bg-zinc-900 text-white border-none shadow-xl">
             <CardHeader className="pb-2 border-b border-zinc-800">
-              <CardTitle className="text-[10px] uppercase tracking-widest text-zinc-500">
+              <CardTitle className="text-[11px] uppercase tracking-widest text-zinc-500">
                 Cấu trúc hiển thị
               </CardTitle>
             </CardHeader>

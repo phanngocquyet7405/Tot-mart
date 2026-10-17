@@ -707,7 +707,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
                         unoptimized={src.startsWith("blob:")}
                       />
                       {i === 0 && (
-                        <span className="absolute bottom-1 left-1 text-[9px] font-bold bg-indigo-600 text-white px-1.5 py-0.5 rounded">
+                        <span className="absolute bottom-1 left-1 text-[11px] font-bold bg-indigo-600 text-white px-1.5 py-0.5 rounded">
                           Đại diện
                         </span>
                       )}

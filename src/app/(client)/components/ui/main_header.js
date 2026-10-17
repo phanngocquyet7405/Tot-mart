@@ -63,7 +63,7 @@ export default function MainHeader() {
                 className="h-12 w-auto object-contain"
               />
             </Link>
-            <div className="hidden lg:block bg-[#4a7c44] text-white text-[10px] font-bold px-4 py-1.5 rounded-sm tracking-widest uppercase">
+            <div className="hidden lg:block bg-[#4a7c44] text-white text-[11px] font-bold px-4 py-1.5 rounded-sm tracking-widest uppercase">
               Giảm giá đến 70%!
             </div>
           </div>
@@ -101,13 +101,13 @@ export default function MainHeader() {
                         />
                       </div>
                       <div className="hidden lg:flex flex-col items-start leading-none text-left">
-                        <span className="text-[10px] font-bold text-gray-900 uppercase tracking-tight">
+                        <span className="text-[11px] font-bold text-gray-900 uppercase tracking-tight">
                           {userData.role === "admin"
                             ? t("administrator")
                             : t("myAccount")}
                         </span>
                         {/* userData từ JWT: { _id, name, email, role, avatar } */}
-                        <span className="text-[10px] text-gray-500 flex items-center gap-0.5">
+                        <span className="text-[11px] text-gray-500 flex items-center gap-0.5">
                           {userData.name || "User"}
                           <ChevronDown className="w-3 h-3" />
                         </span>
@@ -167,7 +167,7 @@ export default function MainHeader() {
               >
                 <Heart className="w-5 h-5 text-gray-700 group-hover:text-red-500 transition-colors" />
                 {wishlistCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-[#8cc63f] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-sm">
+                  <span className="absolute top-0 right-0 bg-[#8cc63f] text-white text-[11px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-sm">
                     {wishlistCount}
                   </span>
                 )}

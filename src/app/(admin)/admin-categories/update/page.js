@@ -182,7 +182,7 @@ function UpdateCategoryContent() {
           {/* Live Preview Card */}
           <Card className="bg-zinc-900 text-white border-none shadow-xl overflow-hidden">
             <CardHeader className="pb-2 border-b border-zinc-800">
-              <CardTitle className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+              <CardTitle className="text-[11px] uppercase tracking-[0.2em] text-zinc-500">
                 Xem trước hiển thị
               </CardTitle>
             </CardHeader>
@@ -209,7 +209,7 @@ function UpdateCategoryContent() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-zinc-800 space-y-2 font-mono text-[10px]">
+              <div className="pt-4 border-t border-zinc-800 space-y-2 font-mono text-[11px]">
                 <div className="flex justify-between">
                   <span className="text-zinc-500">Trạng thái:</span>
                   <span

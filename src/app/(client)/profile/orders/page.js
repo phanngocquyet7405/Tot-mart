@@ -55,7 +55,7 @@ function OrderCard({ order, onConfirmReceipt, confirming }) {
     <article className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-[0_10px_30px_-24px_rgba(58,43,33,0.45)]">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-stone-500">
-          <span className={`rounded-full px-2.5 py-1 text-[10px] tracking-normal ${statusTone[order.status] || "bg-stone-100 text-stone-600"}`}>
+          <span className={`rounded-full px-2.5 py-1 text-[11px] tracking-normal ${statusTone[order.status] || "bg-stone-100 text-stone-600"}`}>
             {statusCopy[order.status] || order.status}
           </span>
           <span className="text-stone-300">•</span>
@@ -178,7 +178,7 @@ export default function MyOrdersPage() {
           <div className="flex min-w-max">
             {statusGroups.map(({ key, label, icon: Icon }) => (
               <button key={key} type="button" onClick={() => setActiveStatus(key)} className={`flex items-center gap-2 border-b-2 px-4 py-3 text-xs font-bold transition sm:px-5 ${activeStatus === key ? "border-[#b95735] text-[#b95735]" : "border-transparent text-stone-500 hover:text-stone-800"}`}>
-                <Icon size={14} /> {label}<span className="rounded-full bg-stone-100 px-1.5 py-0.5 text-[10px]">{counts[key] || 0}</span>
+                <Icon size={14} /> {label}<span className="rounded-full bg-stone-100 px-1.5 py-0.5 text-[11px]">{counts[key] || 0}</span>
               </button>
             ))}
           </div>

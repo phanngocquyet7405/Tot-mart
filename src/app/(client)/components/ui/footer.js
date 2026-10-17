@@ -99,7 +99,7 @@ export default function Footer() {
             </p>
 
             <div className="w-24 h-24 bg-white p-1 rounded-sm flex items-center justify-center">
-              <div className="border border-gray-300 w-full h-full flex items-center justify-center text-gray-800 text-[10px] font-bold">
+              <div className="border border-gray-300 w-full h-full flex items-center justify-center text-gray-800 text-[11px] font-bold">
                 QR CODE
               </div>
             </div>
@@ -187,7 +187,7 @@ export default function Footer() {
       <div className="border-t border-white/10 bg-[#1c2a33]">
         <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row justify-between items-center gap-6">
           {/* Copyright */}
-          <p className="text-[10px] md:text-xs text-gray-400 tracking-widest uppercase font-medium order-2 md:order-1">
+          <p className="text-[11px] md:text-xs text-gray-400 tracking-widest uppercase font-medium order-2 md:order-1">
             © 2026 TotMart Box. All rights reserved.
           </p>
 

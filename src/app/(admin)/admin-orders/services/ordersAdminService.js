@@ -150,6 +150,9 @@ export function getNextStatusOptions(order) {
   }
 
   // "delivered", "cancelled", "returned" — trạng thái cuối, không có action
+  if (status === ORDER_STATUS.DELIVERED && paymentMethod === 'cod' && order.paymentStatus === 'pending') {
+    options.push({ value: ORDER_STATUS.DELIVERED, label: 'Xác nhận đối soát tiền COD', action: 'mark-cod-delivered' });
+  }
   // tiếp theo.
   return options;
 }

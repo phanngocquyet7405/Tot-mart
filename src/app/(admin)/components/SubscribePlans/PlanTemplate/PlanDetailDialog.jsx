@@ -31,7 +31,7 @@ import {
 function SectionLabel({ icon: Icon, color = "text-slate-400", label }) {
   return (
     <p
-      className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider ${color} mb-2`}
+      className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${color} mb-2`}
     >
       <Icon size={11} />
       {label}
@@ -47,7 +47,7 @@ function InfoGrid({ items }) {
           key={r.label}
           className="rounded-lg border border-slate-100 bg-slate-50/60 p-2.5"
         >
-          <p className="text-[10px] text-slate-400 mb-1">{r.label}</p>
+          <p className="text-[11px] text-slate-400 mb-1">{r.label}</p>
           <div className="font-semibold text-sm text-slate-700">
             {r.value ?? "—"}
           </div>
@@ -185,7 +185,7 @@ export function PlanDetailDialog({
                 style={{ width: `${100 - item.discountPercent}%` }}
               />
             </div>
-            <div className="flex justify-between text-[10px] text-indigo-300 mt-1">
+            <div className="flex justify-between text-[11px] text-indigo-300 mt-1">
               <span>{formatCurrency(item.discountPrice)} / khách trả</span>
               <span>{item.discountPercent}% off</span>
             </div>

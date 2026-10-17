@@ -48,7 +48,7 @@ export default function BrandsPage() {
                 className={isRefreshing ? "animate-spin" : ""}
               />
             </Button>
-            <Button asChild className="gap-2 bg-orange-600 hover:bg-orange-700">
+            <Button asChild className="gap-2">
               <Link href="/admin-brands/create">
                 <Plus size={16} />
                 Thêm thương hiệu

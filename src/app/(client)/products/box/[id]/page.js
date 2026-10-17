@@ -254,7 +254,7 @@ export default function BoxDetailPage() {
           {/* CỘT PHẢI - THÔNG TIN CHI TIẾT SẢN PHẨM & MUA HÀNG */}
           <div className="lg:col-span-5 bg-white rounded-2xl p-6 md:p-8 border border-stone-100 shadow-sm space-y-6">
             <div className="space-y-2">
-              <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full">
+              <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full">
                 🎁 Độc quyền tại TotBox
               </span>
               <h1 className="text-2xl md:text-3xl font-black text-stone-900 leading-tight">
@@ -364,7 +364,7 @@ export default function BoxDetailPage() {
                 </div>
                 <div>
                   <p className="font-bold text-stone-800">Phí ship xác nhận riêng</p>
-                  <p className="text-[10px]">Theo địa chỉ nhận hàng</p>
+                  <p className="text-[11px]">Theo địa chỉ nhận hàng</p>
                 </div>
               </div>
               <div className="flex items-center gap-2.5">
@@ -373,7 +373,7 @@ export default function BoxDetailPage() {
                 </div>
                 <div>
                   <p className="font-bold text-stone-800">Bảo hành cam kết</p>
-                  <p className="text-[10px]">Đóng gói chuẩn chỉnh</p>
+                  <p className="text-[11px]">Đóng gói chuẩn chỉnh</p>
                 </div>
               </div>
               <div className="flex items-center gap-2.5">
@@ -382,7 +382,7 @@ export default function BoxDetailPage() {
                 </div>
                 <div>
                   <p className="font-bold text-stone-800">Hỗ trợ đổi trả</p>
-                  <p className="text-[10px]">Trong vòng 7 ngày</p>
+                  <p className="text-[11px]">Trong vòng 7 ngày</p>
                 </div>
               </div>
             </div>
@@ -459,7 +459,7 @@ export default function BoxDetailPage() {
                               <Package size={22} />
                             </div>
                           )}
-                          <span className="absolute -top-1 -right-1 bg-amber-800 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border border-white">
+                          <span className="absolute -top-1 -right-1 bg-amber-800 text-white text-[11px] font-black w-5 h-5 rounded-full flex items-center justify-center border border-white">
                             {itemQuantity}
                           </span>
                         </div>

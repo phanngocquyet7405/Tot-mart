@@ -90,7 +90,7 @@ export function CancelDialog({ target, open, cancelling, onClose, onConfirm }) {
                   <p className="text-xs font-black text-stone-700">
                     {sub.templateId?.name ?? "Gói đăng ký"}
                   </p>
-                  <p className="text-[10px] text-stone-400 mt-0.5">
+                  <p className="text-[11px] text-stone-400 mt-0.5">
                     {PLAN_TYPE_LABELS[sub.planType] ?? sub.planType}
                   </p>
                 </div>

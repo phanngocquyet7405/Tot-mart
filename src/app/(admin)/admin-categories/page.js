@@ -149,12 +149,12 @@ export default function CategoriesPage() {
         <div className="lg:col-span-3">
           <Card className="shadow-xl border-none overflow-hidden rounded-2xl bg-white">
             <CardHeader className="bg-zinc-900 text-white py-4 px-6 flex flex-row items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] opacity-70">
                 {filterType === "all"
                   ? "Cấu trúc phân cấp hệ thống"
                   : `Danh sách lọc: ${filterType}`}
               </span>
-              <div className="hidden md:flex gap-12 text-[10px] font-bold uppercase tracking-widest opacity-70 mr-8">
+              <div className="hidden md:flex gap-12 text-[11px] font-bold uppercase tracking-widest opacity-70 mr-8">
                 <span>Trạng thái</span>
                 <span>Thao tác</span>
               </div>
@@ -204,7 +204,7 @@ function StatsCard({ label, value, icon, color, isActive, onClick }) {
           {icon}
         </div>
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider opacity-60">
+          <p className="text-[11px] font-bold uppercase tracking-wider opacity-60">
             {label}
           </p>
           <p className="text-2xl font-black text-zinc-800">{value}</p>

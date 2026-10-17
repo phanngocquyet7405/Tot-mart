@@ -44,7 +44,7 @@ function UpdateBrandContent() {
           ID không hợp lệ hoặc thương hiệu đã bị xóa.
         </p>
         <Link href="/admin-brands">
-          <Button className="bg-orange-600 hover:bg-orange-700">
+          <Button>
             Quay lại danh sách
           </Button>
         </Link>

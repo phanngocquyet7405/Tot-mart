@@ -173,7 +173,7 @@ export function SubscriberDetailDialog({ subscription, open, onClose }) {
               />
               {subscription.cancelAtPeriodEnd && (
                 <div className="py-2.5 flex items-center gap-2">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
                     ⚠ Sẽ hủy cuối kỳ
                   </span>
                 </div>
@@ -220,7 +220,7 @@ export function SubscriberDetailDialog({ subscription, open, onClose }) {
                       {g.boxId?.name ?? `Quà ${i + 1}`}
                     </span>
                     {g.deliverAtMonth && (
-                      <span className="text-[10px] font-bold text-[#C85C3C] bg-[#FFE8DF] px-2 py-0.5 rounded-full">
+                      <span className="text-[11px] font-bold text-[#C85C3C] bg-[#FFE8DF] px-2 py-0.5 rounded-full">
                         Tháng {g.deliverAtMonth}
                       </span>
                     )}

@@ -126,7 +126,7 @@ function AboutMegaMenu({ onClose }) {
                 colIdx < arr.length - 1 && "border-r border-stone-200 mr-5",
               )}
             >
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 mb-3 flex items-center gap-1.5">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-700 mb-3 flex items-center gap-1.5">
                 <span className="inline-block w-3 h-px bg-amber-400" />
                 {heading}
               </p>
@@ -314,7 +314,7 @@ export function Navigation() {
                 </span>
                 <span
                   className={cn(
-                    "text-[9px] font-semibold uppercase tracking-[0.18em] transition-colors",
+                    "text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors",
                     isPastThreshold
                       ? "text-amber-700"
                       : isLightPage
@@ -471,7 +471,7 @@ export function Navigation() {
               {isMounted && (
                 <span
                   className={cn(
-                    "absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full flex items-center justify-center text-[10px] font-black text-white",
+                    "absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full flex items-center justify-center text-[11px] font-black text-white",
                     cartCount > 0 ? "bg-amber-600" : "bg-stone-400 opacity-60",
                   )}
                 >
@@ -556,7 +556,7 @@ export function Navigation() {
                   <div className="bg-stone-50 border-t border-stone-100 p-4 space-y-4">
                     {Object.entries(aboutMega).map(([heading, links]) => (
                       <div key={heading}>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 mb-2">
+                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-700 mb-2">
                           {heading}
                         </p>
                         {links.map((l) => (

@@ -77,7 +77,7 @@ function AdminOrdersPage() {
               {STATUS_TABS.map((tab) => (
                 <TabsTrigger key={tab.value} value={tab.value} className="gap-1.5">
                   {tab.label}
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-[11px] text-muted-foreground">
                     ({statusCounts[tab.value] ?? 0})
                   </span>
                 </TabsTrigger>

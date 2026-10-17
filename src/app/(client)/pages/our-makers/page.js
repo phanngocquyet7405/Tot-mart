@@ -232,7 +232,7 @@ export default function AboutPage() {
                 <p className="text-[11px] font-bold text-stone-800">
                   Gốm Bát Tràng
                 </p>
-                <p className="text-[10px] text-stone-400">600 năm lịch sử</p>
+                <p className="text-[11px] text-stone-400">600 năm lịch sử</p>
               </div>
             </div>
             <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-lg border border-stone-100 px-4 py-3 flex items-center gap-2.5">
@@ -243,7 +243,7 @@ export default function AboutPage() {
                 <p className="text-[11px] font-bold text-stone-800">
                   Trà sen Hồ Tây
                 </p>
-                <p className="text-[10px] text-stone-400">
+                <p className="text-[11px] text-stone-400">
                   Truyền thống Hà Nội
                 </p>
               </div>

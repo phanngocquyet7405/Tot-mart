@@ -77,7 +77,7 @@ export default function SubscriberPage() {
       <main className="max-w-300 mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
         {/* ── Intro Header ── */}
         <div className="text-center max-w-3xl mx-auto mb-12 lg:mb-16">
-          <span className="text-[10px] font-black uppercase tracking-widest text-[#C85C3C] bg-[#FFF5F2] border border-[#F0DDD5] px-3.5 py-1.5 rounded-full inline-block mb-4 shadow-sm">
+          <span className="text-[11px] font-black uppercase tracking-widest text-[#C85C3C] bg-[#FFF5F2] border border-[#F0DDD5] px-3.5 py-1.5 rounded-full inline-block mb-4 shadow-sm">
             Premium Subscription Experience
           </span>
           <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-[#2C1810] leading-tight">

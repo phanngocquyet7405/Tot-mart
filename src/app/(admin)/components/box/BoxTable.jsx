@@ -125,7 +125,7 @@ export function BoxTable({ boxes, isLoading, onEditClick, onDeleteClick }) {
                       </p>
                     )}
                     {box.isGift && (
-                      <Badge className="mt-1 bg-pink-100 text-pink-700 border-pink-200 text-[10px] py-0 px-1.5">
+                      <Badge className="mt-1 bg-pink-100 text-pink-700 border-pink-200 text-[11px] py-0 px-1.5">
                         <Gift size={10} className="mr-0.5" />
                         Quà tặng
                       </Badge>

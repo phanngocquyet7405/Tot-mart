@@ -240,7 +240,7 @@ export function ProductList({
                               className="object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full bg-[#F0DDD5]/40 flex items-center justify-center text-[10px] text-[#2C1810]/40 font-medium select-none">
+                            <div className="w-full h-full bg-[#F0DDD5]/40 flex items-center justify-center text-[11px] text-[#2C1810]/40 font-medium select-none">
                               No Image
                             </div>
                           )}

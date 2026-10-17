@@ -317,7 +317,7 @@ export default function AddProductPage() {
                         className="object-cover"
                       />
                       {img.isMain && (
-                        <div className="absolute bottom-1 left-1 bg-primary text-[10px] text-white px-1.5 py-0.5 rounded shadow-sm">
+                        <div className="absolute bottom-1 left-1 bg-primary text-[11px] text-white px-1.5 py-0.5 rounded shadow-sm">
                           Chính
                         </div>
                       )}
@@ -438,7 +438,7 @@ export default function AddProductPage() {
           {/* Preview Card */}
           <Card className="bg-muted/30 border-dashed overflow-hidden hidden lg:block">
             <CardHeader className="py-3 bg-muted/50 border-b">
-              <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-center">
+              <CardTitle className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground text-center">
                 Xem trước hiển thị
               </CardTitle>
             </CardHeader>
@@ -467,7 +467,7 @@ export default function AddProductPage() {
                 <div className="flex items-center justify-between pt-2">
                   <span
                     className={cn(
-                      "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase",
+                      "text-[11px] font-bold px-2 py-0.5 rounded-full uppercase",
                       Number(form.stock) > 0
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700",
@@ -475,7 +475,7 @@ export default function AddProductPage() {
                   >
                     {Number(form.stock) > 0 ? "Còn hàng" : "Hết hàng"}
                   </span>
-                  <span className="text-[10px] text-muted-foreground font-mono">
+                  <span className="text-[11px] text-muted-foreground font-mono">
                     SKU: {form.sku || "N/A"}
                   </span>
                 </div>

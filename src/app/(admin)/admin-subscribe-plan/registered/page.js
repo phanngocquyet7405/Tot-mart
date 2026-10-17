@@ -43,13 +43,13 @@ function StatCard({ icon: Icon, label, value, color, sub }) {
         <Icon size={18} className={c.icon} />
       </div>
       <div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">
+        <p className="text-[11px] font-black uppercase tracking-widest text-stone-400">
           {label}
         </p>
         <p className={`text-2xl font-black ${c.value} leading-tight mt-0.5`}>
           {value}
         </p>
-        {sub && <p className="text-[10px] text-stone-400 mt-0.5">{sub}</p>}
+        {sub && <p className="text-[11px] text-stone-400 mt-0.5">{sub}</p>}
       </div>
     </div>
   );

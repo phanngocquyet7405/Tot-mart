@@ -5,6 +5,7 @@ import { Users, Search, RefreshCw, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { AdminPageHeader } from "../components/shared";
 import UserTable from "../components/users/UserTable";
 import UserDialog from "../components/users/UserDialog";
 
@@ -22,27 +23,16 @@ export default function UsersManagement() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-            <Users size={20} className="text-indigo-500" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Quản lý người dùng
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Admin: Xem, khóa và quản lý tài khoản
-            </p>
-          </div>
-        </div>
-        <Button
-          className="gap-2 bg-indigo-600 hover:bg-indigo-700"
-          onClick={() => setIsAddUserOpen(true)}
-        >
-          <UserPlus size={16} /> Thêm người dùng
-        </Button>
-      </div>
+      <AdminPageHeader
+        title="Quản lý người dùng"
+        description="Admin: Xem, khóa và quản lý tài khoản"
+        icon={Users}
+        actions={
+          <Button className="gap-2" onClick={() => setIsAddUserOpen(true)}>
+            <UserPlus size={16} /> Thêm người dùng
+          </Button>
+        }
+      />
 
       <Card>
         <CardHeader className="pb-4">
@@ -53,27 +43,28 @@ export default function UsersManagement() {
                 size={16}
               />
               <Input
-                placeholder="Tìm tên, email, SĐT hoặc vai trò..."
+                placeholder="Tìm kiếm theo tên hoặc email..."
                 className="pl-9"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleRefresh}
-                title="Tải lại danh sách"
-              >
-                <RefreshCw
-                  size={16}
-                  className={isRefreshing ? "animate-spin" : ""}
-                />
-              </Button>
-            </div>
+
+            <Button
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="gap-2"
+            >
+              <RefreshCw
+                size={16}
+                className={isRefreshing ? "animate-spin" : ""}
+              />
+              Làm mới
+            </Button>
           </div>
         </CardHeader>
+
         <CardContent>
           <UserTable search={search} refreshTrigger={refreshTrigger} />
         </CardContent>
@@ -82,8 +73,7 @@ export default function UsersManagement() {
       <UserDialog
         open={isAddUserOpen}
         onOpenChange={setIsAddUserOpen}
-        user={null}
-        onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+        onSuccess={handleRefresh}
       />
     </div>
   );

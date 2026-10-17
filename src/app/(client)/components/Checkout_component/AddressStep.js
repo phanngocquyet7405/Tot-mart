@@ -52,7 +52,7 @@ function AddressRadioCard({ addr, index, selected, user, onSelect }) {
             {addr.fullName || addr.name || user?.name}
           </p>
           {index === 0 && (
-            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-[#C85C3C] text-white uppercase tracking-wide">
+            <span className="text-[11px] font-black px-1.5 py-0.5 rounded-full bg-[#C85C3C] text-white uppercase tracking-wide">
               Mặc định
             </span>
           )}
@@ -81,7 +81,7 @@ function NewAddressForm({ newAddress, onChange }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-4 border-t border-stone-200">
         {ADDRESS_FIELDS.map(({ key, label, full }) => (
           <div key={key} className={full ? "sm:col-span-2" : ""}>
-            <label className="text-[10px] text-stone-600 uppercase tracking-widest font-bold block mb-1.5">
+            <label className="text-[11px] text-stone-600 uppercase tracking-widest font-bold block mb-1.5">
               {label}
             </label>
             <input

@@ -28,7 +28,7 @@ export default function PlanCard({ box, onOpenPlan, isFirst = false }) {
 
       {/* Premium Badge if isFirst */}
       {isFirst && (
-        <span className="absolute top-4 left-4 z-10 text-[9px] font-black uppercase tracking-widest text-white bg-[#C85C3C] px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
+        <span className="absolute top-4 left-4 z-10 text-[11px] font-black uppercase tracking-widest text-white bg-[#C85C3C] px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
           <Sparkles size={10} className="fill-white" /> Khuyên dùng
         </span>
       )}
@@ -47,7 +47,7 @@ export default function PlanCard({ box, onOpenPlan, isFirst = false }) {
 
         {/* Stock warning */}
         {box.stock > 0 && box.stock <= 5 && (
-          <span className="absolute bottom-4 left-4 text-[10px] font-bold px-2.5 py-1 rounded-md bg-red-50 text-[#dc2626] border border-red-100 flex items-center gap-1.5 z-10 shadow-sm">
+          <span className="absolute bottom-4 left-4 text-[11px] font-bold px-2.5 py-1 rounded-md bg-red-50 text-[#dc2626] border border-red-100 flex items-center gap-1.5 z-10 shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping" />
             Chỉ còn {box.stock} hộp cuối!
           </span>
@@ -55,7 +55,7 @@ export default function PlanCard({ box, onOpenPlan, isFirst = false }) {
 
         {/* Rating Stars Overlay */}
         <div className="absolute bottom-4 right-4 flex items-center gap-0.5 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-lg border border-[#F0DDD5] shadow-sm z-10">
-          <span className="text-[10px] font-bold text-[#2C1810] mr-1">5.0</span>
+          <span className="text-[11px] font-bold text-[#2C1810] mr-1">5.0</span>
           {[...Array(5)].map((_, i) => (
             <Star key={i} size={10} fill="#C85C3C" color="#C85C3C" />
           ))}
@@ -76,11 +76,11 @@ export default function PlanCard({ box, onOpenPlan, isFirst = false }) {
 
         {/* Feature Pill Tags */}
         <div className="flex flex-wrap gap-1.5 mb-6 mt-auto">
-          <span className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold bg-[#FFF0EB] text-[#C85C3C] border border-[#F0DDD5]">
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#FFF0EB] text-[#C85C3C] border border-[#F0DDD5]">
             <Package size={11} />
             {box.totalItem ? `${box.totalItem} loại sản phẩm` : "Cấu phần theo gói"}
           </span>
-          <span className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
             Phí giao hàng xác nhận riêng
           </span>
         </div>
@@ -89,14 +89,14 @@ export default function PlanCard({ box, onOpenPlan, isFirst = false }) {
         {/* Price & CTA section inside Card */}
         <div className="pt-4 border-t border-[#F5E6E0] flex items-center justify-between">
           <div>
-            <span className="text-[9px] uppercase tracking-wider text-[#A08880] block font-bold mb-0.5">
+            <span className="text-[11px] uppercase tracking-wider text-[#A08880] block font-bold mb-0.5">
               Bình quân từ
             </span>
             <div className="flex items-baseline gap-1">
               <span className="font-serif text-2xl font-black text-[#C85C3C]">
                 {price.toLocaleString("vi-VN")}đ
               </span>
-              <span className="text-[10px] text-[#A08880] font-semibold">
+              <span className="text-[11px] text-[#A08880] font-semibold">
                 /tháng
               </span>
             </div>

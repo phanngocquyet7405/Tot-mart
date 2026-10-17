@@ -216,7 +216,7 @@ export default function CartDrawer({ open, setOpen }) {
                     Giỏ hàng
                   </h2>
                   {isMounted && cartItems.length > 0 && (
-                    <span className="bg-amber-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full ml-1">
+                    <span className="bg-amber-600 text-white text-[11px] font-black px-2 py-0.5 rounded-full ml-1">
                       {cartItems.length}
                     </span>
                   )}

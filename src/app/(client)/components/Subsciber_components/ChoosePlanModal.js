@@ -133,7 +133,7 @@ function AddressField({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[10px] font-black uppercase tracking-widest text-[#A08880] flex items-center gap-1.5">
+      <label className="text-[11px] font-black uppercase tracking-widest text-[#A08880] flex items-center gap-1.5">
         <Icon size={10} className="text-[#C85C3C]" />
         {label}
         {required && <span className="text-[#C85C3C]">*</span>}
@@ -178,11 +178,11 @@ function SavedAddressCard({ addr, selected, onSelect, index }) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#A08880]">
+            <span className="text-[11px] font-black uppercase tracking-wider text-[#A08880]">
               Địa chỉ {index + 1}
             </span>
             {selected && (
-              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-[#C85C3C] text-white uppercase tracking-wide">
+              <span className="text-[11px] font-black px-1.5 py-0.5 rounded-full bg-[#C85C3C] text-white uppercase tracking-wide">
                 Đang chọn
               </span>
             )}
@@ -214,7 +214,7 @@ function StepIndicator({ step }) {
       <div className="flex items-center gap-1.5">
         <div
           className={cn(
-            "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all",
+            "w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black transition-all",
             step === 1
               ? "bg-[#C85C3C] text-white shadow-sm shadow-[#C85C3C]/30"
               : "bg-[#C85C3C]/10 text-[#C85C3C]",
@@ -224,7 +224,7 @@ function StepIndicator({ step }) {
         </div>
         <span
           className={cn(
-            "text-[10px] font-black uppercase tracking-widest hidden sm:block",
+            "text-[11px] font-black uppercase tracking-widest hidden sm:block",
             step === 1 ? "text-[#C85C3C]" : "text-[#A08880]",
           )}
         >
@@ -244,7 +244,7 @@ function StepIndicator({ step }) {
       <div className="flex items-center gap-1.5">
         <div
           className={cn(
-            "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all",
+            "w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black transition-all",
             step === 2
               ? "bg-[#C85C3C] text-white shadow-sm shadow-[#C85C3C]/30"
               : "bg-[#F0DDD5] text-stone-400",
@@ -254,7 +254,7 @@ function StepIndicator({ step }) {
         </div>
         <span
           className={cn(
-            "text-[10px] font-black uppercase tracking-widest hidden sm:block",
+            "text-[11px] font-black uppercase tracking-widest hidden sm:block",
             step === 2 ? "text-[#C85C3C]" : "text-stone-400",
           )}
         >
@@ -547,7 +547,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent pointer-events-none" />
                 <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-[#F0DDD5] flex items-center gap-1.5 shadow-sm">
-                  <span className="text-[10px] font-black text-[#2C1810]">
+                  <span className="text-[11px] font-black text-[#2C1810]">
                     5.0
                   </span>
                   <div className="flex gap-0.5">
@@ -583,14 +583,14 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
             {/* Selected plan summary — hiển thị khi qua step 2 */}
             {step === 2 && selectedPlan && (
               <div className="bg-[#C85C3C]/5 rounded-2xl p-4 border border-[#C85C3C]/15 space-y-2">
-                <p className="text-[10px] font-black uppercase tracking-widest text-[#A08880]">
+                <p className="text-[11px] font-black uppercase tracking-widest text-[#A08880]">
                   Gói đã chọn
                 </p>
                 <div className="flex items-baseline justify-between">
                   <span className="font-serif text-base font-black text-[#2C1810]">
                     {selectedPlan._months} Tháng
                     {selectedPlan._tag && (
-                      <span className="ml-2 text-[9px] font-black px-2 py-0.5 rounded-full bg-[#C85C3C] text-white uppercase">
+                      <span className="ml-2 text-[11px] font-black px-2 py-0.5 rounded-full bg-[#C85C3C] text-white uppercase">
                         {selectedPlan._tag}
                       </span>
                     )}
@@ -600,13 +600,13 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                   </span>
                 </div>
                 {selectedPlan._saveText && (
-                  <p className="text-[10px] font-bold text-[#C85C3C] bg-red-50 px-2 py-1 rounded-lg inline-block">
+                  <p className="text-[11px] font-bold text-[#C85C3C] bg-red-50 px-2 py-1 rounded-lg inline-block">
                     {selectedPlan._saveText}
                   </p>
                 )}
                 <button
                   onClick={handleBack}
-                  className="text-[10px] text-[#A08880] hover:text-[#C85C3C] underline underline-offset-2 transition-colors mt-1 flex items-center gap-1"
+                  className="text-[11px] text-[#A08880] hover:text-[#C85C3C] underline underline-offset-2 transition-colors mt-1 flex items-center gap-1"
                 >
                   <ChevronLeft size={10} /> Thay đổi gói
                 </button>
@@ -614,7 +614,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
             )}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between border-t border-[#F0DDD5] pt-4 mt-6 text-[10px] text-[#7A645D] gap-y-2">
+          <div className="flex flex-wrap items-center justify-between border-t border-[#F0DDD5] pt-4 mt-6 text-[11px] text-[#7A645D] gap-y-2">
             <div className="flex items-center gap-1.5">
               <Truck size={13} className="text-[#C85C3C]" /> Giao hàng miễn phí
               toàn quốc
@@ -633,7 +633,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
           <div>
             {/* Header */}
             <div className="mb-5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#C85C3C]">
+              <span className="text-[11px] font-black uppercase tracking-widest text-[#C85C3C]">
                 {step === 1 ? "CHOOSE YOUR PLAN" : "SHIPPING ADDRESS"}
               </span>
               <h2 className="font-serif text-2xl lg:text-3xl font-black text-[#2C1810] mt-1.5 leading-tight">
@@ -714,7 +714,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                                 {plan._tag && (
                                   <span
                                     className={cn(
-                                      "text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider",
+                                      "text-[11px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider",
                                       isSelected
                                         ? "bg-white text-[#C85C3C]"
                                         : "bg-[#C85C3C] text-white",
@@ -736,7 +736,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                                 {plan._saveText && (
                                   <span
                                     className={cn(
-                                      "text-[10px] font-bold px-2 py-0.5 rounded-md",
+                                      "text-[11px] font-bold px-2 py-0.5 rounded-md",
                                       isSelected
                                         ? "bg-[#FFF0EB] text-[#C85C3C]"
                                         : "bg-red-50 text-[#C85C3C] border border-red-100",
@@ -760,7 +760,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                                   </span>
                                   <span
                                     className={cn(
-                                      "text-[10px] ml-0.5",
+                                      "text-[11px] ml-0.5",
                                       isSelected
                                         ? "text-white/80"
                                         : "text-stone-400",
@@ -779,7 +779,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                                 <Gift size={14} className="text-white" />
                               </div>
                               <div className="text-xs space-y-1">
-                                <span className="font-black text-[#FFFAF8] block text-[9px] uppercase tracking-wider">
+                                <span className="font-black text-[#FFFAF8] block text-[11px] uppercase tracking-wider">
                                   Quà tặng kèm độc quyền:
                                 </span>
                                 {giftItems.map((g, i) => (
@@ -818,7 +818,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                 {/* Saved addresses */}
                 {!loadingUser && savedAddresses.length > 0 && (
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-[#A08880] mb-2.5 flex items-center gap-1.5">
+                    <p className="text-[11px] font-black uppercase tracking-widest text-[#A08880] mb-2.5 flex items-center gap-1.5">
                       <MapPin size={10} className="text-[#C85C3C]" />
                       Địa chỉ đã lưu
                     </p>
@@ -839,7 +839,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                       <button
                         type="button"
                         onClick={switchToManual}
-                        className="mt-3 text-[10px] font-bold text-[#A08880] hover:text-[#C85C3C] flex items-center gap-1.5 transition-colors"
+                        className="mt-3 text-[11px] font-bold text-[#A08880] hover:text-[#C85C3C] flex items-center gap-1.5 transition-colors"
                       >
                         <Plus size={11} /> Dùng địa chỉ khác
                       </button>
@@ -850,7 +850,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                           setUseManual(false);
                           setSelectedSavedAddr(0);
                         }}
-                        className="mt-3 text-[10px] font-bold text-[#A08880] hover:text-[#C85C3C] flex items-center gap-1.5 transition-colors"
+                        className="mt-3 text-[11px] font-bold text-[#A08880] hover:text-[#C85C3C] flex items-center gap-1.5 transition-colors"
                       >
                         <ChevronLeft size={11} /> Dùng địa chỉ đã lưu
                       </button>
@@ -877,7 +877,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                     )}
                   >
                     {savedAddresses.length > 0 && (
-                      <p className="text-[10px] font-black uppercase tracking-widest text-[#C85C3C] flex items-center gap-1.5">
+                      <p className="text-[11px] font-black uppercase tracking-widest text-[#C85C3C] flex items-center gap-1.5">
                         <Plus size={10} /> Địa chỉ mới
                       </p>
                     )}
@@ -895,7 +895,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                           required
                         />
                         {addressErrors.address && (
-                          <p className="text-[10px] text-red-500 mt-1">
+                          <p className="text-[11px] text-red-500 mt-1">
                             Vui lòng nhập địa chỉ
                           </p>
                         )}
@@ -913,7 +913,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                           required
                         />
                         {addressErrors.district && (
-                          <p className="text-[10px] text-red-500 mt-1">
+                          <p className="text-[11px] text-red-500 mt-1">
                             Vui lòng nhập quận/huyện
                           </p>
                         )}
@@ -931,7 +931,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                           required
                         />
                         {addressErrors.city && (
-                          <p className="text-[10px] text-red-500 mt-1">
+                          <p className="text-[11px] text-red-500 mt-1">
                             Vui lòng nhập tỉnh/thành phố
                           </p>
                         )}
@@ -974,7 +974,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                           type="tel"
                         />
                         {addressErrors.phone && (
-                          <p className="text-[10px] text-red-500 mt-1">
+                          <p className="text-[11px] text-red-500 mt-1">
                             Vui lòng nhập số điện thoại
                           </p>
                         )}
@@ -992,7 +992,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
               /* Step 1 footer */
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="space-y-0.5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#A08880]">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#A08880]">
                     TỔNG CỦA BẠN
                   </span>
                   <div className="flex items-baseline gap-1">
@@ -1002,7 +1002,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                       )}
                     </span>
                   </div>
-                  <p className="text-[10px] text-[#A08880]">
+                  <p className="text-[11px] text-[#A08880]">
                     {selectedPlan?._months === 1
                       ? "Tự động gia hạn hàng tháng"
                       : `Thanh toán một lần cho toàn chu kỳ ${selectedPlan?._months} tháng`}
@@ -1023,7 +1023,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
               /* Step 2 footer */
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="space-y-0.5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#A08880]">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#A08880]">
                     TỔNG THANH TOÁN
                   </span>
                   <div className="flex items-baseline gap-1">
@@ -1033,7 +1033,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
                       )}
                     </span>
                   </div>
-                  <p className="text-[10px] text-[#A08880]">
+                  <p className="text-[11px] text-[#A08880]">
                     {selectedPlan?._months === 1
                       ? "Tự động gia hạn hàng tháng"
                       : `${selectedPlan?._months} tháng · Thanh toán một lần`}
