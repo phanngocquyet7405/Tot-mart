@@ -8,7 +8,7 @@ export default function TrustBadge() {
       <div className="flex flex-wrap justify-center gap-6">
         {[
           "Thanh toán bảo mật",
-          "Phí ship xác nhận riêng",
+          "Ship trả trực tiếp bên giao hàng",
           "Hoàn tiền theo số kỳ chưa giao",
           "Liên hệ hỗ trợ",
         ].map((item) => (

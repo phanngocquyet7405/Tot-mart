@@ -8,6 +8,8 @@ import { AppContext } from "@/app/context/AppContext";
 import { useCart } from "@/app/context/CartContext";
 import {
   loadCheckoutUser,
+  saveCheckoutAddress,
+  hasPendingCheckout,
   validateCoupon,
   quoteCart,
   calcShippingFee,
@@ -49,6 +51,8 @@ export function useCheckout() {
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [showAllAddresses, setShowAllAddresses] = useState(false);
+  const [savingAddress, setSavingAddress] = useState(false);
+  const savingAddressRef = useRef(false);
   const [addingNew, setAddingNew] = useState(false);
   const [newAddress, setNewAddress] = useState(EMPTY_NEW_ADDRESS);
   const [paymentMethod, setPaymentMethod] = useState("online");
@@ -176,6 +180,7 @@ export function useCheckout() {
       !resuming &&
       !resumeCode &&
       !paymentCode &&
+      !hasPendingCheckout() &&
       cartCount === 0 &&
       !orderSuccess
     )
@@ -218,8 +223,9 @@ export function useCheckout() {
         toast.error("Vui lòng tải lại để kiểm tra đơn hiện tại.");
         return;
       }
-      if (!quote) { toast.error("Vui lòng chờ báo giá hoặc kiểm tra lại giỏ hàng."); return; }
-      if (addingNew || !selectedAddress) {
+      const recovering = hasPendingCheckout();
+      if (!recovering && !quote) { toast.error("Vui lòng chờ báo giá hoặc kiểm tra lại giỏ hàng."); return; }
+      if (!recovering && (addingNew || !selectedAddress)) {
         toast.error("Vui lòng chọn địa chỉ đã lưu trong tài khoản.");
         return;
       }
@@ -227,11 +233,11 @@ export function useCheckout() {
       setSubmitting(true);
       try {
         const result = await placeOrder({
-          addressId: selectedAddress._id,
+          addressId: selectedAddress?._id,
           paymentMethod,
           note,
           couponCode: couponApplied ? coupon : undefined,
-          cartItems, cartVersion, quoteFingerprint: quote.fingerprint,
+          cartItems, cartVersion, quoteFingerprint: quote?.fingerprint,
         });
         if (!mounted.current) return;
         if (!result.success) {
@@ -240,7 +246,7 @@ export function useCheckout() {
 
           throw new Error(result.error || "Không thể đặt hàng.");
         }
-        if (paymentMethod === "cod") {
+        if (result.paymentMethod === "cod") {
           clearCart();
           setOrderSuccess(true);
           return;
@@ -249,6 +255,13 @@ export function useCheckout() {
         // ── Online: lấy qrUrl từ BE ──
         const code = result.orderCode;
         activeCodeRef.current = code;
+        setPaymentMethod('online');
+        setPaymentCode(code);
+        setPaymentStatus('awaiting_payment');
+        setOnlineAmount(result.totalAmount ?? 0);
+        // Persist the recoverable URL before the next network operation.
+        router.replace(`/checkout?code=${encodeURIComponent(code)}`);
+        clearCart();
         const info = await checkPaymentNow(code);
         if (!mounted.current) return;
         if (info.status === "error") {
@@ -286,6 +299,27 @@ export function useCheckout() {
       router,
     ],
   );
+
+  const handleAddressNext = async () => {
+    if (savingAddressRef.current) return;
+    if (!addingNew) {
+      if (selectedAddress) setStep("review");
+      else toast.error("Vui lòng chọn địa chỉ giao hàng.");
+      return;
+    }
+    savingAddressRef.current = true;
+    setSavingAddress(true);
+    try {
+      const result = await saveCheckoutAddress(user, newAddress);
+      if (!mounted.current) return;
+      setAddresses(result.addresses);
+      setSelectedAddress(result.selected);
+      setAddingNew(false);
+      setNewAddress(EMPTY_NEW_ADDRESS);
+      setStep("review");
+    } catch (error) { if (mounted.current) toast.error(error.message); }
+    finally { savingAddressRef.current = false; if (mounted.current) setSavingAddress(false); }
+  };
 
   const handleApplyCoupon = async () => {
     const result = await validateCoupon(coupon, cartItems);
@@ -373,5 +407,8 @@ export function useCheckout() {
     couponApplied,
     handleApplyCoupon,
     handlePlaceOrder,
+    pendingAttempt: hasPendingCheckout(),
+    handleAddressNext,
+    savingAddress,
   };
 }

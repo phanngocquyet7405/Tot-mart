@@ -15,6 +15,7 @@ function read(key) {
         : { items: Array.isArray(value) ? value : [], version: 0 };
     return {
       ...stored,
+      present: value !== null,
       items: stored.items.filter((item) => {
         try {
           identity(item);
@@ -91,7 +92,7 @@ export const CartProvider = ({ children }) => {
             .filter(Boolean);
           // Local edits are usable only against the server version they were based on.
           if (cart && version !== local.version) items = server;
-          else if (!items.length) items = server;
+          else if (!local.present) items = server;
           const guest = read("totmart_cart_guest").items;
           const merged = new Map(items.map((item) => [identity(item), item]));
           for (const item of guest) {

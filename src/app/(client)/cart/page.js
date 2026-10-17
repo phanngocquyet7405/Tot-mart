@@ -114,7 +114,7 @@ export default function CartPage() {
                     </span>
                   </div>
                   <p className="text-[11px] text-stone-400 text-right">
-                    Phí vận chuyển được tính ở bước thanh toán.
+                    Phí vận chuyển do khách trả trực tiếp cho bên giao hàng, không cộng vào tiền đơn TotMart.
                   </p>
                 </div>
 

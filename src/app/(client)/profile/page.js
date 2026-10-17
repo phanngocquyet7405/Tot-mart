@@ -89,7 +89,7 @@ export default function ProfilePage() {
           userData.cart = [];
         }
 
-        userData.addreses = userData.addreses || [];
+        userData.addresses = userData.addresses || [];
         setUser(userData);
       } catch (err) {
         logger.error("Lỗi loadProfileAndCart:", err);
@@ -144,17 +144,17 @@ export default function ProfilePage() {
     const userId = user._id || user.id;
     const addressId = address._id || address.id;
 
-    const index = user.addreses.findIndex(
+    const index = user.addresses.findIndex(
       (item) => (item._id || item.id) === addressId,
     );
     const nextAddresses =
       index >= 0
-        ? user.addreses.map((item) =>
+        ? user.addresses.map((item) =>
             (item._id || item.id) === addressId ? address : item,
           )
-        : [address, ...user.addreses];
+        : [address, ...user.addresses];
 
-    setUser({ ...user, addreses: nextAddresses });
+    setUser({ ...user, addresses: nextAddresses });
     setUpdatingAddress(true);
 
     try {
@@ -169,7 +169,7 @@ export default function ProfilePage() {
       const updatedUser = res.data?.data || res.data;
       setUser((prev) => ({
         ...prev,
-        addreses: updatedUser?.addreses || nextAddresses,
+        addresses: updatedUser?.addresses || nextAddresses,
       }));
       toast.success("Đã lưu địa chỉ");
     } catch (err) {
@@ -186,11 +186,11 @@ export default function ProfilePage() {
     if (!user) return;
     const previous = user;
     const userId = user._id || user.id;
-    const nextAddresses = user.addreses.filter(
+    const nextAddresses = user.addresses.filter(
       (item) => (item._id || item.id) !== addressId,
     );
 
-    setUser({ ...user, addreses: nextAddresses });
+    setUser({ ...user, addresses: nextAddresses });
     setUpdatingAddress(true);
 
     try {
@@ -198,7 +198,7 @@ export default function ProfilePage() {
       const updatedUser = res.data?.data || res.data;
       setUser((prev) => ({
         ...prev,
-        addreses: updatedUser?.addreses || nextAddresses,
+        addresses: updatedUser?.addresses || nextAddresses,
       }));
       toast.success("Đã xóa địa chỉ");
     } catch (err) {
@@ -295,7 +295,7 @@ export default function ProfilePage() {
           }
           addressContent={
             <AddressManager
-              addresses={user.addreses}
+              addresses={user.addresses}
               onUpsertAddress={handleUpsertAddress}
               onDeleteAddress={handleDeleteAddress}
               loading={updatingAddress}

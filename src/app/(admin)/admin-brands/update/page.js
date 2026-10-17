@@ -74,7 +74,7 @@ function UpdateBrandContent() {
         </div>
       </div>
 
-      <BrandForm
+      <BrandForm ownershipLocked
         form={form}
         errors={errors}
         updateField={updateField}

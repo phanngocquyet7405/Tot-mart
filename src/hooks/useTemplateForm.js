@@ -24,8 +24,8 @@ function validate(form) {
   const errors = {};
   if (!form.name.trim()) errors.name = "Tên mẫu gói là bắt buộc";
   if (!form.boxId) errors.boxId = "Vui lòng chọn box chính";
-  if (form.discountPercent < 0 || form.discountPercent > 100)
-    errors.discountPercent = "Giảm giá phải từ 0–100%";
+  if (!Number.isFinite(Number(form.discountPercent)) || form.discountPercent < 0 || form.discountPercent >= 100)
+    errors.discountPercent = "Giảm giá phải từ 0 đến dưới 100%";
   form.gift.forEach((g, i) => {
     if (!g.boxId) errors[`gift_${i}_boxId`] = "Chọn box";
     if (!g.quantity || g.quantity < 1) errors[`gift_${i}_qty`] = "Số lượng ≥ 1";

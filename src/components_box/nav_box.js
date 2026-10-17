@@ -21,16 +21,16 @@ import { BAR_H } from "@/components_box/announcement-bar"; // import hằng số
 // ─── Nav data ─────────────────────────────────────────────────────────────────
 
 const shopLinks = [
-  { name: "Combo", desc: "Combo sản phẩm", href: "/products/box?type=combo" },
-  { name: "Hộp quà", desc: "Combo kèm tiện ích", href: "/products/box?type=gift" },
+  { name: "Combo", desc: "Combo sản phẩm", href: "/box" },
+  { name: "Hộp quà", desc: "Combo kèm tiện ích", href: "/gift" },
   { name: "ShopTotMart", desc: "Cửa hàng chính", href: "/homepage" },
-  { name: "Subscribe", desc: "Gói hàng tháng", href: "/products/Subscriber" },
+  { name: "Subscribe", desc: "Gói hàng tháng", href: "/subscription" },
   { name: "TotMart", desc: "Thương hiệu TotMart", href: "/brands" },
 ];
 
 const blogLinks = [
   { name: "Our Blog", desc: "Câu chuyện & chia sẻ", href: "/pages/our-blog" },
-  { name: "Đăng ký hàng tháng", desc: "Các gói đăng ký", href: "/products/Subscriber" },
+  { name: "Đăng ký hàng tháng", desc: "Các gói đăng ký", href: "/subscription" },
 ];
 
 const aboutMega = {
@@ -179,7 +179,7 @@ export function Navigation() {
   const isLightPage = pathname === "/";
 
   const isSolidPage =
-    pathname === "/products/Subscriber" || pathname === "/Subscriber";
+    pathname === "/subscription" || pathname === "/Subscriber";
 
   const [open, setOpen] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -437,7 +437,7 @@ export function Navigation() {
 
           <div className="flex items-center gap-1.5">
             <Button
-              onClick={() => router.push("/products/Subscriber")}
+              onClick={() => router.push("/subscription")}
               className={cn(
                 "hidden md:inline-flex h-9 px-4 text-[11px] font-black uppercase tracking-[0.15em] rounded-full transition-all duration-300 border",
                 isPastThreshold
@@ -637,7 +637,7 @@ export function Navigation() {
               <div className="space-y-2 pt-1 border-t border-stone-200">
                 <Button
                   onClick={() => {
-                    router.push("/products/Subscriber");
+                    router.push("/subscription");
                     setMobileOpen(false);
                   }}
                   className="w-full bg-amber-800 text-white py-6 rounded-xl font-black uppercase tracking-widest hover:bg-amber-900 transition-colors"

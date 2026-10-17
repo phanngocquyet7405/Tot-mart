@@ -34,7 +34,7 @@ const POLICIES = [
       },
       {
         heading: "Phí vận chuyển",
-        body: "Giá hiển thị chưa bao gồm phí giao hàng. Phí giao hàng được xác nhận riêng theo địa chỉ nhận hàng và đơn vị vận chuyển.",
+        body: "Khách trả phí vận chuyển trực tiếp cho bên giao hàng, ngoài tiền COD/chuyển khoản của đơn TotMart. Mức phí cần được thông báo và thống nhất trước khi giao; gói tháng áp dụng riêng cho mỗi lần giao.",
       },
       {
         heading: "Theo dõi đơn hàng",

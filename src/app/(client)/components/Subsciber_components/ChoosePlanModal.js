@@ -343,7 +343,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
         const res = await userService.getMe();
         const fetched = res.data?.data || res.data;
         setUserData(fetched);
-        const addrs = fetched?.addreses || fetched?.addresses || [];
+        const addrs = fetched?.addresses || [];
         setSavedAddresses(addrs);
         if (addrs.length > 0) {
           setSelectedSavedAddr(0);
@@ -455,10 +455,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
       zipCode: resolved.zipCode || "",
     };
 
-    logger.log("[ChoosePlanModal] Subscribing:", {
-      templateId: selectedPlan._id,
-      shippingAddress,
-    });
+    // Keep recipient data out of browser logs.
 
     try {
       setSubmitting(true);
@@ -616,7 +613,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
 
           <div className="flex flex-wrap items-center justify-between border-t border-[#F0DDD5] pt-4 mt-6 text-[11px] text-[#7A645D] gap-y-2">
             <div className="flex items-center gap-1.5">
-              <Truck size={13} className="text-[#C85C3C]" /> Giao hàng miễn phí
+              <Truck size={13} className="text-[#C85C3C]" /> Ship trả riêng cho bên giao hàng mỗi lần nhận
               toàn quốc
             </div>
             <div className="flex items-center gap-1.5">

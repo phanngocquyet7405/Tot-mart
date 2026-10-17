@@ -144,7 +144,7 @@ export default function UserTable({ search, refreshTrigger }) {
                   <TableCell>
                     <div className="text-sm">{user.email}</div>
                     <div className="text-xs text-muted-foreground">
-                      {user.addreses?.[0]?.phone || "Chưa cập nhật"}
+                      {user.addresses?.[0]?.phone || "Chưa cập nhật"}
                     </div>
                   </TableCell>
 

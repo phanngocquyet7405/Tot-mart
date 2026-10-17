@@ -286,17 +286,18 @@ export function PlanFormDialog({
                 <Field
                   label="Giảm giá (%)"
                   error={errors.discountPercent}
-                  hint="0 = không giảm giá"
+                  hint="Từ 0 đến dưới 100%; tổng trả trước phải dương"
                 >
                   <Input
                     type="number"
                     min={0}
-                    max={100}
+                    max={99.99}
+                    step="0.01"
                     value={form.discountPercent}
                     onChange={(e) =>
                       set(
                         "discountPercent",
-                        Math.min(100, Math.max(0, +e.target.value)),
+                        Math.max(0, +e.target.value),
                       )
                     }
                   />

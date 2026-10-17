@@ -5,6 +5,10 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 // Trang tĩnh — cập nhật thủ công khi thêm route mới không thuộc dạng động
 const STATIC_ROUTES = [
+  { path: "/", priority: 1, changeFrequency: "weekly" },
+  { path: "/subscription", priority: 0.9, changeFrequency: "daily" },
+  { path: "/box", priority: 0.9, changeFrequency: "daily" },
+  { path: "/gift", priority: 0.9, changeFrequency: "daily" },
   { path: "/homepage", priority: 1, changeFrequency: "daily" },
   { path: "/products", priority: 0.9, changeFrequency: "daily" },
   { path: "/categories", priority: 0.8, changeFrequency: "weekly" },

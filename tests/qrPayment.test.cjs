@@ -179,6 +179,7 @@ test("checkout success consumes the actual unwrapped response shape", async () =
       }),
     },
   });
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/app/util/purchaseAttempt.mjs'),'utf8').replace(/^export /gm,''), c);
   vm.runInContext(src, c);
   const result = await c.placeOrder({
     addressId: "address",

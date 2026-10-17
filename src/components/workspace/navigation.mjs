@@ -6,6 +6,21 @@ export function activeNavigationHref(items, pathname) {
     .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 }
 
+const EDITABLE = 'input, textarea, select, [contenteditable]:not([contenteditable="false"])';
+
+// Ctrl/Cmd+B toggles the sidebar. Some browser-generated key events (for example autofill)
+// carry no `key`, so the check must tolerate a missing value instead of throwing.
+export function isSidebarShortcut(event) {
+  if (!event || event.defaultPrevented || event.altKey || event.shiftKey) return false;
+  if (event.target?.closest?.(EDITABLE)) return false;
+  return Boolean(event.ctrlKey || event.metaKey) && String(event.key || '').toLowerCase() === 'b';
+}
+
+// Two code points, never half of a surrogate pair (emoji) or an empty avatar.
+export function accountInitials(name) {
+  return Array.from(String(name || '').trim()).slice(0, 2).join('').toLocaleUpperCase('vi') || '?';
+}
+
 export async function performWorkspaceLogout({ logout, beforeLogout, lock, setPending, setError }) {
   if (lock.current || beforeLogout?.() === false) return false;
   lock.current = true;

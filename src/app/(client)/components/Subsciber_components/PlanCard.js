@@ -81,7 +81,7 @@ export default function PlanCard({ box, onOpenPlan, isFirst = false }) {
             {box.totalItem ? `${box.totalItem} loại sản phẩm` : "Cấu phần theo gói"}
           </span>
           <span className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-            Phí giao hàng xác nhận riêng
+            Ship trả trực tiếp bên giao hàng
           </span>
         </div>
 

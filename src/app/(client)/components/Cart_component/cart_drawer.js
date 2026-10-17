@@ -270,7 +270,7 @@ export default function CartDrawer({ open, setOpen }) {
                       </span>
                     </div>
                     <p className="text-[11px] text-stone-400 text-right">
-                      {cartPriceConfirmed ? "Phí giao hàng được xác nhận riêng." : "Giảm theo số lượng và phí tiện ích được xác nhận khi thanh toán."}
+                      {cartPriceConfirmed ? "Phí giao hàng do khách trả trực tiếp cho bên giao hàng." : "Giảm theo số lượng và phí tiện ích được xác nhận khi thanh toán."}
                     </p>
                   </div>
 

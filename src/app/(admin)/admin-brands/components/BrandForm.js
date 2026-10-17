@@ -18,6 +18,7 @@ import RichTextEditor from "../../components/ui/RichTextEditor";
  */
 export default function BrandForm({
   form,
+  ownershipLocked = false,
   errors,
   updateField,
   logoPreview,
@@ -75,13 +76,13 @@ export default function BrandForm({
 
             <div className="space-y-1.5">
               <Label htmlFor="brand-owner">Merchant quản lý</Label>
-              <select id="brand-owner" className="w-full rounded border p-2" value={form.ownerId || ''} onChange={updateField('ownerId')}>
+              <select disabled={ownershipLocked || isSubmitting} id="brand-owner" className="w-full rounded border p-2" value={form.ownerId || ''} onChange={updateField('ownerId')}>
                 <option value="">Admin quản lý / giữ chủ hiện tại</option>
                 {form.ownerId && !merchants.some(m => m._id === form.ownerId) && <option value={form.ownerId}>Chủ hiện tại</option>}
-                {merchants.map(m => <option key={m._id} value={m._id}>{m.name} ({m.email})</option>)}
+                {merchants.map(m => <option key={m._id} value={m._id}>{m.name}</option>)}
               </select>
               {merchantError && <p role="alert" className="text-sm text-red-700">{merchantError}</p>}
-              <p className="text-xs text-muted-foreground">Thương hiệu có sản phẩm của chủ khác cần xử lý chuyển chủ trước khi gán.</p>
+              <p className="text-xs text-muted-foreground">Chỉ chọn merchant khi tạo thương hiệu. Đổi chủ thương hiệu hiện có cần quy trình chuyển quyền và đối chiếu dữ liệu riêng.</p>
             </div>
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5">

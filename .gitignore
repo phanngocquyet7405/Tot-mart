@@ -53,3 +53,4 @@ audit-*.json
 .impeccable/
 .codex/
 AGENTS.md
+.claude/

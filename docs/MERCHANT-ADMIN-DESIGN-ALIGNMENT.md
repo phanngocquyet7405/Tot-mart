@@ -8,7 +8,7 @@ Merchant và admin đã cùng nền tảng thiết kế, nhưng chưa đủ nh�
 
 Impeccable, chế độ **Operate**. Hai đánh giá độc lập: A `/root/design_compare` đọc thiết kế/source không xem detector; B `/root/design_evidence` chạy detector và kiểm chứng implementation. Tổng hợp sau khi hai đánh giá hoàn tất. Đây là so sánh định tính từ source; không đặt phần trăm tương đồng hay điểm pixel khi chưa có ảnh render.
 
-Đã đọc [AGENTS.md](../AGENTS.md), [PRODUCT.md](../PRODUCT.md), [DESIGN.md](../DESIGN.md), [bàn giao merchant](MERCHANT-HANDOFF.md), [kế hoạch lịch sử](MERCHANT-DESIGN-PLAN.md), [báo cáo CI và audit](CI-MANAGER-VERIFICATION.md), cùng layout/component thực tế. Prototype đã xóa không được dùng làm bằng chứng hiện trạng. Các kết quả test trong báo cáo trước vẫn là bằng chứng lịch sử, không phải lần chạy mới.
+Đã đọc `AGENTS.md` (tệp cục bộ), [PRODUCT.md](../PRODUCT.md), [DESIGN.md](../DESIGN.md), [bàn giao merchant](MERCHANT-HANDOFF.md), [kế hoạch lịch sử](MERCHANT-DESIGN-PLAN.md), [báo cáo CI và audit](CI-MANAGER-VERIFICATION.md), cùng layout/component thực tế. Prototype đã xóa không được dùng làm bằng chứng hiện trạng. Các kết quả test trong báo cáo trước vẫn là bằng chứng lịch sử, không phải lần chạy mới.
 
 Browser inventory lần này trả `apps: []`, `browsers: []`. Không mở được phiên browser để chụp cặp desktop/mobile; không có screenshot, overlay hoặc xác minh layout render. Các kích thước dưới đây suy từ class/CSS theo thang Tailwind mặc định, không phải phép đo trên browser. Chưa xác minh computed style, contrast, focus trap, touch hay breakpoint thực tế nếu runtime có tùy biến.
 

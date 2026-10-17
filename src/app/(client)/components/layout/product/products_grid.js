@@ -9,7 +9,7 @@ import {
 import { useAddToCart } from "@/app/hook/useAddToCart";
 import { useWishlist } from "@/app/context/WishlistContext";
 
-export default function ProductsGrid({ categoryId, brandSlug }) {
+export default function ProductsGrid({ categoryId, brandSlug, searchQuery = "" }) {
   const { addToCart } = useAddToCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const [products, setProducts] = useState([]);
@@ -26,7 +26,7 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [categoryId, brandSlug, sortBy]);
+  }, [categoryId, brandSlug, searchQuery, sortBy]);
 
   useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) setCurrentPage(totalPages);
@@ -38,7 +38,7 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
       try {
         setLoading(true);
         setError(null);
-        const res = await getAllProductsApi({ page: currentPage, limit: pageSize, category: categoryId || undefined, brandSlug: brandSlug || undefined, sort: sortBy === 'price-asc' ? 'price_asc' : sortBy === 'price-desc' ? 'price_desc' : undefined });
+        const res = await getAllProductsApi({ page: currentPage, limit: pageSize, keyword: searchQuery.trim() || undefined, category: categoryId || undefined, brandSlug: brandSlug || undefined, sort: sortBy === 'price-asc' ? 'price_asc' : sortBy === 'price-desc' ? 'price_desc' : undefined });
         if (!active) return;
         setProducts(res.data || []); setPagination(res.pagination);
       } catch (err) {
@@ -51,7 +51,7 @@ export default function ProductsGrid({ categoryId, brandSlug }) {
     };
     fetchProducts();
     return () => { active = false; };
-  }, [categoryId, brandSlug, sortBy, currentPage]);
+  }, [categoryId, brandSlug, searchQuery, sortBy, currentPage]);
 
   if (loading)
     return (

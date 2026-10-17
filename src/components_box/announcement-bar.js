@@ -6,7 +6,7 @@ import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const ANNOUNCEMENTS = [
   {
-    text: "Phí giao hàng xác nhận riêng theo địa chỉ",
+    text: "Ship trả trực tiếp bên giao hàng theo địa chỉ",
     cta: "Mua ngay →",
     href: "/homepage",
   },

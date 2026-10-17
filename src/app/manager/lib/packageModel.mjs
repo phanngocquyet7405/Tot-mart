@@ -23,7 +23,7 @@ export function validatePackage(kind, form, editing, products, combos) {
   if (kind !== 'subscriptions' || (!editing && form.sourceType === 'retail')) {
     if (!form.validTo || !(new Date(form.validTo+'T23:59:59+07:00') > new Date())) errors.validTo = 'Chọn hạn kết thúc trong tương lai.';
   }
-  if (kind !== 'gifts' && (form.discountPercent === '' || !Number.isFinite(Number(form.discountPercent)) || Number(form.discountPercent)<0 || Number(form.discountPercent)>100)) errors.discountPercent = 'Mức giảm phải từ 0 đến 100%.';
+  if (kind !== 'gifts' && (form.discountPercent === '' || !Number.isFinite(Number(form.discountPercent)) || Number(form.discountPercent)<0 || (kind === 'subscriptions' ? Number(form.discountPercent)>=100 : Number(form.discountPercent)>100))) errors.discountPercent = kind === 'subscriptions' ? 'Mức giảm phải từ 0 đến dưới 100%.' : 'Mức giảm phải từ 0 đến 100%.';
   if (kind === 'gifts') {
     if (!editing && !combos.some(item=>item._id === form.comboId)) errors.comboId = 'Chọn combo thuộc cửa hàng.';
     if (form.bulkTiers.length>10 || new Set(form.bulkTiers.map(item=>Number(item.minQuantity))).size !== form.bulkTiers.length || form.bulkTiers.some(item=>!integer(item.minQuantity)||Number(item.minQuantity)<2||Number(item.minQuantity)>999||item.percent===''||!Number.isFinite(Number(item.percent))||Number(item.percent)<0||Number(item.percent)>100)) errors.bulkTiers = 'Tối đa 10 bậc không trùng; số lượng 2–999, giảm 0–100%.';

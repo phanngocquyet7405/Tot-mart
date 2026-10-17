@@ -154,6 +154,7 @@ export default function NavMenu() {
         </div>
       </div>
 
+      <div className="flex flex-wrap justify-center gap-6 border-t py-3 text-sm font-semibold"><Link href="/">Trang chính</Link><Link href="/homepage">Cửa hàng</Link><Link href="/subscription">Đăng ký tháng</Link><Link href="/box">Combo</Link><Link href="/gift">Hộp quà</Link></div>
       {activeRoot ? (
         <CategoryDropdown
           root={activeRoot}

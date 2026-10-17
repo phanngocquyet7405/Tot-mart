@@ -82,6 +82,10 @@ function CheckoutPageInner() {
           </div>
         </div>
 
+        {checkout.pendingAttempt && !checkout.paymentCode && <div role="status" className="mb-6 space-y-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm">
+          <p>Có yêu cầu đặt hàng chưa xác định kết quả. Kiểm tra lại sẽ dùng đúng địa chỉ, phương thức thanh toán và nội dung của yêu cầu cũ, kể cả khi bạn đã sửa giỏ. Hãy xử lý yêu cầu này trước khi đặt đơn khác.</p>
+          <button className="min-h-11 rounded-lg bg-stone-800 px-4 text-white disabled:opacity-50" disabled={checkout.submitting} onClick={checkout.handlePlaceOrder}>{checkout.submitting ? 'Đang kiểm tra…' : 'Kiểm tra yêu cầu cũ'}</button>
+        </div>}
         {/* ── Stepper ── */}
         <CheckoutStepper
           currentStep={checkout.step}
@@ -109,7 +113,8 @@ function CheckoutPageInner() {
                   onSelectAddress={checkout.handleSelectAddress}
                   onToggleAddNew={checkout.handleToggleAddNew}
                   onAddressFieldChange={checkout.handleNewAddressChange}
-                  onNext={() => checkout.setStep("review")}
+                  onNext={checkout.handleAddressNext}
+                  savingAddress={checkout.savingAddress}
                 />
               )}
 

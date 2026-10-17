@@ -1,8 +1,8 @@
-import { LayoutDashboard, ShoppingCart, ClipboardList, Users, Tags, FolderTree, User, Package, PlusCircle, Album, LayersPlus, CreditCard, Boxes } from "lucide-react";
+import { Gift, LayoutDashboard, Truck, ShoppingCart, ClipboardList, Users, Tags, FolderTree, User, Package, PlusCircle, Album, LayersPlus, CreditCard, Boxes } from "lucide-react";
 
 export const adminNavigation = [
-  { label: 'Giao hàng & đối soát', icon: CreditCard, href: '/admin-operations' },
   { label: "Tổng quan", icon: LayoutDashboard, href: "/dashboard" },
+  { label: "Gift", icon: Gift, href: "/admin-gifts" },
   {
     label: "Sản phẩm",
     icon: ShoppingCart,
@@ -13,6 +13,7 @@ export const adminNavigation = [
   },
   { label: "Người dùng", icon: Users, href: "/admin-users" },
   { label: "Đơn hàng", icon: ClipboardList, href: "/admin-orders" },
+  { label: 'Giao hàng & đối soát', icon: Truck, href: '/admin-operations' },
   {
     label: "Thương hiệu",
     icon: Tags,

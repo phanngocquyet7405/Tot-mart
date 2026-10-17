@@ -12,7 +12,7 @@ const faqs = [
   {
     question: "Chính sách vận chuyển như thế nào?",
     answer:
-      "Phí giao hàng được xác nhận riêng theo địa chỉ nhận hàng và đơn vị vận chuyển, chưa bao gồm trong tiền hàng hiển thị.",
+      "Khách trả phí giao hàng trực tiếp cho đơn vị vận chuyển, ngoài số tiền thanh toán cho TotMart. Mức phí cần được thống nhất trước khi giao.",
   },
   {
     question: "Tôi có thể mua sỉ hoặc làm quà tặng doanh nghiệp không?",

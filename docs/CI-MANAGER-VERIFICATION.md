@@ -53,3 +53,12 @@ Next priority: `$impeccable harden` for draft/error paths, `$impeccable adapt` f
 ## Unverified
 
 No authenticated manager browser session or fresh desktop/mobile captures were obtained in this pass. Keyboard focus order/traps, screen-reader announcements, contrast, dark theme, touch gestures, 320px reflow, text scaling, virtual keyboard/footer behavior and real browser save/error/409/session-expiry flows remain unverified. Audit findings are source evidence or explicitly labeled layout risks, not visual acceptance. Production build proves compilation, not deployed API connectivity, uploads or persistence. No cloud settings or current Actions run were verified.
+
+## Addendum — 2026-10-17
+
+Superseded since this report was written: `npm test` now runs more than the 60 tests listed above, and
+logout is guarded by the same draft/busy check as sidebar navigation (`ManagerLayout` `beforeLogout`), so
+the logout half of P1 is addressed. Still open from P1: SPA Back/Forward (`popstate`) is not guarded;
+`beforeunload` does not fire for client-side history navigation. Changing that needs a design that is
+exercised in a real browser against the Next.js router, so it is deliberately not part of a source-only change.
+In-flight order status updates register as busy so navigation, logout and tab close wait for them.

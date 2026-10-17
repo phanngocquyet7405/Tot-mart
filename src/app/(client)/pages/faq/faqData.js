@@ -31,7 +31,7 @@ export const FAQS = [
       },
       {
         q: "Phí vận chuyển được tính như thế nào?",
-        a: "Phí giao hàng được xác nhận riêng theo địa chỉ nhận hàng; không cộng phí ship cố định vào tiền hàng khi checkout.",
+        a: "Khách trả phí ship trực tiếp cho bên giao hàng. TotMart không thu khoản này trong COD/chuyển khoản; mức phí cần được thống nhất trước mỗi lần giao.",
       },
       {
         q: "TotMart có giao quốc tế không?",

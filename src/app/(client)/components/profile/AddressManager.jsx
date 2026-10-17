@@ -36,7 +36,7 @@ export function AddressManager({
   const [editing, setEditing] = useState(null);
 
   const canCreate = useMemo(
-    () => Object.values(newAddress).every((value) => value.trim().length > 0),
+    () => ['country','city','district','address','phone'].every(key => newAddress[key].trim().length > 0),
     [newAddress],
   );
 
@@ -44,7 +44,7 @@ export function AddressManager({
     if (!canCreate) return;
     // id dạng "addr-timestamp" → page.js nhận biết đây là CREATE
     const addr = { id: `addr-${Date.now()}`, ...newAddress };
-    logger.log("[AddressManager] Creating address:", addr);
+    // Personal address data is never written to the console.
     await onUpsertAddress(addr);
     setNewAddress(emptyAddress);
   };

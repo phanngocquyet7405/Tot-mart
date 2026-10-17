@@ -1,3 +1,4 @@
+import { readAttempt, storeAttempt, clearAttempt, definitiveFailure } from '@/app/util/purchaseAttempt.mjs';
 import { userService } from '@/app/services/api/userService';
 import { checkoutService } from '@/app/services/api/checkoutService';
 import { syncCartApi } from '@/app/services/api/productServices';
@@ -22,33 +23,50 @@ export async function validateCoupon(code, items) {
 }
 // Delivery charge is agreed separately, never part of the new checkout total.
 export function calcShippingFee() { return 0; }
+export function hasPendingCheckout() {
+  return Boolean(readAttempt(`totmart_checkout_attempt_${getTokenUserId() || 'guest'}`));
+}
 export async function placeOrder({ addressId, paymentMethod, note, couponCode, cartItems = [], quoteFingerprint, cartVersion }) {
   const payload = { addressId, paymentMethod, ...(note ? { note } : {}), ...(couponCode ? { couponCode: couponCode.trim().toUpperCase() } : {}), ...(quoteFingerprint ? { quoteFingerprint } : {}) };
   const scope = `totmart_checkout_attempt_${getTokenUserId() || 'guest'}`;
-  const signature = JSON.stringify({ payload, items: toCartPayload(cartItems) });
-  let attempt, syncedVersion;
+  let attempt = readAttempt(scope), syncedVersion;
   try {
-    if (!addressId) return { success: false, error: 'Thiếu địa chỉ giao hàng' };
-    if (typeof window !== 'undefined') { try { attempt = JSON.parse(sessionStorage.getItem(scope) || 'null'); } catch { attempt = null; } }
-    if (!attempt || attempt.signature !== signature) {
-      attempt = { key: globalThis.crypto.randomUUID(), signature };
+    if (!attempt) {
+      if (!addressId) return { success: false, error: 'Thiếu địa chỉ giao hàng' };
       const synced = await syncCartApi(toCartPayload(cartItems), cartVersion);
       syncedVersion = synced.version;
-      attempt.cartVersion = syncedVersion;
       if (synced.skipped?.length) return { success: false, skipped: synced.skipped, error: 'Sản phẩm không còn tồn tại. Vui lòng kiểm tra giỏ hàng.' };
-      if (typeof window !== 'undefined') sessionStorage.setItem(scope, JSON.stringify(attempt));
+      attempt = { key: globalThis.crypto.randomUUID(), payload, cartVersion: syncedVersion };
+      storeAttempt(scope, attempt);
     }
-    const response = await checkoutService.createOrder(payload, attempt.key);
-    if (!response.success) return { success: false, error: response.message };
-    if (typeof window !== 'undefined') sessionStorage.removeItem(scope);
-    return { success: true, ...response.data };
+    const response = await checkoutService.createOrder(attempt.payload, attempt.key);
+    if (!response.success) throw new Error(response.message || 'Không thể đặt hàng');
+    clearAttempt(scope);
+    return { success: true, ...response.data, paymentMethod: attempt.payload.paymentMethod };
   } catch (err) {
-    // Keep the key on ambiguous network/5xx failures; retry the same attempt.
-    const status = err.response?.status;
-    if (status && status < 500 && typeof window !== 'undefined') sessionStorage.removeItem(scope);
-    return { success: false, status, cartVersion: syncedVersion ?? attempt?.cartVersion, error: err.response?.data?.message || err.message };
+    if (definitiveFailure(err)) clearAttempt(scope);
+    return { success: false, status: err.response?.status,
+      cartVersion: err.response?.data?.version ?? syncedVersion ?? attempt?.cartVersion,
+      error: err.response?.data?.message || (attempt && !definitiveFailure(err) ? 'Chưa xác định được kết quả đặt hàng. Bấm thử lại để kiểm tra đúng yêu cầu cũ; không tạo đơn thay thế.' : err.message) };
   }
 }
+export async function saveCheckoutAddress(user, draft) {
+  const fields = ['street', 'ward', 'district', 'province'];
+  if (!draft.fullName?.trim() || fields.some(key => !draft[key]?.trim()) || !/^(?:0\d{9}|\+[1-9]\d{7,14})$/.test(draft.phone?.trim() || ''))
+    throw new Error('Điền đầy đủ địa chỉ và số điện thoại hợp lệ.');
+  const payload = { fullName: draft.fullName.trim(), country: 'Việt Nam', city: draft.province.trim(), district: draft.district.trim(),
+    address: `${draft.street.trim()}, ${draft.ward.trim()}`, phone: draft.phone.trim() };
+  if (payload.address.length > 255 || payload.city.length > 100 || payload.district.length > 100)
+    throw new Error('Địa chỉ quá dài. Vui lòng rút gọn.');
+  const response = await userService.addAddress(user._id || user.id, payload);
+  const addresses = response.data?.addresses;
+  const previous = new Set((user.addresses || []).map(item => item._id));
+  const selected = addresses?.findLast(item => !previous.has(item._id));
+  if (!selected?._id) throw new Error('Chưa xác nhận được địa chỉ đã lưu. Hãy tải lại danh sách địa chỉ.');
+  user.addresses = addresses;
+  return { addresses, selected };
+}
+
 export function readOrderStatus(response) {
   const data = response.data || {};
   const totalAmount = data.totalAmount ?? data.orders?.reduce((sum, order) => sum + order.totalAmount, 0) ?? 0;

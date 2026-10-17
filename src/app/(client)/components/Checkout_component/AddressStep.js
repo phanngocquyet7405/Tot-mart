@@ -61,7 +61,7 @@ function AddressRadioCard({ addr, index, selected, user, onSelect }) {
           <p className="text-xs text-stone-600 mt-0.5">{addr.phone}</p>
         )}
         <p className="text-xs text-stone-500 mt-1 leading-relaxed">
-          {[addr.street, addr.ward, addr.district, addr.province]
+          {[addr.address, addr.district, addr.city, addr.country]
             .filter(Boolean)
             .join(", ")}
         </p>
@@ -114,6 +114,7 @@ export function AddressStep({
   onToggleAddNew,
   onAddressFieldChange,
   onNext,
+  savingAddress,
 }) {
   const canProceed = selectedAddress || addingNew;
 
@@ -191,10 +192,10 @@ export function AddressStep({
       {/* ─── CTA ─── */}
       <button
         onClick={onNext}
-        disabled={!canProceed}
+        disabled={!canProceed || savingAddress}
         className="w-full bg-[#C85C3C] hover:bg-[#B14B2D] disabled:bg-stone-200 disabled:text-stone-400 text-white py-4 rounded-xl font-black uppercase tracking-widest text-[12px] transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed shadow-lg shadow-[#C85C3C]/20"
       >
-        Tiếp theo → Kiểm tra đơn
+        {savingAddress ? "Đang lưu địa chỉ…" : "Tiếp theo → Kiểm tra đơn"}
       </button>
     </motion.div>
   );

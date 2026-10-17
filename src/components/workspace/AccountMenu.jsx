@@ -3,12 +3,13 @@
 import { ChevronDown, LogOut } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { accountInitials } from './navigation.mjs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function AccountMenu({ account, onLogout, pending }) {
   return <DropdownMenu><DropdownMenuTrigger asChild>
     <Button variant="ghost" className="h-auto min-h-11 min-w-0 max-w-[60vw] gap-2 px-2 sm:max-w-sm" aria-label={`Tài khoản ${account.name}`}>
-      <Avatar className="size-8 shrink-0"><AvatarFallback className="bg-primary text-xs text-primary-foreground">{account.name.slice(0, 2).toLocaleUpperCase('vi')}</AvatarFallback></Avatar>
+      <Avatar className="size-8 shrink-0"><AvatarFallback className="bg-primary text-xs text-primary-foreground">{accountInitials(account.name)}</AvatarFallback></Avatar>
       <span className="min-w-0 text-left"><span className="block truncate text-sm font-medium">{account.name}</span><span className="block truncate text-xs text-muted-foreground">{account.roleLabel}</span></span>
       <ChevronDown className="hidden size-4 shrink-0 sm:block" aria-hidden="true" />
     </Button>

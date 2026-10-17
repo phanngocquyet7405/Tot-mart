@@ -1,6 +1,6 @@
 # Tài liệu dự án
 
-[README dự án](../README.md) · [Sản phẩm](../PRODUCT.md) · [Thiết kế](../DESIGN.md) · [Hướng dẫn agent](../AGENTS.md)
+[README dự án](../README.md) · [Sản phẩm](../PRODUCT.md) · [Thiết kế](../DESIGN.md)
 
 ## Kiểm chứng và bàn giao hiện tại
 

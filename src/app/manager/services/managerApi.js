@@ -14,9 +14,9 @@ export function listManagerProducts({ page = 1, keyword = '', brand, category, m
   return axiosConfig.get('/manager/products', { params: { page, limit: 20, keyword, brand, category, minPrice, maxPrice }, signal });
 }
 const resources = { products: 'products', combos: 'combos', gifts: 'combos', subscriptions: 'subscriptions', orders: 'orders' };
-export function listManagerResource(kind, { page = 1, limit = 20, signal } = {}) {
+export function listManagerResource(kind, { page = 1, limit = 20, signal, ...filters } = {}) {
   if (!resources[kind]) throw new Error('Mục quản lý không hợp lệ.');
-  return axiosConfig.get(`/manager/${resources[kind]}`, { params: { page, limit, ...(kind === 'combos' ? { kind: 'combo' } : kind === 'gifts' ? { kind: 'gift' } : {}) }, signal });
+  return axiosConfig.get(`/manager/${resources[kind]}`, { params: { ...filters, page, limit, ...(kind === 'combos' ? { kind: 'combo' } : kind === 'gifts' ? { kind: 'gift' } : {}) }, signal });
 }
 export async function collectManagerResource(kind, { signal } = {}) {
   const first = confirmed(await listManagerResource(kind, { limit: 100, signal }));

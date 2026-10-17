@@ -159,7 +159,7 @@ export function ProductPurchasePanel({
             <Truck size={16} />
           </div>
           <div>
-            <p className="font-bold text-stone-800">Phí ship xác nhận riêng</p>
+            <p className="font-bold text-stone-800">Ship trả trực tiếp bên giao hàng</p>
             <p className="text-[11px]">Theo địa chỉ nhận hàng</p>
           </div>
         </div>

@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { cn } from '@/lib/utils';
 import SidebarNavigation from './SidebarNavigation';
 import WorkspaceHeader from './WorkspaceHeader';
+import { isSidebarShortcut } from './navigation.mjs';
 
 function WorkspaceBrand({ brand, onNavigate }) {
   return <Link href={brand.href} prefetch={false} onNavigate={event => { if (onNavigate(brand.href) === false) event.preventDefault(); }}
@@ -29,12 +30,10 @@ export default function WorkspaceShell({ brand, navigation, pathname, onNavigate
     function resize() { if (media.matches) setMobileOpen(false); }
     media.addEventListener('change', resize);
     function shortcut(event) {
-      if (event.defaultPrevented || event.altKey || event.shiftKey || event.target?.closest?.('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b') {
-        event.preventDefault();
-        if (media.matches) setDesktopOpen(value => !value);
-        else setMobileOpen(value => !value);
-      }
+      if (!isSidebarShortcut(event)) return;
+      event.preventDefault();
+      if (media.matches) setDesktopOpen(value => !value);
+      else setMobileOpen(value => !value);
     }
     window.addEventListener('keydown', shortcut);
     return () => { media.removeEventListener('change', resize); window.removeEventListener('keydown', shortcut); };

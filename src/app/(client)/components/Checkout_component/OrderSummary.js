@@ -2,7 +2,7 @@
  * OrderSummary.js
  * Cột phải — "phiếu đơn hàng" (sticky). Liệt kê TẤT CẢ sản phẩm có ảnh; khi
  * nhiều hơn 4 dòng, danh sách cuộn bên trong (max-h) thay vì cắt bớt như
- * trước đây (slice(0, 3) + "+N sản phẩm khác"). Phí giao hàng xác nhận riêng.
+ * trước đây (slice(0, 3) + "+N sản phẩm khác"). Ship trả trực tiếp bên giao hàng.
  */
 
 "use client";
@@ -88,12 +88,12 @@ export function OrderSummary({
           {discount > 0 && (
             <CostRow label="Giảm giá" value={`-${formatCurrency(discount)}`} tone="discount" />
           )}
-          <p className="text-xs text-stone-600">Giá trên chưa bao gồm phí giao hàng. Phí giao hàng được xác nhận riêng theo địa chỉ nhận hàng.</p>
+          <p className="text-xs text-stone-600">Phí vận chuyển: khách trả trực tiếp cho bên giao hàng, không nằm trong số tiền COD/chuyển khoản bên dưới. Mức phí cần được thông báo và thống nhất trước khi giao.</p>
 
         </div>
 
         <div className="flex items-baseline justify-between px-6 py-5 bg-white/60 border-t border-[#F0DDD5]">
-          <span className="text-sm font-semibold text-[#2C1810]">Tiền hàng</span>
+          <span className="text-sm font-semibold text-[#2C1810]">Thanh toán cho TotMart</span>
           <span className="font-serif text-3xl font-semibold text-[#C85C3C] tabular-nums">
             {formatCurrency(finalTotal)}
           </span>

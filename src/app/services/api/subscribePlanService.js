@@ -1,3 +1,4 @@
+import { readAttempt, storeAttempt, clearAttempt, definitiveFailure } from '@/app/util/purchaseAttempt.mjs';
 import { getTokenUserId } from '@/app/middleware/tokenMiddleware';
 import { axiosConfig } from "./axiosConfig";
 import { API_ENDPOINTS } from "./apiEndpoints";
@@ -40,12 +41,17 @@ export const getActiveTemplatesApi = () => axiosConfig.get(EP.GET_ACTIVE);
 
 /** Đăng ký gói dịch vụ từ mẫu */
 export const userSubscribeApi = async (data) => {
-  const keyName = 'totmart_subscription_attempt_' + getTokenUserId() + '_' + data.templateId;
-  const signature = JSON.stringify(data);
-  let attempt; try { attempt = JSON.parse(sessionStorage.getItem(keyName) || 'null'); } catch { attempt = null; }
-  if (!attempt || attempt.signature !== signature) { attempt = { signature, key: crypto.randomUUID() }; sessionStorage.setItem(keyName, JSON.stringify(attempt)); }
-  try { const response = await axiosConfig.post(EP.SUBSCRIBE, data, { headers: { 'Idempotency-Key': attempt.key } }); sessionStorage.removeItem(keyName); return response; }
-  catch (err) { if (err.response?.status < 500) sessionStorage.removeItem(keyName); throw err; }
+  const keyName = 'totmart_subscription_attempt_' + getTokenUserId();
+  const legacyKey = keyName + '_' + data.templateId;
+  let attempt = readAttempt(keyName) || readAttempt(legacyKey);
+  if (!attempt) { attempt = { payload: data, key: crypto.randomUUID() }; storeAttempt(keyName, attempt); }
+  else storeAttempt(keyName, attempt);
+  try {
+    const response = await axiosConfig.post(EP.SUBSCRIBE, attempt.payload, { headers: { 'Idempotency-Key': attempt.key } });
+    clearAttempt(keyName);
+    clearAttempt(legacyKey);
+    return response;
+  } catch (err) { if (definitiveFailure(err)) { clearAttempt(keyName); clearAttempt(legacyKey); } throw err; }
 };
 
 /** Lấy tất cả gói đăng ký của user hiện tại đang đăng nhập */
