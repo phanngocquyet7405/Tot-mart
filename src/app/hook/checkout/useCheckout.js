@@ -10,6 +10,8 @@ import {
   loadCheckoutUser,
   saveCheckoutAddress,
   hasPendingCheckout,
+  getPendingCheckout,
+  toCartPayload,
   validateCoupon,
   quoteCart,
   calcShippingFee,
@@ -234,6 +236,7 @@ export function useCheckout() {
       try {
         const result = await placeOrder({
           addressId: selectedAddress?._id,
+          address: selectedAddress, totalAmount: quote?.totalAmount,
           paymentMethod,
           note,
           couponCode: couponApplied ? coupon : undefined,
@@ -407,7 +410,8 @@ export function useCheckout() {
     couponApplied,
     handleApplyCoupon,
     handlePlaceOrder,
-    pendingAttempt: hasPendingCheckout(),
+    pendingAttempt: getPendingCheckout(),
+    pendingDraftChanged: Boolean(getPendingCheckout() && (getPendingCheckout().payload.addressId !== selectedAddress?._id || getPendingCheckout().summary?.cart !== JSON.stringify(toCartPayload(cartItems)))),
     handleAddressNext,
     savingAddress,
   };

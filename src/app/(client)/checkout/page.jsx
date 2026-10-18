@@ -9,9 +9,11 @@
 "use client";
 
 import { Suspense } from "react";
+import { needsReconciliation } from "@/app/util/purchaseAttempt.mjs";
 import { AnimatePresence } from "framer-motion";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { useCheckout } from "@/app/hook/checkout/useCheckout";
 import { CheckoutStepper } from "../components/Checkout_component/CheckoutStepper";
@@ -58,7 +60,7 @@ function CheckoutPageInner() {
     return <LoadingScreen />;
 
   return (
-    <div className="min-h-screen bg-[#FFFAF8] text-[#2C1810]">
+    <div className="tm-commerce tm-commerce--atelier min-h-screen bg-[#FFFAF8] text-[#2C1810]">
       <div className="max-w-6xl mx-auto px-4 py-8 sm:py-10">
         {/* ── Header ── */}
         <div className="flex items-center gap-4 mb-8">
@@ -66,7 +68,7 @@ function CheckoutPageInner() {
             type="button"
             onClick={() => router.back()}
             aria-label="Quay lại"
-            className="grid place-items-center w-10 h-10 rounded-full border border-[#F0DDD5] bg-white text-[#2C1810] hover:border-[#C85C3C]/60 hover:text-[#B14B2D] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C85C3C]"
+            className="grid place-items-center min-w-11 min-h-11 rounded-full border border-[#F0DDD5] bg-white text-[#2C1810] hover:border-[#C85C3C]/60 hover:text-[#B14B2D] transition-colors duration-200"
           >
             <ArrowLeft size={17} />
           </button>
@@ -82,10 +84,21 @@ function CheckoutPageInner() {
           </div>
         </div>
 
-        {checkout.pendingAttempt && !checkout.paymentCode && <div role="status" className="mb-6 space-y-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm">
-          <p>Có yêu cầu đặt hàng chưa xác định kết quả. Kiểm tra lại sẽ dùng đúng địa chỉ, phương thức thanh toán và nội dung của yêu cầu cũ, kể cả khi bạn đã sửa giỏ. Hãy xử lý yêu cầu này trước khi đặt đơn khác.</p>
-          <button className="min-h-11 rounded-lg bg-stone-800 px-4 text-white disabled:opacity-50" disabled={checkout.submitting} onClick={checkout.handlePlaceOrder}>{checkout.submitting ? 'Đang kiểm tra…' : 'Kiểm tra yêu cầu cũ'}</button>
-        </div>}
+        {checkout.pendingAttempt && !checkout.paymentCode && <section role="status" className="tm-notice mb-8">
+          <h2>Yêu cầu đặt hàng trước chưa rõ kết quả</h2>
+          <p className="mt-3">TotMart chưa xác nhận được kết quả của lần gửi trước. Hãy xử lý yêu cầu này trước khi đặt đơn khác.</p>
+          <ul className="mt-4 space-y-2">{checkout.pendingAttempt.summary?.items?.map((item, i) => <li key={i} className="flex justify-between gap-4"><span>{item.name}</span><span className="shrink-0">× {item.quantity}</span></li>)}</ul>
+          <dl>
+            <div><dt>Tổng yêu cầu cũ</dt><dd>{Number.isFinite(checkout.pendingAttempt.summary?.totalAmount) ? checkout.pendingAttempt.summary.totalAmount.toLocaleString('vi-VN') + ' ₫' : 'Chưa lưu — cần đối chiếu'}</dd></div>
+            <div><dt>Địa chỉ cũ đã che</dt><dd>{checkout.pendingAttempt.summary?.address || 'Chưa lưu — cần đối chiếu'}</dd></div>
+            <div><dt>Thời điểm gửi</dt><dd>{checkout.pendingAttempt.sentAt ? new Date(checkout.pendingAttempt.sentAt).toLocaleString('vi-VN') : 'Chưa lưu'}</dd></div>
+          </dl>
+          {checkout.pendingDraftChanged && <p role="alert" className="mb-3 font-semibold">Giỏ hàng hoặc địa chỉ hiện tại đã khác. Tiếp tục chỉ xử lý yêu cầu cũ; thay đổi hiện tại không được gửi.</p>}
+          {(needsReconciliation(checkout.pendingAttempt) || !checkout.pendingAttempt.payload.quoteFingerprint) && <p role="alert" className="mb-3">Cần TotMart xác minh yêu cầu trước. Chưa thể gửi lại hay bắt đầu lần thử mới. Lịch sử đơn hàng không chứng minh yêu cầu chưa được tạo.</p>}
+          <p className="tm-notice__reference">Mã đối chiếu: {checkout.pendingAttempt.key}</p>
+          <p className="mt-2 text-sm">Khi liên hệ TotMart, cung cấp mã này để kiểm tra đúng yêu cầu.</p>
+          <div className="mt-5 flex flex-wrap gap-3"><button type="button" className="tm-button tm-button--outline" disabled={checkout.submitting || needsReconciliation(checkout.pendingAttempt) || !checkout.pendingAttempt.payload.quoteFingerprint} onClick={checkout.handlePlaceOrder}>{checkout.submitting ? 'Đang kiểm tra…' : 'Tiếp tục đúng yêu cầu cũ'}</button><Link href="/pages/contact-us" className="tm-text-button">Liên hệ TotMart</Link></div>
+        </section>}
         {/* ── Stepper ── */}
         <CheckoutStepper
           currentStep={checkout.step}

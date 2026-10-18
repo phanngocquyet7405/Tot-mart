@@ -10,12 +10,7 @@ import Footer from "../../components/ui/footer";
 import CartDrawer from "../../components/Cart_component/cart_drawer";
 import { Heart, Leaf, Package, Users, ArrowRight, Star } from "lucide-react";
 
-const STATS = [
-  { value: "2018", label: "Năm thành lập" },
-  { value: "120+", label: "Nhà sản xuất đối tác" },
-  { value: "50K+", label: "Khách hàng hài lòng" },
-  { value: "98%", label: "Đánh giá tích cực" },
-];
+
 
 const VALUES = [
   {
@@ -40,12 +35,7 @@ const VALUES = [
   },
 ];
 
-const TEAM = [
-  { name: "Nguyễn Lan Anh", role: "Đồng sáng lập & CEO", initials: "LA" },
-  { name: "Trần Minh Đức", role: "Đồng sáng lập & CPO", initials: "MD" },
-  { name: "Lê Thu Hà", role: "Giám đốc Sáng tạo", initials: "TH" },
-  { name: "Phạm Quốc Bảo", role: "Giám đốc Vận hành", initials: "QB" },
-];
+
 
 export default function AboutPage() {
   return (
@@ -86,70 +76,10 @@ export default function AboutPage() {
       </section>
 
       {/* Stats */}
-      <section className="max-w-5xl mx-auto px-6 -mt-10">
-        <div className="bg-white rounded-2xl shadow-sm border border-stone-100 grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-stone-100 overflow-hidden">
-          {STATS.map((s) => (
-            <div key={s.label} className="px-8 py-7 text-center">
-              <p className="font-serif text-4xl text-amber-800 mb-1">
-                {s.value}
-              </p>
-              <p className="text-sm text-stone-500">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+
 
       {/* Story */}
-      <section className="max-w-5xl mx-auto px-6 py-24">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-          <div>
-            <h2 className="font-serif text-4xl text-stone-900 mb-6 leading-snug">
-              Bắt đầu từ một
-              <br />
-              câu hỏi đơn giản
-            </h2>
-            <div className="space-y-4 text-stone-600 leading-relaxed">
-              <p>
-                Năm 2018, hai người bạn Lan Anh và Minh Đức tự hỏi:{" "}
-                <em>Tại sao quà tặng ý nghĩa lại khó tìm đến vậy?</em> Họ muốn
-                những sản phẩm thủ công Việt Nam – từ xà phòng thiên nhiên Hội
-                An, trà sen Tây Hồ, đến gốm Bát Tràng – được biết đến rộng rãi
-                hơn.
-              </p>
-              <p>
-                Từ một garage nhỏ ở Hà Nội với 5 nhà sản xuất đầu tiên, TotMart
-                đã lớn lên thành nền tảng kết nối hơn 120 nghệ nhân, thợ thủ
-                công trên khắp cả nước với hàng chục nghìn khách hàng yêu quý.
-              </p>
-              <p>
-                Chúng tôi không chỉ bán hàng — chúng tôi kể câu chuyện, bảo tồn
-                nghề truyền thống và tạo ra những khoảnh khắc đáng nhớ qua mỗi
-                chiếc hộp.
-              </p>
-            </div>
-            <Link
-              href="/pages/our-makers"
-              className="inline-flex items-center gap-2 mt-8 text-amber-800 font-semibold text-sm hover:gap-3 transition-all"
-            >
-              Gặp gỡ các nhà sản xuất <ArrowRight size={16} />
-            </Link>
-          </div>
 
-          {/* Visual block */}
-          <div className="relative">
-            <div className="aspect-square rounded-3xl bg-linear-to-br from-amber-100 to-stone-200 flex items-center justify-center overflow-hidden">
-              <div className="text-center p-10">
-                <div className="text-8xl mb-4">🎁</div>
-                <p className="font-serif text-xl text-stone-700 italic">
-                  Mỗi hộp là một câu chuyện
-                </p>
-              </div>
-            </div>
-            <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-amber-200 rounded-2xl -z-10" />
-            <div className="absolute -top-4 -right-4 w-16 h-16 bg-stone-200 rounded-xl -z-10" />
-          </div>
-        </div>
-      </section>
 
       {/* Values */}
       <section className="bg-stone-900 py-24">
@@ -183,46 +113,12 @@ export default function AboutPage() {
       </section>
 
       {/* Team */}
-      <section className="max-w-5xl mx-auto px-6 py-24">
-        <div className="text-center mb-14">
-          <h2 className="font-serif text-4xl text-stone-900 mb-4">
-            Đội ngũ sáng lập
-          </h2>
-          <p className="text-stone-500 max-w-lg mx-auto text-sm leading-relaxed">
-            Những con người đam mê, cùng nhau xây dựng TotMart với trái tim và
-            khối óc.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {TEAM.map((member) => (
-            <div key={member.name} className="text-center group">
-              <div className="w-20 h-20 mx-auto rounded-2xl bg-linear-to-br from-amber-200 to-stone-300 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                <span className="font-serif text-xl text-stone-700">
-                  {member.initials}
-                </span>
-              </div>
-              <p className="font-semibold text-stone-900 text-sm">
-                {member.name}
-              </p>
-              <p className="text-xs text-stone-500 mt-0.5">{member.role}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+
 
       {/* CTA */}
       <section className="max-w-4xl mx-auto px-6 pb-24">
         <div className="bg-amber-800 rounded-3xl px-10 py-14 text-center">
-          <div className="flex justify-center mb-4">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                size={20}
-                fill="#fbbf24"
-                className="text-amber-400"
-              />
-            ))}
-          </div>
+
           <h2 className="font-serif text-3xl text-white mb-4">
             Sẵn sàng mở hộp bất ngờ?
           </h2>

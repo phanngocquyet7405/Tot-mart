@@ -1,42 +1,16 @@
-import { useEffect, useState } from "react";
-import { SUBSCRIBE_PLANS } from "@/app/util/formatter";
-
-/**
- * useOtherPlans
- * Fetches and returns available subscription plans that the user can upgrade/downgrade to.
- * Filters out the current subscription plan.
- */
-export function useOtherPlans(currentPlanType = null) {
-  const [plans, setPlans] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-
+import { useEffect, useState } from 'react';
+import { subscriptionApi } from '@/app/services/api/subscribePlanService';
+import { normalizeSubscriptionPlans } from '@/app/util/subscriptionDisplay.mjs';
+export function useOtherPlans(excludeBoxIds = []) {
+  const [plans, setPlans] = useState([]), [isLoading, setLoading] = useState(true), [error, setError] = useState(null);
+  const [reload, setReload] = useState(0);
+  const excluded = JSON.stringify(Array.isArray(excludeBoxIds) ? excludeBoxIds : []);
   useEffect(() => {
-    const loadPlans = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        // Filter out current plan if provided
-        const availablePlans = currentPlanType
-          ? SUBSCRIBE_PLANS.filter((plan) => plan.planType !== currentPlanType)
-          : SUBSCRIBE_PLANS;
-
-        setPlans(availablePlans);
-      } catch (err) {
-        console.error("[useOtherPlans] Error loading plans:", err);
-        setError(err.message || "Failed to load plans");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadPlans();
-  }, [currentPlanType]);
-
-  return {
-    plans,
-    isLoading,
-    error,
-  };
+    let active = true;
+    subscriptionApi.getActive().then(res => {
+      if (active) setPlans(normalizeSubscriptionPlans(res.data || []).filter(box => !JSON.parse(excluded).includes(box._id)));
+    }).catch(err => { if (active) setError(err.message); }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [excluded, reload]);
+  return { plans, isLoading, error, retry: () => { setLoading(true); setError(null); setReload(n => n + 1); } };
 }

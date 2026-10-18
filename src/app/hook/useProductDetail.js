@@ -29,6 +29,8 @@ export function useProductDetail(slug) {
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [reload, setReload] = useState(0);
   const [selectedImage, setSelectedImage] = useState(PLACEHOLDER_IMAGE);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("details");
@@ -48,6 +50,8 @@ export function useProductDetail(slug) {
     const load = async () => {
       try {
         setLoading(true);
+        setError(null);
+        setRelatedProducts([]);
         const productData = await fetchProductDetail(productId);
         if (cancelled) return;
 
@@ -66,11 +70,13 @@ export function useProductDetail(slug) {
           const related = await fetchRelatedProducts(
             categoryId,
             productData._id,
-          );
+          ).catch(() => []);
           if (!cancelled) setRelatedProducts(related);
         }
       } catch (err) {
         if (!cancelled) {
+          setProduct(null);
+          setError(err.response?.status === 404 ? null : "Không tải được thông tin sản phẩm. Hãy kiểm tra kết nối và thử lại.");
           console.error("Lỗi tải sản phẩm:", err);
           toast.error("Có lỗi xảy ra khi tải sản phẩm");
         }
@@ -83,7 +89,7 @@ export function useProductDetail(slug) {
     return () => {
       cancelled = true;
     };
-  }, [productId]);
+  }, [productId, reload]);
 
   const increaseQty = useCallback(() => {
     setQuantity((q) => {
@@ -187,6 +193,8 @@ export function useProductDetail(slug) {
     product,
     relatedProducts,
     loading,
+    error,
+    retry: () => setReload(value => value + 1),
     selectedImage,
     setSelectedImage,
     quantity,

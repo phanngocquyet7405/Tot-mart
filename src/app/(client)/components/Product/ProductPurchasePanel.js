@@ -1,187 +1,41 @@
 "use client";
-
-import {
-  Minus,
-  Plus,
-  ShoppingCart,
-  Heart,
-  Share2,
-  Truck,
-  ShieldCheck,
-  RefreshCw,
-  Package,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-export function ProductPurchasePanel({
-  product,
-  finalPrice,
-  quantity,
-  onIncrease,
-  onDecrease,
-  isAddingToCart,
-  onAddToCart,
-  isBuyingNow,
-  onBuyNow,
-  isWishlisted,
-  onWishlist,
-  onShare,
-  fmtPrice,
-}) {
+import { Minus, Plus, ShoppingCart, Heart, Share2, Truck, Loader2 } from "lucide-react";
+export function ProductPurchasePanel({ product, finalPrice, quantity, onIncrease, onDecrease, isAddingToCart, onAddToCart,
+  isBuyingNow, onBuyNow, isWishlisted, onWishlist, onShare, fmtPrice }) {
   const discount = product.salePercent || 0;
   const stock = product.stock ?? 0;
-
-  return (
-    <div className="lg:col-span-5 bg-white rounded-2xl p-6 md:p-8 border border-stone-100 shadow-sm space-y-6">
-      <div className="space-y-2">
-        {product.category?.name && (
-          <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full">
-            🌿 {product.category.name}
-          </span>
-        )}
-        <h1 className="text-2xl md:text-3xl font-black text-stone-900 leading-tight">
-          {product.name}
-        </h1>
+  const hasPrice = Number.isFinite(finalPrice) && finalPrice >= 0;
+  const busy = isAddingToCart || isBuyingNow;
+  return <section className="tm-purchase" aria-label="Thông tin mua sản phẩm">
+    <div><h1 className="tm-product-title">{product.name}</h1>
+      {product.category?.name && <p className="mt-3 text-sm text-stone-600">{product.category.name}</p>}
+    </div>
+    <div className="tm-price-block">
+      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2"><p className="tm-price">{hasPrice ? fmtPrice(finalPrice) : 'Chưa có giá'}</p>
+        {discount > 0 && <del className="text-base text-stone-500">{fmtPrice(product.price)}</del>}
       </div>
-
-      {/* Giá tiền */}
-      <div className="flex items-baseline gap-3 p-4 bg-[#faf8f4] rounded-xl border border-stone-100">
-        <span className="text-2xl md:text-3xl text-red-600 font-black">
-          {fmtPrice(finalPrice)}
-        </span>
-        {discount > 0 && (
-          <span className="text-stone-400 line-through text-sm">
-            {fmtPrice(product.price)}
-          </span>
-        )}
-      </div>
-
-      {/* Thông số nhanh */}
-      <div className="grid grid-cols-2 gap-4 text-xs md:text-sm text-stone-600 border-y border-stone-100 py-4">
-        <div className="space-y-1">
-          <p className="text-stone-400">Mã sản phẩm:</p>
-          <p className="font-bold text-stone-800 flex items-center gap-1.5">
-            <Package size={16} className="text-amber-700" />
-            {product.sku || "—"}
-          </p>
-        </div>
-        <div className="space-y-1">
-          <p className="text-stone-400">Tình trạng kho hàng:</p>
-          <p className="font-bold">
-            {stock > 0 ? (
-              <span className="text-emerald-600 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Còn lại {stock} sản phẩm
-              </span>
-            ) : (
-              <span className="text-red-500">Tạm hết hàng</span>
-            )}
-          </p>
-        </div>
-      </div>
-
-      {/* Bộ điều khiển số lượng */}
-      <div className="space-y-2.5">
-        <label className="text-xs font-bold uppercase tracking-widest text-stone-400">
-          Chọn số lượng mua
-        </label>
-        <div className="flex items-center border border-stone-200 rounded-xl bg-white overflow-hidden shadow-sm w-fit">
-          <button
-            onClick={onDecrease}
-            disabled={quantity <= 1}
-            className="p-3.5 text-stone-500 hover:bg-stone-50 hover:text-stone-800 transition active:scale-90 disabled:opacity-40"
-            type="button"
-          >
-            <Minus size={14} />
-          </button>
-          <span className="px-6 font-black text-stone-800 min-w-12 text-center text-sm">
-            {quantity}
-          </span>
-          <button
-            onClick={onIncrease}
-            disabled={stock > 0 && quantity >= stock}
-            className="p-3.5 text-stone-500 hover:bg-stone-50 hover:text-stone-800 transition active:scale-90 disabled:opacity-40"
-            type="button"
-          >
-            <Plus size={14} />
-          </button>
-        </div>
-      </div>
-
-      {/* Hành động chính */}
-      <div className="flex flex-col gap-3 pt-2">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            onClick={onAddToCart}
-            disabled={isAddingToCart || isBuyingNow || stock <= 0}
-            className="flex-1 py-6 bg-white hover:bg-stone-50 text-amber-800 border-2 border-amber-800 rounded-xl font-black uppercase tracking-widest text-[12px] flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100 cursor-pointer"
-          >
-            <ShoppingCart size={18} />
-            {isAddingToCart ? "Đang thêm..." : "Thêm vào giỏ hàng"}
-          </Button>
-
-          <Button
-            onClick={onBuyNow}
-            disabled={isAddingToCart || isBuyingNow || stock <= 0}
-            className="flex-1 py-6 bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-black uppercase tracking-widest text-[12px] shadow-lg shadow-amber-900/15 flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100 cursor-pointer"
-          >
-            {isBuyingNow ? "Đang xử lý..." : "Mua ngay"}
-          </Button>
-        </div>
-
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={onWishlist}
-            className={`flex-1 sm:flex-none p-3 sm:w-12 h-12 flex items-center justify-center rounded-xl active:scale-90 transition-all cursor-pointer ${
-              isWishlisted
-                ? "border-red-200 text-red-500 bg-red-50"
-                : "border-stone-200 text-stone-500 hover:text-red-500 hover:border-red-200"
-            }`}
-          >
-            <Heart size={18} className={isWishlisted ? "fill-current" : ""} />
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={onShare}
-            className="flex-1 sm:flex-none p-3 sm:w-12 h-12 flex items-center justify-center rounded-xl border-stone-200 text-stone-500 hover:text-blue-500 hover:border-blue-200 active:scale-90 transition-all cursor-pointer"
-          >
-            <Share2 size={18} />
-          </Button>
-        </div>
-      </div>
-
-      {/* Chính sách hỗ trợ */}
-      <div className="pt-6 border-t border-stone-100 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-stone-500">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-stone-50 rounded-lg text-amber-800">
-            <Truck size={16} />
-          </div>
-          <div>
-            <p className="font-bold text-stone-800">Ship trả trực tiếp bên giao hàng</p>
-            <p className="text-[11px]">Theo địa chỉ nhận hàng</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-stone-50 rounded-lg text-amber-800">
-            <ShieldCheck size={16} />
-          </div>
-          <div>
-            <p className="font-bold text-stone-800">Bảo hành cam kết</p>
-            <p className="text-[11px]">Đóng gói chuẩn chỉnh</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-stone-50 rounded-lg text-amber-800">
-            <RefreshCw size={16} />
-          </div>
-          <div>
-            <p className="font-bold text-stone-800">Hỗ trợ đổi trả</p>
-            <p className="text-[11px]">Trong vòng 7 ngày</p>
-          </div>
-        </div>
+      <p className="mt-2 text-sm text-stone-600">Giá cuối cùng được xác nhận bằng báo giá tại thanh toán.</p>
+    </div>
+    <p className={stock > 0 ? 'text-sm font-semibold text-green-800' : 'text-sm font-semibold text-red-700'}>{stock > 0 ? `Còn ${stock} sản phẩm` : 'Tạm hết hàng'}</p>
+    <div className="tm-quantity-row"><span id="product-quantity-label" className="font-medium">Số lượng</span>
+      <div className="tm-quantity" role="group" aria-labelledby="product-quantity-label">
+        <button type="button" aria-label="Giảm số lượng" disabled={quantity <= 1 || busy || stock <= 0} onClick={onDecrease}><Minus size={18} /></button>
+        <output aria-live="polite" aria-atomic="true">{quantity}</output>
+        <button type="button" aria-label="Tăng số lượng" disabled={stock <= 0 || quantity >= stock || busy} onClick={onIncrease}><Plus size={18} /></button>
       </div>
     </div>
-  );
+    <div className="space-y-3" aria-busy={Boolean(busy)}>
+      <button type="button" className="tm-button tm-button--primary w-full" disabled={busy || stock <= 0 || !hasPrice} onClick={onAddToCart}>
+        {isAddingToCart ? <Loader2 size={19} className="animate-spin" /> : <ShoppingCart size={19} />}{isAddingToCart ? 'Đang thêm…' : stock <= 0 ? 'Tạm hết hàng' : 'Thêm vào giỏ hàng'}
+      </button>
+      <button type="button" className="tm-button tm-button--outline w-full" disabled={busy || stock <= 0 || !hasPrice} onClick={onBuyNow}>{isBuyingNow ? 'Đang chuyển đến thanh toán…' : 'Mua ngay'}</button>
+      <p className="text-sm text-stone-600">Mua ngay sẽ thanh toán cùng các sản phẩm đang có trong giỏ.</p>
+    </div>
+    <div className="flex flex-wrap gap-3">
+      <button type="button" className="tm-text-button" onClick={onWishlist} aria-pressed={isWishlisted}><Heart size={18} className={isWishlisted ? 'fill-current' : ''} />{isWishlisted ? 'Đã yêu thích' : 'Yêu thích'}</button>
+      <button type="button" className="tm-text-button" onClick={onShare}><Share2 size={18} />Chia sẻ</button>
+    </div>
+    <div className="tm-delivery-note"><Truck size={20} className="shrink-0" /><p>Phí giao hàng trả riêng cho đơn vị vận chuyển, ngoài tiền đơn TotMart. Phí cần được thống nhất trước khi giao.</p></div>
+    {product.sku && <p className="text-sm text-stone-600">Mã sản phẩm: <span className="text-stone-900">{product.sku}</span></p>}
+  </section>;
 }

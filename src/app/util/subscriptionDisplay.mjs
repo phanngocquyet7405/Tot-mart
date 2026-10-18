@@ -3,7 +3,7 @@ export function normalizeSubscriptionPlans(plans) {
   const grouped = new Map();
   for (const plan of plans) {
     const box = plan.boxId, duration = months[plan.planType];
-    if (!box?._id || !duration) continue;
+    if (!plan._id || plan.isActive === false || !box?._id || !duration) continue;
     const total = plan.discountPrice ?? plan.basePrice;
     if (!Number.isSafeInteger(total) || total <= 0) continue;
     const id = String(box._id);
@@ -13,6 +13,7 @@ export function normalizeSubscriptionPlans(plans) {
     const group = grouped.get(id);
     group.minimumMonthlyPrice = Math.min(group.minimumMonthlyPrice, Math.round(total / duration));
     group.apiPlans.push(plan);
+    group.apiPlans.sort((a,b) => months[a.planType] - months[b.planType]);
   }
   return [...grouped.values()];
 }

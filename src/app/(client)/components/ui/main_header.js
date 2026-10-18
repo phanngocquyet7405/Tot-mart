@@ -64,7 +64,7 @@ export default function MainHeader() {
               />
             </Link>
             <div className="hidden lg:block bg-[#4a7c44] text-white text-[11px] font-bold px-4 py-1.5 rounded-sm tracking-widest uppercase">
-              Giảm giá đến 70%!
+              Khám phá sản phẩm
             </div>
           </div>
 

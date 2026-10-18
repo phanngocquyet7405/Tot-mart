@@ -45,9 +45,9 @@ export function IntroSection() {
             </p>
             <ul className="space-y-4 mb-8">
               {[
-                "5-7 full-size products in every box",
-                "Supporting 200+ independent makers",
-                "New themes every month",
+                "Contents listed for each available box",
+                "Browse products and brands in the catalog",
+                "Compare available prepaid terms",
               ].map((item, index) => (
                 <li
                   key={index}

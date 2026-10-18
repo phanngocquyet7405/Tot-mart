@@ -93,13 +93,13 @@ function TodayDeliveryBanner({ deliveries }) {
 
 // ─── Gói khác dành cho bạn ─────────────────────────────────────────────────
 function OtherPlansSection({ excludeBoxIds, onSubscribed }) {
-  const { plans, isLoading } = useOtherPlans(excludeBoxIds);
+  const { plans, isLoading, error, retry } = useOtherPlans(excludeBoxIds);
   const [selectedBoxForModal, setSelectedBoxForModal] = useState(null);
 
-  if (!isLoading && (!plans || plans.length === 0)) return null;
+  if (!isLoading && !error && (!plans || plans.length === 0)) return null;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 pb-16">
+    <div className="tm-commerce tm-commerce--atelier max-w-6xl mx-auto px-4 pb-16">
       <div className="flex items-center gap-2 mb-5">
         <Package size={16} className="text-[#C85C3C]" />
         <h2 className="text-sm font-black text-stone-800 uppercase tracking-widest">
@@ -107,8 +107,8 @@ function OtherPlansSection({ excludeBoxIds, onSubscribed }) {
         </h2>
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center gap-2 text-stone-400 text-xs py-6">
+      {error ? <div role="alert" className="space-y-3"><p>Chưa tải được gói gợi ý. Vui lòng thử lại.</p><button type="button" className="tm-button tm-button--outline" onClick={retry}>Thử tải lại</button></div> : isLoading ? (
+        <div role="status" className="flex items-center gap-2 text-stone-600 text-sm py-6">
           <Loader2 size={14} className="animate-spin" />
           Đang tải gợi ý...
         </div>

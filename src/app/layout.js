@@ -13,6 +13,7 @@ import { AppContextProvider } from "./context/AppContext";
 import { CartProvider } from "@/app/context/CartContext";
 import { WishlistProvider } from "@/app/context/WishlistContext";
 import "./globals.css";
+import "./commerce.css";
 
 export const metadata = {
   title: "TotMart - Sản Phẩm Hữu Cơ Chất Lượng Cao",

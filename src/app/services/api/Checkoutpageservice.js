@@ -1,4 +1,4 @@
-import { readAttempt, storeAttempt, clearAttempt, definitiveFailure } from '@/app/util/purchaseAttempt.mjs';
+import { readAttempt, storeAttempt, clearAttempt, definitiveFailure, needsReconciliation, maskedAddress } from '@/app/util/purchaseAttempt.mjs';
 import { userService } from '@/app/services/api/userService';
 import { checkoutService } from '@/app/services/api/checkoutService';
 import { syncCartApi } from '@/app/services/api/productServices';
@@ -23,24 +23,32 @@ export async function validateCoupon(code, items) {
 }
 // Delivery charge is agreed separately, never part of the new checkout total.
 export function calcShippingFee() { return 0; }
+export function getPendingCheckout() {
+  return readAttempt(`totmart_checkout_attempt_${getTokenUserId() || 'guest'}`);
+}
 export function hasPendingCheckout() {
   return Boolean(readAttempt(`totmart_checkout_attempt_${getTokenUserId() || 'guest'}`));
 }
-export async function placeOrder({ addressId, paymentMethod, note, couponCode, cartItems = [], quoteFingerprint, cartVersion }) {
+export async function placeOrder({ addressId, paymentMethod, note, couponCode, cartItems = [], quoteFingerprint, cartVersion, address, totalAmount }) {
   const payload = { addressId, paymentMethod, ...(note ? { note } : {}), ...(couponCode ? { couponCode: couponCode.trim().toUpperCase() } : {}), ...(quoteFingerprint ? { quoteFingerprint } : {}) };
   const scope = `totmart_checkout_attempt_${getTokenUserId() || 'guest'}`;
   let attempt = readAttempt(scope), syncedVersion;
   try {
+    if (attempt && (needsReconciliation(attempt) || !attempt.payload.quoteFingerprint)) return { success: false, error: 'Yêu cầu cần đối chiếu với TotMart trước khi gửi lại hoặc bắt đầu lần thử mới.' };
     if (!attempt) {
       if (!addressId) return { success: false, error: 'Thiếu địa chỉ giao hàng' };
       const synced = await syncCartApi(toCartPayload(cartItems), cartVersion);
       syncedVersion = synced.version;
       if (synced.skipped?.length) return { success: false, skipped: synced.skipped, error: 'Sản phẩm không còn tồn tại. Vui lòng kiểm tra giỏ hàng.' };
-      attempt = { key: globalThis.crypto.randomUUID(), payload, cartVersion: syncedVersion };
-      storeAttempt(scope, attempt);
+      attempt = { key: globalThis.crypto.randomUUID(), payload, cartVersion: syncedVersion, sentAt: Date.now(), summary: { items: cartItems.map(item => ({ name: item.name || item._id || item.id, quantity: item.quantity })), totalAmount, address: maskedAddress(address), cart: JSON.stringify(toCartPayload(cartItems)) } };
+      if (!storeAttempt(scope, attempt)) {
+        clearAttempt(scope);
+        return { success: false, error: 'Không lưu được lần thử để khôi phục sau tải lại. Hãy bật lưu trữ trình duyệt trước khi đặt hàng.' };
+      }
     }
     const response = await checkoutService.createOrder(attempt.payload, attempt.key);
     if (!response.success) throw new Error(response.message || 'Không thể đặt hàng');
+    if (!response.data?.orderCode) throw new Error('Missing confirmed order code');
     clearAttempt(scope);
     return { success: true, ...response.data, paymentMethod: attempt.payload.paymentMethod };
   } catch (err) {

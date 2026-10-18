@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
@@ -9,6 +10,7 @@ import {
   PLACEHOLDER_IMAGE,
   formatPrice,
   getFinalPrice,
+  buildProductHref,
 } from "./productDetailService";
 
 /**
@@ -19,7 +21,7 @@ import {
 export function FrequentlyBought({ products = [] }) {
   const { addToCart } = useCart();
   const [selectedIds, setSelectedIds] = useState(
-    () => new Set(products.map((p) => p._id)),
+    () => new Set(),
   );
 
   if (products.length === 0) return null;
@@ -36,7 +38,7 @@ export function FrequentlyBought({ products = [] }) {
     });
   };
 
-  const selectedProducts = products.filter((p) => selectedIds.has(p._id));
+  const selectedProducts = products.filter((p) => selectedIds.has(p._id) && p.stock > 0 && Number.isFinite(getFinalPrice(p)));
   const total = selectedProducts.reduce((sum, p) => sum + getFinalPrice(p), 0);
 
   const handleAddAll = () => {
@@ -56,57 +58,59 @@ export function FrequentlyBought({ products = [] }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 md:p-8 border border-stone-100 shadow-sm space-y-6">
-      <h2 className="text-lg font-black uppercase tracking-widest text-stone-900">
-        Thường được mua cùng
+    <section className="tm-section space-y-6" aria-label="Gợi ý mua thêm">
+      <h2 className="text-2xl font-bold text-stone-900">
+        Gợi ý mua thêm
       </h2>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((p) => {
           const isChecked = selectedIds.has(p._id);
           const finalPrice = getFinalPrice(p);
           return (
-            <label
+            <article
               key={p._id}
-              className={`flex flex-col gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all ${
+              className={`flex flex-col gap-3 p-3 border rounded-xl ${
                 isChecked
-                  ? "border-amber-700"
+                  ? "border-green-700"
                   : "border-stone-100 hover:border-stone-300"
               }`}
             >
-              <input
+              <label className="flex min-h-11 items-center gap-3 text-sm"><input
                 type="checkbox"
                 checked={isChecked}
+                disabled={!(p.stock > 0) || !Number.isFinite(finalPrice)}
                 onChange={() => toggleItem(p._id)}
-                className="w-4 h-4 accent-amber-800"
-              />
-              <div className="relative aspect-square rounded-lg overflow-hidden bg-[#faf8f4]">
+                className="w-4 h-4 accent-green-800"
+              /><span>{p.stock > 0 ? "Chọn mua thêm" : "Tạm hết hàng"}</span></label>
+              <Link href={buildProductHref(p)} className="block relative aspect-square rounded-lg overflow-hidden bg-[#faf8f4]">
                 <Image
                   src={p.images?.[0]?.url || PLACEHOLDER_IMAGE}
                   alt={p.name}
                   fill
+                  sizes="(max-width: 640px) 45vw, 25vw"
                   className="object-cover p-1"
                   onError={(e) => {
                     e.target.src = PLACEHOLDER_IMAGE;
                   }}
                 />
-              </div>
+              </Link>
               <div className="space-y-1">
-                <p className="text-xs font-bold text-stone-800 line-clamp-2">
-                  {p.name}
+                <p className="text-sm font-bold text-stone-800">
+                  <Link className="underline-offset-4 hover:underline" href={buildProductHref(p)}>{p.name}</Link>
                 </p>
-                <p className="text-sm font-black text-red-600">
-                  {formatPrice(finalPrice)}
+                <p className="text-base font-bold text-green-800">
+                  {Number.isFinite(finalPrice) ? formatPrice(finalPrice) : 'Chưa có giá'}
                 </p>
               </div>
-            </label>
+            </article>
           );
         })}
       </div>
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-stone-100">
         <p className="text-sm text-stone-600">
-          Tổng cộng ({selectedProducts.length} sản phẩm):{" "}
+          Tạm tính ({selectedProducts.length} sản phẩm):{" "}
           <span className="text-lg font-black text-stone-900">
             {formatPrice(total)}
           </span>
@@ -114,12 +118,13 @@ export function FrequentlyBought({ products = [] }) {
         <button
           onClick={handleAddAll}
           disabled={selectedProducts.length === 0}
-          className="w-full sm:w-auto bg-amber-800 hover:bg-amber-900 disabled:opacity-40 disabled:cursor-not-allowed text-white px-8 py-3 rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-colors"
+          className="tm-button tm-button--primary w-full sm:w-auto"
         >
           <ShoppingCart className="w-4 h-4" />
-          Thêm tất cả vào giỏ
+          Thêm sản phẩm đã chọn
         </button>
       </div>
-    </div>
+      <p className="text-sm text-stone-600">Giá cuối cùng được xác nhận khi thanh toán. Phí giao hàng trả riêng cho đơn vị vận chuyển.</p>
+    </section>
   );
 }

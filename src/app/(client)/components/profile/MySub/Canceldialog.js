@@ -117,7 +117,7 @@ export function CancelDialog({ target, open, cancelling, onClose, onConfirm }) {
               >
                 {isImmediate
                   ? "Hành động này không thể hoàn tác. Lịch giao hàng còn lại sẽ bị hủy toàn bộ ngay lập tức."
-                  : "Bạn sẽ tiếp tục nhận hàng cho đến hết chu kỳ. Sau đó, gói sẽ không tự động gia hạn."}
+                  : "Bạn sẽ tiếp tục nhận hàng cho đến hết chu kỳ đã thanh toán."}
               </p>
             </div>
           </div>

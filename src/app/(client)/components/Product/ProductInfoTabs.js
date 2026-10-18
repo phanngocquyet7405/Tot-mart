@@ -9,26 +9,23 @@ const TABS = [
 ];
 
 export function ProductInfoTabs({ product, activeTab, onTabChange }) {
-  const avgRating = product.rating || 0;
-  const reviewCount = product.reviewCount || 0;
+  const avgRating = Number(product.rating);
+  const reviewCount = Number.isSafeInteger(Number(product.reviewCount)) && Number(product.reviewCount) > 0 ? Number(product.reviewCount) : 0;
+  const hasRating = reviewCount > 0 && Number.isFinite(avgRating) && avgRating > 0 && avgRating <= 5;
 
   return (
-    <div className="mt-16 bg-white border border-stone-200/60 rounded-2xl p-6 md:p-8 shadow-sm">
+    <div className="tm-section">
       {/* Header điều hướng tab */}
-      <div className="flex border-b border-stone-100 mb-8 gap-6 overflow-x-auto">
+      <div className="tm-tab-list" role="group" aria-label="Thông tin sản phẩm">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
-            className={`pb-4 text-sm md:text-base font-black uppercase tracking-widest transition-all relative whitespace-nowrap active:scale-95 ${
-              activeTab === tab.key
-                ? "text-amber-800"
-                : "text-stone-400 hover:text-stone-600"
-            }`}
+            aria-pressed={activeTab === tab.key} aria-controls="product-information"
           >
             {tab.label}
             {activeTab === tab.key && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-800 rounded-full" />
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-800 rounded-full" />
             )}
           </button>
         ))}
@@ -36,8 +33,8 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
 
       {/* Tab: Mô tả */}
       {activeTab === "details" && (
-        <div className="space-y-4">
-          <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-6 text-sm text-stone-700 leading-relaxed">
+        <div id="product-information" className="space-y-4">
+          <div className="bg-stone-50 rounded-xl p-5 text-sm text-stone-700 leading-relaxed">
             {product.description ? (
               <div
                 className="prose prose-sm max-w-none prose-p:my-2 prose-p:leading-relaxed prose-stone"
@@ -54,7 +51,7 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
 
       {/* Tab: Đánh giá */}
       {activeTab === "reviews" && (
-        <div className="space-y-6">
+        <div id="product-information" className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-black uppercase tracking-widest text-stone-800 mb-2">
@@ -62,8 +59,8 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
               </h3>
               <p className="text-stone-500 text-sm">{reviewCount} đánh giá</p>
             </div>
-            <div className="text-center">
-              <div className="text-4xl font-black text-amber-800 mb-1">
+            {hasRating && <div className="text-center">
+              <div className="text-4xl font-black text-green-800 mb-1">
                 {avgRating.toFixed(1)}
               </div>
               <div className="flex gap-1 justify-center">
@@ -78,12 +75,12 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
                   />
                 ))}
               </div>
-            </div>
+            </div>}
           </div>
 
           {reviewCount === 0 ? (
             <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-4 flex gap-3 items-start text-xs text-amber-900/80 leading-relaxed">
-              <Info size={16} className="text-amber-800 shrink-0 mt-0.5" />
+              <Info size={16} className="text-green-800 shrink-0 mt-0.5" />
               <p>Chưa có đánh giá nào cho sản phẩm này.</p>
             </div>
           ) : (
@@ -96,7 +93,7 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
 
       {/* Tab: Thông số */}
       {activeTab === "specs" && (
-        <div className="space-y-1">
+        <div id="product-information" className="space-y-1">
           {product.sku && (
             <div className="flex justify-between py-3 border-b border-stone-100 text-sm">
               <span className="text-stone-500">Mã sản phẩm (SKU)</span>

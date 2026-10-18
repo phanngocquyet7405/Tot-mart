@@ -166,6 +166,7 @@ test("checkout success consumes the actual unwrapped response shape", async () =
     .replace(/^import[\s\S]*?;\r?\n/gm, "")
     .replace(/^export /gm, "");
   const c = vm.createContext({
+    sessionStorage: (() => { const store = new Map(); return {getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)}; })(),
     crypto: require("node:crypto").webcrypto,
     userService: {},
     paymentGatewayService: {},

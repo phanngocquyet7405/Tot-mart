@@ -15,14 +15,24 @@ export function readAttempt(scope) {
   return null;
 }
 export function storeAttempt(scope, value) {
-  memory.set(scope, value);
-  try { globalThis.sessionStorage?.setItem(scope, JSON.stringify(value)); } catch { /* Best effort. */ }
+  const serialized = JSON.stringify(value);
+  memory.set(scope, JSON.parse(serialized));
+  try {
+    if (!globalThis.sessionStorage) return false;
+    globalThis.sessionStorage.setItem(scope, serialized);
+    return globalThis.sessionStorage.getItem(scope) === serialized;
+  } catch { return false; }
 }
 export function clearAttempt(scope) {
   memory.delete(scope);
   try { globalThis.sessionStorage?.removeItem(scope); } catch { /* Best effort. */ }
 }
-export function definitiveFailure(error) {
-  const status = error.response?.status;
-  return status >= 400 && status < 500 && ![408, 425, 429].includes(status);
+// HTTP status alone cannot prove that an earlier ambiguous request did not commit.
+export function definitiveFailure() { return false; }
+export const ATTEMPT_TTL_MS = 24 * 60 * 60 * 1000;
+export function needsReconciliation(attempt, now = Date.now()) {
+  return !attempt?.sentAt || now - attempt.sentAt >= ATTEMPT_TTL_MS;
+}
+export function maskedAddress(address) {
+  return address ? [address.district, address.city || address.province, address.phone ? '***' + address.phone.slice(-3) : ''].filter(Boolean).join(', ') : 'Chưa lưu tóm tắt địa chỉ';
 }

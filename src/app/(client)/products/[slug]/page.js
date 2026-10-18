@@ -1,6 +1,7 @@
 "use client";
 
 import { use } from "react";
+import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 // UI Components
@@ -13,7 +14,6 @@ import { useProductDetail } from "@/app/hook/useProductDetail";
 import { ProductGallery } from "../../components/Product/ProductGallery";
 import { ProductPurchasePanel } from "../../components/Product/ProductPurchasePanel";
 import { ProductInfoTabs } from "../../components/Product/ProductInfoTabs";
-import { RelatedProducts } from "../../components/Product/RelatedProducts";
 import { ProductLoadingState } from "../../components/Product/ProductLoadingState";
 import { ProductNotFoundState } from "../../components/Product/ProductNotFoundState";
 import { FrequentlyBought } from "../../components/Product/FrequentlyBought";
@@ -26,6 +26,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
     product,
     relatedProducts,
     loading,
+    error, retry,
     selectedImage,
     setSelectedImage,
     quantity,
@@ -66,7 +67,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
         <AnnouncementBar />
         <MainHeader />
         <NavMenu />
-        <ProductNotFoundState />
+        <ProductNotFoundState error={error} onRetry={retry} />
         <Footer />
       </>
     );
@@ -82,19 +83,14 @@ export default function ProductDetailPage({ params: paramsPromise }) {
           MainHeader ở trên), điều khiển qua CartContext.isCartOpen — không
           còn mount riêng ở đây nữa để tránh 2 Drawer tồn tại song song. */}
 
-      <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-stone-400 mb-8 uppercase tracking-widest font-semibold">
-          <span>Cửa hàng</span>
-          <ChevronRight size={12} />
-          <span>Sản phẩm</span>
-          <ChevronRight size={12} />
-          <span className="text-stone-800 truncate max-w-xs">
-            {product.name}
-          </span>
-        </div>
+      <main className="tm-commerce max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:py-10">
+        <nav className="tm-breadcrumb" aria-label="Đường dẫn">
+          <Link href="/homepage">Cửa hàng</Link><ChevronRight size={14} aria-hidden="true" />
+          <Link href="/products">Sản phẩm</Link><ChevronRight size={14} aria-hidden="true" />
+          <span aria-current="page">{product.name}</span>
+        </nav>
 
-        <div className="grid lg:grid-cols-12 gap-12 items-start">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           <ProductGallery
             images={product.images || []}
             productName={product.name}
@@ -132,8 +128,7 @@ export default function ProductDetailPage({ params: paramsPromise }) {
           <FrequentlyBought products={relatedProducts} />
         </div>
 
-        <RelatedProducts products={relatedProducts} fmtPrice={fmtPrice} />
-      </div>
+      </main>
 
       <Footer />
     </>

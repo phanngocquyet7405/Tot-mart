@@ -1,3 +1,15 @@
 {
-  "buildPath": "code"
+  "buildPath": "code",
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "plus jakarta sans",
+        "createdAt": "2026-10-17T16:57:06.241Z",
+        "reason": "Agent: DESIGN.md explicitly specifies Plus Jakarta Sans for Vietnamese body/UI; user requested preserving TotMart identity. Retain the established typeface."
+      }
+    ]
+  }
 }

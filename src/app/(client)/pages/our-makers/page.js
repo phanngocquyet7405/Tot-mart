@@ -14,12 +14,7 @@ import {
   Quote,
 } from "lucide-react";
 
-const STATS = [
-  { value: "2018", label: "Năm thành lập" },
-  { value: "120+", label: "Nhà sản xuất đối tác" },
-  { value: "50K+", label: "Khách hàng hài lòng" },
-  { value: "98%", label: "Đánh giá tích cực" },
-];
+
 
 const VALUES = [
   {
@@ -56,32 +51,7 @@ const VALUES = [
   },
 ];
 
-const TEAM = [
-  {
-    name: "Nguyễn Lan Anh",
-    role: "Đồng sáng lập & CEO",
-    initials: "LA",
-    bg: "from-amber-200 to-amber-300",
-  },
-  {
-    name: "Trần Minh Đức",
-    role: "Đồng sáng lập & CPO",
-    initials: "MD",
-    bg: "from-stone-200 to-stone-300",
-  },
-  {
-    name: "Lê Thu Hà",
-    role: "Giám đốc Sáng tạo",
-    initials: "TH",
-    bg: "from-rose-100 to-rose-200",
-  },
-  {
-    name: "Phạm Quốc Bảo",
-    role: "Giám đốc Vận hành",
-    initials: "QB",
-    bg: "from-teal-100 to-teal-200",
-  },
-];
+
 
 export default function AboutPage() {
   return (
@@ -142,118 +112,10 @@ export default function AboutPage() {
       </section>
 
       {/* ── Stats bar ────────────────────────────────────────── */}
-      <section className="max-w-5xl mx-auto px-6 -mt-8 relative z-10">
-        <div className="bg-white rounded-2xl shadow-lg shadow-stone-200/60 border border-stone-100 overflow-hidden">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-stone-100">
-            {STATS.map((s, i) => (
-              <div
-                key={s.label}
-                className="px-6 py-8 text-center group hover:bg-amber-50/50 transition-colors"
-              >
-                <p className="font-serif text-4xl md:text-5xl text-amber-800 mb-1.5 group-hover:scale-105 transition-transform origin-bottom">
-                  {s.value}
-                </p>
-                <p className="text-sm text-stone-500 font-medium">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
       {/* ── Story ────────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-6 py-24 md:py-32">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-          {/* Text */}
-          <div>
-            <span className="inline-block text-[11px] font-bold tracking-[0.2em] uppercase text-amber-700 bg-amber-100 px-3 py-1 rounded-full mb-6">
-              Nguồn gốc
-            </span>
-            <h2 className="font-serif text-4xl md:text-5xl text-stone-900 mb-8 leading-snug">
-              Bắt đầu từ một
-              <br />
-              câu hỏi đơn giản
-            </h2>
 
-            {/* Pull quote */}
-            <div className="relative pl-5 mb-7 border-l-2 border-amber-400">
-              <Quote size={18} className="text-amber-400 mb-2" />
-              <p className="text-stone-700 font-serif text-lg italic leading-relaxed">
-                Tại sao quà tặng ý nghĩa lại khó tìm đến vậy?
-              </p>
-              <p className="text-sm text-stone-400 mt-2">
-                — Lan Anh & Minh Đức, 2018
-              </p>
-            </div>
-
-            <div className="space-y-4 text-stone-600 leading-relaxed text-[15px]">
-              <p>
-                Hai người bạn muốn những sản phẩm thủ công Việt Nam – từ xà
-                phòng thiên nhiên Hội An, trà sen Tây Hồ, đến gốm Bát Tràng –
-                được biết đến rộng rãi hơn.
-              </p>
-              <p>
-                Từ một garage nhỏ ở Hà Nội với 5 nhà sản xuất đầu tiên, TotMart
-                đã lớn lên thành nền tảng kết nối hơn 120 nghệ nhân trên khắp cả
-                nước với hàng chục nghìn khách hàng yêu quý.
-              </p>
-              <p>
-                Chúng tôi không chỉ bán hàng — chúng tôi kể câu chuyện, bảo tồn
-                nghề truyền thống và tạo ra những khoảnh khắc đáng nhớ qua mỗi
-                chiếc hộp.
-              </p>
-            </div>
-
-            <Link
-              href="/pages/our-makers"
-              className="inline-flex items-center gap-2 mt-9 text-amber-800 font-bold text-sm border-b-2 border-amber-300 pb-0.5 hover:border-amber-600 transition-colors"
-            >
-              Gặp gỡ các nhà sản xuất <ArrowRight size={14} />
-            </Link>
-          </div>
-
-          {/* Visual */}
-          <div className="relative">
-            {/* Main card */}
-            <div className="aspect-square rounded-3xl bg-linear-to-br from-amber-100 via-amber-50 to-stone-200 flex flex-col items-center justify-center overflow-hidden shadow-xl shadow-stone-200/60 border border-stone-100">
-              <div className="text-center p-10">
-                <div className="text-[80px] mb-5 select-none">🎁</div>
-                <p className="font-serif text-xl text-stone-700 italic mb-2">
-                  Mỗi hộp là một câu chuyện
-                </p>
-                <p className="text-sm text-stone-400">— TotMart</p>
-              </div>
-            </div>
-            {/* Floating badges */}
-            <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-lg border border-stone-100 px-4 py-3 flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-lg">
-                🏺
-              </div>
-              <div>
-                <p className="text-[11px] font-bold text-stone-800">
-                  Gốm Bát Tràng
-                </p>
-                <p className="text-[11px] text-stone-400">600 năm lịch sử</p>
-              </div>
-            </div>
-            <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-lg border border-stone-100 px-4 py-3 flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-lg">
-                🌸
-              </div>
-              <div>
-                <p className="text-[11px] font-bold text-stone-800">
-                  Trà sen Hồ Tây
-                </p>
-                <p className="text-[11px] text-stone-400">
-                  Truyền thống Hà Nội
-                </p>
-              </div>
-            </div>
-            {/* bg decor */}
-            <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-amber-200/60 rounded-2xl -z-10" />
-            <div className="absolute -top-6 -right-6 w-16 h-16 bg-stone-200/80 rounded-xl -z-10" />
-          </div>
-        </div>
-      </section>
 
       {/* ── Values ───────────────────────────────────────────── */}
       <section className="bg-stone-900 py-24">
@@ -292,39 +154,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── Team ─────────────────────────────────────────────── */}
-      <section className="max-w-5xl mx-auto px-6 py-24">
-        <div className="text-center mb-14">
-          <span className="inline-block text-[11px] font-bold tracking-[0.2em] uppercase text-amber-700 bg-amber-100 px-3 py-1 rounded-full mb-5">
-            Con người
-          </span>
-          <h2 className="font-serif text-4xl md:text-5xl text-stone-900 mb-4">
-            Đội ngũ sáng lập
-          </h2>
-          <p className="text-stone-500 max-w-lg mx-auto text-sm leading-relaxed">
-            Những con người đam mê, cùng nhau xây dựng TotMart với trái tim và
-            khối óc.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {TEAM.map((member) => (
-            <div key={member.name} className="text-center group cursor-default">
-              <div
-                className={`w-20 h-20 mx-auto rounded-2xl bg-linear-to-br ${member.bg} flex items-center justify-center mb-4 group-hover:scale-105 group-hover:shadow-lg transition-all duration-200`}
-              >
-                <span className="font-serif text-xl text-stone-700">
-                  {member.initials}
-                </span>
-              </div>
-              <p className="font-semibold text-stone-900 text-sm">
-                {member.name}
-              </p>
-              <p className="text-xs text-stone-400 mt-1 leading-snug">
-                {member.role}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+
 
       {/* ── CTA ──────────────────────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-6 pb-24">
