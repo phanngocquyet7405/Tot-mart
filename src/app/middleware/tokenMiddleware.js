@@ -13,7 +13,11 @@ export function getTokenUserId() { const user = sessionUser || getDecodedToken()
 export function getStoredUser() { return sessionUser; }
 export function saveToken(token) {
   accessToken = token;
-  if (typeof window !== 'undefined') { localStorage.removeItem('token'); localStorage.removeItem('user'); sessionStorage.removeItem('token'); sessionStorage.removeItem('user'); }
+  if (typeof window !== 'undefined') {
+    for (const name of ['localStorage', 'sessionStorage']) {
+      try { globalThis[name]?.removeItem('token'); globalThis[name]?.removeItem('user'); } catch { /* Storage may be disabled; authentication stays in memory. */ }
+    }
+  }
 }
 export function clearSession() { accessToken = null; sessionUser = null; }
 export function handleExpiredToken() {

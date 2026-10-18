@@ -43,7 +43,7 @@ function middleware(refresh, platform = {}) {
   let cleared = false;
   const sandbox = vm.createContext({
     ...platform,
-    axios:{post:refresh}, getAccessToken:()=>token, saveToken:value=>{token=value;}, clearSession:()=>{token=null;cleared=true;},
+    axios:{post:refresh}, getAccessToken:()=>token, getTokenUserId:()=> 'test-user', jwtDecode:()=>({userId:'test-user'}), saveToken:value=>{token=value;}, clearSession:()=>{token=null;cleared=true;},
   });
   const source = fs.readFileSync(require.resolve('../src/app/middleware/axiosMiddleware.js'), 'utf8').replace(/^import .*;\r?\n/gm, '').replace(/^export /gm, '');
   vm.runInContext(`${source}\nthis.setup = setupAxiosMiddleware;`, sandbox);

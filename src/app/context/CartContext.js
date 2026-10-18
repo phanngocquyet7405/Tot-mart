@@ -3,6 +3,8 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { AppContext } from "./AppContext";
 import { axiosConfig } from "../services/api/axiosConfig";
 import { normalizeCartProduct } from "@/app/util/cartItem";
+import { readAttempt } from '@/app/util/purchaseAttempt.mjs';
+import { toast } from 'sonner';
 const CartContext = createContext();
 import { cartLineKey, giftOptions, toCartPayload } from "@/app/util/cartLine.mjs";
 const identity = cartLineKey;
@@ -131,7 +133,16 @@ export const CartProvider = ({ children }) => {
       store(key, JSON.stringify({ items: cartItems, version: cartVersion }));
   }, [cartItems, cartVersion, key, loadedScope]);
   const isMounted = !isLoading && loadedScope === key;
+  const cartLocked = () => {
+    const attempt = user && readAttempt(`totmart_checkout_attempt_${user._id}`);
+    if (attempt && attempt.state !== 'created') {
+      toast.error('Có lần thử thanh toán đang chờ. Kiểm tra hoặc kết thúc lần thử trước khi sửa giỏ.');
+      return true;
+    }
+    return false;
+  };
   const addToCart = (product, quantity = 1) => {
+    if (cartLocked()) return;
     if (!isMounted || !Number.isInteger(quantity) || quantity < 1) return;
     const normalized = normalizeCartProduct({
       ...product,
@@ -151,7 +162,7 @@ export const CartProvider = ({ children }) => {
     });
   };
   const updateQuantity = (id, amount) =>
-    setCartItems((items) =>
+    !cartLocked() && setCartItems((items) =>
       items.map((item) =>
         identity(item) === id
           ? {
@@ -162,7 +173,7 @@ export const CartProvider = ({ children }) => {
       ),
     );
   const removeFromCart = (id) =>
-    setCartItems((items) => items.filter((item) => identity(item) !== id));
+    !cartLocked() && setCartItems((items) => items.filter((item) => identity(item) !== id));
   const clearCart = () => {
     setCartItems([]);
     setCartVersion(0);

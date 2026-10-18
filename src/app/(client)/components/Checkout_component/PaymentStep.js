@@ -401,7 +401,7 @@ export function PaymentStep({
                 </>
               ) : (
                 <>
-                  {paymentMethod === "online" ? "Tạo mã QR" : "Đặt hàng"} ·{" "}
+                  Chuẩn bị xác nhận ·{" "}
                   {formatCurrency(finalTotal)}
                 </>
               )}

@@ -39,6 +39,7 @@ const hosts = (
   .map((host) => host.trim())
   .filter(Boolean);
 export default withNextIntl({
+  distDir: process.env.TOTMART_TEST_DIST === '1' ? '.cache/next-test' : process.env.TOTMART_TEST_DIST === 'build' ? '.cache/next-build' : '.next',
   outputFileTracingRoot: fileURLToPath(new URL(".", import.meta.url)),
   experimental:
     process.env.BUILD_WORKER_THREADS === "1"

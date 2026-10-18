@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { createBoxApi } from "@/app/services/api/boxService";
 import { getAllProductsApi } from "@/app/services/api/productServices";
+import { axiosConfig } from '@/app/services/api/axiosConfig';
 
 import { BoxFormHeader } from "../../components/box/createbox/BoxFormHeader";
 import { BasicInfoSection } from "../../components/box/createbox/Basicinfosection";
@@ -26,6 +27,11 @@ export default function CreateBoxPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [availableProducts, setAvailableProducts] = useState([]);
+  const [merchants, setMerchants] = useState([]);
+  const [ownerId, setOwnerId] = useState('');
+  useEffect(() => {
+    axiosConfig.get('/brands/merchant-options').then(res => setMerchants(res.data || [])).catch(() => toast.error('Không tải được merchant. Hãy tải lại trang.'));
+  }, []);
 
   const [form, setForm] = useState({
     name: "",
@@ -144,6 +150,8 @@ export default function CreateBoxPage() {
   };
 
   const handleSubmit = async () => {
+    if (!ownerId || !merchants.some(m => m._id === ownerId)) { toast.error('Chọn merchant sở hữu combo.'); return; }
+    if (new Set(products.map(p => p.productId)).size !== products.length || products.some(p => !Number.isInteger(p.quantity) || p.quantity < 1 || !availableProducts.some(row => row._id === p.productId && (row.ownerId?._id || row.ownerId) === ownerId))) { toast.error('Cấu phần phải duy nhất, đúng merchant và số lượng nguyên dương.'); return; }
     console.log("[1] Bắt đầu tiến trình Submit...");
 
     // Chỉnh sửa hàm validate một chút để lấy log chuẩn hoặc log trực tiếp trong validate()
@@ -157,6 +165,7 @@ export default function CreateBoxPage() {
 
     try {
       const formData = new FormData();
+      formData.append('ownerId', ownerId);
 
       // 1. Thông tin cơ bản
       formData.append("name", form.name.trim());
@@ -286,6 +295,13 @@ export default function CreateBoxPage() {
 
         <Card>
           <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
+            <div className="p-6 space-y-2">
+              <label htmlFor="combo-merchant">Merchant sở hữu</label>
+              <select id="combo-merchant" className="w-full rounded border p-2" value={ownerId} disabled={loading} onChange={event => { setOwnerId(event.target.value); setProducts([EMPTY_PRODUCT()]); }}>
+                <option value="">Chọn merchant</option>
+                {merchants.map(m => <option key={m._id} value={m._id}>{m.name}</option>)}
+              </select>
+            </div>
             <BasicInfoSection
               form={form}
               errors={errors}
@@ -300,7 +316,7 @@ export default function CreateBoxPage() {
 
             <BoxSection
               products={products}
-              availableProducts={availableProducts}
+              availableProducts={availableProducts.filter(p => (p.ownerId?._id || p.ownerId) === ownerId && !p.archivedAt)}
               errors={errors}
               computedValue={computedValue}
               discountPercent={form.discountPercent}

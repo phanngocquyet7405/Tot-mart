@@ -5,7 +5,8 @@
 ## Kiểm chứng và bàn giao hiện tại
 
 - [STOREFRONT-UI-REFINEMENT.md](STOREFRONT-UI-REFINEMENT.md): critique/audit từ source, thay đổi UI sản phẩm–gói–box/gift, giới hạn browser và checklist nghiệm thu local.
-- [CHECKOUT-SUBSCRIPTION-RECOVERY.md](CHECKOUT-SUBSCRIPTION-RECOVERY.md): route/component đang dùng, khôi phục yêu cầu mơ hồ, nhóm kỳ hạn subscription, kiểm chứng local và hợp đồng BE còn thiếu.
+- [CHECKOUT-SUBSCRIPTION-RECOVERY.md](CHECKOUT-SUBSCRIPTION-RECOVERY.md): tích hợp prepare/lookup/terminate ngày 18/10, kiểm chứng FE–BE local và browser; giữ nguyên bằng chứng và giới hạn của bản ghi 17/10.
+- [CHECKOUT-RECOVERY-GAP-VERIFICATION.md](CHECKOUT-RECOVERY-GAP-VERIFICATION.md): kiểm chứng bổ sung auth/address/storage/tab/merchant-admin với Redis local thật; phân biệt module browser, UI smoke và HTTP, cùng điều kiện nghiệm thu staging.
 - [MERCHANT-ADMIN-IMPLEMENTATION.md](MERCHANT-ADMIN-IMPLEMENTATION.md): kết quả triển khai shell dùng chung, kiểm tra local mới và checklist browser còn thiếu.
 - [MERCHANT-ADMIN-DESIGN-ALIGNMENT.md](MERCHANT-ADMIN-DESIGN-ALIGNMENT.md): khảo sát ban đầu và phương án đồng bộ admin/merchant đã duyệt.
 - [CI-MANAGER-VERIFICATION.md](CI-MANAGER-VERIFICATION.md): sửa lỗi lint, loại bỏ prototype, kết quả kiểm tra local và audit mã nguồn `/manager`; ghi rõ phần chưa xác minh trên browser/Actions.

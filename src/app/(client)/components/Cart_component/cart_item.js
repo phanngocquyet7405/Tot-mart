@@ -46,6 +46,7 @@ export default function CartItem({ product, lineTotal }) {
 
         {/* Nút xóa khỏi giỏ hàng */}
         <button
+          aria-label={`Xóa ${product.name} khỏi giỏ`}
           onClick={() => removeFromCart(productId)}
           className="text-gray-300 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg shrink-0"
         >
@@ -58,6 +59,7 @@ export default function CartItem({ product, lineTotal }) {
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
           <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
             <button
+              aria-label={`Giảm số lượng ${product.name}`}
               onClick={() => updateQuantity(productId, -1)}
               className="px-2.5 py-1 hover:bg-gray-50 transition-colors text-slate-600"
             >
@@ -67,6 +69,7 @@ export default function CartItem({ product, lineTotal }) {
               {product.quantity}
             </span>
             <button
+              aria-label={`Tăng số lượng ${product.name}`}
               onClick={() => updateQuantity(productId, 1)}
               className="px-2.5 py-1 hover:bg-gray-50 transition-colors text-slate-600"
             >

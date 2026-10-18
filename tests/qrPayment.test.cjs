@@ -150,7 +150,7 @@ test("payment reader uses the unwrapped Axios body and authenticated customer en
       status: "paid",
       data: {
         status: "processing",
-        checkout: { orderId: "id", orderCode: "TMART123", totalAmount: 1 },
+        checkout: { orderId: "id", orderCode: "original", totalAmount: 1 },
       },
     };
   };
@@ -165,30 +165,16 @@ test("checkout success consumes the actual unwrapped response shape", async () =
     )
     .replace(/^import[\s\S]*?;\r?\n/gm, "")
     .replace(/^export /gm, "");
-  const c = vm.createContext({
-    sessionStorage: (() => { const store = new Map(); return {getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)}; })(),
-    crypto: require("node:crypto").webcrypto,
-    userService: {},
-    paymentGatewayService: {},
-    getTokenUserId: () => null,
-    logger: { error() {} },
-    syncCartApi: async () => ({ success: true, skipped: [], data: {} }),
-    checkoutService: {
-      createOrder: async () => ({
-        success: true,
-        data: { orderId: "id", orderCode: "TMART123", totalAmount: 10 },
-      }),
-    },
-  });
-  vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/app/util/purchaseAttempt.mjs'),'utf8').replace(/^export /gm,''), c);
-  vm.runInContext(src, c);
+  const {context:c}=require('./helpers/attemptHarness.cjs')({loseFirstCreate:false});
+  await c.placeOrder({addressId:'address',paymentMethod:'online'});
   const result = await c.placeOrder({
+    confirm: true,
     addressId: "address",
     paymentMethod: "online",
     cartItems: [],
   });
   assert.equal(result.success, true);
   assert.equal(result.orderId, "id");
-  assert.equal(result.orderCode, "TMART123");
-  assert.equal(result.totalAmount, 10);
+  assert.equal(result.orderCode, "original");
+  assert.equal(result.totalAmount, 12345);
 });

@@ -1,4 +1,5 @@
-import { readAttempt, storeAttempt, clearAttempt, definitiveFailure, needsReconciliation } from '@/app/util/purchaseAttempt.mjs';
+import { resolveAttempt } from '@/app/util/attemptLifecycle.mjs';
+import { readAttempt, readSubscriptionAttempt, storeAttempt, clearAttempt, withAttemptLock } from '@/app/util/purchaseAttempt.mjs';
 import { getTokenUserId } from '@/app/middleware/tokenMiddleware';
 import { axiosConfig } from "./axiosConfig";
 import { API_ENDPOINTS } from "./apiEndpoints";
@@ -40,26 +41,27 @@ export const getActiveTemplatesApi = () => axiosConfig.get(EP.GET_ACTIVE);
 // ============================================================
 
 /** Đăng ký gói dịch vụ từ mẫu */
-export const getPendingSubscription = () => readAttempt('totmart_subscription_attempt_' + getTokenUserId());
-export const userSubscribeApi = async (data, { resume = false, summary } = {}) => {
-  const keyName = 'totmart_subscription_attempt_' + getTokenUserId();
-  const legacyKey = keyName + '_' + data.templateId;
-  let attempt = readAttempt(keyName) || readAttempt(legacyKey);
-  if (attempt && (!resume || needsReconciliation(attempt))) throw new Error('Có yêu cầu đăng ký chưa rõ kết quả. Xem yêu cầu cũ và đối chiếu trước khi tiếp tục.');
-  if (!attempt) {
-    attempt = { payload: data, key: crypto.randomUUID(), sentAt: Date.now(), summary };
-    if (!storeAttempt(keyName, attempt)) {
-      clearAttempt(keyName);
-      throw new Error('Không lưu được lần thử. Hãy bật lưu trữ trình duyệt trước khi đăng ký.');
+export const getPendingSubscription = () => readSubscriptionAttempt('totmart_subscription_attempt_' + getTokenUserId());
+export const userSubscribeApi = async (data, { resume = false, summary, confirm = false, terminate = false } = {}) => {
+  const userId = getTokenUserId();
+  if (!userId) throw new Error('Vui lòng đăng nhập.');
+  const scope = 'totmart_subscription_attempt_' + userId;
+  return withAttemptLock(scope, async () => {
+    const legacyKey = scope + '_' + data.templateId;
+    let attempt = readSubscriptionAttempt(scope) || readAttempt(legacyKey);
+    if (attempt?.blocked) throw new Error('Dữ liệu khôi phục bị lỗi. Liên hệ TotMart để đối chiếu; không tạo đăng ký thay thế.');
+    if (attempt && !resume) throw new Error('Xử lý yêu cầu cũ trước khi đăng ký gói khác.');
+    if (!attempt) {
+      if (resume || confirm || terminate) throw new Error('Không tìm thấy yêu cầu cũ. Liên hệ TotMart nếu đã gửi giao dịch.');
+      attempt = { userId, kind: 'subscription', payload: data, serializedBody: JSON.stringify(data), key: crypto.randomUUID(), sentAt: Date.now(), summary };
     }
-  } else storeAttempt(keyName, attempt);
-  try {
-    const response = await axiosConfig.post(EP.SUBSCRIBE, attempt.payload, { headers: { 'Idempotency-Key': attempt.key } });
-    if (!response.success || !response.data?.paymentCode || !response.data?._id) throw new Error('Chưa nhận được mã đăng ký xác nhận.');
-    clearAttempt(keyName);
-    clearAttempt(legacyKey);
+    attempt.userId ||= userId;
+    if (!storeAttempt(scope, attempt)) throw new Error('Hãy bật lưu trữ trình duyệt trước khi gửi yêu cầu.');
+    const response = await resolveAttempt({ attempt, kind: 'subscription', api: axiosConfig, save: value => storeAttempt(scope, value), currentUser: getTokenUserId, confirm, terminate });
+    if (response.invalidated) { clearAttempt(scope); clearAttempt(attempt.legacyScope || legacyKey); return response; }
+    if (response.data) response.data.paymentCode ||= response.data.orderCode;
     return response;
-  } catch (err) { if (definitiveFailure(err)) { clearAttempt(keyName); clearAttempt(legacyKey); } throw err; }
+  });
 };
 
 /** Lấy tất cả gói đăng ký của user hiện tại đang đăng nhập */

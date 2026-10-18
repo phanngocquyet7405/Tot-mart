@@ -23,7 +23,14 @@ import {
 
 export function useCheckout() {
   const router = useRouter();
-  const { isLoading: sessionLoading } = useContext(AppContext);
+  const { isLoading: sessionLoading, user: sessionUser } = useContext(AppContext);
+  const [, refreshAttempt] = useState(0);
+  useEffect(() => {
+    const refresh = () => refreshAttempt(value => value + 1);
+    window.addEventListener('storage', refresh);
+    window.addEventListener('totmart:attempt-changed', refresh);
+    return () => { window.removeEventListener('storage', refresh); window.removeEventListener('totmart:attempt-changed', refresh); };
+  }, []);
   const searchParams = useSearchParams();
   const resumeCode = searchParams.get("code");
   const {
@@ -98,7 +105,7 @@ export function useCheckout() {
     return () => {
       active = false;
     };
-  }, [router, sessionLoading]);
+  }, [router, sessionLoading, sessionUser]);
 
   useEffect(() => {
     if (!isMounted || !user || !cartItems.length || paymentCode || resumeCode) return;
@@ -213,7 +220,7 @@ export function useCheckout() {
   }, [paymentCode, paymentStatus, pollAttempt, finishPaid, handleCancelled]);
 
   const handlePlaceOrder = useCallback(
-    async (event) => {
+    async (event, options = {}) => {
       event?.preventDefault();
       if (submittingRef.current) return;
       // Đơn đã tạo ở BE: không tạo đơn thay thế, chỉ hiện lại màn QR
@@ -235,6 +242,7 @@ export function useCheckout() {
       setSubmitting(true);
       try {
         const result = await placeOrder({
+          confirm: options.confirm === true, terminate: options.terminate === true,
           addressId: selectedAddress?._id,
           address: selectedAddress, totalAmount: quote?.totalAmount,
           paymentMethod,
@@ -249,8 +257,12 @@ export function useCheckout() {
 
           throw new Error(result.error || "Không thể đặt hàng.");
         }
+        if (!result.paymentMethod) {
+          router.replace('/profile/orders');
+          return;
+        }
         if (result.paymentMethod === "cod") {
-          clearCart();
+          if (result.consumeCart) clearCart();
           setOrderSuccess(true);
           return;
         }
@@ -258,13 +270,14 @@ export function useCheckout() {
         // ── Online: lấy qrUrl từ BE ──
         const code = result.orderCode;
         activeCodeRef.current = code;
+        setStep('payment');
         setPaymentMethod('online');
         setPaymentCode(code);
         setPaymentStatus('awaiting_payment');
         setOnlineAmount(result.totalAmount ?? 0);
         // Persist the recoverable URL before the next network operation.
         router.replace(`/checkout?code=${encodeURIComponent(code)}`);
-        clearCart();
+        if (result.consumeCart) clearCart();
         const info = await checkPaymentNow(code);
         if (!mounted.current) return;
         if (info.status === "error") {
@@ -278,7 +291,7 @@ export function useCheckout() {
         setOnlineAmount(info.remainingAmount ?? result.totalAmount ?? info.totalAmount ?? 0);
         setPaymentStatus(info.status === "paid" ? "paid" : "awaiting_payment");
         // Giỏ đã được tiêu thụ ở BE; giữ paymentCode trên URL để khôi phục sau refresh
-        clearCart();
+        if (result.consumeCart) clearCart();
         router.replace(`/checkout?code=${encodeURIComponent(code)}`);
         if (info.status === "paid") setOrderSuccess(true);
       } catch (error) {
@@ -370,7 +383,7 @@ export function useCheckout() {
     giftFee: quote?.giftFee || 0,
     bulkDiscountAmount: quote?.bulkDiscountAmount || 0,
     discount,
-    finalTotal: quote?.totalAmount ?? cartTotal - discount + shippingFee,
+    finalTotal: paymentCode ? onlineAmount : quote?.totalAmount ?? cartTotal - discount + shippingFee,
     step,
     setStep,
     loading,
@@ -411,7 +424,7 @@ export function useCheckout() {
     handleApplyCoupon,
     handlePlaceOrder,
     pendingAttempt: getPendingCheckout(),
-    pendingDraftChanged: Boolean(getPendingCheckout() && (getPendingCheckout().payload.addressId !== selectedAddress?._id || getPendingCheckout().summary?.cart !== JSON.stringify(toCartPayload(cartItems)))),
+    pendingDraftChanged: Boolean(getPendingCheckout()?.payload && (getPendingCheckout().payload.addressId !== selectedAddress?._id || getPendingCheckout().summary?.cart !== JSON.stringify(toCartPayload(cartItems)))),
     handleAddressNext,
     savingAddress,
   };

@@ -58,12 +58,20 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
   // ── Step / submit ──
   const [step, setStep] = useState(1); // 1 = choose plan, 2 = address
   const [submitting, setSubmitting] = useState(false);
+  const [, refreshAttempt] = useState(0);
+  useEffect(() => {
+    const refresh = () => refreshAttempt(n => n + 1);
+    window.addEventListener('storage', refresh);
+    window.addEventListener('totmart:attempt-changed', refresh);
+    return () => { window.removeEventListener('storage', refresh); window.removeEventListener('totmart:attempt-changed', refresh); };
+  }, []);
   const pending = getPendingSubscription();
-  const resumePending = async () => {
+  const resumePending = async (options = {}) => {
     if (submitting) return;
     setSubmitting(true);
     try {
-      const res = await subscriptionApi.subscribe({}, { resume: true });
+      const res = await subscriptionApi.subscribe({}, { resume: true, ...options });
+      if (res.prepared || res.invalidated) return;
       onClose();
       router.push(`/checkout?code=${encodeURIComponent(res.data.paymentCode)}`);
     } catch (err) { toast.error(err.message); }
@@ -248,13 +256,13 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
         shippingAddress,
       }, { summary: { name: box.name, months: selectedPlan._months, totalAmount: selectedPlan._totalPrice, address: maskedAddress(shippingAddress) } });
 
+      if (res?.prepared) { toast.info('Đã chuẩn bị. Kiểm tra thông tin yêu cầu cũ rồi xác nhận.'); }
       if (res?.success && res?.data?._id) {
         toast.success("Đã tạo gói chờ thanh toán.");
         onClose();
         router.push(`/checkout?code=${encodeURIComponent(res.data.paymentCode)}`);
       }
     } catch (err) {
-      logger.error("[ChoosePlanModal] Lỗi subscribe:", err);
       toast.error(
         err?.response?.data?.errors?.map((e) => e.message).join(" | ") ||
         err?.response?.data?.message ||
@@ -289,12 +297,17 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
           <p className="my-5 text-sm font-semibold text-stone-600" aria-live="polite">Bước {step}/2 · {step === 1 ? 'Chọn kỳ hạn' : 'Chọn địa chỉ'}</p>
           {pending && <section className="tm-notice mb-6" role="status">
             <h3>Yêu cầu đăng ký trước chưa rõ kết quả</h3>
-            <p className="mt-2">{pending.summary?.name || pending.payload.templateId} · {pending.summary?.months || '?'} tháng.</p>
-            <dl><div><dt>Tổng trả trước</dt><dd>{Number.isFinite(pending.payload.expectedTotalAmount) ? formatCurrency(pending.payload.expectedTotalAmount) : 'Cần đối chiếu'}</dd></div><div><dt>Địa chỉ cũ</dt><dd>{pending.summary?.address || maskedAddress(pending.payload.shippingAddress)}</dd></div><div><dt>Thời điểm gửi</dt><dd>{pending.sentAt ? new Date(pending.sentAt).toLocaleString('vi-VN') : 'Chưa lưu'}</dd></div></dl>
+            <p className="mt-2">{pending.summary?.name || pending.payload?.templateId} · {pending.summary?.months || '?'} tháng.</p>
+            <dl><div><dt>Tổng trả trước</dt><dd>{Number.isFinite(pending.payload?.expectedTotalAmount) ? formatCurrency(pending.payload?.expectedTotalAmount) : 'Cần đối chiếu'}</dd></div><div><dt>Địa chỉ cũ</dt><dd>{pending.summary?.address || maskedAddress(pending.payload?.shippingAddress)}</dd></div><div><dt>Thời điểm gửi</dt><dd>{pending.sentAt ? new Date(pending.sentAt).toLocaleString('vi-VN') : 'Chưa lưu'}</dd></div></dl>
             <p>Gói và địa chỉ hiện tại không thay thế yêu cầu cũ. Hãy xử lý yêu cầu này trước khi đăng ký gói khác.</p>
+            {pending.payload?.shippingAddress && <p>Địa chỉ xác nhận: {Object.values(pending.payload.shippingAddress).filter(Boolean).join(', ')}</p>}
+            <p>Trạng thái: {pending.state || 'chưa xác định'}</p>
+            {pending.error?.message && <p role="alert">{pending.error.message}</p>}
+            {pending.hash && pending.state !== 'rejected' && pending.state !== 'created' && <button className="tm-button tm-button--primary" disabled={submitting} onClick={() => resumePending({ confirm: true })}>Xác nhận gói, địa chỉ và tổng trả trước trên</button>}
+            <button className="tm-button tm-button--outline" disabled={submitting} onClick={() => resumePending({ terminate: true })}>Kết thúc lần thử</button>
             <p className="tm-notice__reference mt-3">Mã đối chiếu: {pending.key}</p>
             {needsReconciliation(pending) && <p className="mt-3 font-semibold">Cần TotMart xác minh. Chưa thể gửi lại hay bắt đầu lần thử mới.</p>}
-            <div className="mt-4 flex flex-wrap gap-3"><button type="button" className="tm-button tm-button--outline" disabled={submitting || needsReconciliation(pending)} onClick={resumePending}>{submitting ? 'Đang kiểm tra…' : 'Tiếp tục yêu cầu cũ'}</button><Link className="tm-text-button" href="/pages/contact-us">Liên hệ TotMart</Link></div>
+            <div className="mt-4 flex flex-wrap gap-3"><button type="button" className="tm-button tm-button--outline" disabled={submitting || needsReconciliation(pending)} onClick={() => resumePending()}>{submitting ? 'Đang kiểm tra…' : 'Tiếp tục yêu cầu cũ'}</button><Link className="tm-text-button" href="/pages/contact-us">Liên hệ TotMart</Link></div>
           </section>}
           {step === 1 ? <>
             {loadingPlans ? <p role="status" className="py-8">Đang tải kỳ hạn…</p> : plansError ? <div role="alert" className="space-y-3"><p>{plansError}</p><button type="button" className="tm-button tm-button--outline" onClick={()=>{setPlansError('');setPlansReload(n=>n+1);}}>Thử tải lại</button></div> : <PlanComparison plans={displayPlans} selectedId={selectedPlan?._id} onSelect={setSelectedPlan} />}

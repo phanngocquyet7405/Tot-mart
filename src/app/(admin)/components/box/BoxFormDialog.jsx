@@ -28,6 +28,7 @@ import { toast } from "sonner";
 
 import { createBoxApi, updateBoxApi } from "@/app/services/api/boxService";
 import { getAllProductsApi } from "@/app/services/api/productServices";
+import { axiosConfig } from "@/app/services/api/axiosConfig";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const fmtPrice = (val) =>
@@ -50,6 +51,7 @@ const EMPTY_PRODUCT = () => ({
 });
 
 const INITIAL_FORM = {
+  ownerId: "",
   name: "",
   descriptions: "",
   stock: 1,
@@ -280,6 +282,10 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
   const [existingImages, setExistingImages] = useState([]); // { url, public_id }[] từ DB
   const [imagePreviews, setImagePreviews] = useState([]);
   const [availableProducts, setAvailableProducts] = useState([]);
+  const [merchants, setMerchants] = useState([]);
+  useEffect(() => {
+    axiosConfig.get('/brands/merchant-options').then(res => setMerchants(res.data || [])).catch(() => toast.error('Không tải được merchant. Hãy mở lại biểu mẫu.'));
+  }, []);
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef(null);
@@ -300,6 +306,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
 
     if (isEdit && box) {
       setForm({
+        ownerId: box.ownerId?._id || box.ownerId || '',
         name: box.name || "",
         descriptions: box.descriptions || box.description || "",
         stock: box.stock ?? 1,
@@ -408,6 +415,9 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
   // ── Validation ───────────────────────────────────────────────────────────────
   const validate = () => {
     const e = {};
+    if (!form.ownerId) e.ownerId = 'Chọn merchant sở hữu combo; dữ liệu legacy cần đối chiếu trước khi sửa.';
+    if (products.some(p => !Number.isInteger(p.quantity) || p.quantity < 1) || new Set(products.map(p => p.productId)).size !== products.length) e.products = 'Sản phẩm phải duy nhất, số lượng nguyên dương.';
+    if (products.some(p => !availableProducts.some(row => row._id === p.productId && (row.ownerId?._id || row.ownerId) === form.ownerId))) e.products = 'Cấu phần thiếu hoặc khác merchant. Đối chiếu dữ liệu trước khi lưu.';
     if (!(form.name ?? "").trim()) e.name = "Tên box là bắt buộc";
     if (form.stock < 1) e.stock = "Tồn kho phải ≥ 1";
     if (!(form.descriptions ?? "").trim()) e.descriptions = "Mô tả là bắt buộc";
@@ -440,6 +450,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     setIsSaving(true);
     try {
       const formData = new FormData();
+      if (!isEdit) formData.append('ownerId', form.ownerId);
 
       // Thông tin cơ bản
       formData.append("name", (form.name ?? "").trim());
@@ -518,6 +529,14 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
 
         {/* Body — scrollable */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="combo-owner">Merchant sở hữu</Label>
+            <select id="combo-owner" className="w-full rounded border p-2" disabled={isEdit || isSaving} value={form.ownerId || ''} onChange={event => { setForm(f => ({ ...f, ownerId: event.target.value })); setProducts([EMPTY_PRODUCT()]); }}>
+              <option value="">Chọn merchant</option>
+              {merchants.map(merchant => <option key={merchant._id} value={merchant._id}>{merchant.name}</option>)}
+            </select>
+            {errors.ownerId && <p role="alert">{errors.ownerId}</p>}
+          </div>
           {/* ── Thông tin cơ bản ── */}
           <section>
             <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
@@ -747,7 +766,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
                   key={i}
                   item={p}
                   index={i}
-                  availableProducts={availableProducts}
+                  availableProducts={availableProducts.filter(p => (p.ownerId?._id || p.ownerId) === form.ownerId && !p.archivedAt && !products.some(row => row.productId === p._id))}
                   onChange={handleChangeProduct}
                   onRemove={removeProduct}
                   error={errors[`product_${i}`]}

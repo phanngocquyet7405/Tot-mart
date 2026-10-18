@@ -1,6 +1,6 @@
-import { readAttempt, storeAttempt, clearAttempt, definitiveFailure, needsReconciliation, maskedAddress } from '@/app/util/purchaseAttempt.mjs';
+import { readAttempt, storeAttempt, clearAttempt, withAttemptLock, maskedAddress } from '@/app/util/purchaseAttempt.mjs';
 import { userService } from '@/app/services/api/userService';
-import { checkoutService } from '@/app/services/api/checkoutService';
+import { resolveAttempt } from '@/app/util/attemptLifecycle.mjs';
 import { syncCartApi } from '@/app/services/api/productServices';
 import { paymentGatewayService } from '@/app/services/api/paymentGatewayService';
 import { getTokenUserId } from '@/app/middleware/tokenMiddleware';
@@ -29,33 +29,36 @@ export function getPendingCheckout() {
 export function hasPendingCheckout() {
   return Boolean(readAttempt(`totmart_checkout_attempt_${getTokenUserId() || 'guest'}`));
 }
-export async function placeOrder({ addressId, paymentMethod, note, couponCode, cartItems = [], quoteFingerprint, cartVersion, address, totalAmount }) {
-  const payload = { addressId, paymentMethod, ...(note ? { note } : {}), ...(couponCode ? { couponCode: couponCode.trim().toUpperCase() } : {}), ...(quoteFingerprint ? { quoteFingerprint } : {}) };
-  const scope = `totmart_checkout_attempt_${getTokenUserId() || 'guest'}`;
-  let attempt = readAttempt(scope), syncedVersion;
+export async function placeOrder({ addressId, paymentMethod, note, couponCode, cartItems = [], cartVersion, address, confirm = false, terminate = false }) {
+  const userId = getTokenUserId();
+  if (!userId) return { success: false, error: 'Vui lòng đăng nhập.' };
+  const scope = `totmart_checkout_attempt_${userId}`;
+  let syncedVersion;
   try {
-    if (attempt && (needsReconciliation(attempt) || !attempt.payload.quoteFingerprint)) return { success: false, error: 'Yêu cầu cần đối chiếu với TotMart trước khi gửi lại hoặc bắt đầu lần thử mới.' };
-    if (!attempt) {
-      if (!addressId) return { success: false, error: 'Thiếu địa chỉ giao hàng' };
-      const synced = await syncCartApi(toCartPayload(cartItems), cartVersion);
-      syncedVersion = synced.version;
-      if (synced.skipped?.length) return { success: false, skipped: synced.skipped, error: 'Sản phẩm không còn tồn tại. Vui lòng kiểm tra giỏ hàng.' };
-      attempt = { key: globalThis.crypto.randomUUID(), payload, cartVersion: syncedVersion, sentAt: Date.now(), summary: { items: cartItems.map(item => ({ name: item.name || item._id || item.id, quantity: item.quantity })), totalAmount, address: maskedAddress(address), cart: JSON.stringify(toCartPayload(cartItems)) } };
-      if (!storeAttempt(scope, attempt)) {
-        clearAttempt(scope);
-        return { success: false, error: 'Không lưu được lần thử để khôi phục sau tải lại. Hãy bật lưu trữ trình duyệt trước khi đặt hàng.' };
+    return await withAttemptLock(scope, async () => {
+      let attempt = readAttempt(scope);
+      if (attempt?.blocked) throw new Error('Dữ liệu khôi phục bị lỗi. Liên hệ TotMart để đối chiếu; không tạo đơn thay thế.');
+      if (!attempt) {
+        if (terminate || confirm) throw new Error('Không tìm thấy yêu cầu cũ. Kiểm tra lại dữ liệu trước khi bắt đầu.');
+        const synced = await syncCartApi(toCartPayload(cartItems), cartVersion);
+        syncedVersion = synced.version;
+        if (synced.skipped?.length) throw new Error('Giỏ hàng có sản phẩm không còn bán. Kiểm tra lại giỏ hàng.');
+        const quote = await quoteCart(cartItems, couponCode);
+        if (getTokenUserId() !== userId) throw new Error('Tài khoản đã thay đổi.');
+        const payload = { addressId, paymentMethod, ...(note ? { note } : {}), ...(couponCode ? { couponCode: couponCode.trim().toUpperCase() } : {}), quoteFingerprint: quote.fingerprint };
+        attempt = { userId, kind: 'products', key: crypto.randomUUID(), payload, serializedBody: JSON.stringify(payload), sentAt: Date.now(), summary: { items: cartItems.map(item => ({ name: item.name, quantity: item.quantity })), totalAmount: quote.totalAmount, address: maskedAddress(address), cart: JSON.stringify(toCartPayload(cartItems)) } };
       }
-    }
-    const response = await checkoutService.createOrder(attempt.payload, attempt.key);
-    if (!response.success) throw new Error(response.message || 'Không thể đặt hàng');
-    if (!response.data?.orderCode) throw new Error('Missing confirmed order code');
-    clearAttempt(scope);
-    return { success: true, ...response.data, paymentMethod: attempt.payload.paymentMethod };
+      attempt.userId ||= userId;
+      attempt.kind ||= 'products';
+      if (!storeAttempt(scope, attempt)) throw new Error('Hãy bật lưu trữ trình duyệt trước khi gửi yêu cầu.');
+      const response = await resolveAttempt({ attempt, kind: 'products', api: axiosConfig, save: value => storeAttempt(scope, value), currentUser: getTokenUserId, confirm, terminate });
+      if (response.invalidated) { clearAttempt(scope); return { success: false, invalidated: true, error: 'Đã kết thúc lần thử. Kiểm tra lại thông tin trước khi chuẩn bị yêu cầu mới.' }; }
+      if (response.prepared) return { success: false, prepared: true, error: 'Đã chuẩn bị. Kiểm tra địa chỉ BE xác nhận và tổng tiền, rồi bấm xác nhận.' };
+      return { success: true, ...response.data, consumeCart: attempt.summary?.cart === JSON.stringify(toCartPayload(cartItems)), paymentMethod: attempt.payload?.paymentMethod || (attempt.serializedBody ? JSON.parse(attempt.serializedBody).paymentMethod : undefined) };
+    });
   } catch (err) {
-    if (definitiveFailure(err)) clearAttempt(scope);
-    return { success: false, status: err.response?.status,
-      cartVersion: err.response?.data?.version ?? syncedVersion ?? attempt?.cartVersion,
-      error: err.response?.data?.message || (attempt && !definitiveFailure(err) ? 'Chưa xác định được kết quả đặt hàng. Bấm thử lại để kiểm tra đúng yêu cầu cũ; không tạo đơn thay thế.' : err.message) };
+    return { success: false, status: err.response?.status, cartVersion: err.response?.data?.version ?? syncedVersion,
+      error: err.response?.data?.errors?.map(error => `${error.field}: ${error.message}`).join(' | ') || err.response?.data?.message || err.response?.data?.code || err.message || 'Chưa rõ kết quả. Kiểm tra lại yêu cầu cũ.' };
   }
 }
 export async function saveCheckoutAddress(user, draft) {

@@ -94,10 +94,17 @@ function CheckoutPageInner() {
             <div><dt>Thời điểm gửi</dt><dd>{checkout.pendingAttempt.sentAt ? new Date(checkout.pendingAttempt.sentAt).toLocaleString('vi-VN') : 'Chưa lưu'}</dd></div>
           </dl>
           {checkout.pendingDraftChanged && <p role="alert" className="mb-3 font-semibold">Giỏ hàng hoặc địa chỉ hiện tại đã khác. Tiếp tục chỉ xử lý yêu cầu cũ; thay đổi hiện tại không được gửi.</p>}
-          {(needsReconciliation(checkout.pendingAttempt) || !checkout.pendingAttempt.payload.quoteFingerprint) && <p role="alert" className="mb-3">Cần TotMart xác minh yêu cầu trước. Chưa thể gửi lại hay bắt đầu lần thử mới. Lịch sử đơn hàng không chứng minh yêu cầu chưa được tạo.</p>}
+          {(needsReconciliation(checkout.pendingAttempt)) && <p role="alert" className="mb-3">Cần TotMart xác minh yêu cầu trước. Chưa thể gửi lại hay bắt đầu lần thử mới. Lịch sử đơn hàng không chứng minh yêu cầu chưa được tạo.</p>}
+          {checkout.pendingAttempt.snapshot && <p className="mt-3">Địa chỉ BE xác nhận: {[checkout.pendingAttempt.snapshot.fullName, checkout.pendingAttempt.snapshot.address, checkout.pendingAttempt.snapshot.district, checkout.pendingAttempt.snapshot.city, checkout.pendingAttempt.snapshot.phone].filter(Boolean).join(', ')}</p>}
+          <p>Trạng thái: {checkout.pendingAttempt.state || 'chưa xác định'}</p>
+          {checkout.pendingAttempt.error?.message && <p role="alert">{checkout.pendingAttempt.error.message}</p>}
+          <div className="mt-4 flex flex-wrap gap-3">
+            {checkout.pendingAttempt.hash && checkout.pendingAttempt.state !== 'created' && checkout.pendingAttempt.state !== 'rejected' && <button className="tm-button tm-button--primary" disabled={checkout.submitting} onClick={event => checkout.handlePlaceOrder(event, { confirm: true })}>Xác nhận đúng địa chỉ và tổng tiền trên</button>}
+            <button className="tm-button tm-button--outline" disabled={checkout.submitting} onClick={event => checkout.handlePlaceOrder(event, { terminate: true })}>Kết thúc lần thử</button>
+          </div>
           <p className="tm-notice__reference">Mã đối chiếu: {checkout.pendingAttempt.key}</p>
           <p className="mt-2 text-sm">Khi liên hệ TotMart, cung cấp mã này để kiểm tra đúng yêu cầu.</p>
-          <div className="mt-5 flex flex-wrap gap-3"><button type="button" className="tm-button tm-button--outline" disabled={checkout.submitting || needsReconciliation(checkout.pendingAttempt) || !checkout.pendingAttempt.payload.quoteFingerprint} onClick={checkout.handlePlaceOrder}>{checkout.submitting ? 'Đang kiểm tra…' : 'Tiếp tục đúng yêu cầu cũ'}</button><Link href="/pages/contact-us" className="tm-text-button">Liên hệ TotMart</Link></div>
+          <div className="mt-5 flex flex-wrap gap-3"><button type="button" className="tm-button tm-button--outline" disabled={checkout.submitting || needsReconciliation(checkout.pendingAttempt)} onClick={checkout.handlePlaceOrder}>{checkout.submitting ? 'Đang kiểm tra…' : 'Tiếp tục đúng yêu cầu cũ'}</button><Link href="/pages/contact-us" className="tm-text-button">Liên hệ TotMart</Link></div>
         </section>}
         {/* ── Stepper ── */}
         <CheckoutStepper
