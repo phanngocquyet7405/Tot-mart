@@ -29,7 +29,6 @@ import { SectionCard } from "./SectionCard";
 import { BTN_PRIMARY, BTN_SECONDARY, INPUT } from "./checkoutStyles";
 import { PAYMENT_METHODS } from "@/app/services/api/Checkoutpageservice";
 import { formatCurrency } from "@/app/util/formatter";
-import logger from "@/app/util/Logger";
 
 const METHOD_ICONS = { cod: Banknote, online: QrCode, momo: Smartphone };
 
@@ -206,12 +205,6 @@ function SepayQrPanel({ qrUrl, onlineAmount, paymentCode, paymentStatus, onReche
   const configBroken = !qrUrl || isBlank(parsed.acc) || isBlank(parsed.bank);
   const imageFailed = failedUrl === qrUrl;
   const showImage = !configBroken && !imageFailed;
-
-  useEffect(() => {
-    if (configBroken) {
-      logger.error("[PaymentStep] qrUrl thiếu tài khoản/ngân hàng:", qrUrl);
-    }
-  }, [configBroken, qrUrl]);
 
   const amount = onlineAmount || parsed.amount || 0;
   const content = paymentCode || parsed.des;

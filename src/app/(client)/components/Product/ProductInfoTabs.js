@@ -10,7 +10,7 @@ const TABS = [
 
 export function ProductInfoTabs({ product, activeTab, onTabChange }) {
   const avgRating = Number(product.rating);
-  const reviewCount = Number.isSafeInteger(Number(product.reviewCount)) && Number(product.reviewCount) > 0 ? Number(product.reviewCount) : 0;
+  const reviewCount = Number.isSafeInteger(product.reviewCount) && product.reviewCount >= 0 ? product.reviewCount : null;
   const hasRating = reviewCount > 0 && Number.isFinite(avgRating) && avgRating > 0 && avgRating <= 5;
 
   return (
@@ -57,7 +57,7 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
               <h3 className="text-sm font-black uppercase tracking-widest text-stone-800 mb-2">
                 Đánh giá từ khách hàng
               </h3>
-              <p className="text-stone-500 text-sm">{reviewCount} đánh giá</p>
+              <p className="text-stone-500 text-sm">{reviewCount === null ? 'Chưa có dữ liệu đánh giá được xác nhận' : `${reviewCount} đánh giá`}</p>
             </div>
             {hasRating && <div className="text-center">
               <div className="text-4xl font-black text-green-800 mb-1">
@@ -78,10 +78,10 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
             </div>}
           </div>
 
-          {reviewCount === 0 ? (
+          {reviewCount === null || reviewCount === 0 ? (
             <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-4 flex gap-3 items-start text-xs text-amber-900/80 leading-relaxed">
               <Info size={16} className="text-green-800 shrink-0 mt-0.5" />
-              <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+              <p>{reviewCount === null ? 'TotMart chưa cung cấp dữ liệu đánh giá cho sản phẩm này.' : 'Chưa có đánh giá nào cho sản phẩm này.'}</p>
             </div>
           ) : (
             <p className="text-stone-600 text-sm">

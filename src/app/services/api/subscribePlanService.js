@@ -1,5 +1,5 @@
 import { resolveAttempt } from '@/app/util/attemptLifecycle.mjs';
-import { readAttempt, readSubscriptionAttempt, storeAttempt, clearAttempt, withAttemptLock } from '@/app/util/purchaseAttempt.mjs';
+import { readAttempt, readSubscriptionAttempt, storeAttempt, clearAttempt, withAttemptLock, referenceScope, startNewPurchase } from '@/app/util/purchaseAttempt.mjs';
 import { getTokenUserId } from '@/app/middleware/tokenMiddleware';
 import { axiosConfig } from "./axiosConfig";
 import { API_ENDPOINTS } from "./apiEndpoints";
@@ -41,14 +41,18 @@ export const getActiveTemplatesApi = () => axiosConfig.get(EP.GET_ACTIVE);
 // ============================================================
 
 /** Đăng ký gói dịch vụ từ mẫu */
-export const getPendingSubscription = () => readSubscriptionAttempt('totmart_subscription_attempt_' + getTokenUserId());
-export const userSubscribeApi = async (data, { resume = false, summary, confirm = false, terminate = false } = {}) => {
+export const getPendingSubscription = key => { const scope = 'totmart_subscription_attempt_' + getTokenUserId(); const active = readSubscriptionAttempt(scope); return key && active?.key !== key ? readAttempt(referenceScope(scope, key)) : active; };
+export const startNewSubscription = key => { const userId = getTokenUserId(); return startNewPurchase('totmart_subscription_attempt_' + userId, key, getTokenUserId, userId); };
+export const userSubscribeApi = async (data, { resume = false, summary, confirm = false, terminate = false, expectedKey } = {}) => {
   const userId = getTokenUserId();
   if (!userId) throw new Error('Vui lòng đăng nhập.');
   const scope = 'totmart_subscription_attempt_' + userId;
   return withAttemptLock(scope, async () => {
+    if (getTokenUserId() !== userId) throw new Error('Tài khoản đã thay đổi trong khi chờ khóa giao dịch.');
     const legacyKey = scope + '_' + data.templateId;
-    let attempt = readSubscriptionAttempt(scope) || readAttempt(legacyKey);
+    let attempt = expectedKey ? (readSubscriptionAttempt(scope)?.key === expectedKey ? readSubscriptionAttempt(scope) : readAttempt(referenceScope(scope, expectedKey))) : readSubscriptionAttempt(scope) || readAttempt(legacyKey);
+    if (expectedKey && !attempt) throw new Error('Reference của tab này không còn khả dụng.');
+    const targetScope = attempt && readSubscriptionAttempt(scope)?.key !== attempt.key ? referenceScope(scope, attempt.key) : scope;
     if (attempt?.blocked) throw new Error('Dữ liệu khôi phục bị lỗi. Liên hệ TotMart để đối chiếu; không tạo đăng ký thay thế.');
     if (attempt && !resume) throw new Error('Xử lý yêu cầu cũ trước khi đăng ký gói khác.');
     if (!attempt) {
@@ -56,9 +60,9 @@ export const userSubscribeApi = async (data, { resume = false, summary, confirm 
       attempt = { userId, kind: 'subscription', payload: data, serializedBody: JSON.stringify(data), key: crypto.randomUUID(), sentAt: Date.now(), summary };
     }
     attempt.userId ||= userId;
-    if (!storeAttempt(scope, attempt)) throw new Error('Hãy bật lưu trữ trình duyệt trước khi gửi yêu cầu.');
-    const response = await resolveAttempt({ attempt, kind: 'subscription', api: axiosConfig, save: value => storeAttempt(scope, value), currentUser: getTokenUserId, confirm, terminate });
-    if (response.invalidated) { clearAttempt(scope); clearAttempt(attempt.legacyScope || legacyKey); return response; }
+    if (!storeAttempt(targetScope, attempt)) throw new Error('Hãy bật lưu trữ trình duyệt trước khi gửi yêu cầu.');
+    const response = await resolveAttempt({ attempt, kind: 'subscription', api: axiosConfig, save: value => storeAttempt(targetScope, value), currentUser: getTokenUserId, confirm, terminate });
+    if (response.invalidated) { clearAttempt(targetScope); clearAttempt(attempt.legacyScope || legacyKey); return response; }
     if (response.data) response.data.paymentCode ||= response.data.orderCode;
     return response;
   });

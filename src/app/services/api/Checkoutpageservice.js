@@ -1,4 +1,4 @@
-import { readAttempt, storeAttempt, clearAttempt, withAttemptLock, maskedAddress } from '@/app/util/purchaseAttempt.mjs';
+import { readAttempt, storeAttempt, clearAttempt, withAttemptLock, maskedAddress, referenceScope, startNewPurchase, createdReferenceByCode } from '@/app/util/purchaseAttempt.mjs';
 import { userService } from '@/app/services/api/userService';
 import { resolveAttempt } from '@/app/util/attemptLifecycle.mjs';
 import { syncCartApi } from '@/app/services/api/productServices';
@@ -13,8 +13,8 @@ export async function loadCheckoutUser() {
   try { const id = getTokenUserId(); if (!id) return { success: false, error: 'NO_TOKEN' }; const response = await userService.getUserById(id); return { success: true, user: response.data, addresses: response.data.addresses || [] }; }
   catch (err) { return { success: false, error: err.message }; }
 }
-export async function quoteCart(items, couponCode) {
-  const response = await axiosConfig.post('/checkout/quote', { items: toCartPayload(items), ...(couponCode?.trim() ? { couponCode: couponCode.trim().toUpperCase() } : {}) });
+export async function quoteCart(items, couponCode, userId = getTokenUserId()) {
+  const response = await axiosConfig.post('/checkout/quote', { items: toCartPayload(items), ...(couponCode?.trim() ? { couponCode: couponCode.trim().toUpperCase() } : {}) }, { _requestUserId: userId });
   return response.data;
 }
 export async function validateCoupon(code, items) {
@@ -23,38 +23,49 @@ export async function validateCoupon(code, items) {
 }
 // Delivery charge is agreed separately, never part of the new checkout total.
 export function calcShippingFee() { return 0; }
-export function getPendingCheckout() {
-  return readAttempt(`totmart_checkout_attempt_${getTokenUserId() || 'guest'}`);
+export function getPendingCheckout(key, code) {
+  const scope = `totmart_checkout_attempt_${getTokenUserId() || 'guest'}`;
+  const active = readAttempt(scope);
+  if (code && active?.result?.orderCode !== code) return createdReferenceByCode(scope, code);
+  return key && active?.key !== key ? readAttempt(referenceScope(scope, key)) : active;
 }
 export function hasPendingCheckout() {
   return Boolean(readAttempt(`totmart_checkout_attempt_${getTokenUserId() || 'guest'}`));
 }
-export async function placeOrder({ addressId, paymentMethod, note, couponCode, cartItems = [], cartVersion, address, confirm = false, terminate = false }) {
+export function startNewCheckout(key) { const userId = getTokenUserId(); return startNewPurchase(`totmart_checkout_attempt_${userId}`, key, getTokenUserId, userId); };
+export async function placeOrder({ addressId, paymentMethod, note, couponCode, cartItems = [], cartVersion, address, confirm = false, terminate = false, expectedKey }) {
   const userId = getTokenUserId();
   if (!userId) return { success: false, error: 'Vui lòng đăng nhập.' };
   const scope = `totmart_checkout_attempt_${userId}`;
   let syncedVersion;
   try {
     return await withAttemptLock(scope, async () => {
-      let attempt = readAttempt(scope);
+      if (getTokenUserId() !== userId) throw new Error('Tài khoản đã thay đổi trong khi chờ khóa giao dịch.');
+      let attempt = expectedKey ? (readAttempt(scope)?.key === expectedKey ? readAttempt(scope) : readAttempt(referenceScope(scope, expectedKey))) : readAttempt(scope);
+      if (expectedKey && !attempt) throw new Error('Reference của tab này không còn khả dụng. Không gửi giao dịch khác.');
+      const targetScope = attempt && readAttempt(scope)?.key !== attempt.key ? referenceScope(scope, attempt.key) : scope;
       if (attempt?.blocked) throw new Error('Dữ liệu khôi phục bị lỗi. Liên hệ TotMart để đối chiếu; không tạo đơn thay thế.');
       if (!attempt) {
         if (terminate || confirm) throw new Error('Không tìm thấy yêu cầu cũ. Kiểm tra lại dữ liệu trước khi bắt đầu.');
-        const synced = await syncCartApi(toCartPayload(cartItems), cartVersion);
+        if (!addressId || !['cod', 'online'].includes(paymentMethod)) throw new Error('Chọn địa chỉ và phương thức thanh toán hợp lệ.');
+        if (note != null && (typeof note !== 'string' || note.length > 500)) throw new Error('Ghi chú tối đa 500 ký tự.');
+        if (couponCode != null && (typeof couponCode !== 'string' || (couponCode && (couponCode.trim().length < 3 || couponCode.trim().length > 30)))) throw new Error('Mã giảm giá dài từ 3 đến 30 ký tự.');
+        const synced = await syncCartApi(toCartPayload(cartItems), cartVersion, userId);
         syncedVersion = synced.version;
         if (synced.skipped?.length) throw new Error('Giỏ hàng có sản phẩm không còn bán. Kiểm tra lại giỏ hàng.');
-        const quote = await quoteCart(cartItems, couponCode);
+        if (getTokenUserId() !== userId) throw new Error('Tài khoản đã thay đổi.');
+        const quote = await quoteCart(cartItems, couponCode, userId);
         if (getTokenUserId() !== userId) throw new Error('Tài khoản đã thay đổi.');
         const payload = { addressId, paymentMethod, ...(note ? { note } : {}), ...(couponCode ? { couponCode: couponCode.trim().toUpperCase() } : {}), quoteFingerprint: quote.fingerprint };
         attempt = { userId, kind: 'products', key: crypto.randomUUID(), payload, serializedBody: JSON.stringify(payload), sentAt: Date.now(), summary: { items: cartItems.map(item => ({ name: item.name, quantity: item.quantity })), totalAmount: quote.totalAmount, address: maskedAddress(address), cart: JSON.stringify(toCartPayload(cartItems)) } };
       }
       attempt.userId ||= userId;
       attempt.kind ||= 'products';
-      if (!storeAttempt(scope, attempt)) throw new Error('Hãy bật lưu trữ trình duyệt trước khi gửi yêu cầu.');
-      const response = await resolveAttempt({ attempt, kind: 'products', api: axiosConfig, save: value => storeAttempt(scope, value), currentUser: getTokenUserId, confirm, terminate });
-      if (response.invalidated) { clearAttempt(scope); return { success: false, invalidated: true, error: 'Đã kết thúc lần thử. Kiểm tra lại thông tin trước khi chuẩn bị yêu cầu mới.' }; }
+      if (!storeAttempt(targetScope, attempt)) throw new Error('Hãy bật lưu trữ trình duyệt trước khi gửi yêu cầu.');
+      const response = await resolveAttempt({ attempt, kind: 'products', api: axiosConfig, save: value => storeAttempt(targetScope, value), currentUser: getTokenUserId, confirm, terminate });
+      if (response.invalidated) { clearAttempt(targetScope); return { success: false, invalidated: true, error: 'Đã kết thúc lần thử. Kiểm tra lại thông tin trước khi chuẩn bị yêu cầu mới.' }; }
       if (response.prepared) return { success: false, prepared: true, error: 'Đã chuẩn bị. Kiểm tra địa chỉ BE xác nhận và tổng tiền, rồi bấm xác nhận.' };
-      return { success: true, ...response.data, consumeCart: attempt.summary?.cart === JSON.stringify(toCartPayload(cartItems)), paymentMethod: attempt.payload?.paymentMethod || (attempt.serializedBody ? JSON.parse(attempt.serializedBody).paymentMethod : undefined) };
+      return { success: true, ...response.data, consumeCart: response.createdNow === true, paymentMethod: attempt.paymentMethod || attempt.payload?.paymentMethod || (attempt.serializedBody ? JSON.parse(attempt.serializedBody).paymentMethod : undefined) };
     });
   } catch (err) {
     return { success: false, status: err.response?.status, cartVersion: err.response?.data?.version ?? syncedVersion,

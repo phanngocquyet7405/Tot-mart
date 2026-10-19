@@ -7,9 +7,9 @@ import { X, ChevronLeft, ChevronRight, Truck, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ProductGallery } from '../Product/ProductGallery';
 import PlanComparison from './PlanComparison';
-import { subscriptionApi, getPendingSubscription } from '@/app/services/api/subscribePlanService';
+import { subscriptionApi, getPendingSubscription, startNewSubscription } from '@/app/services/api/subscribePlanService';
 import { needsReconciliation, maskedAddress } from '@/app/util/purchaseAttempt.mjs';
-import { checkTokenValid } from '@/app/middleware/tokenMiddleware';
+import { checkTokenValid, getTokenUserId } from '@/app/middleware/tokenMiddleware';
 import { userService } from '@/app/services/api/userService';
 import { formatCurrency } from '@/app/util/formatter';
 import logger from '@/app/util/Logger';
@@ -65,13 +65,23 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
     window.addEventListener('totmart:attempt-changed', refresh);
     return () => { window.removeEventListener('storage', refresh); window.removeEventListener('totmart:attempt-changed', refresh); };
   }, []);
-  const pending = getPendingSubscription();
+  const contextKey = useRef(null);
+  const active = getPendingSubscription();
+  if (!contextKey.current && active?.key) contextKey.current = active.key;
+  const pending = getPendingSubscription(contextKey.current);
+  const startNew = async () => {
+    setSubmitting(true);
+    try { await startNewSubscription(contextKey.current); contextKey.current = null; refreshAttempt(n => n + 1); }
+    catch (error) { toast.error(error.message); }
+    finally { setSubmitting(false); }
+  };
   const resumePending = async (options = {}) => {
     if (submitting) return;
     setSubmitting(true);
     try {
-      const res = await subscriptionApi.subscribe({}, { resume: true, ...options });
-      if (res.prepared || res.invalidated) return;
+      const res = await subscriptionApi.subscribe({}, { resume: true, expectedKey: contextKey.current, ...options });
+      if (res.invalidated) { contextKey.current = null; refreshAttempt(n => n + 1); return; }
+      if (res.prepared) return;
       onClose();
       router.push(`/checkout?code=${encodeURIComponent(res.data.paymentCode)}`);
     } catch (err) { toast.error(err.message); }
@@ -175,9 +185,11 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
 
   const validateAddress = (addr) => {
     const errors = {};
-    if (!addr.address?.trim()) errors.address = true;
-    if (!addr.district?.trim()) errors.district = true;
-    if (!addr.city?.trim()) errors.city = true;
+    if (!addr.address?.trim() || addr.address.length > 255) errors.address = true;
+    if (!addr.district?.trim() || addr.district.length > 100) errors.district = true;
+    if (!addr.city?.trim() || addr.city.length > 100) errors.city = true;
+    if (!addr.country?.trim() || addr.country.length > 100) errors.country = true;
+    if ((addr.zipCode || '').length > 10) errors.zipCode = true;
     if (!/^[0-9()+\s-]{7,20}$/.test(addr.phone?.trim() || "")) errors.phone = true;
     return errors;
   };
@@ -217,6 +229,10 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
   // ── Submit ──
   const handleSubscribe = async () => {
     if (submitting) return;
+    if (String(userData?._id || userData?.id) !== String(getTokenUserId())) {
+      toast.error('Tài khoản đã thay đổi. Mở lại thông tin đăng ký trước khi tiếp tục.');
+      return;
+    }
     if (!selectedPlan?._isReal || !selectedPlan?._id) {
       toast.error("Gói này chưa khả dụng!");
       return;
@@ -296,7 +312,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
           <DialogDescription className="mt-3 text-sm text-stone-600">{step === 1 ? 'So sánh tổng trả trước và bình quân tháng để chọn kỳ hạn phù hợp.' : `Nhận ${box.name} theo kỳ hạn ${selectedPlan?._months} tháng đã chọn.`}</DialogDescription>
           <p className="my-5 text-sm font-semibold text-stone-600" aria-live="polite">Bước {step}/2 · {step === 1 ? 'Chọn kỳ hạn' : 'Chọn địa chỉ'}</p>
           {pending && <section className="tm-notice mb-6" role="status">
-            <h3>Yêu cầu đăng ký trước chưa rõ kết quả</h3>
+            <h3>{pending.state === 'created' ? 'Đăng ký đã được tạo' : 'Kiểm tra yêu cầu đăng ký trước'}</h3>
             <p className="mt-2">{pending.summary?.name || pending.payload?.templateId} · {pending.summary?.months || '?'} tháng.</p>
             <dl><div><dt>Tổng trả trước</dt><dd>{Number.isFinite(pending.payload?.expectedTotalAmount) ? formatCurrency(pending.payload?.expectedTotalAmount) : 'Cần đối chiếu'}</dd></div><div><dt>Địa chỉ cũ</dt><dd>{pending.summary?.address || maskedAddress(pending.payload?.shippingAddress)}</dd></div><div><dt>Thời điểm gửi</dt><dd>{pending.sentAt ? new Date(pending.sentAt).toLocaleString('vi-VN') : 'Chưa lưu'}</dd></div></dl>
             <p>Gói và địa chỉ hiện tại không thay thế yêu cầu cũ. Hãy xử lý yêu cầu này trước khi đăng ký gói khác.</p>
@@ -304,7 +320,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
             <p>Trạng thái: {pending.state || 'chưa xác định'}</p>
             {pending.error?.message && <p role="alert">{pending.error.message}</p>}
             {pending.hash && pending.state !== 'rejected' && pending.state !== 'created' && <button className="tm-button tm-button--primary" disabled={submitting} onClick={() => resumePending({ confirm: true })}>Xác nhận gói, địa chỉ và tổng trả trước trên</button>}
-            <button className="tm-button tm-button--outline" disabled={submitting} onClick={() => resumePending({ terminate: true })}>Kết thúc lần thử</button>
+            {pending.state === 'created' ? <button className="tm-button tm-button--primary" disabled={submitting} onClick={startNew}>Đăng ký mới</button> : <button className="tm-button tm-button--outline" disabled={submitting} onClick={() => resumePending({ terminate: true })}>Kết thúc lần thử</button>}
             <p className="tm-notice__reference mt-3">Mã đối chiếu: {pending.key}</p>
             {needsReconciliation(pending) && <p className="mt-3 font-semibold">Cần TotMart xác minh. Chưa thể gửi lại hay bắt đầu lần thử mới.</p>}
             <div className="mt-4 flex flex-wrap gap-3"><button type="button" className="tm-button tm-button--outline" disabled={submitting || needsReconciliation(pending)} onClick={() => resumePending()}>{submitting ? 'Đang kiểm tra…' : 'Tiếp tục yêu cầu cũ'}</button><Link className="tm-text-button" href="/pages/contact-us">Liên hệ TotMart</Link></div>

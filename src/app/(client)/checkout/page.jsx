@@ -53,7 +53,7 @@ function CheckoutPageInner() {
   const checkout = useCheckout();
 
   // Success screen
-  if (checkout.orderSuccess) return <OrderSuccessScreen />;
+  if (checkout.orderSuccess) return <OrderSuccessScreen onNew={checkout.handleStartNew} submitting={checkout.submitting} />;
 
   // Loading screen
   if (!checkout.isMounted || checkout.loading || checkout.resuming)
@@ -84,9 +84,10 @@ function CheckoutPageInner() {
           </div>
         </div>
 
+        {checkout.pendingAttempt?.state === 'created' && <div className="tm-notice mb-4"><p>Giao dịch đã tồn tại: {checkout.pendingAttempt.result?.orderCode}</p><button className="tm-button tm-button--primary" disabled={checkout.submitting} onClick={checkout.handleStartNew}>Đặt đơn mới</button><Link className="tm-text-button ml-4" href={`/checkout?code=${encodeURIComponent(checkout.pendingAttempt.result?.orderCode || '')}`}>Xem / thanh toán đơn cũ</Link></div>}
         {checkout.pendingAttempt && !checkout.paymentCode && <section role="status" className="tm-notice mb-8">
-          <h2>Yêu cầu đặt hàng trước chưa rõ kết quả</h2>
-          <p className="mt-3">TotMart chưa xác nhận được kết quả của lần gửi trước. Hãy xử lý yêu cầu này trước khi đặt đơn khác.</p>
+          <h2>{checkout.pendingAttempt.state === 'created' ? 'Đơn hàng đã được tạo' : 'Kiểm tra yêu cầu đặt hàng trước'}</h2>
+          <p className="mt-3">{checkout.pendingAttempt.state === 'created' ? 'Bạn có thể xem đơn cũ hoặc chủ động đặt đơn mới.' : 'Giữ nguyên reference cho đến khi BE xác nhận kết quả hoặc kết thúc lần thử.'}</p>
           <ul className="mt-4 space-y-2">{checkout.pendingAttempt.summary?.items?.map((item, i) => <li key={i} className="flex justify-between gap-4"><span>{item.name}</span><span className="shrink-0">× {item.quantity}</span></li>)}</ul>
           <dl>
             <div><dt>Tổng yêu cầu cũ</dt><dd>{Number.isFinite(checkout.pendingAttempt.summary?.totalAmount) ? checkout.pendingAttempt.summary.totalAmount.toLocaleString('vi-VN') + ' ₫' : 'Chưa lưu — cần đối chiếu'}</dd></div>
@@ -100,7 +101,7 @@ function CheckoutPageInner() {
           {checkout.pendingAttempt.error?.message && <p role="alert">{checkout.pendingAttempt.error.message}</p>}
           <div className="mt-4 flex flex-wrap gap-3">
             {checkout.pendingAttempt.hash && checkout.pendingAttempt.state !== 'created' && checkout.pendingAttempt.state !== 'rejected' && <button className="tm-button tm-button--primary" disabled={checkout.submitting} onClick={event => checkout.handlePlaceOrder(event, { confirm: true })}>Xác nhận đúng địa chỉ và tổng tiền trên</button>}
-            <button className="tm-button tm-button--outline" disabled={checkout.submitting} onClick={event => checkout.handlePlaceOrder(event, { terminate: true })}>Kết thúc lần thử</button>
+            {checkout.pendingAttempt.state !== 'created' && <button className="tm-button tm-button--outline" disabled={checkout.submitting} onClick={event => checkout.handlePlaceOrder(event, { terminate: true })}>Kết thúc lần thử</button>}
           </div>
           <p className="tm-notice__reference">Mã đối chiếu: {checkout.pendingAttempt.key}</p>
           <p className="mt-2 text-sm">Khi liên hệ TotMart, cung cấp mã này để kiểm tra đúng yêu cầu.</p>

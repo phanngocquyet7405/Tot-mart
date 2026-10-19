@@ -1,9 +1,8 @@
 // Run only against the explicitly started local disposable fixture server.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const playwrightPath=process.argv[2];
-if(!playwrightPath)throw Error('Pass the installed Playwright module path');
-const {chromium}=require(playwrightPath);
-const origin='http://localhost:3100';
+const {chromium}=require('@playwright/test');
+const origin=process.env.FE_TEST_ORIGIN || 'http://localhost:3100';
+if(!/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin))throw Error('Local FE origin required');
 const runtime=JSON.parse(fs.readFileSync('.cache/checkout-runtime.json','utf8'));
 if(!/^http:\/\/127\.0\.0\.1:\d+$/.test(runtime.origin))throw Error('Disposable local backend required');
 const checks=[];
@@ -22,6 +21,7 @@ async function main(){
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  try{
   const health=await page.request.get(origin+'/api/home/health');assert.equal(health.status(),200);checks.push('FE rewrite reaches local BE health');
+  const beforeCoupon=await (await page.request.get(runtime.origin+'/__fixture/evidence')).json();
   await page.goto(origin+'/login');
   await page.locator('#email').fill('customer@checkout.example.com');await page.locator('#password').fill('Fixture-Only-123!');
   await page.locator('form button[type=submit]').click();
@@ -64,7 +64,8 @@ async function main(){
   await page.reload();await page.getByText('Đang chờ thanh toán, hệ thống tự kiểm tra mỗi vài giây.',{exact:true}).waitFor();checks.push('Reload payment URL restores waiting-payment screen');
   assert.ok((await page.locator('aside').innerText()).includes(frozen.summary.totalAmount.toLocaleString('vi-VN')));checks.push('Payment summary keeps BE remaining amount after cart consumption');
   await page.screenshot({path:'.cache/checkout-browser.png',fullPage:true});
-  await second.getByRole('button',{name:'Kết thúc lần thử',exact:true}).click();await second.waitForURL('**/checkout?code=*');assert.ok(second.url().includes(committedCode));checks.push('Terminate from second tab preserves committed transaction');
+  await second.getByRole('button',{name:'Tiếp tục đúng yêu cầu cũ',exact:true}).click();await second.waitForURL('**/checkout?code=*');assert.ok(second.url().includes(committedCode));checks.push('Second tab replays committed transaction');
+  const afterCoupon=await (await page.request.get(runtime.origin+'/__fixture/evidence')).json();assert.equal(afterCoupon.couponUsage,beforeCoupon.couponUsage+1,'Coupon used once after UI create and second-tab replay');
   await page.goto(origin+'/profile/orders');await page.getByRole('heading').first().waitFor();checks.push('Customer order history opens through UI');
   await page.goto(origin+'/subscription');
   await page.getByRole('button',{name:'Chọn gói & địa chỉ',exact:false}).first().click();

@@ -3,7 +3,7 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const {randomUUID}=require('node:crypto');
 module.exports=async function({be,root,origin,user,merchant,admin,product,fixture}){
- const {chromium}=require(process.env.PLAYWRIGHT_MODULE);
+ const {chromium}=require('@playwright/test');
  const front=process.env.FE_TEST_ORIGIN;
  assert.match(front,/^http:\/\/localhost:\d+$/);
  const results=[],errors=[];
@@ -21,8 +21,8 @@ module.exports=async function({be,root,origin,user,merchant,admin,product,fixtur
  sources['/__verify/client.js']="import axios from '/__verify/axios.js';import {setupAxiosMiddleware} from '/__verify/middleware.js';export const axiosConfig=axios.create({baseURL:'/api',timeout:10000,headers:{'Content-Type':'application/json',Accept:'application/json'}});setupAxiosMiddleware(axiosConfig);";
  sources['/__verify/products.js']="import {axiosConfig} from '/__verify/client.js';import {API_ENDPOINTS} from '/__verify/endpoints.js';\n"+read('src/app/services/api/productServices.js').replace(/^import[^\n]*\n/gm,'');
  sources['/__verify/service.js']=read('src/app/services/api/Checkoutpageservice.js').replace(/^import[^\n]*\n/gm,'')+'';
- sources['/__verify/service.js']="import {readAttempt,storeAttempt,clearAttempt,withAttemptLock,maskedAddress} from '/__verify/storage.js';import {resolveAttempt} from '/__verify/lifecycle.js';import {getTokenUserId} from '/__verify/token.js';import {axiosConfig} from '/__verify/client.js';import {syncCartApi} from '/__verify/products.js';const userService={};const paymentGatewayService={};\n"+sources['/__verify/service.js'];
- sources['/__verify/subscription.js']="import {readAttempt,readSubscriptionAttempt,storeAttempt,clearAttempt,withAttemptLock} from '/__verify/storage.js';import {resolveAttempt} from '/__verify/lifecycle.js';import {getTokenUserId} from '/__verify/token.js';import {axiosConfig} from '/__verify/client.js';import {API_ENDPOINTS} from '/__verify/endpoints.js';\n"+read('src/app/services/api/subscribePlanService.js').replace(/^import[^\n]*\n/gm,'');
+ sources['/__verify/service.js']="import {readAttempt,storeAttempt,clearAttempt,withAttemptLock,maskedAddress,referenceScope,startNewPurchase,createdReferenceByCode} from '/__verify/storage.js';import {resolveAttempt} from '/__verify/lifecycle.js';import {getTokenUserId} from '/__verify/token.js';import {axiosConfig} from '/__verify/client.js';import {syncCartApi} from '/__verify/products.js';const userService={};const paymentGatewayService={};\n"+sources['/__verify/service.js'];
+ sources['/__verify/subscription.js']="import {readAttempt,readSubscriptionAttempt,storeAttempt,clearAttempt,withAttemptLock,referenceScope,startNewPurchase,createdReferenceByCode} from '/__verify/storage.js';import {resolveAttempt} from '/__verify/lifecycle.js';import {getTokenUserId} from '/__verify/token.js';import {axiosConfig} from '/__verify/client.js';import {API_ENDPOINTS} from '/__verify/endpoints.js';\n"+read('src/app/services/api/subscribePlanService.js').replace(/^import[^\n]*\n/gm,'');
  let browser=await chromium.launch({headless:true});
  const Session=be(path.join(root,'src/models/AuthSession')),Checkout=be(path.join(root,'src/models/Checkout')),Attempt=be(path.join(root,'src/models/CheckoutAttempt')),Box=be(path.join(root,'src/models/Box'));
  const jwt=be('jsonwebtoken');
@@ -49,7 +49,7 @@ module.exports=async function({be,root,origin,user,merchant,admin,product,fixtur
  async function revoke(){await Session.deleteMany({userId:user._id});}
  async function api(method,url,body,account=admin){const r=await fetch(origin+'/api'+url,{method,headers:{Authorization:'Bearer '+fixture.signToken(account),'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});return {status:r.status,data:await r.json()};}
  try{
-  assert.equal(await be(path.join(root,'src/config/redis')).getClient().ping(),'PONG');
+  assert.equal(be(path.join(root,'src/config/redis')).ready(),true);
   // Refresh paths use a genuinely expired, correctly signed JWT and real session cookies.
   for(const op of ['prepare','create','lookup','terminate'])for(const mode of ['refresh-success','refresh-failure','revoked'])await check(`${op}: ${mode}`,async()=>{
    await resetAddress();await open();if(op!=='prepare')assert.equal((await order()).prepared,true);
@@ -122,6 +122,18 @@ module.exports=async function({be,root,origin,user,merchant,admin,product,fixtur
    const inputValue=input();const prepared=await Promise.all([order(),second.evaluate(x=>s.placeOrder(x),inputValue)]);assert.ok(prepared.every(r=>r.prepared));const a=await pending(),b=await second.evaluate(()=>s.getPendingCheckout());assert.equal(a.key,b.key);
    const created=await Promise.all([order({confirm:true}),second.evaluate(x=>s.placeOrder({...x,confirm:true}),inputValue)]);assert.ok(created.every(r=>r.success));assert.equal(created[0].orderCode,created[1].orderCode);assert.equal(await Checkout.countDocuments({requestKey:a.key}),1);
   });
+  await check('two tabs explicitly start anew once; delayed old lookup cannot replace new active or consume cart',async()=>{
+   const token=await open();await order();await order({confirm:true});const old=await pending();
+   const second=await context.newPage();await second.goto(front+'/__verify');await second.evaluate(async({token,id})=>{const t=await import('/__verify/token.js');t.saveToken(token);t.saveSessionUser({_id:id});globalThis.s=await import('/__verify/service.js');},{token,id:String(user._id)});
+   const starts=await Promise.all([page.evaluate(key=>s.startNewCheckout(key).then(()=>true,()=>false),old.key),second.evaluate(key=>s.startNewCheckout(key).then(()=>true,()=>false),old.key)]);assert.equal(starts.filter(Boolean).length,1);
+   assert.equal((await order()).prepared,true);const next=await pending();assert.notEqual(next.key,old.key);
+   let release,entered;const ready=new Promise(r=>entered=r),gate=new Promise(r=>release=r);
+   await second.route('**/api/checkout/attempts/products/'+old.key,async route=>{entered();await gate;await route.continue();});
+   const late=second.evaluate(({input,key})=>s.placeOrder({...input,expectedKey:key}),{input:input(),key:old.key});await ready;
+   const creating=order({confirm:true});release();const [replay,created]=await Promise.all([late,creating]);
+   assert.equal(replay.orderCode,old.result.orderCode);assert.equal(replay.consumeCart,false);assert.equal(created.success,true);assert.equal((await pending()).key,next.key);
+   assert.equal(await Checkout.countDocuments({requestKey:{$in:[old.key,next.key]}}),2);
+  });
   const {user:other}=await fixture.createUser({role:'merchant'});const otherBrand=await fixture.createBrand({ownerId:other._id});const foreign=await fixture.createProduct(otherBrand);const archived=await fixture.createProduct(await fixture.createBrand({ownerId:merchant._id}));archived.archivedAt=new Date();await archived.save();
   const comboBody={name:'Gap fixture combo',descriptions:'Local fixture',products:[{productId:String(product._id),quantity:1}],stock:30,validTo:'2099-01-01'};
   let comboId;
@@ -139,6 +151,13 @@ module.exports=async function({be,root,origin,user,merchant,admin,product,fixtur
   await check('merchant creates own combo',async()=>{const r=await api('POST','/manager/combos',comboBody,merchant);assert.equal(r.status,201,JSON.stringify(r));assert.equal(String((await Box.findById(r.data.data._id)).ownerId),String(merchant._id));});
   await check('admin edits existing combo without changing owner',async()=>{const before=await Box.findById(comboId);const r=await api('PUT','/boxes/update-box/'+comboId,{name:'Admin edited fixture'});assert.equal(r.status,200,JSON.stringify(r));assert.equal(String((await Box.findById(comboId)).ownerId),String(before.ownerId));});
   for(const bad of [foreign._id,archived._id,new (be('mongoose').Types.ObjectId)()])await check('merchant invalid component edit '+(String(bad)===String(foreign._id)?'foreign':String(bad)===String(archived._id)?'archived':'missing')+' is atomic',async()=>{const before=await catalogSnapshot();const r=await api('PUT','/manager/combos/'+comboId,{name:'Must not persist',products:[{productId:String(bad),quantity:1}]},merchant);assert.ok(r.status>=400&&r.status<500);assert.equal(await catalogSnapshot(),before);});
+  await check('rendered merchant combo form creates and edits; DB owner and value verified',async()=>{
+   await open(merchant);await page.goto(front+'/manager/combos');await page.getByRole('button',{name:'Tạo combo',exact:true}).click();
+   await page.locator('#package-name').fill('UI fixture combo');await page.locator('#package-description').fill('Local fixture only');await page.locator('#package-stock').fill('2');await page.locator('#package-validTo').fill('2099-01-01');
+   await page.getByLabel(product.name,{exact:false}).check();await page.getByRole('button',{name:'Lưu',exact:true}).click();await page.getByRole('heading',{name:'UI fixture combo',exact:true}).waitFor();
+   const stored=await Box.findOne({name:'UI fixture combo'});assert.ok(stored);assert.equal(String(stored.ownerId),String(merchant._id));assert.equal(stored.value,100000);
+   const row=page.getByRole('article').filter({has:page.getByRole('heading',{name:'UI fixture combo',exact:true})});await row.getByRole('button',{name:'Sửa UI fixture combo',exact:true}).click();await page.locator('#package-name').fill('UI fixture combo edited');await page.getByRole('button',{name:'Lưu',exact:true}).click();await page.getByRole('heading',{name:'UI fixture combo edited',exact:true}).waitFor();assert.equal((await Box.findById(stored._id)).name,'UI fixture combo edited');
+  });
   const template=await api('POST','/subcribe-plans/create-subscription-template',{name:'Gap subscription',boxId:comboId,planType:'1_month',discountPercent:0});assert.equal(template.status,201,JSON.stringify(template));
   const subData={templateId:template.data.data._id,expectedTotalAmount:100000,shippingAddress:{address:initialAddress.address,district:initialAddress.district,city:initialAddress.city,country:initialAddress.country,phone:initialAddress.phone}};
   const subOrder=options=>page.evaluate(async({data,options})=>{try{const sub=await import('/__verify/subscription.js');return await sub.userSubscribeApi(data,options);}catch(e){return {success:false,error:e.response?.data?.message||e.message};}},{data:subData,options});
@@ -166,8 +185,9 @@ module.exports=async function({be,root,origin,user,merchant,admin,product,fixtur
    const prepared=await subPending();assert.ok(prepared.hash);await page.getByRole('button',{name:'Xác nhận gói, địa chỉ và tổng trả trước trên',exact:true}).click();await page.waitForURL('**/checkout?code=*');const payment=page.url();await page.getByText('Đang chờ thanh toán, hệ thống tự kiểm tra mỗi vài giây.',{exact:true}).waitFor();await page.reload();await page.getByText('Đang chờ thanh toán, hệ thống tự kiểm tra mỗi vài giây.',{exact:true}).waitFor();assert.equal(page.url(),payment);assert.equal(await Checkout.countDocuments({requestKey:prepared.key}),1);await page.screenshot({path:'.cache/checkout-gap-redis-ui.png',fullPage:true});
   });
  }catch(error){results.push({name:'suite setup outside individual cases',status:'fail',error:error.message});}finally{
-  await browser.close();const redis=be(path.join(root,'src/config/redis'));const keys=await redis.getClient().keys(redis.namespace()+':*');
+  await browser.close();const redis=be(path.join(root,'src/config/redis'));const cleanup=be('redis').createClient({url:process.env.TEST_REDIS_URL});await cleanup.connect();const keys=await cleanup.keys(redis.namespace()+':*');
   const evidence={date:new Date().toISOString(),frontend:front,backend:origin,redis:{url:process.env.TEST_REDIS_URL,ready:redis.ready(),namespace:redis.namespace(),keyCount:keys.length},database:'disposable MongoMemoryReplSet',results,passed:results.filter(r=>r.status==='pass').length,failed:results.filter(r=>r.status==='fail').length,errors,scope:'Chromium native FE module/service integration; rendered products snapshot/COD and subscription payment smoke; merchant/admin HTTP mutations',injection:'signed expired JWT at operation dispatch; session deletion at dispatch; post-201 response abort; module routing only; real HTTP/DB/Redis/storage/locks',notVerified:['profile form UI mutations (address API is real)','merchant/admin full form and image upload UI','browser engine other than Chromium','network partition during Mongo commit; multi-node failover']};
+  if(keys.length)await cleanup.del(keys);await cleanup.quit();
   const serialized=JSON.stringify(evidence,null,2);fs.writeFileSync('.cache/checkout-gap-results.json',serialized);fs.writeFileSync('.cache/checkout-gap-results-'+evidence.date.replace(/[:.]/g,'-')+'.json',serialized);console.log(JSON.stringify({passed:evidence.passed,failed:evidence.failed}));if(evidence.failed)process.exitCode=1;
  }
 };

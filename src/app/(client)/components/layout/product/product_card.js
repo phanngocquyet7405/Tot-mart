@@ -103,7 +103,7 @@ export const ProductCard = ({
           </h3>
 
           {/* Rating */}
-          <div className="flex items-center gap-2 mb-3">
+          {Number.isSafeInteger(product.reviewCount) && product.reviewCount > 0 && Number.isFinite(product.rating) && product.rating > 0 && product.rating <= 5 && <div className="flex items-center gap-2 mb-3">
             <div className="flex gap-0.5">
               {[...Array(5)].map((_, i) => (
                 <Star
@@ -117,9 +117,9 @@ export const ProductCard = ({
               ))}
             </div>
             <span className="text-xs text-gray-500">
-              {product.reviews ? `(${product.reviews})` : ""}
+              ({product.reviewCount})
             </span>
-          </div>
+          </div>}
 
           {/* Price */}
           <div className="flex items-baseline gap-2 mb-4">

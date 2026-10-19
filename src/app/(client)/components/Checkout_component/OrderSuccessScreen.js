@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle2, ShoppingBag, ArrowRight } from "lucide-react";
 
-export function OrderSuccessScreen() {
+export function OrderSuccessScreen({ onNew, submitting = false }) {
   const router = useRouter();
 
   return (
@@ -65,6 +65,13 @@ export function OrderSuccessScreen() {
           >
             <ShoppingBag size={15} />
             Xem đơn hàng của tôi
+          </button>
+          <button
+            onClick={onNew}
+            disabled={submitting || !onNew}
+            className="w-full border-2 border-stone-200 text-stone-600 py-3.5 rounded-xl font-bold hover:border-[#C85C3C]/30 hover:text-[#C85C3C] transition-colors"
+          >
+            Đặt đơn mới
           </button>
           <button
             onClick={() => router.push("/")}

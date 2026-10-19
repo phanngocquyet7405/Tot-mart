@@ -4,6 +4,8 @@
 
 ## Kiểm chứng và bàn giao hiện tại
 
+- [FE-CHECKOUT-ACCEPTANCE-2026-10-19.md](FE-CHECKOUT-ACCEPTANCE-2026-10-19.md): sửa hai lỗi P1, hợp đồng terminate-with-body, mua/đăng ký lần hai, kết quả kiểm thử tách cấp và phần còn thiếu trước phát hành.
+
 - [STOREFRONT-UI-REFINEMENT.md](STOREFRONT-UI-REFINEMENT.md): critique/audit từ source, thay đổi UI sản phẩm–gói–box/gift, giới hạn browser và checklist nghiệm thu local.
 - [CHECKOUT-SUBSCRIPTION-RECOVERY.md](CHECKOUT-SUBSCRIPTION-RECOVERY.md): tích hợp prepare/lookup/terminate ngày 18/10, kiểm chứng FE–BE local và browser; giữ nguyên bằng chứng và giới hạn của bản ghi 17/10.
 - [CHECKOUT-RECOVERY-GAP-VERIFICATION.md](CHECKOUT-RECOVERY-GAP-VERIFICATION.md): kiểm chứng bổ sung auth/address/storage/tab/merchant-admin với Redis local thật; phân biệt module browser, UI smoke và HTTP, cùng điều kiện nghiệm thu staging.

@@ -7,9 +7,17 @@ export async function resolveAttempt({ attempt, kind, api, save, currentUser, te
   if (attempt.kind && attempt.kind !== kind) throw new Error('Loại giao dịch cũ không khớp. Liên hệ TotMart để đối chiếu.');
   if (!/^[A-Za-z0-9_-]{16,128}$/.test(attempt.key || '')) throw new Error('Reference cũ thiếu hoặc không hợp lệ. Liên hệ TotMart để đối chiếu, không tạo key thay thế.');
   const body = attempt.serializedBody || (attempt.payload && JSON.stringify(attempt.payload));
+  // Bind transport as well as response persistence to the attempt owner. Axios
+  // dispatch/refresh may run after the synchronous identity check above.
+  const transport = api;
+  api = {
+    post: (url, data, options) => transport.post(url, data, { ...options, _requestUserId: attempt.userId }),
+    get: (url, options) => transport.get(url, { ...options, _requestUserId: attempt.userId }),
+  };
   const persist = async data => {
     checkUser();
     if (data.key && data.key !== attempt.key) throw new Error('Reference trả về không khớp yêu cầu cũ. Giữ nguyên lần thử để đối chiếu.');
+    if (data.hash && attempt.hash && data.hash !== attempt.hash) throw new Error('Hash trả về không khớp reference cũ.');
     if (data.result) {
       // Replay subscriptions contain shipping details; retain only recovery identifiers.
       const result = data.result;
@@ -20,6 +28,20 @@ export async function resolveAttempt({ attempt, kind, api, save, currentUser, te
     if (!await save(attempt)) throw new Error('Không lưu được kết quả. Giữ yêu cầu cũ và thử kiểm tra lại.');
   };
   const base = `/checkout/attempts/${kind}`;
+  // Without a server hash, termination must not depend on prepare/address lookup.
+  // A lost response is recovered by retrying these exact bytes and path.
+  terminate ||= attempt.terminationRequested === true && !attempt.hash;
+  if (terminate && !attempt.hash && attempt.state !== 'created') {
+    if (!body) throw new Error('Thiếu body gốc để kết thúc yêu cầu. Liên hệ TotMart để đối chiếu.');
+    await persist({ terminationRequested: true });
+    checkUser();
+    const response = await api.post(`${base}/${attempt.key}/terminate-with-body`, body);
+    if (!response.success || response.data?.key !== attempt.key || !/^[a-f0-9]{64}$/.test(response.data?.hash || '') || !['invalidated', 'created'].includes(response.data?.state)) throw new Error('Chưa xác nhận kết thúc yêu cầu. Giữ nguyên reference và thử lại.');
+    await persist(response.data);
+    if (attempt.state === 'invalidated' && attempt.canRestart === true) return { invalidated: true };
+    if (attempt.state === 'created' && attempt.result?.orderCode) return { success: true, data: attempt.result };
+    throw new Error('Chưa có xác nhận cho phép bắt đầu lần thử mới.');
+  }
   let preparedNow = false;
   if (!attempt.hash) {
     if (!body) throw new Error('Yêu cầu cũ thiếu nội dung và hash. Liên hệ TotMart để đối chiếu; không tạo đơn thay thế.');
@@ -29,8 +51,9 @@ export async function resolveAttempt({ attempt, kind, api, save, currentUser, te
     preparedNow = true;
   }
   const headers = { 'Attempt-Payload-Hash': attempt.hash };
+  checkUser();
   if (!/^[a-f0-9]{64}$/.test(attempt.hash)) throw new Error('Hash cũ không hợp lệ. Liên hệ TotMart để đối chiếu.');
-  const response = terminate
+  const response = terminate && attempt.state !== 'created'
     ? await api.post(`${base}/${attempt.key}/terminate`, undefined, { headers })
     : await api.get(`${base}/${attempt.key}`, { headers });
   if (!response.success || !['unknown', 'processing', 'created', 'rejected', 'invalidated'].includes(response.data?.state)) throw new Error('Chưa xác nhận được trạng thái yêu cầu.');
@@ -51,5 +74,5 @@ export async function resolveAttempt({ attempt, kind, api, save, currentUser, te
   const created = await api.post(kind === 'products' ? '/checkout/check-out' : '/subcribe-plans/user-subscribe', body, { headers: { 'Idempotency-Key': attempt.key } });
   if (!created.success || !created.data?.orderCode) throw new Error('Chưa xác nhận mã giao dịch. Kiểm tra lại yêu cầu cũ.');
   await persist({ state: 'created', result: created.data, canRestart: false });
-  return created;
+  return { ...created, createdNow: true };
 }

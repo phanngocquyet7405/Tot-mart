@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { cartLineKey } from '@/app/util/cartLine.mjs';
+import { getTokenUserId } from '@/app/middleware/tokenMiddleware';
 import { AppContext } from "@/app/context/AppContext";
 import { useCart } from "@/app/context/CartContext";
 import {
@@ -16,6 +17,7 @@ import {
   quoteCart,
   calcShippingFee,
   placeOrder,
+  startNewCheckout,
   pollPaymentStatus,
   checkPaymentNow,
   EMPTY_NEW_ADDRESS,
@@ -33,6 +35,10 @@ export function useCheckout() {
   }, []);
   const searchParams = useSearchParams();
   const resumeCode = searchParams.get("code");
+  // Bind this tab to the first reference it observes, even after another tab starts anew.
+  const contextKey = useRef(null);
+  const activeAttempt = getPendingCheckout(undefined, resumeCode);
+  if (!contextKey.current && activeAttempt?.key) contextKey.current = activeAttempt.key;
   const {
     cartItems,
     cartVersion, setCartVersion,
@@ -241,8 +247,9 @@ export function useCheckout() {
       submittingRef.current = true;
       setSubmitting(true);
       try {
+        if (String(user?._id || user?.id) !== String(getTokenUserId())) throw new Error('Tài khoản đã thay đổi. Tải lại thông tin trước khi thanh toán.');
         const result = await placeOrder({
-          confirm: options.confirm === true, terminate: options.terminate === true,
+          confirm: options.confirm === true, terminate: options.terminate === true, expectedKey: contextKey.current,
           addressId: selectedAddress?._id,
           address: selectedAddress, totalAmount: quote?.totalAmount,
           paymentMethod,
@@ -250,11 +257,13 @@ export function useCheckout() {
           couponCode: couponApplied ? coupon : undefined,
           cartItems, cartVersion, quoteFingerprint: quote?.fingerprint,
         });
-        if (!mounted.current) return;
+        if (!mounted.current || String(user?._id || user?.id) !== String(getTokenUserId())) return;
+        contextKey.current ||= getPendingCheckout()?.key;
         if (!result.success) {
+          if (result.invalidated) { contextKey.current = null; refreshAttempt(n => n + 1); }
           if (result.cartVersion !== undefined) setCartVersion(result.cartVersion);
           if (result.status === 409) { setQuote(null); setQuoteGeneration(value => value + 1); }
-
+          if (result.prepared || result.invalidated) { toast.info(result.error); return; }
           throw new Error(result.error || "Không thể đặt hàng.");
         }
         if (!result.paymentMethod) {
@@ -262,7 +271,7 @@ export function useCheckout() {
           return;
         }
         if (result.paymentMethod === "cod") {
-          if (result.consumeCart) clearCart();
+          if (result.consumeCart) clearCart(cartItems);
           setOrderSuccess(true);
           return;
         }
@@ -277,7 +286,7 @@ export function useCheckout() {
         setOnlineAmount(result.totalAmount ?? 0);
         // Persist the recoverable URL before the next network operation.
         router.replace(`/checkout?code=${encodeURIComponent(code)}`);
-        if (result.consumeCart) clearCart();
+        if (result.consumeCart) clearCart(cartItems);
         const info = await checkPaymentNow(code);
         if (!mounted.current) return;
         if (info.status === "error") {
@@ -291,7 +300,6 @@ export function useCheckout() {
         setOnlineAmount(info.remainingAmount ?? result.totalAmount ?? info.totalAmount ?? 0);
         setPaymentStatus(info.status === "paid" ? "paid" : "awaiting_payment");
         // Giỏ đã được tiêu thụ ở BE; giữ paymentCode trên URL để khôi phục sau refresh
-        if (result.consumeCart) clearCart();
         router.replace(`/checkout?code=${encodeURIComponent(code)}`);
         if (info.status === "paid") setOrderSuccess(true);
       } catch (error) {
@@ -312,6 +320,7 @@ export function useCheckout() {
       coupon,
       cartItems, cartVersion, quote, setCartVersion,
       clearCart,
+      user,
       router,
     ],
   );
@@ -423,7 +432,22 @@ export function useCheckout() {
     couponApplied,
     handleApplyCoupon,
     handlePlaceOrder,
-    pendingAttempt: getPendingCheckout(),
+    handleStartNew: async () => {
+      if (submittingRef.current) return;
+      submittingRef.current = true;
+      setSubmitting(true);
+      try {
+        await startNewCheckout(contextKey.current);
+        contextKey.current = null;
+        activeCodeRef.current = null;
+        setPaymentCode(null); setPaymentStatus('idle'); setOrderSuccess(false);
+        setQrUrl(''); setQuote(null); setStep('address');
+        setQuoteGeneration(value => value + 1);
+        router.replace('/checkout');
+      } catch (error) { toast.error(error.message); }
+      finally { submittingRef.current = false; setSubmitting(false); }
+    },
+    pendingAttempt: getPendingCheckout(contextKey.current, resumeCode),
     pendingDraftChanged: Boolean(getPendingCheckout()?.payload && (getPendingCheckout().payload.addressId !== selectedAddress?._id || getPendingCheckout().summary?.cart !== JSON.stringify(toCartPayload(cartItems)))),
     handleAddressNext,
     savingAddress,

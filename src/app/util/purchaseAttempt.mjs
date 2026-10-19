@@ -62,3 +62,37 @@ export async function withAttemptLock(scope, action) {
 export function maskedAddress(address) {
   return address ? [address.district, address.city || address.province, address.phone ? '***' + address.phone.slice(-3) : ''].filter(Boolean).join(', ') : 'Chưa lưu tóm tắt địa chỉ';
 }
+
+export function referenceScope(scope, key) { return `${scope}:created:${key}`; }
+export function createdReferenceByCode(scope, code) {
+  try {
+    const storage = globalThis.localStorage;
+    for (let i = 0; storage && i < storage.length; i++) {
+      const key = storage.key(i);
+      if (key?.startsWith(`${scope}:created:`)) {
+        const value = readAttempt(key);
+        if (value?.state === 'created' && value.result?.orderCode === code) return value;
+      }
+    }
+  } catch { /* A payment URL can still recover through the authenticated BE. */ }
+  return null;
+}
+// Called only by an explicit user action, under the same browser-wide lock as create.
+export async function startNewPurchase(scope, expectedKey, currentUser, userId) {
+  return withAttemptLock(scope, async () => {
+    if (!userId || currentUser() !== userId) throw new Error('Tài khoản đã thay đổi.');
+    const attempt = readAttempt(scope);
+    if (!expectedKey || attempt?.key !== expectedKey || attempt.state !== 'created' || !attempt.result?.orderCode || !attempt.hash) throw new Error('Cần xác nhận giao dịch cũ đã tồn tại trước khi bắt đầu giao dịch mới.');
+    const result = attempt.result;
+    const reference = { userId, kind: attempt.kind, key: attempt.key, hash: attempt.hash, state: 'created', result: { orderId: result.orderId, _id: result._id, orderCode: result.orderCode, paymentCode: result.paymentCode, totalAmount: result.totalAmount }, paymentMethod: attempt.payload?.paymentMethod || attempt.paymentMethod, sentAt: attempt.sentAt };
+    if (!storeAttempt(referenceScope(scope, attempt.key), reference)) throw new Error('Không lưu được reference cũ. Chưa thể bắt đầu giao dịch mới.');
+    // Remove the active pointer only after a durable minimal history reference exists.
+    globalThis.localStorage.removeItem(scope);
+    globalThis.sessionStorage?.removeItem(scope);
+    if (globalThis.localStorage.getItem(scope)) throw new Error('Không thể giải phóng reference cũ.');
+    memory.delete(scope);
+    if (attempt.legacyScope) clearAttempt(attempt.legacyScope);
+    globalThis.dispatchEvent?.(new Event('totmart:attempt-changed'));
+    return reference;
+  });
+}

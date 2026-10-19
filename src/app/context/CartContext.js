@@ -132,6 +132,15 @@ export const CartProvider = ({ children }) => {
     if (loadedScope === key)
       store(key, JSON.stringify({ items: cartItems, version: cartVersion }));
   }, [cartItems, cartVersion, key, loadedScope]);
+  useEffect(() => {
+    const changed = event => {
+      if (event.key !== key || loadedScope !== key) return;
+      const next = read(key);
+      setCartItems(next.items); setCartVersion(next.version || 0);
+    };
+    window.addEventListener('storage', changed);
+    return () => window.removeEventListener('storage', changed);
+  }, [key, loadedScope]);
   const isMounted = !isLoading && loadedScope === key;
   const cartLocked = () => {
     const attempt = user && readAttempt(`totmart_checkout_attempt_${user._id}`);
@@ -174,10 +183,11 @@ export const CartProvider = ({ children }) => {
     );
   const removeFromCart = (id) =>
     !cartLocked() && setCartItems((items) => items.filter((item) => identity(item) !== id));
-  const clearCart = () => {
-    setCartItems([]);
+  const clearCart = (expectedItems) => {
+    // Object identity fences even a new cart with identical products and quantities.
+    if (expectedItems && cartItems !== expectedItems) return;
+    setCartItems(current => expectedItems && current !== expectedItems ? current : []);
     setCartVersion(0);
-    store(key, null);
   };
   const visible = isMounted ? cartItems : [];
   const cartQuote = isMounted && quoteResult?.scope === key && quoteResult.signature === signature ? quoteResult.data : null;

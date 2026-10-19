@@ -98,6 +98,8 @@ test('suggested purchases require opt-in and unavailable stock cannot be selecte
 test('review summary shows a rating only with actual review count and a valid score', () => {
   const absent = render(ProductInfoTabs, { product: {}, activeTab: 'reviews' });
   assert.doesNotMatch(absent, /lucide-star|NaN|0\.0/);
+  assert.doesNotMatch(absent, />0 đánh giá</);
+  assert.match(absent, /Chưa có dữ liệu đánh giá được xác nhận/);
   const present = render(ProductInfoTabs, { product: { rating: 4.5, reviewCount: 2 }, activeTab: 'reviews' });
   assert.match(present, /4\.5/);
   assert.match(present, /lucide-star/);
