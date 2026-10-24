@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -43,7 +44,7 @@ export default function ProductsGrid({ categoryId, brandSlug, searchQuery = "" }
         setProducts(res.data || []); setPagination(res.pagination);
       } catch (err) {
         if (!active) return;
-        console.error("Error fetching products:", err);
+        logger.error("Error fetching products:", err);
         setError("Could not load products.");
       } finally {
         if (active) setLoading(false);

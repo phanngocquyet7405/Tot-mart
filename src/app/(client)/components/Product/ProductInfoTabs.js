@@ -1,6 +1,7 @@
 "use client";
 
 import { Info, Star } from "lucide-react";
+import { sanitizeHtml } from "@/app/util/htmlSanitizer";
 
 const TABS = [
   { key: "details", label: "Mô tả sản phẩm" },
@@ -38,7 +39,7 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
             {product.description ? (
               <div
                 className="prose prose-sm max-w-none prose-p:my-2 prose-p:leading-relaxed prose-stone"
-                dangerouslySetInnerHTML={{ __html: product.description }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }}
               />
             ) : (
               <span className="italic text-stone-400">

@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { formatCurrency } from "@/app/util/formatter";
 import { useState, useEffect, useRef } from "react";
@@ -115,7 +116,7 @@ export default function UpdateProductPage() {
           if (product) fillForm(product);
         }
       } catch (error) {
-        console.error(error);
+        logger.error(error);
         toast.error("Lỗi khi tải dữ liệu");
       } finally {
         setLoading(false);

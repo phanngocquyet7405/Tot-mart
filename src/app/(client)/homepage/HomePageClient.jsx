@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useState, useEffect } from "react";
 import NavMenu from "../components/ui/nav_menu";
@@ -30,7 +31,7 @@ export default function HomePage() {
           setProducts(data);
         }
       } catch (err) {
-        console.error("Lỗi khi lấy sản phẩm cho trang chủ:", err);
+        logger.error("Lỗi khi lấy sản phẩm cho trang chủ:", err);
       } finally {
         setLoading(false);
       }

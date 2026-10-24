@@ -82,6 +82,7 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
       const res = await subscriptionApi.subscribe({}, { resume: true, expectedKey: contextKey.current, ...options });
       if (res.invalidated) { contextKey.current = null; refreshAttempt(n => n + 1); return; }
       if (res.prepared) return;
+      if (res.confirming) { toast.info(res.error || 'Hệ thống đang xác nhận đăng ký gói.'); return; }
       onClose();
       router.push(`/checkout?code=${encodeURIComponent(res.data.paymentCode)}`);
     } catch (err) { toast.error(err.message); }
@@ -312,18 +313,18 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
           <DialogDescription className="mt-3 text-sm text-stone-600">{step === 1 ? 'So sánh tổng trả trước và bình quân tháng để chọn kỳ hạn phù hợp.' : `Nhận ${box.name} theo kỳ hạn ${selectedPlan?._months} tháng đã chọn.`}</DialogDescription>
           <p className="my-5 text-sm font-semibold text-stone-600" aria-live="polite">Bước {step}/2 · {step === 1 ? 'Chọn kỳ hạn' : 'Chọn địa chỉ'}</p>
           {pending && <section className="tm-notice mb-6" role="status">
-            <h3>{pending.state === 'created' ? 'Đăng ký đã được tạo' : 'Kiểm tra yêu cầu đăng ký trước'}</h3>
+            <h3>{pending.state === 'created' ? 'Đăng ký đã được tạo' : pending.state === 'confirming' ? 'Đang xác nhận kết quả đăng ký' : 'Kiểm tra yêu cầu đăng ký trước'}</h3>
             <p className="mt-2">{pending.summary?.name || pending.payload?.templateId} · {pending.summary?.months || '?'} tháng.</p>
             <dl><div><dt>Tổng trả trước</dt><dd>{Number.isFinite(pending.payload?.expectedTotalAmount) ? formatCurrency(pending.payload?.expectedTotalAmount) : 'Cần đối chiếu'}</dd></div><div><dt>Địa chỉ cũ</dt><dd>{pending.summary?.address || maskedAddress(pending.payload?.shippingAddress)}</dd></div><div><dt>Thời điểm gửi</dt><dd>{pending.sentAt ? new Date(pending.sentAt).toLocaleString('vi-VN') : 'Chưa lưu'}</dd></div></dl>
             <p>Gói và địa chỉ hiện tại không thay thế yêu cầu cũ. Hãy xử lý yêu cầu này trước khi đăng ký gói khác.</p>
             {pending.payload?.shippingAddress && <p>Địa chỉ xác nhận: {Object.values(pending.payload.shippingAddress).filter(Boolean).join(', ')}</p>}
-            <p>Trạng thái: {pending.state || 'chưa xác định'}</p>
+            <p>Trạng thái: {pending.state === 'confirming' ? 'đang xác nhận' : pending.state || 'chưa xác định'}</p>
             {pending.error?.message && <p role="alert">{pending.error.message}</p>}
             {pending.hash && pending.state !== 'rejected' && pending.state !== 'created' && <button className="tm-button tm-button--primary" disabled={submitting} onClick={() => resumePending({ confirm: true })}>Xác nhận gói, địa chỉ và tổng trả trước trên</button>}
-            {pending.state === 'created' ? <button className="tm-button tm-button--primary" disabled={submitting} onClick={startNew}>Đăng ký mới</button> : <button className="tm-button tm-button--outline" disabled={submitting} onClick={() => resumePending({ terminate: true })}>Kết thúc lần thử</button>}
+            {pending.state === 'created' ? <button className="tm-button tm-button--primary" disabled={submitting} onClick={startNew}>Đăng ký mới</button> : pending.state !== 'confirming' ? <button className="tm-button tm-button--outline" disabled={submitting} onClick={() => resumePending({ terminate: true })}>Kết thúc lần thử</button> : null}
             <p className="tm-notice__reference mt-3">Mã đối chiếu: {pending.key}</p>
             {needsReconciliation(pending) && <p className="mt-3 font-semibold">Cần TotMart xác minh. Chưa thể gửi lại hay bắt đầu lần thử mới.</p>}
-            <div className="mt-4 flex flex-wrap gap-3"><button type="button" className="tm-button tm-button--outline" disabled={submitting || needsReconciliation(pending)} onClick={() => resumePending()}>{submitting ? 'Đang kiểm tra…' : 'Tiếp tục yêu cầu cũ'}</button><Link className="tm-text-button" href="/pages/contact-us">Liên hệ TotMart</Link></div>
+            <div className="mt-4 flex flex-wrap gap-3"><button type="button" className="tm-button tm-button--outline" disabled={submitting || needsReconciliation(pending)} onClick={() => resumePending()}>{submitting ? 'Đang kiểm tra…' : pending.state === 'confirming' ? 'Kiểm tra lại kết quả' : 'Tiếp tục yêu cầu cũ'}</button><Link className="tm-text-button" href="/pages/contact-us">Liên hệ TotMart</Link></div>
           </section>}
           {step === 1 ? <>
             {loadingPlans ? <p role="status" className="py-8">Đang tải kỳ hạn…</p> : plansError ? <div role="alert" className="space-y-3"><p>{plansError}</p><button type="button" className="tm-button tm-button--outline" onClick={()=>{setPlansError('');setPlansReload(n=>n+1);}}>Thử tải lại</button></div> : <PlanComparison plans={displayPlans} selectedId={selectedPlan?._id} onSelect={setSelectedPlan} />}

@@ -1,10 +1,10 @@
+"use client";
 /**
  * useAdminSubscriptions.js
  * Custom hook — Admin quản lý danh sách đăng ký
  * Tuân thủ microservice: chỉ gọi service layer, không gọi API trực tiếp
  */
 
-"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";

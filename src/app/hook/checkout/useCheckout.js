@@ -264,6 +264,11 @@ export function useCheckout() {
           if (result.cartVersion !== undefined) setCartVersion(result.cartVersion);
           if (result.status === 409) { setQuote(null); setQuoteGeneration(value => value + 1); }
           if (result.prepared || result.invalidated) { toast.info(result.error); return; }
+          if (result.confirming) {
+            refreshAttempt(n => n + 1);
+            toast.info(result.error || "Hệ thống đang xác nhận kết quả giao dịch. Vui lòng bấm kiểm tra lại.");
+            return;
+          }
           throw new Error(result.error || "Không thể đặt hàng.");
         }
         if (!result.paymentMethod) {

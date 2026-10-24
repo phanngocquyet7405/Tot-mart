@@ -1,3 +1,4 @@
+"use client";
 /**
  * PaymentStep.js
  * Bước 3 — Chọn phương thức thanh toán + mã giảm giá + đặt hàng.
@@ -7,7 +8,6 @@
  * đơn đã chốt ở BE nên không cho đổi phương thức hay quay lại ở bước này.
  */
 
-"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";

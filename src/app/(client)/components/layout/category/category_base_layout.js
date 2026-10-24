@@ -1,5 +1,5 @@
-// components/layout/category/category_base_layout.jsx
 "use client";
+// components/layout/category/category_base_layout.jsx
 
 import React, { useState } from "react";
 import AnnouncementBar from "../../ui/AnnouncementBar";

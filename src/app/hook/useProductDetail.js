@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -20,18 +21,20 @@ import {
  * service → hooks → components → page orchestrator đang dùng trong dự án
  * (ví dụ Checkout, admin subscription plan).
  */
-export function useProductDetail(slug) {
+export function useProductDetail(slug, initialProduct = null) {
   const productId = extractProductId(slug);
   const router = useRouter();
   const { addToCart } = useAddToCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
 
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState(initialProduct);
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialProduct);
   const [error, setError] = useState(null);
   const [reload, setReload] = useState(0);
-  const [selectedImage, setSelectedImage] = useState(PLACEHOLDER_IMAGE);
+  const [selectedImage, setSelectedImage] = useState(
+    initialProduct?.images?.[0]?.url || PLACEHOLDER_IMAGE,
+  );
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("details");
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -46,6 +49,20 @@ export function useProductDetail(slug) {
     }
 
     let cancelled = false;
+
+    if (initialProduct && reload === 0) {
+      const categoryId = initialProduct.category?._id || initialProduct.category;
+      if (categoryId) {
+        fetchRelatedProducts(categoryId, initialProduct._id)
+          .then((related) => {
+            if (!cancelled) setRelatedProducts(related);
+          })
+          .catch(() => {});
+      }
+      return () => {
+        cancelled = true;
+      };
+    }
 
     const load = async () => {
       try {
@@ -77,7 +94,7 @@ export function useProductDetail(slug) {
         if (!cancelled) {
           setProduct(null);
           setError(err.response?.status === 404 ? null : "Không tải được thông tin sản phẩm. Hãy kiểm tra kết nối và thử lại.");
-          console.error("Lỗi tải sản phẩm:", err);
+          logger.error("Lỗi tải sản phẩm:", err);
           toast.error("Có lỗi xảy ra khi tải sản phẩm");
         }
       } finally {
@@ -89,7 +106,7 @@ export function useProductDetail(slug) {
     return () => {
       cancelled = true;
     };
-  }, [productId, reload]);
+  }, [productId, reload, initialProduct]);
 
   const increaseQty = useCallback(() => {
     setQuantity((q) => {
@@ -161,7 +178,7 @@ export function useProductDetail(slug) {
           url,
         });
       } catch (err) {
-        if (err.name !== "AbortError") console.error(err);
+        if (err.name !== "AbortError") logger.error(err);
       }
     } else {
       try {

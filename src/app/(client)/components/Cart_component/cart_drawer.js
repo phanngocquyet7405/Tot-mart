@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 import { matchQuoteLine } from "@/app/util/cartQuote.mjs";
 import { cartLineKey } from "@/app/util/cartLine.mjs";
 
@@ -64,7 +65,7 @@ export default function CartDrawer({ open, setOpen }) {
           setSuggestions(limitProducts);
         }
       } catch (error) {
-        console.error("Lỗi lấy sản phẩm gợi ý:", error);
+        logger.error("Lỗi lấy sản phẩm gợi ý:", error);
       } finally {
         setLoadingSuggestions(false);
       }

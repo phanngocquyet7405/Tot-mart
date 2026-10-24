@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
@@ -48,7 +49,7 @@ export function useAdminProducts() {
       setCategories(filterData.categories);
       setBrands(filterData.brands);
     } catch (err) {
-      console.error("Fetch error:", err);
+      logger.error("Fetch error:", err);
       setError(
         "Không thể tải danh sách sản phẩm. Vui lòng kiểm tra kết nối API.",
       );

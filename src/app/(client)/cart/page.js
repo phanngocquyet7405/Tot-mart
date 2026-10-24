@@ -1,3 +1,4 @@
+"use client";
 /**
  * page.js — Trang Giỏ hàng đầy đủ
  * Route: /cart
@@ -8,7 +9,6 @@
  * trang chi tiết sản phẩm (nền kem #faf8f4, accent amber-800).
  */
 
-"use client";
 import { cartLineKey } from "@/app/util/cartLine.mjs";
 
 import Link from "next/link";

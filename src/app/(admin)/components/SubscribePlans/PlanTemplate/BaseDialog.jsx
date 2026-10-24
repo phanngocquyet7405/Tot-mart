@@ -1,8 +1,8 @@
+"use client";
 // components/SubscribePlans/BaseDialog.jsx
 // Custom dialog primitive — KHÔNG dùng shadcn Dialog/AlertDialog.
 // Dùng chung cho CancelPlanDialog, PlanDetailDialog, v.v.
 
-"use client";
 
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";

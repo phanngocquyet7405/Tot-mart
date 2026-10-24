@@ -88,7 +88,7 @@ test('terminal refresh denial notifies session owner; ordinary 403 never trigger
 
 test('failed refresh clears memory; failed login never triggers another auth POST', async () => {
   let calls = 0;
-  const session = middleware(async()=>{calls++;throw new Error('refresh failed');});
+  const session = middleware(async()=>{calls++;throw Object.assign(new Error('refresh failed'), { response: { status: 401 } });});
   const client = axios.create({baseURL:'/api',adapter:async config=>{throw new axios.AxiosError('unauthorized','ERR_BAD_REQUEST',config,null,{status:401});}});
   session.setup(client);
   await assert.rejects(client.post('/home/login',{email:'test@example.invalid',password:'test-only'}));

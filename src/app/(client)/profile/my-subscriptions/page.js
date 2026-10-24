@@ -1,3 +1,4 @@
+"use client";
 /**
  * page.js — Client: Trang quản lý gói đăng ký cá nhân
  * Route: /my-subscriptions
@@ -5,7 +6,6 @@
  * Pure orchestrator: chỉ compose hooks + components, không có logic trực tiếp
  */
 
-"use client";
 
 import { useState } from "react";
 import Link from "next/link";

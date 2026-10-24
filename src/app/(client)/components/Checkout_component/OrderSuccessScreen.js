@@ -1,10 +1,10 @@
+"use client";
 /**
  * OrderSuccessScreen.js
  * Màn hình xác nhận đặt hàng thành công
  * Palette: emerald-600 success icon (semantic), [#C85C3C] primary buttons
  */
 
-"use client";
 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";

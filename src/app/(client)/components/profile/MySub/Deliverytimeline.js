@@ -1,9 +1,9 @@
+"use client";
 /**
  * DeliveryTimeline.js
  * Hiển thị tiến trình giao hàng dạng timeline dots
  */
 
-"use client";
 
 import { Check, Truck, Clock } from "lucide-react";
 import { getDeliveryProgress } from "@/app/services/api/MySubscriptionService";

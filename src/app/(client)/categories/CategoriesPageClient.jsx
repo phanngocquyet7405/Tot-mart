@@ -1,5 +1,6 @@
-// app/(client)/categories/CategoriesPageClient.jsx
 "use client";
+import logger from "@/app/util/Logger";
+// app/(client)/categories/CategoriesPageClient.jsx
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -39,7 +40,7 @@ export default function CategoryPage() {
         setCategoryTree(buildCategoryTree(parseList(catRes)));
         setProductCounts(countProductsByCategory(parseList(prodRes)));
       } catch (err) {
-        console.error("Lỗi tải danh mục:", err);
+        logger.error("Lỗi tải danh mục:", err);
       } finally {
         if (isMounted) setLoading(false);
       }

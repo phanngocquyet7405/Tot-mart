@@ -1,7 +1,7 @@
+"use client";
 // components/SubscribePlans/PlanDetailDialog.jsx
 // Hiển thị chi tiết một Subscription Template (mẫu gói).
 // KHÔNG dùng shadcn Dialog — dùng BaseDialog tự làm.
-"use client";
 
 import {
   CalendarClock,

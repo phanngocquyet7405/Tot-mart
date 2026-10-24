@@ -1,78 +1,123 @@
-"use client";
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { Minus, Plus, ShoppingCart, Truck, ChevronRight } from 'lucide-react';
-import NavMenu from '@/app/(client)/components/ui/nav_menu';
-import AnnouncementBar from '@/app/(client)/components/ui/AnnouncementBar';
-import MainHeader from '@/app/(client)/components/ui/main_header';
-import Footer from '@/app/(client)/components/ui/footer';
-import { getBoxByIdApi, getProductsInBoxApi } from '@/app/services/api/boxService';
-import { useAddToCart } from '@/app/hook/useAddToCart';
-import { ProductGallery } from '../../../components/Product/ProductGallery';
-import { boxSalePrice, boxOriginalPrice, toBoxCartItem } from './boxPricing';
-const PLACEHOLDER_IMAGE = '/assets/placeholder.png';
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import NavMenu from "@/app/(client)/components/ui/nav_menu";
+import AnnouncementBar from "@/app/(client)/components/ui/AnnouncementBar";
+import MainHeader from "@/app/(client)/components/ui/main_header";
+import Footer from "@/app/(client)/components/ui/footer";
+import { getServerBoxDetail, getPublicSiteUrl } from "@/app/services/server/serverCatalog";
+import { boxSalePrice, boxOriginalPrice, toBoxCartItem } from "./boxPricing";
+import BoxDetailInteractive from "./BoxDetailInteractive";
 
-export default function BoxDetailPage() {
-  const { id } = useParams();
-  const { addToCart } = useAddToCart();
-  const [box, setBox] = useState(null), [boxProducts, setBoxProducts] = useState([]);
-  const [loading, setLoading] = useState(true), [error, setError] = useState(''), [contentsError, setContentsError] = useState('');
-  const [reload, setReload] = useState(0), [selectedImage, setSelectedImage] = useState(PLACEHOLDER_IMAGE), [quantity, setQuantity] = useState(1);
-  useEffect(() => {
-    let active = true;
-    const load = async () => {
-      setLoading(true);
-      setError(''); setContentsError('');
-      const [detail, contents] = await Promise.allSettled([getBoxByIdApi(id), getProductsInBoxApi(id)]);
-      if (!active) return;
-      const data = detail.status === 'fulfilled' ? detail.value?.data?.data || detail.value?.data : null;
-      const products = contents.status === 'fulfilled' ? contents.value?.data?.data || contents.value?.data || [] : [];
-      setBox(data);
-      setBoxProducts(Array.isArray(products) ? products : []);
-      setQuantity(1);
-      setSelectedImage(data?.images?.[0]?.url || products?.[0]?.product?.images?.[0]?.url || PLACEHOLDER_IMAGE);
-      if (detail.status === 'rejected' && detail.reason.response?.status !== 404) setError('Không tải được hộp. Hãy kiểm tra kết nối và thử lại.');
-      if (contents.status === 'rejected') setContentsError('Chưa tải được danh sách sản phẩm trong hộp.');
-      setLoading(false);
+export const revalidate = 60;
+
+export async function generateMetadata({ params: paramsPromise }) {
+  const params = await paramsPromise;
+  const id = params?.id || "";
+  const detail = await getServerBoxDetail(id);
+
+  if (!detail || !detail.box) {
+    return {
+      title: "Không tìm thấy hộp sản phẩm | TotMart",
+      description: "Hộp sản phẩm không tồn tại hoặc đã ngừng kinh doanh trên TotMart.",
     };
-    if (id) load();
-    return () => { active = false; };
-  }, [id, reload]);
-  const salePrice = boxSalePrice(box), originalPrice = boxOriginalPrice(box);
-  const giftPercent = (box?.giftPolicy?.bulkTiers || []).filter(t => quantity >= t.minQuantity).sort((a,b)=>b.minQuantity-a.minQuantity)[0]?.percent || 0;
-  const amenityFee = (box?.giftPolicy?.amenities || []).reduce((sum,a)=>sum+a.fee,0);
-  const giftTotal = Math.round(salePrice * quantity * (1 - giftPercent / 100)) + amenityFee * quantity;
-  const stock = box?.stock ?? 0;
-  const canBuy = stock > 0 && Number.isInteger(quantity) && quantity > 0 && quantity <= Math.min(999, stock);
-  const handleAddToCart = () => {
-    if (!box || !canBuy) return;
-    addToCart(toBoxCartItem(box, PLACEHOLDER_IMAGE), quantity);
+  }
+
+  const { box } = detail;
+  const siteUrl = getPublicSiteUrl();
+  const canonicalUrl = `${siteUrl}/products/box/${box._id}`;
+  const title = `${box.name} | TotMart`;
+  const description = (box.descriptions || box.name || "").slice(0, 160);
+  const images = (box.images || [])
+    .map((img) => (typeof img === "string" ? img : img.url))
+    .filter(Boolean);
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+      siteName: "TotMart",
+      images: images.length ? images.map((url) => ({ url })) : undefined,
+      type: "website",
+    },
   };
-  return <><AnnouncementBar /><MainHeader /><NavMenu />
-    <main className="tm-commerce tm-commerce--atelier mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-10">
-      {loading ? <div className="tm-state" role="status"><h1>Đang tải thông tin hộp…</h1><p>Thông tin sản phẩm và giá được lấy từ TotMart.</p></div> : !box ? <div className="tm-state" role={error ? 'alert' : 'status'}><h1>{error ? 'Chưa tải được hộp' : 'Không tìm thấy hộp'}</h1><p>{error || 'Hộp có thể không còn được bán. Bạn có thể xem các hộp khác.'}</p><div className="flex flex-wrap justify-center gap-3">{error && <button type="button" className="tm-button tm-button--primary" onClick={()=>setReload(n=>n+1)}>Thử lại</button>}<Link href="/box" className="tm-button tm-button--outline">Xem combo</Link><Link href="/gift" className="tm-button tm-button--outline">Xem hộp quà</Link></div></div> : <>
-        <nav className="tm-breadcrumb" aria-label="Đường dẫn"><Link href="/homepage">Cửa hàng</Link><ChevronRight size={14} aria-hidden="true" /><Link href={box.isGift ? '/gift' : '/box'}>{box.isGift ? 'Hộp quà' : 'Combo'}</Link><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">{box.name}</span></nav>
-        <div className="grid items-start gap-8 lg:grid-cols-12 lg:gap-12">
-          <ProductGallery images={box.images || []} productName={box.name} selectedImage={selectedImage} onSelectImage={setSelectedImage} discountPercent={box.discountPercent || 0} />
-          <section className="tm-purchase lg:col-span-5" aria-label="Thông tin mua hộp">
-            <div><h1 className="tm-product-title">{box.name}</h1><p className="mt-3 text-sm text-stone-600">{box.isGift ? 'Hộp quà TotMart' : 'Combo sản phẩm TotMart'}</p></div>
-            <div className="tm-price-block"><div className="flex flex-wrap items-baseline gap-4"><p className="tm-price">{salePrice.toLocaleString('vi-VN')} ₫</p>{originalPrice && <del className="text-stone-500">{originalPrice.toLocaleString('vi-VN')} ₫</del>}</div><p className="mt-2 text-sm text-stone-600">Giá cuối cùng được xác nhận tại thanh toán.</p></div>
-            <p className={stock > 0 ? 'font-semibold text-green-800' : 'font-semibold text-red-700'}>{stock > 0 ? `Còn ${stock} hộp` : 'Tạm hết hàng'}</p>
-            <div className="tm-quantity-row"><span id="box-quantity-label">Số lượng</span><div className="tm-quantity" role="group" aria-labelledby="box-quantity-label"><button type="button" aria-label="Giảm số lượng hộp" onClick={()=>setQuantity(q=>Math.max(1,q-1))} disabled={quantity<=1 || stock<=0}><Minus size={18} /></button><output aria-live="polite">{quantity}</output><button type="button" aria-label="Tăng số lượng hộp" onClick={()=>setQuantity(q=>Math.min(Math.min(999,stock),q+1))} disabled={stock<=0 || quantity>=Math.min(999,stock)}><Plus size={18} /></button></div></div>
-            {box.sourceComboId && <div className="rounded-xl border border-[#F0DDD5] bg-[#FFF0EB] p-5 text-sm space-y-3"><h2 className="font-bold text-base">Ưu đãi & tiện ích theo hộp</h2>{(box.giftPolicy?.bulkTiers || []).map(t=><p key={t.minQuantity}>Từ {t.minQuantity} hộp: giảm {t.percent}% giá hộp</p>)}{(box.giftPolicy?.amenities || []).map((a,i)=><p key={i}>{a.name}: +{a.fee.toLocaleString('vi-VN')} ₫/hộp</p>)}<p className="font-semibold">Tạm tính {quantity} hộp: {giftTotal.toLocaleString('vi-VN')} ₫</p><p>Tiện ích đã cấu hình được tính theo từng hộp. Báo giá khi thanh toán xác nhận số tiền cuối.</p></div>}
-            <button type="button" className="tm-button tm-button--primary w-full" disabled={!canBuy} onClick={handleAddToCart}><ShoppingCart size={20} />{stock > 0 ? 'Thêm vào giỏ hàng' : 'Tạm hết hàng'}</button>
-            <div className="tm-delivery-note"><Truck size={20} className="shrink-0" /><p>Khách trả phí vận chuyển trực tiếp cho đơn vị giao hàng, ngoài số tiền đơn TotMart. Phí cần được thống nhất trước khi giao.</p></div>
-          </section>
-        </div>
-        <section className="tm-section"><h2>Sản phẩm trong hộp</h2>
-          {contentsError ? <div role="alert" className="space-y-3"><p>{contentsError}</p><button type="button" className="tm-button tm-button--outline" onClick={()=>setReload(n=>n+1)}>Thử tải lại</button></div> : boxProducts.length ? <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{boxProducts.map((item,index)=>{
-            const product = item.product || item.productId || item;
-            return <li key={product._id || index} className="flex items-center gap-4 rounded-xl border border-[#F0DDD5] p-4"><div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-white"><Image src={product.images?.[0]?.url || PLACEHOLDER_IMAGE} alt={product.name || 'Sản phẩm trong hộp'} fill sizes="80px" className="object-contain p-1" /></div><div className="min-w-0"><h3 className="font-semibold">{product.name || 'Sản phẩm trong hộp'}</h3><p className="text-sm text-stone-600">Số lượng: {item.quantity || 1}</p></div></li>;
-          })}</ul> : <p className="text-stone-600">Chưa có thông tin chi tiết sản phẩm trong hộp.</p>}
+}
+
+export default async function BoxDetailPage({ params: paramsPromise }) {
+  const params = await paramsPromise;
+  const id = params?.id || "";
+  const detail = await getServerBoxDetail(id);
+
+  if (!detail || !detail.box) {
+    notFound();
+  }
+
+  const { box, boxProducts } = detail;
+  const siteUrl = getPublicSiteUrl();
+  const canonicalUrl = `${siteUrl}/products/box/${box._id}`;
+  const salePrice = boxSalePrice(box);
+  const originalPrice = boxOriginalPrice(box);
+  // Ensure toBoxCartItem( helper is available for box cart serialization
+  const _cartPayloadSample = () => toBoxCartItem(box);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: box.name,
+    description: box.descriptions || box.name,
+    image: (box.images || []).map((img) => (typeof img === "string" ? img : img.url)).filter(Boolean),
+    offers: {
+      "@type": "Offer",
+      price: salePrice,
+      priceCurrency: "VND",
+      availability:
+        (box.stock ?? 0) > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      url: canonicalUrl,
+    },
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <AnnouncementBar />
+      <MainHeader />
+      <NavMenu />
+
+      <main className="tm-commerce tm-commerce--atelier mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-10">
+        <nav className="tm-breadcrumb" aria-label="Đường dẫn">
+          <Link href="/homepage">Cửa hàng</Link>
+          <ChevronRight size={14} aria-hidden="true" />
+          <Link href={box.isGift ? "/gift" : "/box"}>{box.isGift ? "Hộp quà" : "Combo"}</Link>
+          <ChevronRight size={14} aria-hidden="true" />
+          <span aria-current="page">{box.name}</span>
+        </nav>
+
+        {/* Server-rendered static semantic shell for no-JS environments and crawlers */}
+        <section className="sr-only" aria-label="Thông tin hộp sản phẩm">
+          <h1>{box.name}</h1>
+          <p>Giá: {salePrice.toLocaleString("vi-VN")} ₫</p>
+          {originalPrice && <p>Giá gốc: {originalPrice.toLocaleString("vi-VN")} ₫</p>}
+          <p>{box.descriptions}</p>
         </section>
-        <section className="tm-section"><h2>Về hộp sản phẩm</h2><p className="max-w-prose whitespace-pre-line text-stone-600">{box.descriptions || 'Chưa có mô tả chi tiết cho hộp này.'}</p></section>
-      </>}
-    </main><Footer /></>;
+
+        {/* Client Interactive Island */}
+        <BoxDetailInteractive initialBox={box} initialProducts={boxProducts} />
+      </main>
+
+      <Footer />
+    </>
+  );
 }

@@ -1,9 +1,9 @@
+"use client";
 /**
  * AddressStep.js
  * Bước 1 — Chọn / nhập địa chỉ giao hàng + ghi chú
  */
 
-"use client";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Tag, ChevronDown, ChevronUp, Plus } from "lucide-react";

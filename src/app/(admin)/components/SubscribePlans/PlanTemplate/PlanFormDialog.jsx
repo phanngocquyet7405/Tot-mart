@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 // components/SubscribePlans/PlanFormDialog.jsx
 // Tạo / Cập nhật Subscription Template (MẪU GÓI).
 // Template là cấu hình gói mà admin định nghĩa — KHÔNG phải subscription của user.
@@ -103,7 +104,7 @@ export function PlanFormDialog({
         const res = await getAllBoxesApi();
         setBoxes(res.data);
       } catch (error) {
-        console.error("Failed to load boxes:", error);
+        logger.error("Failed to load boxes:", error);
         toast.error("Không tải được danh sách box, vui lòng thử lại.");
       } finally {
         setLoadingBoxes(false);

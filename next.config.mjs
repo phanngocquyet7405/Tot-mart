@@ -55,14 +55,41 @@ export default withNextIntl({
     remotePatterns: hosts.map((hostname) => ({ protocol: "https", hostname })),
   },
   async headers() {
+    const cspDirectives = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      `img-src 'self' data: blob: ${hosts.map((h) => "https://" + h).join(" ")}`,
+      "connect-src 'self' https: http://localhost:*",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; ");
+
+    const isReportOnlyScope =
+      process.env.TOTMART_CSP_REPORT_ONLY === "1" ||
+      process.env.TOTMART_ENV === "staging" ||
+      process.env.CI === "true";
+
+    const commonHeaders = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "X-Frame-Options", value: "DENY" },
+    ];
+
+    if (isReportOnlyScope) {
+      commonHeaders.push({
+        key: "Content-Security-Policy-Report-Only",
+        value: cspDirectives,
+      });
+    }
+
     return [
       {
         source: "/:path*",
-        headers: [
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "DENY" },
-        ],
+        headers: commonHeaders,
       },
     ];
   },

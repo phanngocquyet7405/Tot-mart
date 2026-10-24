@@ -1,9 +1,9 @@
+"use client";
 /**
  * SubscriberTable.js
  * Bảng hiển thị danh sách người đăng ký với pagination + row click mở detail
  */
 
-"use client";
 
 import { useState } from "react";
 import { Eye, ChevronLeft, ChevronRight, Package } from "lucide-react";

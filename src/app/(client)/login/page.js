@@ -3,7 +3,7 @@
 import { useState, useContext, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import { Lock, Loader2, Eye, EyeOff, AlertTriangle } from "lucide-react";
 
 import AuthContainer from "@/app/(client)/components/ui/auth/auth_container";
 import AuthCard from "@/app/(client)/components/ui/auth/auth_card";
@@ -13,6 +13,7 @@ import { AppContext } from "@/app/context/AppContext";
 import { loginApi, pingApi } from "../../services/api/authService";
 import { saveToken, getTokenRole } from "@/app/middleware/tokenMiddleware";
 import { withGuest } from "@/app/middleware/authMiddleware";
+import { getLoginError } from "@/app/util/authErrors";
 
 function LoginPage() {
   const router = useRouter();
@@ -21,7 +22,8 @@ function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
+  const [passwordPolicyNotice, setPasswordPolicyNotice] = useState(null);
   const [loading, setLoading] = useState(false);
 
   // Đánh thức API (Render cold start) trong lúc người dùng nhập thông tin.
@@ -33,36 +35,47 @@ function LoginPage() {
     (e) => {
       const { id, value } = e.target;
       setFormData((prev) => ({ ...prev, [id]: value }));
-      if (error) setError("");
+      if (error) setError(null);
+      if (passwordPolicyNotice) setPasswordPolicyNotice(null);
     },
-    [error],
+    [error, passwordPolicyNotice],
   );
 
   const handleOnSubmit = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (loading) return;
 
     setLoading(true);
-    setError("");
+    setError(null);
 
     try {
       const res = await loginApi(formData.email, formData.password, rememberMe);
       const token = res?.token ?? res?.data?.token;
 
       if (!token) {
-        setError("Không nhận được token từ hệ thống!");
+        setError({ message: "Không nhận được token từ hệ thống!", isTransient: false });
         return;
       }
 
       saveToken(token, { persistent: rememberMe });
       await refreshUser();
 
+      if (res?.passwordChangeRequired) {
+        setPasswordPolicyNotice({
+          required: true,
+          reason: res.passwordPolicyReason || "LEGACY_BCRYPT_BYTE_LIMIT",
+          message:
+            res.passwordPolicyReason === "LEGACY_BCRYPT_BYTE_LIMIT"
+              ? "Mật khẩu của bạn đang sử dụng định dạng cũ vượt quá giới hạn an toàn (tối đa 72 byte UTF-8). Vui lòng đặt lại mật khẩu để bảo vệ tài khoản của bạn."
+              : "Tài khoản của bạn yêu cầu cập nhật mật khẩu mới theo chính sách bảo mật.",
+        });
+        return;
+      }
+
       const role = getTokenRole();
       router.push(role === "admin" ? "/dashboard" : role === "merchant" ? "/manager" : "/homepage");
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Email hoặc mật khẩu không đúng.",
-      );
+      setError(getLoginError(err));
     } finally {
       setLoading(false);
     }
@@ -85,15 +98,65 @@ function LoginPage() {
             </p>
           </div>
 
+          {/* Password Policy Notice (passwordChangeRequired) */}
+          {passwordPolicyNotice && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 space-y-2">
+              <div className="font-semibold text-sm flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                <span>Yêu cầu cập nhật mật khẩu</span>
+              </div>
+              <p className="text-sm text-amber-800">{passwordPolicyNotice.message}</p>
+              <div className="pt-2 flex items-center gap-3">
+                <Link
+                  href="/forgot-password"
+                  className="inline-block text-xs font-semibold px-3 py-1.5 bg-amber-600 text-white rounded hover:bg-amber-700 transition"
+                >
+                  Đặt lại mật khẩu ngay
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const role = getTokenRole();
+                    router.push(role === "admin" ? "/dashboard" : role === "merchant" ? "/manager" : "/homepage");
+                  }}
+                  className="text-xs text-amber-700 hover:underline"
+                >
+                  Để sau và tiếp tục
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
-              <div className="text-red-600 flex-shrink-0 pt-0.5">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex flex-col gap-2">
+              <div className="flex gap-3">
+                <div className="text-red-600 flex-shrink-0 pt-0.5">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-red-700 text-sm">{error.message || String(error)}</p>
+                  {error.requestId && (
+                    <p className="text-xs text-stone-500 font-mono mt-1">
+                      Mã yêu cầu (requestId): {error.requestId}
+                    </p>
+                  )}
+                </div>
               </div>
-              <p className="text-red-700 text-sm">{error}</p>
+              {error.isTransient && (
+                <div className="pl-8 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleOnSubmit}
+                    disabled={loading}
+                    className="text-xs font-semibold text-red-700 hover:text-red-800 underline cursor-pointer"
+                  >
+                    Thử lại
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

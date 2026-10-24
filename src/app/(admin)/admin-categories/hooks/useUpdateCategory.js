@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -74,7 +75,7 @@ export function useUpdateCategory() {
       } catch (error) {
         const errorMsg = error.response?.data?.message || "Lỗi khi cập nhật";
         toast.error(errorMsg);
-        console.error("Update Error:", error.response?.data);
+        logger.error("Update Error:", error.response?.data);
       } finally {
         setIsSubmitting(false);
       }

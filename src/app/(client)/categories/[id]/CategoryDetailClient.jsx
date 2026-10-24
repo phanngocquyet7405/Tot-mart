@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import AnnouncementBar from "../../components/ui/AnnouncementBar";
@@ -10,16 +11,20 @@ import ProductsGrid from "../../components/layout/product/products_grid";
 import SideBar from "../../components/ui/SideBar";
 import { getAllCategoriesApi } from "@/app/services/api/productServices";
 
-export default function CategoryDetailPage() {
+export default function CategoryDetailPage({ initialCategory = null }) {
   const params = useParams();
   const slugOrId = params?.id;
 
-  const [actualId, setActualId] = useState(null);
-  const [category, setCategory] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [actualId, setActualId] = useState(initialCategory?._id || null);
+  const [category, setCategory] = useState(initialCategory);
+  const [loading, setLoading] = useState(!initialCategory);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
+    if (initialCategory) {
+      setLoading(false);
+      return;
+    }
     const resolveCategory = async () => {
       try {
         const res = await getAllCategoriesApi();
@@ -37,7 +42,7 @@ export default function CategoryDetailPage() {
           setCategory(null);
         }
       } catch (error) {
-        console.error("Error finding category:", error);
+        logger.error("Error finding category:", error);
       } finally {
         setLoading(false);
       }
@@ -46,7 +51,7 @@ export default function CategoryDetailPage() {
     if (slugOrId) {
       resolveCategory();
     }
-  }, [slugOrId]);
+  }, [slugOrId, initialCategory]);
 
   if (loading)
     return (

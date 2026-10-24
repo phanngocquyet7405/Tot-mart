@@ -1,5 +1,6 @@
-// app/(client)/brands/BrandsPageClient.jsx
 "use client";
+import logger from "@/app/util/Logger";
+// app/(client)/brands/BrandsPageClient.jsx
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
@@ -37,7 +38,7 @@ export default function BrandPage() {
         setBrands(parseList(brandRes).filter((b) => b.isActive !== false));
         setProductCounts(countProductsByBrand(parseList(prodRes)));
       } catch (err) {
-        console.error("Lỗi tải gian hàng:", err);
+        logger.error("Lỗi tải gian hàng:", err);
       } finally {
         if (isMounted) setLoading(false);
       }
