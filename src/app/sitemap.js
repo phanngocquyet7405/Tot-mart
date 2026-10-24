@@ -94,18 +94,21 @@ export default async function sitemap() {
 
     return [...staticEntries, ...dynamicEntries];
   } catch (err) {
-    console.warn(
-      `[Sitemap] Backend catalog fetch failed (${err.message}). Attempting recovery with last-known-good cache.`,
-    );
-
-    const cachedDynamic = getLastKnownGoodSitemap();
-    if (cachedDynamic && cachedDynamic.length > 0) {
-      return [...staticEntries, ...cachedDynamic];
+    // Fail-closed mặc định ở mọi môi trường; chỉ cho phép dự phòng khi có biến bật rõ ràng cho CI test
+    if (process.env.ALLOW_SITEMAP_FALLBACK === "true") {
+      console.warn(
+        `[Sitemap Fallback Permitted] Backend fetch failed (${err.message}). Using last-known-good cache.`,
+      );
+      const cachedDynamic = getLastKnownGoodSitemap();
+      if (cachedDynamic && cachedDynamic.length > 0) {
+        return [...staticEntries, ...cachedDynamic];
+      }
+      return staticEntries;
     }
 
     console.error(
-      "[Sitemap Alert] Neither backend nor last-known-good cache is available. Serving static baseline only.",
+      `[Sitemap Error] Backend catalog fetch failed: ${err.message}. Fail-closed active (ALLOW_SITEMAP_FALLBACK is not enabled).`,
     );
-    return staticEntries;
+    throw err;
   }
 }

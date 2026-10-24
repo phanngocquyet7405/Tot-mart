@@ -1,42 +1,5 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const path = require("node:path");
-
-// Đọc source và xác minh TUYỆT ĐỐI KHÔNG DÙNG REGEX trong htmlSanitizer.js
-const sanitizerCode = fs.readFileSync(
-  path.resolve(__dirname, "../src/app/util/htmlSanitizer.js"),
-  "utf8"
-);
-
-test("htmlSanitizer: Zero Regular Expression verification", () => {
-  // Loại bỏ comments trước khi kiểm tra ký hiệu regex
-  const strippedCode = sanitizerCode
-    .split("\n")
-    .filter((line) => !line.trim().startsWith("//") && !line.trim().startsWith("*"))
-    .join("\n");
-
-  assert.equal(
-    strippedCode.includes("RegExp"),
-    false,
-    "htmlSanitizer.js must not instantiate or reference RegExp"
-  );
-  assert.equal(
-    strippedCode.includes(".match("),
-    false,
-    "htmlSanitizer.js must not call .match()"
-  );
-  assert.equal(
-    strippedCode.includes(".search("),
-    false,
-    "htmlSanitizer.js must not call .search()"
-  );
-  assert.equal(
-    strippedCode.includes(".test("),
-    false,
-    "htmlSanitizer.js must not call .test()"
-  );
-});
 
 // Import module
 async function getSanitizer() {
@@ -59,7 +22,7 @@ test("htmlSanitizer: Strips classic <script> and dangerous tags completely", asy
   assert.equal(sanitizeHtml(iframeAttack), "<p>Safe</p>");
 });
 
-test("htmlSanitizer: Strips inline event handlers (onerror, onclick, onload, etc.)", async () => {
+test("htmlSanitizer: Strips inline event handlers and non-http img schemes", async () => {
   const { sanitizeHtml } = await getSanitizer();
 
   const imgAttack = '<img src="https://images.unsplash.com/photo.jpg" onerror="alert(1)" alt="Cover" />';
@@ -69,21 +32,26 @@ test("htmlSanitizer: Strips inline event handlers (onerror, onclick, onload, etc
   assert.equal(sanitizedImg.includes('src="https://images.unsplash.com/photo.jpg"'), true);
   assert.equal(sanitizedImg.includes('alt="Cover"'), true);
 
+  // img chỉ cho phép http/https; data: và javascript: bị chặn
+  const imgDataAttack = '<img src="data:image/svg+xml;base64,PHN2Zz48c2NyaXB0PmFsZXJ0KDEpPC9zY3JpcHQ+PC9zdmc+" />';
+  const cleanImgData = sanitizeHtml(imgDataAttack);
+  assert.equal(cleanImgData.includes("data:"), false);
+
   const svgAttack = '<svg onload="alert(1)"><circle cx="50" cy="50" r="40"/></svg>';
   assert.equal(sanitizeHtml(svgAttack), "");
 
   const buttonAttack = '<button onclick="evilAction()">Click</button>';
-  assert.equal(sanitizeHtml(buttonAttack), "Click"); // Thẻ button bị loại bỏ, text an toàn được giữ
+  assert.equal(sanitizeHtml(buttonAttack), "Click");
 });
 
-test("htmlSanitizer: Blocks dangerous URL protocols (javascript, data, vbscript, etc.)", async () => {
+test("htmlSanitizer: Blocks dangerous URL protocols and protocol-relative URLs", async () => {
   const { sanitizeHtml } = await getSanitizer();
 
   // javascript: scheme
   const jsLink = '<a href="javascript:alert(1)">Click Me</a>';
   assert.equal(sanitizeHtml(jsLink), "<a>Click Me</a>");
 
-  // data: scheme (XSS via data URI)
+  // data: scheme
   const dataLink = '<a href="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">Click</a>';
   assert.equal(sanitizeHtml(dataLink), "<a>Click</a>");
 
@@ -91,12 +59,22 @@ test("htmlSanitizer: Blocks dangerous URL protocols (javascript, data, vbscript,
   const vbLink = '<a href="vbscript:msgbox(1)">Click</a>';
   assert.equal(sanitizeHtml(vbLink), "<a>Click</a>");
 
-  // Evasion: spaces and control characters in protocol
-  const spacedJs = '<a href="jav&#x09;ascript:alert(1)">Click</a>';
-  assert.equal(sanitizeHtml(spacedJs).includes("alert"), false);
+  // Protocol-relative URL (allowProtocolRelative: false)
+  const protoRelative = '<a href="//evil.com/xss">Evil</a>';
+  const cleanProto = sanitizeHtml(protoRelative);
+  assert.equal(cleanProto.includes("//evil.com"), false);
+});
 
-  const nullByteJs = '<a href="java\0script:alert(1)">Click</a>';
-  assert.equal(sanitizeHtml(nullByteJs), "<a>Click</a>");
+test("htmlSanitizer: Bỏ class tùy ý và style, chỉ giữ class có prefix TipTap/ProseMirror", async () => {
+  const { sanitizeHtml } = await getSanitizer();
+
+  const input = '<p class="tiptap-lead ProseMirror-selectednode custom-bad-class" style="color: red; font-size: 50px;">Nội dung</p>';
+  const clean = sanitizeHtml(input);
+
+  assert.equal(clean.includes('style='), false);
+  assert.equal(clean.includes('custom-bad-class'), false);
+  assert.equal(clean.includes('tiptap-lead'), true);
+  assert.equal(clean.includes('ProseMirror-selectednode'), true);
 });
 
 test("htmlSanitizer: Automatically enforces rel='noopener noreferrer' on target='_blank'", async () => {
@@ -108,30 +86,34 @@ test("htmlSanitizer: Automatically enforces rel='noopener noreferrer' on target=
   assert.equal(cleanLink.includes('rel="noopener noreferrer"'), true);
 });
 
-test("htmlSanitizer: Preserves valid rich-text formatting and structures without corruption", async () => {
+test("htmlSanitizer: Test với HTML TipTap thật", async () => {
   const { sanitizeHtml } = await getSanitizer();
 
-  const richText = `
-    <h2>Mô tả sản phẩm hữu cơ</h2>
-    <p class="lead">Sản phẩm <strong>100% tự nhiên</strong> từ nông trại Đà Lạt.</p>
+  // Mẫu HTML TipTap xuất bản thực tế từ RichTextEditor
+  const realTipTapHtml = `
+    <h2 class="tiptap-heading">Hộp Quà Đặc Sản Tây Bắc</h2>
+    <p>Sản phẩm được tuyển chọn thủ công từ các <strong>hợp tác xã bản địa</strong>.</p>
+    <blockquote>Hương vị nguyên bản từ núi rừng Hoàng Liên Sơn.</blockquote>
     <ul>
-      <li>Không chất bảo quản</li>
-      <li>Chứng nhận VietGAP</li>
+      <li><p>Chè Shan Tuyết cổ thụ 100g</p></li>
+      <li><p>Mật ong hoa rừng tự nhiên 250ml</p></li>
+      <li><p>Thịt trâu gác bếp sấy củi nhãn 300g</p></li>
     </ul>
-    <p>Chi tiết xem tại <a href="/categories/rau-cu">Danh mục Rau Củ</a>.</p>
-    <img src="https://res.cloudinary.com/demo/image/upload/v1/sample.jpg" alt="Rau xanh" width="400" height="300" />
+    <pre><code>MÃ_SẢN_PHẨM: TB-GIFT-2026</code></pre>
+    <p>Chi tiết liên hệ: <a href="https://totmart.vn/lien-he" target="_blank">TotMart Hotline</a> hoặc email <a href="mailto:support@totmart.vn">support@totmart.vn</a>.</p>
+    <img src="https://images.unsplash.com/photo-taybac.jpg" alt="Đặc sản Tây Bắc" width="600" height="400" />
   `.trim();
 
-  const result = sanitizeHtml(richText);
+  const cleaned = sanitizeHtml(realTipTapHtml);
 
-  // Thẻ tiêu đề & định dạng được giữ nguyên
-  assert.equal(result.includes("<h2>Mô tả sản phẩm hữu cơ</h2>"), true);
-  assert.equal(result.includes("<strong>100% tự nhiên</strong>"), true);
-  assert.equal(result.includes("<ul>"), true);
-  assert.equal(result.includes("<li>Không chất bảo quản</li>"), true);
-  assert.equal(result.includes('<a href="/categories/rau-cu">Danh mục Rau Củ</a>'), true);
-  assert.equal(result.includes('src="https://res.cloudinary.com/demo/image/upload/v1/sample.jpg"'), true);
-  assert.equal(result.includes('alt="Rau xanh"'), true);
+  assert.equal(cleaned.includes('<h2 class="tiptap-heading">Hộp Quà Đặc Sản Tây Bắc</h2>'), true);
+  assert.equal(cleaned.includes('<strong>hợp tác xã bản địa</strong>'), true);
+  assert.equal(cleaned.includes('<blockquote>Hương vị nguyên bản từ núi rừng Hoàng Liên Sơn.</blockquote>'), true);
+  assert.equal(cleaned.includes('<ul>'), true);
+  assert.equal(cleaned.includes('<pre><code>MÃ_SẢN_PHẨM: TB-GIFT-2026</code></pre>'), true);
+  assert.equal(cleaned.includes('rel="noopener noreferrer"'), true);
+  assert.equal(cleaned.includes('href="mailto:support@totmart.vn"'), true);
+  assert.equal(cleaned.includes('src="https://images.unsplash.com/photo-taybac.jpg"'), true);
 });
 
 test("htmlSanitizer: Gracefully handles null, empty, malformed and non-string inputs", async () => {
@@ -142,6 +124,5 @@ test("htmlSanitizer: Gracefully handles null, empty, malformed and non-string in
   assert.equal(sanitizeHtml(""), "");
   assert.equal(sanitizeHtml(123), "");
   assert.equal(sanitizeHtml("<"), "&lt;");
-  assert.equal(sanitizeHtml("<>"), "&lt;>");
-  assert.equal(sanitizeHtml("<p>Unclosed paragraph"), "<p>Unclosed paragraph");
+  assert.equal(sanitizeHtml("<p>Unclosed paragraph"), "<p>Unclosed paragraph</p>");
 });

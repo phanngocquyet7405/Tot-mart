@@ -55,6 +55,12 @@ export default withNextIntl({
     remotePatterns: hosts.map((hostname) => ({ protocol: "https", hostname })),
   },
   async headers() {
+    const isReportOnlyScope =
+      process.env.TOTMART_CSP_REPORT_ONLY === "1" ||
+      process.env.TOTMART_ENV === "staging" ||
+      process.env.APP_ENV === "staging" ||
+      process.env.CI === "true";
+
     const cspDirectives = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval'",
@@ -66,12 +72,8 @@ export default withNextIntl({
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
+      ...(isReportOnlyScope ? ["report-uri /csp-report"] : []),
     ].join("; ");
-
-    const isReportOnlyScope =
-      process.env.TOTMART_CSP_REPORT_ONLY === "1" ||
-      process.env.TOTMART_ENV === "staging" ||
-      process.env.CI === "true";
 
     const commonHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },

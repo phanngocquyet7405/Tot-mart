@@ -57,44 +57,55 @@ async function main() {
     fs.unlinkSync(runtimeFile);
   }
 
-  console.log('1. Starting BE fixture server (--serve)...');
+  const FIXTURE_PORT = process.env.FE_TEST_API_PORT || '3101';
+  console.log(`1. Starting BE fixture server (--serve) on port ${FIXTURE_PORT}...`);
   const fixtureProc = spawn('node', ['scripts/verify-checkout-attempts.cjs', beRoot, '--serve'], {
     stdio: ['pipe', 'pipe', 'inherit'],
     env: {
       ...process.env,
       FE_TEST_ORIGIN: FE_ORIGIN,
+      FE_TEST_API_PORT: FIXTURE_PORT,
       NODE_ENV: 'test',
     },
   });
+  fixtureProc.stdout.on('data', d => process.stdout.write(`[Fixture stdout] ${d}`));
+  fixtureProc.on('exit', (code, sig) => console.log(`[Fixture exited] code=${code} signal=${sig}`));
+  fixtureProc.on('error', err => console.error(`[Fixture error]`, err));
 
   let nextProc = null;
+  let stopping = false;
 
   try {
-    // Wait for runtime file
-    await waitFor(() => fs.existsSync(runtimeFile), 30000);
+    // Wait for runtime file (allows MongoMemoryReplSet startup + 15 initial checks)
+    await waitFor(() => fs.existsSync(runtimeFile), 90000);
     const runtime = JSON.parse(fs.readFileSync(runtimeFile, 'utf8'));
     console.log(`BE Fixture ready at ${runtime.origin}`);
 
-    console.log(`2. Starting Next.js dev server on port ${FE_PORT}...`);
-    nextProc = spawn('npx', ['next', 'dev', '--port', String(FE_PORT)], {
+    console.log(`2. Starting Next.js production server (next start) on port ${FE_PORT}...`);
+    nextProc = spawn('npx', ['next', 'start', '-p', String(FE_PORT)], {
       stdio: ['ignore', 'pipe', 'pipe'],
       shell: true,
       env: {
         ...process.env,
+        CI: 'true',
         PORT: String(FE_PORT),
         API_URL: `${runtime.origin}/api`,
         NEXT_PUBLIC_API_URL: '/api',
       },
     });
-    nextProc.stdout.on('data', () => {});
-    nextProc.stderr.on('data', () => {});
+    nextProc.stdout.on('data', (d) => process.stdout.write(`[Next.js stdout] ${d}`));
+    nextProc.stderr.on('data', (d) => process.stderr.write(`[Next.js stderr] ${d}`));
 
-    console.log('Waiting for Next.js and BE health check...');
+    console.log('Waiting for Next.js production server health check...');
     await waitFor(async () => {
-      const res = await fetch(`${FE_ORIGIN}/api/home/health`);
-      return res.status === 200;
-    }, 45000, 1000);
-    console.log('Next.js dev server ready and proxying to BE fixture.');
+      try {
+        const res = await fetch(`${FE_ORIGIN}/`);
+        return res.status === 200 || res.status === 307 || res.status === 308;
+      } catch {
+        return false;
+      }
+    }, 30000, 500);
+    console.log('Next.js production server ready.');
 
     console.log('3. Running Phase F02 E2E Browser Suite (Playwright)...');
     await runCommand('node', ['scripts/f02-browser-e2e.cjs'], {
@@ -109,6 +120,7 @@ async function main() {
     console.log('Purchase UI Regression suite completed successfully!');
 
   } finally {
+    stopping = true;
     console.log('Cleaning up processes...');
     killProcess(nextProc);
     killProcess(fixtureProc);

@@ -1,4 +1,5 @@
 const { test } = require('node:test');
+process.env.NODE_ENV = 'test';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -243,14 +244,15 @@ test('Sitemap: multi-page pagination collects items across all pages', async () 
   }
 });
 
-test('Sitemap: backend failure recovers with last-known-good cache and does not return empty sitemap', async () => {
+test('Sitemap: fail-closed by default on backend failure; recovers only with explicit ALLOW_SITEMAP_FALLBACK', async () => {
   const originalFetch = global.fetch;
+  const origFallbackEnv = process.env.ALLOW_SITEMAP_FALLBACK;
   const warnings = [];
   const origWarn = console.warn;
   console.warn = (...args) => warnings.push(args.join(' '));
 
   try {
-    // Seed last-known-good
+    // Seed in-memory last-known-good
     ServerCatalog.saveLastKnownGoodSitemap([
       { url: 'https://totmart.vn/products/cached-item-1', lastModified: new Date(), priority: 0.7 },
     ]);
@@ -260,15 +262,89 @@ test('Sitemap: backend failure recovers with last-known-good cache and does not 
       throw new Error('ECONNREFUSED 127.0.0.1:3001');
     };
 
+    // 1. Fail-closed mặc định khi không có ALLOW_SITEMAP_FALLBACK
+    delete process.env.ALLOW_SITEMAP_FALLBACK;
+    await assert.rejects(
+      async () => await SitemapModule.default(),
+      /ECONNREFUSED 127\.0\.0\.1:3001/,
+      'Sitemap must fail-closed (throw error) by default when backend fetch fails'
+    );
+
+    // 2. Phục hồi với last-known-good khi có biến ALLOW_SITEMAP_FALLBACK="true"
+    process.env.ALLOW_SITEMAP_FALLBACK = 'true';
     const sitemap = await SitemapModule.default();
     assert.ok(sitemap.length > 0);
     const cachedEntry = sitemap.find((e) => e.url.includes('cached-item-1'));
-    assert.ok(cachedEntry, 'Sitemap must recover using last-known-good cache');
-    assert.ok(warnings.some((w) => w.includes('last-known-good')), 'Must log warning when using last-known-good');
+    assert.ok(cachedEntry, 'Sitemap must recover using last-known-good cache when explicitly permitted');
+    assert.ok(warnings.some((w) => w.includes('Fallback Permitted')), 'Must log warning when using last-known-good fallback');
   } finally {
     global.fetch = originalFetch;
     console.warn = origWarn;
+    if (origFallbackEnv !== undefined) process.env.ALLOW_SITEMAP_FALLBACK = origFallbackEnv;
+    else delete process.env.ALLOW_SITEMAP_FALLBACK;
   }
+});
+
+test('ServerCatalog & Robots: staging environment requires explicit STAGING_SITE_URL and robots disallows all', () => {
+  const origEnv = process.env.APP_ENV;
+  const origStagingUrl = process.env.STAGING_SITE_URL;
+  const RobotsModule = load(path.join(root, 'app/robots.js'));
+
+  try {
+    process.env.APP_ENV = 'staging';
+
+    // Bỏ mặc định staging.totmart.vn: bắt buộc STAGING_SITE_URL
+    delete process.env.STAGING_SITE_URL;
+    assert.throws(
+      () => ServerCatalog.getPublicSiteUrl(),
+      /Staging environment requires explicit STAGING_SITE_URL/,
+      'Must throw when STAGING_SITE_URL is missing in staging'
+    );
+
+    // Cung cấp STAGING_SITE_URL hợp lệ
+    process.env.STAGING_SITE_URL = 'https://preview-deploy.totmart.vn';
+    assert.equal(ServerCatalog.getPublicSiteUrl(), 'https://preview-deploy.totmart.vn');
+
+    // robots.txt Disallow cho staging
+    const stagingRobots = RobotsModule.default();
+    assert.equal(stagingRobots.rules.userAgent, '*');
+    assert.equal(stagingRobots.rules.disallow, '/');
+  } finally {
+    if (origEnv !== undefined) process.env.APP_ENV = origEnv;
+    else delete process.env.APP_ENV;
+    if (origStagingUrl !== undefined) process.env.STAGING_SITE_URL = origStagingUrl;
+    else delete process.env.STAGING_SITE_URL;
+  }
+});
+
+test('Sitemap & ISR: Next.js keeps stale cached version when revalidation throws an error (Reproduction)', async () => {
+  // Mô phỏng cơ chế ISR của Next.js:
+  // Next.js lưu bản render trước trong memory/cache. Khi revalidate ném lỗi,
+  // Next.js phục hồi và tiếp tục phục vụ stale cache mà không ngắt trang của người dùng.
+  let currentCachedSitemap = [
+    { url: 'https://totmart.vn/products/prev-cached', lastModified: new Date(1700000000000) }
+  ];
+
+  async function simulateNextJsRevalidation(revalidateFn) {
+    try {
+      const fresh = await revalidateFn();
+      currentCachedSitemap = fresh;
+      return { status: 200, data: fresh, stale: false };
+    } catch (err) {
+      // Next.js ISR behavior: "If an error is thrown, continue serving the previous data"
+      return { status: 200, data: currentCachedSitemap, stale: true, revalidationError: err.message };
+    }
+  }
+
+  // Lần revalidate gặp lỗi ném ra từ sitemap fail-closed:
+  const result = await simulateNextJsRevalidation(async () => {
+    throw new Error('Backend network timeout 503');
+  });
+
+  assert.equal(result.status, 200);
+  assert.equal(result.stale, true);
+  assert.equal(result.data[0].url, 'https://totmart.vn/products/prev-cached');
+  assert.equal(result.revalidationError, 'Backend network timeout 503');
 });
 
 test('Product Page: generateMetadata produces canonical URL, OpenGraph and descriptive title', async () => {
@@ -507,4 +583,92 @@ test('Performance: Waterfall elimination and LCP comparison', () => {
 
   assert.ok(waterfallStepsAfter.length < waterfallStepsBefore.length);
   assert.equal(waterfallStepsAfter[0], 'HTML_WITH_CONTENT_AND_LCP');
+});
+
+test('ServerCatalog: fetchServerJson retry policy enforces GET-only, 5xx/timeout/network only, max 2 retries, no 4xx retry', async () => {
+  // 1. GET with 500 retries max 2 times (total 3 attempts) then throws
+  let get500Attempts = 0;
+  const fetch500 = async () => {
+    get500Attempts++;
+    return {
+      ok: false,
+      status: 500,
+      text: async () => JSON.stringify({ message: 'Internal Server Error' }),
+    };
+  };
+  await assert.rejects(
+    ServerCatalog.fetchServerJson('/test-500', { method: 'GET', retries: 5, fetch: fetch500 }),
+    (err) => err.status === 500,
+  );
+  assert.equal(get500Attempts, 3, 'GET with 500 must retry exactly 2 times (3 total attempts)');
+
+  // 2. GET with 500 on attempt 1, 200 on attempt 2 succeeds
+  let getRecoverAttempts = 0;
+  const fetchRecover = async () => {
+    getRecoverAttempts++;
+    if (getRecoverAttempts === 1) {
+      return {
+        ok: false,
+        status: 503,
+        text: async () => JSON.stringify({ message: 'Service Unavailable' }),
+      };
+    }
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ success: true, data: { recovered: true } }),
+    };
+  };
+  const recovered = await ServerCatalog.fetchServerJson('/test-recover', { method: 'GET', fetch: fetchRecover });
+  assert.equal(recovered.ok, true);
+  assert.equal(recovered.data.recovered, true);
+  assert.equal(getRecoverAttempts, 2, 'GET recovered on attempt 2');
+
+  // 3. POST with 500 does NOT retry (max 1 attempt)
+  let postAttempts = 0;
+  const fetchPost = async () => {
+    postAttempts++;
+    return {
+      ok: false,
+      status: 500,
+      text: async () => JSON.stringify({ message: 'Server Error' }),
+    };
+  };
+  await assert.rejects(
+    ServerCatalog.fetchServerJson('/test-post', { method: 'POST', retries: 2, fetch: fetchPost }),
+    (err) => err.status === 500,
+  );
+  assert.equal(postAttempts, 1, 'Non-GET (POST) must NOT retry (exactly 1 attempt)');
+
+  // 4. GET with 4xx (400, 401, 403, 422) does NOT retry (exactly 1 attempt)
+  for (const status of [400, 401, 403, 422]) {
+    let clientErrorAttempts = 0;
+    const fetchClient = async () => {
+      clientErrorAttempts++;
+      return {
+        ok: false,
+        status,
+        text: async () => JSON.stringify({ message: `Client Error ${status}` }),
+      };
+    };
+    await assert.rejects(
+      ServerCatalog.fetchServerJson(`/test-${status}`, { method: 'GET', retries: 2, fetch: fetchClient }),
+      (err) => err.status === status,
+    );
+    assert.equal(clientErrorAttempts, 1, `Status ${status} must NOT retry (exactly 1 attempt)`);
+  }
+
+  // 5. GET with network/timeout error retries max 2 times (3 total attempts) then throws
+  let networkAttempts = 0;
+  const fetchNetwork = async () => {
+    networkAttempts++;
+    const netErr = new Error('fetch failed');
+    netErr.code = 'ECONNRESET';
+    throw netErr;
+  };
+  await assert.rejects(
+    ServerCatalog.fetchServerJson('/test-network', { method: 'GET', retries: 2, fetch: fetchNetwork }),
+    (err) => err.code === 'ECONNRESET',
+  );
+  assert.equal(networkAttempts, 3, 'Network error must retry exactly 2 times (3 total attempts)');
 });

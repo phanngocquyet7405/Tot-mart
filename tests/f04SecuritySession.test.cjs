@@ -254,8 +254,67 @@ test("CSP: next.config.mjs xuất header Content-Security-Policy-Report-Only tro
     assert.ok(policy.includes("https://res.cloudinary.com"));
     assert.ok(policy.includes("https://qr.sepay.vn"));
     assert.ok(policy.includes("https://img.vietqr.io"));
+    assert.ok(policy.includes("report-uri /csp-report"), "Chính sách report-only phải cấu hình report-uri /csp-report");
   } finally {
     if (originalEnv === undefined) delete process.env.TOTMART_CSP_REPORT_ONLY;
     else process.env.TOTMART_CSP_REPORT_ONLY = originalEnv;
   }
+});
+
+// ─── 5. Kiểm thử Endpoint /csp-report: Kích thước 8KB, strip query, in-memory counter ─
+
+test("CSP Endpoint /csp-report: Xử lý báo cáo vi phạm, giới hạn 8KB, cắt query string và không ghi đĩa", async () => {
+  const { POST, getCspStatistics, resetCspStatistics, sanitizeReportUrl } = await import(
+    "../src/app/csp-report/route.js"
+  );
+
+  resetCspStatistics();
+
+  // 1. Kiểm tra cắt query string và hash
+  assert.equal(
+    sanitizeReportUrl("https://totmart.vn/checkout?session=secretToken123#step2"),
+    "https://totmart.vn/checkout"
+  );
+  assert.equal(
+    sanitizeReportUrl("https://evil.com/leak?auth=bearer_token"),
+    "https://evil.com/leak"
+  );
+
+  // 2. Báo cáo hợp lệ qua POST
+  const validReport = {
+    "csp-report": {
+      "document-uri": "https://totmart.vn/products?ref=123",
+      "blocked-uri": "https://untrusted.cdn.com/evil.js?v=99",
+      "effective-directive": "script-src",
+      "violated-directive": "script-src",
+    },
+  };
+
+  const req = new Request("http://localhost:3000/csp-report", {
+    method: "POST",
+    headers: { "Content-Type": "application/csp-report" },
+    body: JSON.stringify(validReport),
+  });
+
+  const res = await POST(req);
+  assert.equal(res.status, 204);
+
+  // 3. Kiểm tra thống kê trong bộ nhớ
+  const stats = getCspStatistics();
+  assert.equal(stats.totalReports, 1);
+  assert.equal(stats.byDirective["script-src"], 1);
+
+  // 4. Giới hạn body > 8KB trả về 413 Payload Too Large
+  const oversizedBody = "x".repeat(8500);
+  const oversizedReq = new Request("http://localhost:3000/csp-report", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/csp-report",
+      "Content-Length": "8500",
+    },
+    body: oversizedBody,
+  });
+
+  const res413 = await POST(oversizedReq);
+  assert.equal(res413.status, 413);
 });

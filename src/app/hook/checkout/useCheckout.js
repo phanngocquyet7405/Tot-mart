@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { cartLineKey } from '@/app/util/cartLine.mjs';
-import { getTokenUserId } from '@/app/middleware/tokenMiddleware';
+import { getTokenUserId, cleanupUncommittedAttempts } from '@/app/middleware/tokenMiddleware';
 import { AppContext } from "@/app/context/AppContext";
 import { useCart } from "@/app/context/CartContext";
 import {
@@ -33,12 +33,34 @@ export function useCheckout() {
     window.addEventListener('totmart:attempt-changed', refresh);
     return () => { window.removeEventListener('storage', refresh); window.removeEventListener('totmart:attempt-changed', refresh); };
   }, []);
+
+  useEffect(() => {
+    const handleExpired = () => {
+      cleanupUncommittedAttempts();
+      contextKey.current = null;
+      setStep("address");
+      refreshAttempt(v => v + 1);
+    };
+    window.addEventListener('totmart:session-expired', handleExpired);
+    window.addEventListener('session-expired', handleExpired);
+    return () => {
+      window.removeEventListener('totmart:session-expired', handleExpired);
+      window.removeEventListener('session-expired', handleExpired);
+    };
+  }, []);
+
   const searchParams = useSearchParams();
   const resumeCode = searchParams.get("code");
   // Bind this tab to the first reference it observes, even after another tab starts anew.
   const contextKey = useRef(null);
   const activeAttempt = getPendingCheckout(undefined, resumeCode);
-  if (!contextKey.current && activeAttempt?.key) contextKey.current = activeAttempt.key;
+  const currentUid = getTokenUserId();
+  if (contextKey.current && (!activeAttempt || (activeAttempt.userId && activeAttempt.userId !== currentUid))) {
+    contextKey.current = null;
+  }
+  if (!contextKey.current && activeAttempt?.key && (!activeAttempt.userId || activeAttempt.userId === currentUid)) {
+    contextKey.current = activeAttempt.key;
+  }
   const {
     cartItems,
     cartVersion, setCartVersion,
@@ -442,7 +464,8 @@ export function useCheckout() {
       submittingRef.current = true;
       setSubmitting(true);
       try {
-        await startNewCheckout(contextKey.current);
+        const key = contextKey.current || activeAttempt?.key || getPendingCheckout()?.key;
+        await startNewCheckout(key);
         contextKey.current = null;
         activeCodeRef.current = null;
         setPaymentCode(null); setPaymentStatus('idle'); setOrderSuccess(false);
