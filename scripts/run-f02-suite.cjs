@@ -81,8 +81,8 @@ async function main() {
     const runtime = JSON.parse(fs.readFileSync(runtimeFile, 'utf8'));
     console.log(`BE Fixture ready at ${runtime.origin}`);
 
-    console.log(`2. Starting Next.js production server (next start) on port ${FE_PORT}...`);
-    nextProc = spawn('npx', ['next', 'start', '-p', String(FE_PORT)], {
+    console.log(`2. Starting Next.js production server (next start -H 127.0.0.1) on port ${FE_PORT}...`);
+    nextProc = spawn('npx', ['next', 'start', '-H', '127.0.0.1', '-p', String(FE_PORT)], {
       stdio: ['ignore', 'pipe', 'pipe'],
       shell: true,
       env: {

@@ -4,6 +4,9 @@
 
 ## Tài liệu Kiểm chứng & Bàn giao Hiện hành (Current Verification & Quality Gates)
 
+- [quality/FE-SEC.md](quality/FE-SEC.md): kế hoạch và biên bản nghiệm thu FE-SEC — xử lý triệt để lỗ hổng npm audit production (next, follow-redirects), đánh giá phơi nhiễm và kiểm chứng cổng chất lượng.
+- [quality/F-FIX2.md](quality/F-FIX2.md): nghiệm thu chất lượng Phase F-FIX2 — hoàn thiện attempt lifecycle, CSP analysis, sitemap ISR, 74 cặp component, hook recovery và dual-run verification.
+- [quality/F-FIX.md](quality/F-FIX.md): nghiệm thu chất lượng Phase F-FIX — rà soát toàn diện và xử lý các tồn đọng.
 - [quality/F05-structure-types.md](quality/F05-structure-types.md): nghiệm thu chất lượng Phase F05 — quy hoạch component SSOT & re-export bridges, phân rã file lớn (`BoxFormDialog`), hiện đại hóa logging (`@/app/util/Logger`), progressive `checkJs`/JSDoc cho domain module trọng yếu và chuẩn hóa mục lục docs.
 - [quality/F04-security-session.md](quality/F04-security-session.md): nghiệm thu chất lượng Phase F04 — XSS defense allowlist không regex, bảo vệ phiên khi refresh 5xx/503/timeout, chuẩn hóa login passwordChangeRequired & lỗi 503/403, CSP report-only, làm sạch log và rà soát file tracked đáng ngờ.
 - [quality/F03-seo-rendering.md](quality/F03-seo-rendering.md): nghiệm thu chất lượng Phase F03 — SEO, sitemap phục hồi snapshot last-known-good, Server Component shells và phân tách quote checkout.

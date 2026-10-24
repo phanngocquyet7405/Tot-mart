@@ -64,6 +64,7 @@ const INITIAL_FORM = {
 import { ProductRow } from "./parts/ProductRow";
 import { BoxImageSection } from "./parts/BoxImageSection";
 import { BoxPriceSummary } from "./parts/BoxPriceSummary";
+import { BoxBasicInfoSection } from "./parts/BoxBasicInfoSection";
 
 // ─── Main Dialog ───────────────────────────────────────────────────────────────
 export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
@@ -77,7 +78,12 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
   const [availableProducts, setAvailableProducts] = useState([]);
   const [merchants, setMerchants] = useState([]);
   useEffect(() => {
-    axiosConfig.get('/brands/merchant-options').then(res => setMerchants(res.data || [])).catch(() => toast.error('Không tải được merchant. Hãy mở lại biểu mẫu.'));
+    axiosConfig
+      .get("/brands/merchant-options")
+      .then((res) => setMerchants(res.data || []))
+      .catch(() =>
+        toast.error("Không tải được merchant. Hãy mở lại biểu mẫu."),
+      );
   }, []);
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
@@ -99,7 +105,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
 
     if (isEdit && box) {
       setForm({
-        ownerId: box.ownerId?._id || box.ownerId || '',
+        ownerId: box.ownerId?._id || box.ownerId || "",
         name: box.name || "",
         descriptions: box.descriptions || box.description || "",
         stock: box.stock ?? 1,
@@ -155,7 +161,9 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     if (selected.length === 0) return;
 
     const valid = selected.filter((f) => {
-      const ok = ["image/jpeg", "image/png", "image/webp"].includes(f.type) && f.size <= 5 * 1024 * 1024;
+      const ok =
+        ["image/jpeg", "image/png", "image/webp"].includes(f.type) &&
+        f.size <= 5 * 1024 * 1024;
       if (!ok) toast.error(`${f.name}: ảnh phải < 5MB`);
       return ok;
     });
@@ -208,9 +216,26 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
   // ── Validation ───────────────────────────────────────────────────────────────
   const validate = () => {
     const e = {};
-    if (!form.ownerId) e.ownerId = 'Chọn merchant sở hữu combo; dữ liệu legacy cần đối chiếu trước khi sửa.';
-    if (products.some(p => !Number.isInteger(p.quantity) || p.quantity < 1) || new Set(products.map(p => p.productId)).size !== products.length) e.products = 'Sản phẩm phải duy nhất, số lượng nguyên dương.';
-    if (products.some(p => !availableProducts.some(row => row._id === p.productId && (row.ownerId?._id || row.ownerId) === form.ownerId))) e.products = 'Cấu phần thiếu hoặc khác merchant. Đối chiếu dữ liệu trước khi lưu.';
+    if (!form.ownerId)
+      e.ownerId =
+        "Chọn merchant sở hữu combo; dữ liệu legacy cần đối chiếu trước khi sửa.";
+    if (
+      products.some((p) => !Number.isInteger(p.quantity) || p.quantity < 1) ||
+      new Set(products.map((p) => p.productId)).size !== products.length
+    )
+      e.products = "Sản phẩm phải duy nhất, số lượng nguyên dương.";
+    if (
+      products.some(
+        (p) =>
+          !availableProducts.some(
+            (row) =>
+              row._id === p.productId &&
+              (row.ownerId?._id || row.ownerId) === form.ownerId,
+          ),
+      )
+    )
+      e.products =
+        "Cấu phần thiếu hoặc khác merchant. Đối chiếu dữ liệu trước khi lưu.";
     if (!(form.name ?? "").trim()) e.name = "Tên box là bắt buộc";
     if (form.stock < 1) e.stock = "Tồn kho phải ≥ 1";
     if (!(form.descriptions ?? "").trim()) e.descriptions = "Mô tả là bắt buộc";
@@ -243,7 +268,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     setIsSaving(true);
     try {
       const formData = new FormData();
-      if (!isEdit) formData.append('ownerId', form.ownerId);
+      if (!isEdit) formData.append("ownerId", form.ownerId);
 
       // Thông tin cơ bản
       formData.append("name", (form.name ?? "").trim());
@@ -287,7 +312,9 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     } catch (err) {
       const msg =
         err?.response?.data?.errors?.map((e) => e.message).join(" | ") ||
-        err?.response?.data?.message || err?.message || "Đã có lỗi xảy ra";
+        err?.response?.data?.message ||
+        err?.message ||
+        "Đã có lỗi xảy ra";
       toast.error(msg);
     } finally {
       setIsSaving(false);
@@ -324,148 +351,32 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
           <div className="space-y-2">
             <Label htmlFor="combo-owner">Merchant sở hữu</Label>
-            <select id="combo-owner" className="w-full rounded border p-2" disabled={isEdit || isSaving} value={form.ownerId || ''} onChange={event => { setForm(f => ({ ...f, ownerId: event.target.value })); setProducts([EMPTY_PRODUCT()]); }}>
+            <select
+              id="combo-owner"
+              className="w-full rounded border p-2"
+              disabled={isEdit || isSaving}
+              value={form.ownerId || ""}
+              onChange={(event) => {
+                setForm((f) => ({ ...f, ownerId: event.target.value }));
+                setProducts([EMPTY_PRODUCT()]);
+              }}
+            >
               <option value="">Chọn merchant</option>
-              {merchants.map(merchant => <option key={merchant._id} value={merchant._id}>{merchant.name}</option>)}
+              {merchants.map((merchant) => (
+                <option key={merchant._id} value={merchant._id}>
+                  {merchant.name}
+                </option>
+              ))}
             </select>
             {errors.ownerId && <p role="alert">{errors.ownerId}</p>}
           </div>
           {/* ── Thông tin cơ bản ── */}
-          <section>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
-              Thông tin cơ bản
-            </h3>
-            <div className="space-y-4">
-              {/* Tên */}
-              <div className="space-y-1.5">
-                <Label>
-                  Tên Box <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  placeholder="VD: Premium Mystery Box"
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, name: e.target.value }))
-                  }
-                  className={errors.name ? "border-red-400" : ""}
-                />
-                {errors.name && (
-                  <p className="text-xs text-red-500">{errors.name}</p>
-                )}
-              </div>
-
-              {/* Mô tả */}
-              <div className="space-y-1.5">
-                <Label>
-                  Mô tả <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                  rows={3}
-                  placeholder="Mô tả nội dung và điểm nổi bật của box..."
-                  value={form.descriptions}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, descriptions: e.target.value }))
-                  }
-                  className={`resize-none ${errors.descriptions ? "border-red-400" : ""}`}
-                />
-                {errors.descriptions && (
-                  <p className="text-xs text-red-500">{errors.descriptions}</p>
-                )}
-              </div>
-
-              {/* Tồn kho + Giảm giá */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label>
-                    Tồn kho <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={form.stock}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        stock: Number(e.target.value) || 1,
-                      }))
-                    }
-                    className={errors.stock ? "border-red-400" : ""}
-                  />
-                  {errors.stock && (
-                    <p className="text-xs text-red-500">{errors.stock}</p>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Giảm giá (%)</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={form.discountPercent}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        discountPercent: Math.min(
-                          100,
-                          Math.max(0, Number(e.target.value) || 0),
-                        ),
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* Ngày */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label>
-                    Ngày bắt đầu <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    type="date"
-                    min={today}
-                    value={form.validFrom}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, validFrom: e.target.value }))
-                    }
-                    className={errors.validFrom ? "border-red-400" : ""}
-                  />
-                  {errors.validFrom && (
-                    <p className="text-xs text-red-500">{errors.validFrom}</p>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <Label>
-                    Ngày kết thúc <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    type="date"
-                    min={form.validFrom || today}
-                    value={form.validTo}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, validTo: e.target.value }))
-                    }
-                    className={errors.validTo ? "border-red-400" : ""}
-                  />
-                  {errors.validTo && (
-                    <p className="text-xs text-red-500">{errors.validTo}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Gift toggle */}
-              <div className="flex items-center gap-3 py-1">
-                <Switch
-                  checked={form.isGift}
-                  onCheckedChange={(v) => setForm((f) => ({ ...f, isGift: v }))}
-                  id="isGift"
-                />
-                <Label htmlFor="isGift" className="cursor-pointer">
-                  Đánh dấu là Box quà tặng
-                </Label>
-              </div>
-            </div>
-          </section>
+          <BoxBasicInfoSection
+            form={form}
+            setForm={setForm}
+            errors={errors}
+            today={today}
+          />
 
           {/* ── Hình ảnh ── */}
           <BoxImageSection
@@ -499,7 +410,12 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
                   key={i}
                   item={p}
                   index={i}
-                  availableProducts={availableProducts.filter(p => (p.ownerId?._id || p.ownerId) === form.ownerId && !p.archivedAt && !products.some(row => row.productId === p._id))}
+                  availableProducts={availableProducts.filter(
+                    (p) =>
+                      (p.ownerId?._id || p.ownerId) === form.ownerId &&
+                      !p.archivedAt &&
+                      !products.some((row) => row.productId === p._id),
+                  )}
                   onChange={handleChangeProduct}
                   onRemove={removeProduct}
                   error={errors[`product_${i}`]}

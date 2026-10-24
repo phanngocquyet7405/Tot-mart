@@ -19,6 +19,15 @@ export function saveToken(token) {
     }
   }
 }
+const PURGEABLE_UNCOMMITTED_STATES = new Set(['invalidated', 'rejected']);
+const AMBIGUOUS_OR_COMMITTED_STATES = new Set([
+  'created',
+  'confirming',
+  'processing',
+  'unknown',
+  'terminationRequested',
+]);
+
 export function cleanupUncommittedAttempts() {
   if (typeof window === 'undefined') return;
   for (const storageName of ['localStorage', 'sessionStorage']) {
@@ -29,7 +38,15 @@ export function cleanupUncommittedAttempts() {
       for (const k of keys) {
         try {
           const item = JSON.parse(storage.getItem(k));
-          if (item && item.state !== 'created') {
+          if (!item) continue;
+          // GIỮ các trạng thái có thể đã commit hoặc đang xử lý ở BE
+          if (AMBIGUOUS_OR_COMMITTED_STATES.has(item.state) || item.terminationRequested === true) {
+            continue;
+          }
+          // CHỈ xóa trạng thái chắc chắn chưa commit:
+          // 1. invalidated, rejected
+          // 2. prepare lỗi trước hash (không có hash và không có result)
+          if (PURGEABLE_UNCOMMITTED_STATES.has(item.state) || (!item.hash && !item.result)) {
             storage.removeItem(k);
           }
         } catch {}

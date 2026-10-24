@@ -23,6 +23,17 @@ import {
   EMPTY_NEW_ADDRESS,
 } from "@/app/services/api/Checkoutpageservice";
 
+function getAttemptInitialStep(attempt) {
+  if (!attempt) return "address";
+  if (attempt.state === "created" || attempt.state === "confirming" || attempt.state === "processing" || attempt.confirmed) {
+    return "payment";
+  }
+  if (attempt.hash) {
+    return "review";
+  }
+  return "address";
+}
+
 export function useCheckout() {
   const router = useRouter();
   const { isLoading: sessionLoading, user: sessionUser } = useContext(AppContext);
@@ -32,21 +43,6 @@ export function useCheckout() {
     window.addEventListener('storage', refresh);
     window.addEventListener('totmart:attempt-changed', refresh);
     return () => { window.removeEventListener('storage', refresh); window.removeEventListener('totmart:attempt-changed', refresh); };
-  }, []);
-
-  useEffect(() => {
-    const handleExpired = () => {
-      cleanupUncommittedAttempts();
-      contextKey.current = null;
-      setStep("address");
-      refreshAttempt(v => v + 1);
-    };
-    window.addEventListener('totmart:session-expired', handleExpired);
-    window.addEventListener('session-expired', handleExpired);
-    return () => {
-      window.removeEventListener('totmart:session-expired', handleExpired);
-      window.removeEventListener('session-expired', handleExpired);
-    };
   }, []);
 
   const searchParams = useSearchParams();
@@ -61,6 +57,7 @@ export function useCheckout() {
   if (!contextKey.current && activeAttempt?.key && (!activeAttempt.userId || activeAttempt.userId === currentUid)) {
     contextKey.current = activeAttempt.key;
   }
+
   const {
     cartItems,
     cartVersion, setCartVersion,
@@ -71,7 +68,41 @@ export function useCheckout() {
     removeFromCart,
   } = useCart();
 
-  const [step, setStep] = useState("address");
+  const [step, setStep] = useState(() => {
+    return getAttemptInitialStep(activeAttempt);
+  });
+
+  useEffect(() => {
+    const handleExpired = () => {
+      cleanupUncommittedAttempts();
+      const remainingAttempt = getPendingCheckout(contextKey.current, resumeCode);
+      const uid = getTokenUserId();
+      if (remainingAttempt && (remainingAttempt.userId === uid || !remainingAttempt.userId)) {
+        setStep(getAttemptInitialStep(remainingAttempt));
+      } else {
+        contextKey.current = null;
+        setStep("address");
+      }
+      refreshAttempt(v => v + 1);
+    };
+    window.addEventListener('totmart:session-expired', handleExpired);
+    window.addEventListener('session-expired', handleExpired);
+    return () => {
+      window.removeEventListener('totmart:session-expired', handleExpired);
+      window.removeEventListener('session-expired', handleExpired);
+    };
+  }, [resumeCode]);
+
+  useEffect(() => {
+    const attempt = getPendingCheckout(contextKey.current, resumeCode);
+    const uid = getTokenUserId();
+    if (attempt && (attempt.userId === uid || !attempt.userId)) {
+      const targetStep = getAttemptInitialStep(attempt);
+      if (targetStep !== 'address') {
+        setStep(targetStep);
+      }
+    }
+  }, [sessionUser, resumeCode]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
@@ -282,7 +313,7 @@ export function useCheckout() {
         if (!mounted.current || String(user?._id || user?.id) !== String(getTokenUserId())) return;
         contextKey.current ||= getPendingCheckout()?.key;
         if (!result.success) {
-          if (result.invalidated) { contextKey.current = null; refreshAttempt(n => n + 1); }
+          if (result.invalidated) { contextKey.current = null; setStep("address"); refreshAttempt(n => n + 1); }
           if (result.cartVersion !== undefined) setCartVersion(result.cartVersion);
           if (result.status === 409) { setQuote(null); setQuoteGeneration(value => value + 1); }
           if (result.prepared || result.invalidated) { toast.info(result.error); return; }

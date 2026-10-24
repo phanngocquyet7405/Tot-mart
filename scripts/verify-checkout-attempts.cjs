@@ -27,6 +27,7 @@ async function main(){
     await mongoose.connect(repl.getUri('fe_checkout_'+randomUUID().replaceAll('-','')));
     await Promise.all(Object.values(mongoose.models).map(m=>m.init()));
     const {user}=await fixture.createUser({name:'Local Customer',email:'customer@checkout.example.com',password:'Fixture-Only-123!'});
+    const {user:customer2}=await fixture.createUser({name:'Second Customer',email:'customer2@checkout.example.com',password:'Fixture-Only-123!'});
     const {user:merchant}=await fixture.createUser({role:'merchant',email:'merchant@checkout.example.com'});
     const {user:admin}=await fixture.createUser({role:'admin',email:'admin@checkout.example.com'});
     const brand=await fixture.createBrand({ownerId:merchant._id});
@@ -151,7 +152,7 @@ async function main(){
     console.log(JSON.stringify(evidence,null,2));
     if(process.argv.includes('--serve')){
       require('node:fs').mkdirSync('.cache',{recursive:true});
-      require('node:fs').writeFileSync('.cache/checkout-runtime.json',JSON.stringify({origin,productId:String(product._id),productSlug:product.slug,comboId:combo.data._id,templateId:template.data._id}));
+      require('node:fs').writeFileSync('.cache/checkout-runtime.json',JSON.stringify({origin,productId:String(product._id),productSlug:product.slug,comboId:combo.data._id,templateId:template.data._id,customer2Email:'customer2@checkout.example.com',customer2Id:String(customer2._id)}));
       console.log('Local fixture server ready; press Enter to dispose');await new Promise(r=>{process.once('SIGINT',r);process.stdin.once('data',r);process.stdin.resume();});process.stdin.pause();
     }
   }finally{if(server)await new Promise(r=>server.close(r));if(gapRedis)await be(path.join(root,'src/config/redis')).stopRedis();await mongoose.disconnect();await repl.stop();}

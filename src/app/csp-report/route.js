@@ -54,6 +54,10 @@ export function sanitizeReportUrl(rawUrl) {
   }
 }
 
+export async function GET() {
+  return NextResponse.json(getCspStatistics());
+}
+
 export async function POST(request) {
   try {
     // Kiểm tra kích thước header Content-Length trước

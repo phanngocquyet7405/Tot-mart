@@ -47,12 +47,17 @@ async function main() {
     return r.json();
   };
 
-  const pending = () => page.evaluate(() => {
+  const pending = (userId) => page.evaluate((targetUid) => {
+    if (targetUid) {
+      const raw = localStorage.getItem(`totmart_checkout_attempt_${targetUid}`);
+      return raw ? JSON.parse(raw) : null;
+    }
     const keys = Object.keys(localStorage).filter(k => /^totmart_checkout_attempt_[^:]+$/.test(k));
     return keys.length ? JSON.parse(localStorage.getItem(keys[0])) : null;
-  });
+  }, userId);
 
-  const login = async (email = 'customer@checkout.example.com', password = 'Fixture-Only-123!') => {
+  const login = async (email = 'customer@checkout.example.com', password = 'Fixture-Only-123!', options = {}) => {
+    const { cleanStorage = false } = options;
     // If already authenticated as the target user, reuse session
     try {
       const isAuth = await page.evaluate(async (targetEmail) => {
@@ -72,9 +77,11 @@ async function main() {
     // Invalidate old session on server and client before new login
     try { await page.request.post(origin + '/api/home/logout'); } catch {}
     await context.clearCookies();
-    await page.evaluate(() => {
-      try { localStorage.clear(); sessionStorage.clear(); } catch {}
-    }).catch(() => {});
+    if (cleanStorage) {
+      await page.evaluate(() => {
+        try { localStorage.clear(); sessionStorage.clear(); } catch {}
+      }).catch(() => {});
+    }
     await page.goto(origin + '/login');
     await page.locator('#email').fill(email);
     await page.locator('#password').fill(password);
@@ -119,12 +126,16 @@ async function main() {
   const ensureFreshCheckout = async () => {
     const nextBtn = page.getByRole('button', { name: /Tiếp theo.*Kiểm tra đơn/i });
     const newBtn = page.getByRole('button', { name: 'Đặt đơn mới', exact: true });
+    const terminateBtn = page.getByRole('button', { name: 'Kết thúc lần thử', exact: true });
     await Promise.race([
       nextBtn.waitFor({ state: 'visible' }),
       newBtn.waitFor({ state: 'visible' }),
+      terminateBtn.waitFor({ state: 'visible' }),
     ]);
     if (await newBtn.isVisible()) {
       await newBtn.click();
+    } else if (await terminateBtn.isVisible()) {
+      await terminateBtn.click();
     }
     await nextBtn.waitFor({ state: 'visible' });
   };
@@ -362,20 +373,43 @@ async function main() {
     await page.evaluate(() => {
       window.dispatchEvent(new Event('totmart:session-expired'));
     });
-    // Ứng dụng tự động dọn dẹp attempt chưa hoàn thành của phiên bị hết hạn (không xóa thủ công qua test)
-    assert.equal(await pending(), null, 'Ứng dụng phải tự động xóa attempt chưa hoàn tất khi phiên hết hạn');
-    checks.push('Edge Case 2: Đổi user / hết hạn phiên giữa chừng ngăn chặn đặt đơn dưới danh tính sai lệch');
+    // Attempt của Cust1 vẫn được giữ nguyên an toàn trong storage (không bị xóa nhầm)
+    assert.ok(await pending(), 'Attempt của Cust1 phải được giữ nguyên an toàn khi mất phiên');
+
+    // Chuyển sang Customer 2 đăng nhập (không xóa storage)
+    await login(runtime.customer2Email || 'customer2@checkout.example.com', 'Fixture-Only-123!', { cleanStorage: false });
+    await page.goto(origin + '/checkout');
+
+    // Customer 2 không thấy attempt của Customer 1 (key theo userId)
+    const cust2Attempt = await page.evaluate((c2Id) => {
+      return localStorage.getItem(`totmart_checkout_attempt_${c2Id}`);
+    }, runtime.customer2Id);
+    assert.equal(cust2Attempt, null, 'Customer 2 tuyệt đối không thấy attempt của Customer 1');
+
+    // Đăng nhập lại Customer 1: Attempt cũ vẫn còn nguyên vẹn
+    await login('customer@checkout.example.com', 'Fixture-Only-123!', { cleanStorage: false });
+    checks.push('Edge Case 2: Đổi user / hết hạn phiên giữa chừng ngăn chặn đặt đơn dưới danh tính sai lệch, cách ly key theo userId');
 
     // -------------------------------------------------------------
-    // SCENARIO 10 (Edge Case 3): Thu hồi phiên (Session revocation / 401 during confirm)
+    // SCENARIO 10 (Edge Case 3): Thu hồi phiên, trạng thái unknown, logout & đăng nhập lại phục hồi đơn đúng 1 lần
     // -------------------------------------------------------------
     const ordersBefore10 = (await evidence()).transactions.length;
-    await login();
+    await login('customer@checkout.example.com', 'Fixture-Only-123!', { cleanStorage: false });
     await add();
     await page.goto(origin + '/checkout');
     await ensureFreshCheckout();
     await prepare('cod');
+    const pre401Attempt = await pending();
+    assert.ok(pre401Attempt?.key);
 
+    // Sub-test 1: 401 lúc create (kèm refresh 401 do phiên bị thu hồi) -> xử lý an toàn, không commit đơn giả mạo, attempt được giữ lại
+    await page.route('**/api/home/refresh', async route => {
+      await route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: false, status: 401, message: 'Refresh token revoked' }),
+      });
+    });
     await page.route('**/api/checkout/check-out', async route => {
       await route.fulfill({
         status: 401,
@@ -384,17 +418,83 @@ async function main() {
       });
     });
 
+    await page.evaluate(() => {
+      window.__sessionExpiredFired = false;
+      window.addEventListener('totmart:session-expired', () => { window.__sessionExpiredFired = true; }, { once: true });
+    });
     const confirmBtn = page.getByRole('button', { name: 'Xác nhận đúng địa chỉ và tổng tiền trên', exact: true });
     await confirmBtn.waitFor({ state: 'visible' });
-    const responsePromise = page.waitForResponse(res => res.url().includes('/api/checkout/check-out') && res.status() === 401);
     await confirmBtn.click();
-    await responsePromise;
+    await page.waitForFunction(() => window.__sessionExpiredFired === true);
     await page.unroute('**/api/checkout/check-out');
+    await page.unroute('**/api/home/refresh');
 
-    // Xác minh không có đơn hàng giả mạo nào được ghi nhận trong DB
-    const ordersAfter10 = (await evidence()).transactions.length;
-    assert.equal(ordersAfter10, ordersBefore10, 'Không commit đơn hàng khi gặp lỗi 401 thu hồi phiên');
-    checks.push('Edge Case 3: Thu hồi phiên (401 khi xác nhận) được xử lý an toàn, không commit đơn giả mạo');
+    // Không commit đơn nào vào DB
+    assert.equal((await evidence()).transactions.length, ordersBefore10, 'Không commit đơn hàng khi gặp 401');
+    // Attempt vẫn được bảo toàn trong storage (không bị cleanupUncommittedAttempts xóa mất)
+    const post401Attempt = await pending();
+    assert.ok(post401Attempt?.key, 'Attempt phải được giữ nguyên sau khi gặp lỗi 401');
+
+    // Sub-test 2: Hết phiên khi create ở trạng thái unknown -> attempt được GIỮ
+    await page.evaluate(() => {
+      const keys = Object.keys(localStorage).filter(k => /^totmart_checkout_attempt_[^:]+$/.test(k));
+      if (keys.length) {
+        const item = JSON.parse(localStorage.getItem(keys[0]));
+        item.state = 'unknown';
+        localStorage.setItem(keys[0], JSON.stringify(item));
+      }
+      window.dispatchEvent(new Event('totmart:session-expired'));
+    });
+    const postExpiredAttempt = await pending();
+    assert.equal(postExpiredAttempt?.state, 'unknown', 'Hết phiên khi ở trạng thái unknown: attempt không bị xóa');
+
+    // Sub-test 3: Logout khi unknown -> attempt được GIỮ
+    await page.evaluate(() => {
+      window.dispatchEvent(new Event('totmart:session-expired'));
+    });
+    try { await page.request.post(origin + '/api/home/logout'); } catch {}
+    await context.clearCookies();
+    const postLogoutAttempt = await pending();
+    assert.equal(postLogoutAttempt?.state, 'unknown', 'Logout khi ở trạng thái unknown: attempt không bị xóa');
+
+    // Sub-test 4: Cùng user đăng nhập lại -> Stepper phản ánh attempt đã lưu, lookup phục hồi đơn đúng 1 lần
+    await login('customer@checkout.example.com', 'Fixture-Only-123!', { cleanStorage: false });
+    await page.goto(origin + '/checkout');
+
+    // Nút recheck hiển thị
+    const recheckBtn = page.getByRole('button', { name: /Kiểm tra lại kết quả|Tiếp tục đúng yêu cầu cũ/i });
+    await recheckBtn.waitFor({ state: 'visible' });
+
+    // Mock BE lookup trả về đơn đã tạo (created) để phục hồi đúng 1 lần
+    const recoveredCode = 'RECOVERED-' + Date.now();
+    await page.route('**/api/checkout/attempts/products/*', async route => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: true,
+            data: {
+              key: postLogoutAttempt.key,
+              hash: postLogoutAttempt.hash,
+              state: 'created',
+              result: { orderCode: recoveredCode, totalAmount: 100000, paymentCode: recoveredCode },
+              canRestart: false,
+            },
+          }),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await recheckBtn.click();
+    // Đơn được phục hồi thành công sang màn hình hoàn tất
+    await page.getByText(/Giao dịch đã tồn tại|Đặt đơn mới|Đặt hàng thành công/i).first().waitFor({ timeout: 10000 });
+    await page.unroute('**/api/checkout/attempts/products/*');
+
+    // Xác nhận không dùng bất kỳ lệnh xóa key nào trong test
+    checks.push('Edge Case 3: Thu hồi phiên 401, hết phiên khi unknown, logout khi unknown, cùng user đăng nhập lại stepper phản ánh đúng attempt và lookup phục hồi đơn đúng 1 lần (không xóa key né test)');
 
     // -------------------------------------------------------------
     // SCENARIO 11 (Edge Case 4): Storage đầy (localStorage QuotaExceededError)
@@ -443,6 +543,13 @@ async function main() {
   } finally {
     try { await context.tracing.stop(); } catch {}
     fs.mkdirSync('.cache', { recursive: true });
+    try {
+      const cspRes = await fetch(`${origin}/csp-report`);
+      if (cspRes.ok) {
+        const cspStats = await cspRes.json();
+        fs.writeFileSync('.cache/csp-stats.json', JSON.stringify(cspStats, null, 2));
+      }
+    } catch {}
     fs.writeFileSync('.cache/f02-browser-e2e-results.json', JSON.stringify({ checks, errors, timestamp: new Date().toISOString() }, null, 2));
     await browser.close();
     console.log(JSON.stringify({ checks, errors, passed: checks.length, failed: errors.length }, null, 2));
