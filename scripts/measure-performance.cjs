@@ -364,10 +364,21 @@ async function main() {
     }
   } catch {}
 
+  // Check if BE fixture server is already alive
+  let isFixtureRunning = false;
+  let fixtureInfo = null;
+  try {
+    const chk = await fetch(`http://127.0.0.1:${FIXTURE_PORT}/__fixture/f07-info`);
+    if (chk.status === 200) {
+      isFixtureRunning = true;
+      fixtureInfo = await chk.json();
+    }
+  } catch {}
+
   const forceStandalone = process.argv.includes('--standalone');
 
-  if (!isFeRunning || !fs.existsSync(runtimePath) || forceStandalone) {
-    console.log('Stand-alone mode: Initializing dedicated fixture and Next.js server...');
+  if (!isFixtureRunning || forceStandalone) {
+    console.log('Stand-alone mode: Initializing dedicated fixture...');
     serversStartedByMe = true;
 
     // Start disposable Redis
@@ -405,16 +416,29 @@ async function main() {
         ...process.env,
         FE_TEST_ORIGIN: FE_ORIGIN,
         FE_TEST_API_PORT: FIXTURE_PORT,
-        REDIS_URL: redisContainerId ? `redis://127.0.0.1:${REDIS_PORT}` : '',
+        REDIS_URL: redisContainerId ? `redis://127.0.0.1:${REDIS_PORT}` : (process.env.REDIS_URL || ''),
         NODE_ENV: 'test',
       },
     });
     if (fixtureProc.pid) spawnedPids.add(fixtureProc.pid);
     fixtureProc.stdout.on('data', (d) => process.stdout.write(`[Fixture] ${d}`));
+  } else {
+    console.log(`Reusing existing F07 BE fixture server on port ${FIXTURE_PORT}...`);
+    if (!fs.existsSync(runtimePath) && fixtureInfo) {
+      const reconstructed = {
+        origin: `http://127.0.0.1:${FIXTURE_PORT}`,
+        ...fixtureInfo,
+      };
+      fs.writeFileSync(runtimePath, JSON.stringify(reconstructed, null, 2));
+      console.log(`[Fixture Info] Reconstructed ${runtimePath} from live endpoint.`);
+    }
+  }
 
-    await waitFor(() => fs.existsSync(runtimePath), 90000);
-    const runtime = JSON.parse(fs.readFileSync(runtimePath, 'utf8'));
+  await waitFor(() => fs.existsSync(runtimePath), 90000);
+  const runtime = JSON.parse(fs.readFileSync(runtimePath, 'utf8'));
 
+  if (!isFeRunning || forceStandalone) {
+    serversStartedByMe = true;
     console.log(`Starting Next.js production server on port ${FE_PORT}...`);
     nextProc = spawn('npx', ['next', 'start', '-H', '127.0.0.1', '-p', String(FE_PORT)], {
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -443,6 +467,8 @@ async function main() {
       500
     );
     console.log('Next.js server is ready.');
+  } else {
+    console.log(`Reusing existing Next.js server on port ${FE_PORT}...`);
   }
 
   try {
