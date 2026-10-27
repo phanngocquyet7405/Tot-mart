@@ -32,7 +32,11 @@ export function validStockAdjustment(delta, stock, reason) {
 }
 
 export function managerError(error, fallback = 'Không thể tải dữ liệu. Vui lòng thử lại.') {
-  return error.response?.data?.errors?.map(item => item.message).filter(Boolean).join('; ') || error.response?.data?.message || (error.isAxiosError ? fallback : error.message) || fallback;
+  const status = error.response?.status;
+  const requestId = error.response?.data?.requestId || error.requestId || error.response?.headers?.['x-request-id'];
+  const baseMsg = error.response?.data?.errors?.map(item => item.message).filter(Boolean).join('; ') || error.response?.data?.message || (error.isAxiosError ? fallback : error.message) || fallback;
+  const safeMsg = (status >= 500) ? 'Lỗi hệ thống. Vui lòng thử lại.' : baseMsg;
+  return requestId ? `${safeMsg} (Request ID: ${requestId})` : safeMsg;
 }
 
 export const money = value => value === null || value === undefined || value === '' || !Number.isFinite(Number(value)) ? 'Chưa có giá' : `${Number(value).toLocaleString('vi-VN')} ₫`;

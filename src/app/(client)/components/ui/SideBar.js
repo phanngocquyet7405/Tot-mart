@@ -1,3 +1,5 @@
+"use client";
+import logger from "@/app/util/Logger";
 import { ChevronDown, X, ChevronUp } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -29,7 +31,7 @@ export default function SideBar ({isOpen, onClose}) {
             setBrands(Array.isArray(unwrap(brandResponse)) ? unwrap(brandResponse) : []);
           }
         })
-        .catch((error) => console.error("Error loading sidebar data:", error));
+        .catch((error) => logger.error("Error loading sidebar data:", error));
       return () => { active = false; };
     }, []);
 

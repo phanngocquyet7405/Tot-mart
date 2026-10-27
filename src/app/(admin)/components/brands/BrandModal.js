@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 //su dung sau
 
@@ -83,7 +84,7 @@ export default function BrandModal({
       onSuccess();
       onClose();
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       setError(err.response?.data?.message || "Có lỗi xảy ra khi lưu dữ liệu.");
     } finally {
       setIsSubmitting(false);

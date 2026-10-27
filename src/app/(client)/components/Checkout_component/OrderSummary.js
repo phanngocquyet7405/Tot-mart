@@ -1,3 +1,4 @@
+"use client";
 /**
  * OrderSummary.js
  * Cột phải — "phiếu đơn hàng" (sticky). Liệt kê TẤT CẢ sản phẩm có ảnh; khi
@@ -5,7 +6,6 @@
  * trước đây (slice(0, 3) + "+N sản phẩm khác"). Ship trả trực tiếp bên giao hàng.
  */
 
-"use client";
 import { cartLineKey } from "@/app/util/cartLine.mjs";
 
 import { Truck, RotateCcw, Gift } from "lucide-react";

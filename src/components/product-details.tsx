@@ -153,7 +153,7 @@ export function ProductDetails({
             min={1}
             max={stock || 100}
             value={quantity}
-            onChange={(e) => handleQuantityChange(Number(e.target.value))}
+            onChange={(e: any) => handleQuantityChange(Number(e.target.value))}
             disabled={!inStock}
             className="h-10 w-20 text-center font-semibold"
           />

@@ -1,9 +1,9 @@
+"use client";
 /**
  * ReviewStep.js
  * Bước 2 — Kiểm tra đơn: TẤT CẢ sản phẩm (kèm ảnh) + địa chỉ đã chọn.
  */
 
-"use client";
 import { cartLineKey } from "@/app/util/cartLine.mjs";
 
 import { motion } from "framer-motion";

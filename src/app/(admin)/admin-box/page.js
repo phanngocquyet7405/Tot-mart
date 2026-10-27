@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -47,7 +48,7 @@ export default function BoxManagement() {
     setIsLoading(true);
     try {
       const res = await getAllBoxesApi();
-      console.log("Dữ liệu API trả về:", res);
+      logger.log("Dữ liệu API trả về:", res);
       setBoxes(res?.data || []);
     } catch (error) {
       toast.error("Không thể tải danh sách box");

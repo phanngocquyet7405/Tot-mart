@@ -1,9 +1,9 @@
+"use client";
 /**
  * useMySubscriptions.js
  * Custom hook — Client quản lý gói đăng ký cá nhân
  */
 
-"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";

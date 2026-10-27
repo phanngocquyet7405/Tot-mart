@@ -11,7 +11,7 @@ if (gapRedis && !/^redis:\/\/(127\.0\.0\.1|localhost):\d+$/.test(gapRedis)) thro
 if (process.argv.includes('--gaps') && !/^redis:\/\/(127\.0\.0\.1|localhost):\d+$/.test(gapRedis || '')) throw Error('--gaps requires dedicated local TEST_REDIS_URL');
 if(gapRedis && (!/^http:\/\/localhost:\d+$/.test(process.env.FE_TEST_ORIGIN || '') || !/^\d+$/.test(process.env.FE_TEST_API_PORT || ''))) throw Error('--gaps requires explicit local FE_TEST_ORIGIN and FE_TEST_API_PORT');
 be('dotenv').config=()=>({parsed:{}});
-Object.assign(process.env,{NODE_ENV:'test',MONGODB_URI:'mongodb://127.0.0.1:1/unused',REDIS_URL:'',REDIS_NAMESPACE:'totmart:isolated:'+randomUUID(),JWT_SECRET:randomBytes(32).toString('hex'),JWT_REFRESH_SECRET:randomBytes(32).toString('hex'),FRONTEND_URL:'http://localhost:3100',CORS_ORIGINS:'http://localhost:3100',TRUST_PROXY:'0',BREVO_API_KEY:'',CLOUDINARY_CLOUD_NAME:'',CLOUDINARY_API_KEY:'',CLOUDINARY_API_SECRET:'',SEPAY_API_KEY:'local-fixture-only',SEPAY_BANK_ACCOUNT:'0000000000',SEPAY_BANK_NAME:'TestBank',LOG_LEVEL:'silent'});
+Object.assign(process.env,{NODE_ENV:'test',MONGODB_URI:'mongodb://127.0.0.1:1/unused',REDIS_URL:'',REDIS_NAMESPACE:'totmart:isolated:'+randomUUID(),JWT_SECRET:randomBytes(32).toString('hex'),JWT_REFRESH_SECRET:randomBytes(32).toString('hex'),FRONTEND_URL:'http://localhost:3100',CORS_ORIGINS:'http://localhost:3100',TRUST_PROXY:'0',BREVO_API_KEY:'test-brevo-key',FROM_EMAIL:'noreply@example.com',CLOUDINARY_CLOUD_NAME:'test-cloud',CLOUDINARY_API_KEY:'test-key',CLOUDINARY_API_SECRET:'test-secret',SEPAY_API_KEY:'local-fixture-only',SEPAY_BANK_ACCOUNT:'0000000000',SEPAY_BANK_NAME:'TestBank',LOG_LEVEL:'silent'});
 if(process.env.FE_TEST_ORIGIN) { if(!/^http:\/\/localhost:\d+$/.test(process.env.FE_TEST_ORIGIN))throw Error('Explicit local FE origin required'); Object.assign(process.env,{FRONTEND_URL:process.env.FE_TEST_ORIGIN,CORS_ORIGINS:process.env.FE_TEST_ORIGIN}); }
 if(gapRedis) process.env.REDIS_URL=gapRedis;
 const mongoose=be('mongoose'), {MongoMemoryReplSet}=be('mongodb-memory-server');
@@ -27,6 +27,7 @@ async function main(){
     await mongoose.connect(repl.getUri('fe_checkout_'+randomUUID().replaceAll('-','')));
     await Promise.all(Object.values(mongoose.models).map(m=>m.init()));
     const {user}=await fixture.createUser({name:'Local Customer',email:'customer@checkout.example.com',password:'Fixture-Only-123!'});
+    const {user:customer2}=await fixture.createUser({name:'Second Customer',email:'customer2@checkout.example.com',password:'Fixture-Only-123!'});
     const {user:merchant}=await fixture.createUser({role:'merchant',email:'merchant@checkout.example.com'});
     const {user:admin}=await fixture.createUser({role:'admin',email:'admin@checkout.example.com'});
     const brand=await fixture.createBrand({ownerId:merchant._id});
@@ -151,7 +152,7 @@ async function main(){
     console.log(JSON.stringify(evidence,null,2));
     if(process.argv.includes('--serve')){
       require('node:fs').mkdirSync('.cache',{recursive:true});
-      require('node:fs').writeFileSync('.cache/checkout-runtime.json',JSON.stringify({origin,productId:String(product._id),productSlug:product.slug,comboId:combo.data._id,templateId:template.data._id}));
+      require('node:fs').writeFileSync('.cache/checkout-runtime.json',JSON.stringify({origin,productId:String(product._id),productSlug:product.slug,comboId:combo.data._id,templateId:template.data._id,customer2Email:'customer2@checkout.example.com',customer2Id:String(customer2._id)}));
       console.log('Local fixture server ready; press Enter to dispose');await new Promise(r=>{process.once('SIGINT',r);process.stdin.once('data',r);process.stdin.resume();});process.stdin.pause();
     }
   }finally{if(server)await new Promise(r=>server.close(r));if(gapRedis)await be(path.join(root,'src/config/redis')).stopRedis();await mongoose.disconnect();await repl.stop();}

@@ -130,6 +130,7 @@ export function GiftOptions({
         <div className="space-y-3 pt-3 border-t border-pink-200">
           <div className="flex items-center gap-2">
             <Checkbox
+              className=""
               id="include-message"
               checked={includeMessage}
               onCheckedChange={handleIncludeMessageChange}
@@ -147,7 +148,7 @@ export function GiftOptions({
               <Textarea
                 placeholder="Write your message here (max 150 characters)..."
                 value={giftMessage}
-                onChange={(e) => handleMessageChange(e.target.value.slice(0, 150))}
+                onChange={(e: any) => handleMessageChange(e.target.value.slice(0, 150))}
                 maxLength={150}
                 rows={3}
                 className="resize-none text-sm"

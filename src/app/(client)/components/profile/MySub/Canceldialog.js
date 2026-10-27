@@ -1,9 +1,9 @@
+"use client";
 /**
  * CancelDialog.js
  * Hộp thoại xác nhận hủy đăng ký — hỗ trợ 2 mode: cuối kỳ và ngay lập tức
  */
 
-"use client";
 
 import { AlertTriangle, X, Loader2, Clock, Zap } from "lucide-react";
 import { PLAN_TYPE_LABELS } from "@/app/util/formatter";

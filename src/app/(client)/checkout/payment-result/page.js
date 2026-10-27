@@ -1,3 +1,4 @@
+"use client";
 /**
  * payment-result/page.jsx
  * Route: /checkout/payment-result
@@ -11,7 +12,6 @@
  * ở bước này, đơn hàng vẫn được xử lý đúng.
  */
 
-"use client";
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";

@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import React, { useState, useEffect } from "react";
 import { Pencil, Loader2 } from "lucide-react";
@@ -48,7 +49,7 @@ export default function UpdateCategory({ category, onSuccess }) {
       setIsOpen(false);
       if (onSuccess) onSuccess(); // Gọi callback để refresh danh sách ở trang cha
     } catch (error) {
-      console.error("Lỗi cập nhật:", error);
+      logger.error("Lỗi cập nhật:", error);
     } finally {
       setIsSubmitting(false);
     }

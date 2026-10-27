@@ -1,3 +1,4 @@
+import logger from "@/app/util/Logger";
 import { useState } from "react";
 import { Search } from "lucide-react";
 
@@ -6,7 +7,7 @@ export default function SearchBar() {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        console.log("Searching for:", searchQuery);
+        logger.log("Searching for:", searchQuery);
     };
 
     return (

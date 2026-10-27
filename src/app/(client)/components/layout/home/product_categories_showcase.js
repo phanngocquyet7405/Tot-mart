@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
@@ -19,7 +20,7 @@ export default function ProductCategoriesShowcase() {
           setCategories(buildCategoryTree(data));
         }
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        logger.error("Error fetching categories:", error);
       } finally {
         setLoading(false);
       }

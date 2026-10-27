@@ -1,9 +1,9 @@
+"use client";
 /**
  * EmptySubscription.js
  * Trạng thái rỗng khi user chưa có gói đăng ký nào
  */
 
-"use client";
 
 import Link from "next/link";
 import { Package, Sparkles } from "lucide-react";

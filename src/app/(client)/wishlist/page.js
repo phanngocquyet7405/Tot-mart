@@ -1,3 +1,4 @@
+"use client";
 /**
  * page.js — Trang Danh sách yêu thích
  * Route: /wishlist
@@ -7,7 +8,6 @@
  * đọc từ WishlistContext (localStorage), cùng phong cách với /cart.
  */
 
-"use client";
 
 import Link from "next/link";
 import Image from "next/image";

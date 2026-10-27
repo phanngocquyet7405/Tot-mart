@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -63,7 +64,7 @@ export default function CreateBoxPage() {
           setAvailableProducts(res.data);
         }
       } catch (err) {
-        console.error("Lỗi khi tải sản phẩm:", err);
+        logger.error("Lỗi khi tải sản phẩm:", err);
         toast.error("Không thể tải danh sách sản phẩm!");
       }
     }
@@ -152,11 +153,11 @@ export default function CreateBoxPage() {
   const handleSubmit = async () => {
     if (!ownerId || !merchants.some(m => m._id === ownerId)) { toast.error('Chọn merchant sở hữu combo.'); return; }
     if (new Set(products.map(p => p.productId)).size !== products.length || products.some(p => !Number.isInteger(p.quantity) || p.quantity < 1 || !availableProducts.some(row => row._id === p.productId && (row.ownerId?._id || row.ownerId) === ownerId))) { toast.error('Cấu phần phải duy nhất, đúng merchant và số lượng nguyên dương.'); return; }
-    console.log("[1] Bắt đầu tiến trình Submit...");
+    logger.log("[1] Bắt đầu tiến trình Submit...");
 
     // Chỉnh sửa hàm validate một chút để lấy log chuẩn hoặc log trực tiếp trong validate()
     if (!validate()) {
-      console.warn("[2] Form không hợp lệ!");
+      logger.warn("[2] Form không hợp lệ!");
       return;
     }
 
@@ -186,7 +187,7 @@ export default function CreateBoxPage() {
       const dateTo = parseLocalDate(form.validTo);
 
       if (!dateFrom || !dateTo) {
-        console.error("Lỗi parse ngày:", {
+        logger.error("Lỗi parse ngày:", {
           validFrom: form.validFrom,
           validTo: form.validTo,
         });
@@ -218,45 +219,24 @@ export default function CreateBoxPage() {
         }
       });
 
-      // --- ĐOẠN LOG BỔ SUNG ĐỂ KIỂM TRA DATA TRƯỚC KHI GỬI ---
-      console.group("[3] Kiểm tra dữ liệu FormData gửi đi");
-      for (let [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(
-            `👉 ${key}: File -> Name: ${value.name}, Size: ${value.size} bytes`,
-          );
-        } else {
-          console.log(`👉 ${key}:`, value);
-        }
-      }
-      console.groupEnd();
-      // -----------------------------------------------------
-
-      console.log("[4] Gửi Request tới API...");
-      const response = await createBoxApi(formData);
-
-      console.log("full reponse", response);
-
-      console.log(
-        "[5] Tạo thành công. Kèm data phản hồi:",
-        response.data.images,
-      );
-
+      await createBoxApi(formData);
       toast.success("Tạo box thành công!");
       router.push("/admin-box");
     } catch (err) {
-      console.group("Lỗi API khi tạo Box");
+      const status = err.response?.status;
       const errorData = err.response?.data;
-      console.error("Chi tiết Error Object:", err);
-      console.error("Dữ liệu lỗi từ BE:", errorData);
-      console.groupEnd();
+      const requestId = errorData?.requestId;
 
-      let errMsg = "Đã có lỗi xảy ra";
-      if (errorData?.errors && Array.isArray(errorData.errors)) {
+      let errMsg = "Đã có lỗi xảy ra. Vui lòng thử lại.";
+      if (status === 503) {
+        errMsg = "Hệ thống đang bận. Vui lòng thử lại sau ít phút." + (requestId ? ` (Mã: ${requestId})` : "");
+      } else if (status && status >= 500) {
+        errMsg = "Lỗi hệ thống. Vui lòng thử lại." + (requestId ? ` (Mã: ${requestId})` : "");
+      } else if (errorData?.errors && Array.isArray(errorData.errors)) {
         errMsg = errorData.errors.map((e) => e.message || e).join(" | ");
       } else if (errorData?.message) {
         errMsg = errorData.message;
-      } else {
+      } else if (err.message) {
         errMsg = err.message;
       }
 

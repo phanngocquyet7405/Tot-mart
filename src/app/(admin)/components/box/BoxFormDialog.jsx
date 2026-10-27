@@ -61,216 +61,10 @@ const INITIAL_FORM = {
   isGift: false,
 };
 
-// ─── Product Picker Popover ────────────────────────────────────────────────────
-function ProductPicker({ onSelect, availableProducts }) {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const filtered = availableProducts.filter((p) =>
-    p.name?.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 h-9 px-3 text-sm rounded-lg border border-input bg-white hover:bg-slate-50 text-slate-600 transition-colors w-full truncate focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
-      >
-        <Search size={14} className="text-slate-400 shrink-0" />
-        <span className="truncate text-slate-500">Tìm và chọn sản phẩm...</span>
-        <ChevronDown
-          size={14}
-          className={`ml-auto text-slate-400 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-
-      {open && (
-        <div className="absolute z-50 top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
-          <div className="p-3 border-b border-slate-100">
-            <div className="relative">
-              <Search
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                autoFocus
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Nhập tên sản phẩm..."
-                className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
-              />
-            </div>
-          </div>
-          <div className="max-h-56 overflow-y-auto">
-            {filtered.length === 0 ? (
-              <div className="py-8 text-center text-sm text-slate-400">
-                <Package size={24} className="mx-auto mb-2 opacity-40" />
-                <p>Không tìm thấy sản phẩm</p>
-              </div>
-            ) : (
-              filtered.map((p) => {
-                const imgUrl =
-                  Array.isArray(p.images) && p.images[0]?.url
-                    ? p.images[0].url
-                    : null;
-                return (
-                  <button
-                    key={p._id}
-                    type="button"
-                    onClick={() => {
-                      onSelect(p);
-                      setOpen(false);
-                      setSearch("");
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 transition-colors text-left border-b border-slate-50 last:border-b-0"
-                  >
-                    <div className="w-10 h-10 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden shrink-0 relative">
-                      {imgUrl ? (
-                        <Image
-                          src={imgUrl}
-                          alt={p.name}
-                          fill
-                          className="object-cover"
-                          sizes="40px"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Package size={14} className="text-slate-300" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-800 truncate">
-                        {p.name}
-                      </p>
-                      <p className="text-xs text-indigo-600 font-semibold mt-0.5">
-                        {fmtPrice(p.price)}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Product Row ───────────────────────────────────────────────────────────────
-function ProductRow({
-  item,
-  index,
-  availableProducts,
-  onChange,
-  onRemove,
-  error,
-}) {
-  return (
-    <div className="group rounded-lg border border-slate-200 bg-white p-4 space-y-3 hover:border-indigo-300 hover:shadow-sm transition-all">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          {item.name ? (
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <span className="text-sm font-semibold text-slate-900 block">
-                  {item.name}
-                </span>
-                <span className="text-xs text-indigo-600 font-medium mt-0.5">
-                  {fmtPrice(item.price)}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <ProductPicker
-              availableProducts={availableProducts}
-              onSelect={(p) =>
-                onChange(index, {
-                  productId: p._id,
-                  name: p.name,
-                  price: p.price || 0,
-                })
-              }
-            />
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={() => onRemove(index)}
-          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0 opacity-0 group-hover:opacity-100"
-          title="Remove product"
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
-
-      {item.productId && (
-        <div className="space-y-3 pt-2 border-t border-slate-100">
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Label className="text-xs font-medium text-slate-600 shrink-0">
-                Số lượng
-              </Label>
-              <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
-                <button
-                  type="button"
-                  onClick={() =>
-                    onChange(index, "quantity", Math.max(1, item.quantity - 1))
-                  }
-                  className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-200 text-sm transition-colors font-medium"
-                >
-                  −
-                </button>
-                <span className="w-9 text-center text-sm font-semibold text-slate-800 border-l border-r border-slate-200">
-                  {item.quantity}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onChange(index, "quantity", item.quantity + 1)}
-                  className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-200 text-sm transition-colors font-medium"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-            <div className="text-xs text-slate-600">
-              <span className="font-medium">Tổng:</span>{" "}
-              <span className="font-bold text-slate-900">
-                {fmtPrice(item.price * item.quantity)}
-              </span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() =>
-              onChange(index, { productId: "", name: "", price: 0 })
-            }
-            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
-          >
-            ↻ Đổi sản phẩm
-          </button>
-        </div>
-      )}
-
-      {error && (
-        <p className="text-xs text-red-600 font-medium bg-red-50 p-2 rounded">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
+import { ProductRow } from "./parts/ProductRow";
+import { BoxImageSection } from "./parts/BoxImageSection";
+import { BoxPriceSummary } from "./parts/BoxPriceSummary";
+import { BoxBasicInfoSection } from "./parts/BoxBasicInfoSection";
 
 // ─── Main Dialog ───────────────────────────────────────────────────────────────
 export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
@@ -284,7 +78,12 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
   const [availableProducts, setAvailableProducts] = useState([]);
   const [merchants, setMerchants] = useState([]);
   useEffect(() => {
-    axiosConfig.get('/brands/merchant-options').then(res => setMerchants(res.data || [])).catch(() => toast.error('Không tải được merchant. Hãy mở lại biểu mẫu.'));
+    axiosConfig
+      .get("/brands/merchant-options")
+      .then((res) => setMerchants(res.data || []))
+      .catch(() =>
+        toast.error("Không tải được merchant. Hãy mở lại biểu mẫu."),
+      );
   }, []);
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
@@ -306,7 +105,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
 
     if (isEdit && box) {
       setForm({
-        ownerId: box.ownerId?._id || box.ownerId || '',
+        ownerId: box.ownerId?._id || box.ownerId || "",
         name: box.name || "",
         descriptions: box.descriptions || box.description || "",
         stock: box.stock ?? 1,
@@ -362,7 +161,9 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     if (selected.length === 0) return;
 
     const valid = selected.filter((f) => {
-      const ok = ["image/jpeg", "image/png", "image/webp"].includes(f.type) && f.size <= 5 * 1024 * 1024;
+      const ok =
+        ["image/jpeg", "image/png", "image/webp"].includes(f.type) &&
+        f.size <= 5 * 1024 * 1024;
       if (!ok) toast.error(`${f.name}: ảnh phải < 5MB`);
       return ok;
     });
@@ -415,9 +216,26 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
   // ── Validation ───────────────────────────────────────────────────────────────
   const validate = () => {
     const e = {};
-    if (!form.ownerId) e.ownerId = 'Chọn merchant sở hữu combo; dữ liệu legacy cần đối chiếu trước khi sửa.';
-    if (products.some(p => !Number.isInteger(p.quantity) || p.quantity < 1) || new Set(products.map(p => p.productId)).size !== products.length) e.products = 'Sản phẩm phải duy nhất, số lượng nguyên dương.';
-    if (products.some(p => !availableProducts.some(row => row._id === p.productId && (row.ownerId?._id || row.ownerId) === form.ownerId))) e.products = 'Cấu phần thiếu hoặc khác merchant. Đối chiếu dữ liệu trước khi lưu.';
+    if (!form.ownerId)
+      e.ownerId =
+        "Chọn merchant sở hữu combo; dữ liệu legacy cần đối chiếu trước khi sửa.";
+    if (
+      products.some((p) => !Number.isInteger(p.quantity) || p.quantity < 1) ||
+      new Set(products.map((p) => p.productId)).size !== products.length
+    )
+      e.products = "Sản phẩm phải duy nhất, số lượng nguyên dương.";
+    if (
+      products.some(
+        (p) =>
+          !availableProducts.some(
+            (row) =>
+              row._id === p.productId &&
+              (row.ownerId?._id || row.ownerId) === form.ownerId,
+          ),
+      )
+    )
+      e.products =
+        "Cấu phần thiếu hoặc khác merchant. Đối chiếu dữ liệu trước khi lưu.";
     if (!(form.name ?? "").trim()) e.name = "Tên box là bắt buộc";
     if (form.stock < 1) e.stock = "Tồn kho phải ≥ 1";
     if (!(form.descriptions ?? "").trim()) e.descriptions = "Mô tả là bắt buộc";
@@ -450,7 +268,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     setIsSaving(true);
     try {
       const formData = new FormData();
-      if (!isEdit) formData.append('ownerId', form.ownerId);
+      if (!isEdit) formData.append("ownerId", form.ownerId);
 
       // Thông tin cơ bản
       formData.append("name", (form.name ?? "").trim());
@@ -492,9 +310,19 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
       onSuccess?.();
       onOpenChange(false);
     } catch (err) {
-      const msg =
+      const status = err?.response?.status;
+      const requestId = err?.response?.data?.requestId || err?.requestId || err?.response?.headers?.["x-request-id"];
+      let msg =
         err?.response?.data?.errors?.map((e) => e.message).join(" | ") ||
-        err?.response?.data?.message || err?.message || "Đã có lỗi xảy ra";
+        err?.response?.data?.message ||
+        err?.message ||
+        "Đã có lỗi xảy ra";
+      if (status >= 500) {
+        msg = "Lỗi hệ thống. Vui lòng thử lại.";
+      }
+      if (requestId) {
+        msg = `${msg} (Request ID: ${requestId})`;
+      }
       toast.error(msg);
     } finally {
       setIsSaving(false);
@@ -531,218 +359,42 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
           <div className="space-y-2">
             <Label htmlFor="combo-owner">Merchant sở hữu</Label>
-            <select id="combo-owner" className="w-full rounded border p-2" disabled={isEdit || isSaving} value={form.ownerId || ''} onChange={event => { setForm(f => ({ ...f, ownerId: event.target.value })); setProducts([EMPTY_PRODUCT()]); }}>
+            <select
+              id="combo-owner"
+              className="w-full rounded border p-2"
+              disabled={isEdit || isSaving}
+              value={form.ownerId || ""}
+              onChange={(event) => {
+                setForm((f) => ({ ...f, ownerId: event.target.value }));
+                setProducts([EMPTY_PRODUCT()]);
+              }}
+            >
               <option value="">Chọn merchant</option>
-              {merchants.map(merchant => <option key={merchant._id} value={merchant._id}>{merchant.name}</option>)}
+              {merchants.map((merchant) => (
+                <option key={merchant._id} value={merchant._id}>
+                  {merchant.name}
+                </option>
+              ))}
             </select>
             {errors.ownerId && <p role="alert">{errors.ownerId}</p>}
           </div>
           {/* ── Thông tin cơ bản ── */}
-          <section>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
-              Thông tin cơ bản
-            </h3>
-            <div className="space-y-4">
-              {/* Tên */}
-              <div className="space-y-1.5">
-                <Label>
-                  Tên Box <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  placeholder="VD: Premium Mystery Box"
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, name: e.target.value }))
-                  }
-                  className={errors.name ? "border-red-400" : ""}
-                />
-                {errors.name && (
-                  <p className="text-xs text-red-500">{errors.name}</p>
-                )}
-              </div>
-
-              {/* Mô tả */}
-              <div className="space-y-1.5">
-                <Label>
-                  Mô tả <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                  rows={3}
-                  placeholder="Mô tả nội dung và điểm nổi bật của box..."
-                  value={form.descriptions}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, descriptions: e.target.value }))
-                  }
-                  className={`resize-none ${errors.descriptions ? "border-red-400" : ""}`}
-                />
-                {errors.descriptions && (
-                  <p className="text-xs text-red-500">{errors.descriptions}</p>
-                )}
-              </div>
-
-              {/* Tồn kho + Giảm giá */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label>
-                    Tồn kho <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={form.stock}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        stock: Number(e.target.value) || 1,
-                      }))
-                    }
-                    className={errors.stock ? "border-red-400" : ""}
-                  />
-                  {errors.stock && (
-                    <p className="text-xs text-red-500">{errors.stock}</p>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Giảm giá (%)</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={form.discountPercent}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        discountPercent: Math.min(
-                          100,
-                          Math.max(0, Number(e.target.value) || 0),
-                        ),
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* Ngày */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label>
-                    Ngày bắt đầu <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    type="date"
-                    min={today}
-                    value={form.validFrom}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, validFrom: e.target.value }))
-                    }
-                    className={errors.validFrom ? "border-red-400" : ""}
-                  />
-                  {errors.validFrom && (
-                    <p className="text-xs text-red-500">{errors.validFrom}</p>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <Label>
-                    Ngày kết thúc <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    type="date"
-                    min={form.validFrom || today}
-                    value={form.validTo}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, validTo: e.target.value }))
-                    }
-                    className={errors.validTo ? "border-red-400" : ""}
-                  />
-                  {errors.validTo && (
-                    <p className="text-xs text-red-500">{errors.validTo}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Gift toggle */}
-              <div className="flex items-center gap-3 py-1">
-                <Switch
-                  checked={form.isGift}
-                  onCheckedChange={(v) => setForm((f) => ({ ...f, isGift: v }))}
-                  id="isGift"
-                />
-                <Label htmlFor="isGift" className="cursor-pointer">
-                  Đánh dấu là Box quà tặng
-                </Label>
-              </div>
-            </div>
-          </section>
+          <BoxBasicInfoSection
+            form={form}
+            setForm={setForm}
+            errors={errors}
+            today={today}
+          />
 
           {/* ── Hình ảnh ── */}
-          <section>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
-              Hình ảnh{" "}
-              {!isEdit && (
-                <span className="text-red-500 normal-case font-normal">*</span>
-              )}
-            </h3>
-
-            <div className="space-y-3">
-              {/* Upload zone */}
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className={`w-full border-2 border-dashed rounded-xl p-4 flex flex-col items-center gap-2 hover:bg-gray-50 transition-colors ${
-                  errors.images ? "border-red-300" : "border-gray-200"
-                }`}
-              >
-                <ImagePlus size={20} className="text-gray-400" />
-                <p className="text-sm text-gray-500">
-                  Click để chọn ảnh{" "}
-                  <span className="text-gray-400">(tối đa 5MB / ảnh)</span>
-                </p>
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                onChange={handleImageSelect}
-              />
-              {errors.images && (
-                <p className="text-xs text-red-500">{errors.images}</p>
-              )}
-
-              {/* Preview grid */}
-              {imagePreviews.length > 0 && (
-                <div className="grid grid-cols-5 gap-2">
-                  {imagePreviews.map((src, i) => (
-                    <div
-                      key={i}
-                      className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group"
-                    >
-                      <Image
-                        src={src}
-                        alt={`img-${i}`}
-                        fill
-                        className="object-cover"
-                        unoptimized={src.startsWith("blob:")}
-                      />
-                      {i === 0 && (
-                        <span className="absolute bottom-1 left-1 text-[11px] font-bold bg-indigo-600 text-white px-1.5 py-0.5 rounded">
-                          Đại diện
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeImage(i)}
-                        className="absolute top-1 right-1 w-5 h-5 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X size={10} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </section>
+          <BoxImageSection
+            isEdit={isEdit}
+            errors={errors}
+            fileInputRef={fileInputRef}
+            handleImageSelect={handleImageSelect}
+            imagePreviews={imagePreviews}
+            removeImage={removeImage}
+          />
 
           {/* ── Sản phẩm ── */}
           <section>
@@ -766,7 +418,12 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
                   key={i}
                   item={p}
                   index={i}
-                  availableProducts={availableProducts.filter(p => (p.ownerId?._id || p.ownerId) === form.ownerId && !p.archivedAt && !products.some(row => row.productId === p._id))}
+                  availableProducts={availableProducts.filter(
+                    (p) =>
+                      (p.ownerId?._id || p.ownerId) === form.ownerId &&
+                      !p.archivedAt &&
+                      !products.some((row) => row.productId === p._id),
+                  )}
                   onChange={handleChangeProduct}
                   onRemove={removeProduct}
                   error={errors[`product_${i}`]}
@@ -778,26 +435,11 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
             )}
 
             {/* Summary */}
-            {subtotal > 0 && (
-              <div className="mt-3 rounded-xl bg-indigo-50 border border-indigo-100 p-3 space-y-1">
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>Tổng giá sản phẩm</span>
-                  <span>{fmtPrice(subtotal)}</span>
-                </div>
-                {form.discountPercent > 0 && (
-                  <div className="flex justify-between text-sm text-red-500">
-                    <span>Giảm giá ({form.discountPercent}%)</span>
-                    <span>
-                      −{fmtPrice(subtotal * (form.discountPercent / 100))}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between text-sm font-bold text-indigo-700 border-t border-indigo-200 pt-1">
-                  <span>Giá trị box</span>
-                  <span>{fmtPrice(computedValue)}</span>
-                </div>
-              </div>
-            )}
+            <BoxPriceSummary
+              subtotal={subtotal}
+              discountPercent={form.discountPercent}
+              computedValue={computedValue}
+            />
           </section>
         </div>
 

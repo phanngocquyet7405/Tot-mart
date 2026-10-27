@@ -1,3 +1,4 @@
+"use client";
 /**
  * page.js — Trang hồ sơ cá nhân
  * Route: /profile
@@ -6,7 +7,6 @@
  * Page này chỉ chịu trách nhiệm load data + render tab content.
  */
 
-"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";

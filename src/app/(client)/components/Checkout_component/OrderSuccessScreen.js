@@ -1,17 +1,18 @@
+"use client";
 /**
  * OrderSuccessScreen.js
  * Màn hình xác nhận đặt hàng thành công
  * Palette: emerald-600 success icon (semantic), [#C85C3C] primary buttons
  */
 
-"use client";
 
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { CheckCircle2, ShoppingBag, ArrowRight } from "lucide-react";
 
 export function OrderSuccessScreen({ onNew, submitting = false }) {
   const router = useRouter();
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <div className="min-h-screen bg-[#FFFAF8] flex items-center justify-center px-4">
@@ -22,16 +23,16 @@ export function OrderSuccessScreen({ onNew, submitting = false }) {
       </div>
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.92 }}
+        initial={shouldReduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.92 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease: "easeOut" }}
         className="relative text-center max-w-md w-full"
       >
         {/* Icon */}
         <motion.div
-          initial={{ scale: 0, rotate: -15 }}
+          initial={shouldReduceMotion ? { scale: 1, rotate: 0 } : { scale: 0, rotate: -15 }}
           animate={{ scale: 1, rotate: 0 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 240, damping: 18 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.2, type: "spring", stiffness: 240, damping: 18 }}
           className="w-24 h-24 rounded-3xl bg-emerald-50 border-2 border-emerald-600/20 flex items-center justify-center mx-auto mb-8 shadow-xl shadow-emerald-600/10"
         >
           <CheckCircle2 size={48} className="text-emerald-600" />
@@ -39,9 +40,9 @@ export function OrderSuccessScreen({ onNew, submitting = false }) {
 
         {/* Text */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.35 }}
         >
           <h1 className="text-3xl font-black text-stone-900 mb-3 tracking-tight">
             Đặt hàng thành công!
@@ -54,9 +55,9 @@ export function OrderSuccessScreen({ onNew, submitting = false }) {
 
         {/* CTAs */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.5 }}
           className="flex flex-col gap-3"
         >
           <button
@@ -87,9 +88,9 @@ export function OrderSuccessScreen({ onNew, submitting = false }) {
           {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
-              initial={{ scale: 0 }}
+              initial={shouldReduceMotion ? { scale: 1 } : { scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.6 + i * 0.1, type: "spring" }}
+              transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.6 + i * 0.1, type: "spring" }}
               className={`rounded-full ${i === 1 ? "w-3 h-3 bg-[#C85C3C]" : "w-1.5 h-1.5 bg-stone-200"}`}
             />
           ))}

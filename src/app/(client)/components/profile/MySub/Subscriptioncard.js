@@ -1,9 +1,9 @@
+"use client";
 /**
  * SubscriptionCard.js
  * Card hiển thị một gói đăng ký trong trang My Subscriptions
  */
 
-"use client";
 
 import {
   MapPin,

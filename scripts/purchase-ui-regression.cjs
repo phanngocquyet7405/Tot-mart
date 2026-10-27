@@ -13,7 +13,7 @@ async function main(){
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  const evidence=async()=>{const r=await page.request.get(runtime.origin+'/__fixture/evidence');assert.equal(r.status(),200);return r.json();};
  const pending=()=>page.evaluate(()=>Object.keys(localStorage).filter(k=>/^totmart_checkout_attempt_[^:]+$/.test(k)).map(k=>JSON.parse(localStorage.getItem(k)))[0]);
- const login=async()=>{await page.goto(origin+'/login');await page.locator('#email').fill('customer@checkout.example.com');await page.locator('#password').fill('Fixture-Only-123!');await page.locator('form button[type=submit]').click();await page.waitForURL('**/homepage');};
+ const login=async()=>{await context.clearCookies();await page.goto(origin+'/login');await page.locator('#email').fill('customer@checkout.example.com');await page.locator('#password').fill('Fixture-Only-123!');await page.locator('form button[type=submit]').click();await page.waitForURL('**/homepage');};
  const add=async()=>{await page.goto(origin+'/products/'+runtime.productId);await page.getByRole('button',{name:/Thêm vào giỏ/i}).first().click();};
  const review=async()=>{await page.getByRole('button',{name:/Tiếp theo.*Kiểm tra đơn/i}).click();await page.getByRole('button',{name:'Tiếp tục thanh toán',exact:true}).click();};
  const prepare=async(method='cod')=>{await review();await page.locator(`input[name=payment][value=${method}]`).locator('..').click();await page.getByRole('button',{name:/Chuẩn bị xác nhận/}).click();await page.getByText('Địa chỉ BE xác nhận:',{exact:false}).waitFor();return pending();};
@@ -36,7 +36,7 @@ async function main(){
   await page.getByRole('button',{name:'Đặt đơn mới',exact:true}).click();await page.getByRole('button',{name:/Tiếp theo.*Kiểm tra đơn/i}).waitFor();await page.goto(oldUrl);await page.getByText('Đang chờ thanh toán, hệ thống tự kiểm tra mỗi vài giây.',{exact:true}).waitFor();checks.push('Online created -> explicit new -> old payment URL remains recoverable');
   // Fresh page retains the new draft; remove selected fixture address after load,
   // before UI prepare. The original serialized body must survive body termination.
-  await add();await page.goto(origin+'/checkout');await review();
+  await add();await page.goto(origin+'/checkout');const nb=page.getByRole('button',{name:'Đặt đơn mới',exact:true});if(await nb.isVisible())await nb.click();await page.getByRole('button',{name:/Tiếp theo.*Kiểm tra đơn/i}).waitFor();await review();
   const me=await page.request.get(origin+'/api/users/me');assert.equal(me.status(),200);const envelope=await me.json();const user=envelope.data?.data||envelope.data;const address=user.addresses[0];
   const removed=await page.request.delete(`${origin}/api/users/delete-address/${user._id}/${address._id}`,{headers:{'X-TotMart-Request':'1'}});assert.ok(removed.status()<300);
   await page.getByRole('button',{name:/Chuẩn bị xác nhận/}).click();await page.getByRole('button',{name:'Kết thúc lần thử',exact:true}).waitFor();const failed=await pending();assert.equal(failed.hash,undefined);

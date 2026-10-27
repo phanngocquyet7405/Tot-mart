@@ -1,3 +1,4 @@
+"use client";
 /**
  * PaymentStep.js
  * Bước 3 — Chọn phương thức thanh toán + mã giảm giá + đặt hàng.
@@ -7,7 +8,6 @@
  * đơn đã chốt ở BE nên không cho đổi phương thức hay quay lại ở bước này.
  */
 
-"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
@@ -40,7 +40,7 @@ function PaymentMethodCard({ method, selected, onSelect }) {
   return (
     <label
       className={[
-        "flex items-center gap-4 p-4 rounded-xl border transition-colors duration-200",
+        "flex items-center gap-4 p-4 rounded-xl border transition-colors duration-200 motion-reduce:transition-none",
         "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[#C85C3C]",
         disabled
           ? "border-[#F0DDD5] bg-stone-50 opacity-60 cursor-not-allowed"
@@ -77,7 +77,7 @@ function PaymentMethodCard({ method, selected, onSelect }) {
       ) : (
         <span
           className={[
-            "grid place-items-center w-5 h-5 rounded-full border-2 shrink-0 transition-colors duration-200",
+            "grid place-items-center w-5 h-5 rounded-full border-2 shrink-0 transition-colors duration-200 motion-reduce:transition-none",
             selected ? "border-[#C85C3C] bg-[#C85C3C]" : "border-stone-300 bg-white",
           ].join(" ")}
           aria-hidden="true"
@@ -186,7 +186,7 @@ function CopyRow({ label, value, display, strong }) {
         type="button"
         onClick={copy}
         aria-label={`Sao chép ${label.toLowerCase()}`}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-[#F0DDD5] px-2.5 py-1.5 text-xs font-semibold text-[#B14B2D] hover:bg-[#FFF0EB] transition-colors duration-200 shrink-0"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-[#F0DDD5] px-2.5 py-1.5 text-xs font-semibold text-[#B14B2D] hover:bg-[#FFF0EB] transition-colors duration-200 motion-reduce:transition-none shrink-0"
       >
         {copied ? <Check size={13} /> : <Copy size={13} />}
         {copied ? "Đã chép" : "Chép"}
@@ -196,9 +196,36 @@ function CopyRow({ label, value, display, strong }) {
 }
 
 function SepayQrPanel({ qrUrl, onlineAmount, paymentCode, paymentStatus, onRecheck }) {
-  const isTimeout = paymentStatus === "timeout";
   const parsed = useMemo(() => parseQr(qrUrl), [qrUrl]);
   const [failedUrl, setFailedUrl] = useState(null);
+
+  const isTimeout = paymentStatus === "timeout";
+  const isUnderpaid = paymentStatus === "underpaid";
+  const isNonPayable = paymentStatus === "cancelled" || paymentStatus === "expired" || paymentStatus === "on_hold";
+
+  if (isNonPayable) {
+    return (
+      <SectionCard title="Trạng thái đơn hàng" icon={<AlertTriangle size={16} />}>
+        <div role="alert" className="p-5 rounded-2xl border border-rose-200 bg-rose-50 text-rose-900 space-y-3">
+          <h3 className="font-bold text-base">
+            {paymentStatus === "on_hold"
+              ? "Đơn hàng đang tạm giữ"
+              : "Mã thanh toán không còn hiệu lực"}
+          </h3>
+          <p className="text-sm leading-relaxed text-rose-800">
+            {paymentStatus === "on_hold"
+              ? "Đơn hàng đang được tạm giữ để kiểm tra tồn kho. TotMart đã ghi nhận thanh toán và đang xử lý điều phối tồn kho."
+              : "Đơn hàng không còn hiệu lực nhận thanh toán. Nếu bạn đã chuyển khoản, khoản tiền sẽ vào quy trình đối soát hoàn tiền hoặc liên hệ hỗ trợ TotMart kèm mã thanh toán để được hỗ trợ."}
+          </p>
+          {paymentCode && (
+            <div className="pt-2 border-t border-rose-200 text-xs font-mono text-rose-700">
+              Mã thanh toán: <span className="font-bold">{paymentCode}</span>
+            </div>
+          )}
+        </div>
+      </SectionCard>
+    );
+  }
 
   // qrUrl thiếu/hỏng (vd. BE chưa cấu hình SEPAY_BANK_ACCOUNT / SEPAY_BANK_NAME
   // → acc=undefined&bank=undefined): không vẽ ảnh vỡ, báo rõ cho khách.
@@ -211,6 +238,13 @@ function SepayQrPanel({ qrUrl, onlineAmount, paymentCode, paymentStatus, onReche
 
   return (
     <SectionCard title="Quét mã để thanh toán" icon={<QrCode size={16} />}>
+      {isUnderpaid && (
+        <div role="status" className="mb-6 p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-900">
+          <p className="text-sm font-semibold">
+            Hệ thống đã nhận một phần tiền thanh toán. Vui lòng quét mã bên dưới hoặc chuyển tiếp số tiền còn lại ({formatCurrency(amount)}) để hoàn tất đơn hàng.
+          </p>
+        </div>
+      )}
       <div className="grid gap-6 md:grid-cols-[232px_1fr]">
         {/* QR */}
         <div className="mx-auto md:mx-0 w-full max-w-[232px]">
@@ -324,7 +358,12 @@ export function PaymentStep({
   // chuyển thẳng sang OrderSuccessScreen khi orderSuccess = true.
   const isAwaitingPayment =
     paymentMethod === "online" &&
-    (paymentStatus === "awaiting_payment" || paymentStatus === "timeout");
+    (paymentStatus === "awaiting_payment" ||
+     paymentStatus === "underpaid" ||
+     paymentStatus === "timeout" ||
+     paymentStatus === "cancelled" ||
+     paymentStatus === "expired" ||
+     paymentStatus === "on_hold");
 
   return (
     <motion.div

@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { getAllBrandsApi } from "@/app/services/api/productServices";
@@ -14,7 +15,7 @@ export default function BrandSidebar({ currentSlug }) {
         const data = response?.data?.data || response?.data || response;
         if (Array.isArray(data)) setBrands(data);
       } catch (error) {
-        console.error("Lỗi tải sidebar:", error);
+        logger.error("Lỗi tải sidebar:", error);
       } finally {
         setLoading(false);
       }

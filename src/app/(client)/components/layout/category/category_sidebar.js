@@ -1,5 +1,6 @@
-// components/layout/category/category_sidebar.jsx
 "use client";
+import logger from "@/app/util/Logger";
+// components/layout/category/category_sidebar.jsx
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { getAllCategoriesApi } from "@/app/services/api/productServices"; //
@@ -15,7 +16,7 @@ export default function CategorySidebar({ currentId }) {
         const data = response?.data?.data || response?.data || response;
         if (Array.isArray(data)) setCategories(data);
       } catch (error) {
-        console.error("Lỗi tải danh mục:", error);
+        logger.error("Lỗi tải danh mục:", error);
       } finally {
         setCategories(false);
       }

@@ -1,5 +1,5 @@
-// components/SubscribePlans/CancelPlanDialog.jsx
 "use client";
+// components/SubscribePlans/CancelPlanDialog.jsx
 
 import { Loader2, Zap, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";

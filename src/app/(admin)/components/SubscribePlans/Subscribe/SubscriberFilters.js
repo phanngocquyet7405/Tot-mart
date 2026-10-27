@@ -1,9 +1,9 @@
+"use client";
 /**
  * SubscriberFilters.js
  * Thanh tìm kiếm + bộ lọc trạng thái, gói, sắp xếp cho Admin
  */
 
-"use client";
 
 import { Search, SlidersHorizontal, ArrowUpDown, X } from "lucide-react";
 import { PLAN_TYPE_LABELS } from "@/app/util/formatter";

@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import DropMenu from "./drop_menu";
@@ -28,7 +29,7 @@ export default function NavMenu() {
         setBrands(brandRes?.data?.data || brandRes?.data || []);
         setProducts(prodRes?.data?.data || prodRes?.data || []);
       } catch (error) {
-        console.error("Lỗi tải menu:", error);
+        logger.error("Lỗi tải menu:", error);
       }
     };
     fetchData();

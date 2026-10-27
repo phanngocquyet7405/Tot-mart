@@ -1,3 +1,4 @@
+"use client";
 /**
  * CartLine.js
  * Một dòng sản phẩm dùng chung cho ReviewStep (đầy đủ) và OrderSummary
@@ -5,7 +6,6 @@
  * `images[0]`), lỗi tải ảnh / không có ảnh → hiện icon thay vì ô trống.
  */
 
-"use client";
 
 import { useState } from "react";
 import Image from "next/image";

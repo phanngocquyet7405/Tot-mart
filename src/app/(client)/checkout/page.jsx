@@ -1,3 +1,4 @@
+"use client";
 /**
  * page.js — Trang Checkout
  * Route: /checkout
@@ -6,7 +7,6 @@
  * Palette: warm cream / terracotta (#C85C3C, #FFFAF8, #F0DDD5, #2C1810)
  */
 
-"use client";
 
 import { Suspense } from "react";
 import { needsReconciliation } from "@/app/util/purchaseAttempt.mjs";
@@ -86,8 +86,8 @@ function CheckoutPageInner() {
 
         {checkout.pendingAttempt?.state === 'created' && <div className="tm-notice mb-4"><p>Giao dịch đã tồn tại: {checkout.pendingAttempt.result?.orderCode}</p><button className="tm-button tm-button--primary" disabled={checkout.submitting} onClick={checkout.handleStartNew}>Đặt đơn mới</button><Link className="tm-text-button ml-4" href={`/checkout?code=${encodeURIComponent(checkout.pendingAttempt.result?.orderCode || '')}`}>Xem / thanh toán đơn cũ</Link></div>}
         {checkout.pendingAttempt && !checkout.paymentCode && <section role="status" className="tm-notice mb-8">
-          <h2>{checkout.pendingAttempt.state === 'created' ? 'Đơn hàng đã được tạo' : 'Kiểm tra yêu cầu đặt hàng trước'}</h2>
-          <p className="mt-3">{checkout.pendingAttempt.state === 'created' ? 'Bạn có thể xem đơn cũ hoặc chủ động đặt đơn mới.' : 'Giữ nguyên reference cho đến khi BE xác nhận kết quả hoặc kết thúc lần thử.'}</p>
+          <h2>{checkout.pendingAttempt.state === 'created' ? 'Đơn hàng đã được tạo' : checkout.pendingAttempt.state === 'confirming' ? 'Đang xác nhận kết quả giao dịch' : 'Kiểm tra yêu cầu đặt hàng trước'}</h2>
+          <p className="mt-3">{checkout.pendingAttempt.state === 'created' ? 'Bạn có thể xem đơn cũ hoặc chủ động đặt đơn mới.' : checkout.pendingAttempt.state === 'confirming' ? 'Hệ thống đang xác nhận kết quả giao dịch từ phía máy chủ. Giữ nguyên reference hoặc bấm kiểm tra lại.' : 'Giữ nguyên reference cho đến khi BE xác nhận kết quả hoặc kết thúc lần thử.'}</p>
           <ul className="mt-4 space-y-2">{checkout.pendingAttempt.summary?.items?.map((item, i) => <li key={i} className="flex justify-between gap-4"><span>{item.name}</span><span className="shrink-0">× {item.quantity}</span></li>)}</ul>
           <dl>
             <div><dt>Tổng yêu cầu cũ</dt><dd>{Number.isFinite(checkout.pendingAttempt.summary?.totalAmount) ? checkout.pendingAttempt.summary.totalAmount.toLocaleString('vi-VN') + ' ₫' : 'Chưa lưu — cần đối chiếu'}</dd></div>
@@ -95,17 +95,18 @@ function CheckoutPageInner() {
             <div><dt>Thời điểm gửi</dt><dd>{checkout.pendingAttempt.sentAt ? new Date(checkout.pendingAttempt.sentAt).toLocaleString('vi-VN') : 'Chưa lưu'}</dd></div>
           </dl>
           {checkout.pendingDraftChanged && <p role="alert" className="mb-3 font-semibold">Giỏ hàng hoặc địa chỉ hiện tại đã khác. Tiếp tục chỉ xử lý yêu cầu cũ; thay đổi hiện tại không được gửi.</p>}
+          {checkout.pendingAttempt?.blocked && <p role="alert" className="mb-3">Không thể đọc thông tin giao dịch từ bộ nhớ trình duyệt. Vui lòng kiểm tra mục <Link href="/profile/orders" className="underline font-semibold">Đơn hàng của tôi</Link> hoặc liên hệ hỗ trợ TotMart để đối chiếu.</p>}
           {(needsReconciliation(checkout.pendingAttempt)) && <p role="alert" className="mb-3">Cần TotMart xác minh yêu cầu trước. Chưa thể gửi lại hay bắt đầu lần thử mới. Lịch sử đơn hàng không chứng minh yêu cầu chưa được tạo.</p>}
           {checkout.pendingAttempt.snapshot && <p className="mt-3">Địa chỉ BE xác nhận: {[checkout.pendingAttempt.snapshot.fullName, checkout.pendingAttempt.snapshot.address, checkout.pendingAttempt.snapshot.district, checkout.pendingAttempt.snapshot.city, checkout.pendingAttempt.snapshot.phone].filter(Boolean).join(', ')}</p>}
-          <p>Trạng thái: {checkout.pendingAttempt.state || 'chưa xác định'}</p>
+          <p>Trạng thái: {checkout.pendingAttempt.state === 'confirming' ? 'đang xác nhận' : checkout.pendingAttempt.state || 'chưa xác định'}</p>
           {checkout.pendingAttempt.error?.message && <p role="alert">{checkout.pendingAttempt.error.message}</p>}
           <div className="mt-4 flex flex-wrap gap-3">
-            {checkout.pendingAttempt.hash && checkout.pendingAttempt.state !== 'created' && checkout.pendingAttempt.state !== 'rejected' && <button className="tm-button tm-button--primary" disabled={checkout.submitting} onClick={event => checkout.handlePlaceOrder(event, { confirm: true })}>Xác nhận đúng địa chỉ và tổng tiền trên</button>}
-            {checkout.pendingAttempt.state !== 'created' && <button className="tm-button tm-button--outline" disabled={checkout.submitting} onClick={event => checkout.handlePlaceOrder(event, { terminate: true })}>Kết thúc lần thử</button>}
+            {checkout.pendingAttempt.hash && checkout.pendingAttempt.state !== 'created' && checkout.pendingAttempt.state !== 'rejected' && checkout.pendingAttempt.state !== 'confirming' && <button className="tm-button tm-button--primary" disabled={checkout.submitting} onClick={event => checkout.handlePlaceOrder(event, { confirm: true })}>Xác nhận đúng địa chỉ và tổng tiền trên</button>}
+            {checkout.pendingAttempt.state !== 'created' && (!checkout.pendingAttempt.state || checkout.pendingAttempt.state !== 'confirming' || checkout.pendingAttempt.terminationRequested) && <button className="tm-button tm-button--outline" disabled={checkout.submitting} onClick={event => checkout.handlePlaceOrder(event, { terminate: true })}>Kết thúc lần thử</button>}
           </div>
           <p className="tm-notice__reference">Mã đối chiếu: {checkout.pendingAttempt.key}</p>
           <p className="mt-2 text-sm">Khi liên hệ TotMart, cung cấp mã này để kiểm tra đúng yêu cầu.</p>
-          <div className="mt-5 flex flex-wrap gap-3"><button type="button" className="tm-button tm-button--outline" disabled={checkout.submitting || needsReconciliation(checkout.pendingAttempt)} onClick={checkout.handlePlaceOrder}>{checkout.submitting ? 'Đang kiểm tra…' : 'Tiếp tục đúng yêu cầu cũ'}</button><Link href="/pages/contact-us" className="tm-text-button">Liên hệ TotMart</Link></div>
+          <div className="mt-5 flex flex-wrap gap-3"><button type="button" className="tm-button tm-button--outline" disabled={checkout.submitting || needsReconciliation(checkout.pendingAttempt)} onClick={checkout.handlePlaceOrder}>{checkout.submitting ? 'Đang kiểm tra…' : checkout.pendingAttempt.state === 'confirming' ? 'Kiểm tra lại kết quả' : 'Tiếp tục đúng yêu cầu cũ'}</button><Link href="/pages/contact-us" className="tm-text-button">Liên hệ TotMart</Link></div>
         </section>}
         {/* ── Stepper ── */}
         <CheckoutStepper

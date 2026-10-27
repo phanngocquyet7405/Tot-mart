@@ -1,9 +1,9 @@
+"use client";
 /**
  * SubscriberDetailDialog.js
  * Dialog xem chi tiết một đăng ký — thông tin user, gói, lịch giao hàng, quà tặng
  */
 
-"use client";
 
 import {
   X,

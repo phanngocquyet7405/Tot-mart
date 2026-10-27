@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { MapPin, Store } from "lucide-react";
+import { sanitizeHtml } from "@/app/util/htmlSanitizer";
 
 /**
  * Hero riêng cho trang chi tiết gian hàng (/brands/[slug]) — thay cho
@@ -68,7 +69,7 @@ export default function BrandDetailHero({ brand, loading }) {
           {brand.description ? (
             <div
               className="prose prose-sm max-w-none text-gray-700 prose-p:my-1.5 prose-p:leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: brand.description }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(brand.description) }}
             />
           ) : (
             <p className="text-gray-500 italic">

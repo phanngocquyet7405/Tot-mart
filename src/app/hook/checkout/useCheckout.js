@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { cartLineKey } from '@/app/util/cartLine.mjs';
-import { getTokenUserId } from '@/app/middleware/tokenMiddleware';
+import { getTokenUserId, cleanupUncommittedAttempts } from '@/app/middleware/tokenMiddleware';
 import { AppContext } from "@/app/context/AppContext";
 import { useCart } from "@/app/context/CartContext";
 import {
@@ -23,6 +23,17 @@ import {
   EMPTY_NEW_ADDRESS,
 } from "@/app/services/api/Checkoutpageservice";
 
+function getAttemptInitialStep(attempt) {
+  if (!attempt) return "address";
+  if (attempt.state === "created" || attempt.state === "confirming" || attempt.state === "processing" || attempt.confirmed) {
+    return "payment";
+  }
+  if (attempt.hash) {
+    return "review";
+  }
+  return "address";
+}
+
 export function useCheckout() {
   const router = useRouter();
   const { isLoading: sessionLoading, user: sessionUser } = useContext(AppContext);
@@ -33,12 +44,20 @@ export function useCheckout() {
     window.addEventListener('totmart:attempt-changed', refresh);
     return () => { window.removeEventListener('storage', refresh); window.removeEventListener('totmart:attempt-changed', refresh); };
   }, []);
+
   const searchParams = useSearchParams();
   const resumeCode = searchParams.get("code");
   // Bind this tab to the first reference it observes, even after another tab starts anew.
   const contextKey = useRef(null);
   const activeAttempt = getPendingCheckout(undefined, resumeCode);
-  if (!contextKey.current && activeAttempt?.key) contextKey.current = activeAttempt.key;
+  const currentUid = getTokenUserId();
+  if (contextKey.current && (!activeAttempt || (activeAttempt.userId && activeAttempt.userId !== currentUid))) {
+    contextKey.current = null;
+  }
+  if (!contextKey.current && activeAttempt?.key && (!activeAttempt.userId || activeAttempt.userId === currentUid)) {
+    contextKey.current = activeAttempt.key;
+  }
+
   const {
     cartItems,
     cartVersion, setCartVersion,
@@ -49,7 +68,41 @@ export function useCheckout() {
     removeFromCart,
   } = useCart();
 
-  const [step, setStep] = useState("address");
+  const [step, setStep] = useState(() => {
+    return getAttemptInitialStep(activeAttempt);
+  });
+
+  useEffect(() => {
+    const handleExpired = () => {
+      cleanupUncommittedAttempts();
+      const remainingAttempt = getPendingCheckout(contextKey.current, resumeCode);
+      const uid = getTokenUserId();
+      if (remainingAttempt && (remainingAttempt.userId === uid || !remainingAttempt.userId)) {
+        setStep(getAttemptInitialStep(remainingAttempt));
+      } else {
+        contextKey.current = null;
+        setStep("address");
+      }
+      refreshAttempt(v => v + 1);
+    };
+    window.addEventListener('totmart:session-expired', handleExpired);
+    window.addEventListener('session-expired', handleExpired);
+    return () => {
+      window.removeEventListener('totmart:session-expired', handleExpired);
+      window.removeEventListener('session-expired', handleExpired);
+    };
+  }, [resumeCode]);
+
+  useEffect(() => {
+    const attempt = getPendingCheckout(contextKey.current, resumeCode);
+    const uid = getTokenUserId();
+    if (attempt && (attempt.userId === uid || !attempt.userId)) {
+      const targetStep = getAttemptInitialStep(attempt);
+      if (targetStep !== 'address') {
+        setStep(targetStep);
+      }
+    }
+  }, [sessionUser, resumeCode]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
@@ -131,16 +184,12 @@ export function useCheckout() {
   }, []);
 
   const handleCancelled = useCallback(() => {
-    activeCodeRef.current = null;
-    setPaymentStatus("idle");
-    setPaymentCode(null);
+    setPaymentStatus("cancelled");
     setQrUrl("");
-    setOnlineAmount(0);
     toast.error(
-      "Đơn đã bị huỷ hoặc hết hạn thanh toán. Vui lòng không chuyển khoản cho mã này.",
+      "Mã thanh toán không còn hiệu lực nhận thanh toán. Nếu bạn đã chuyển khoản, khoản tiền sẽ vào quy trình đối soát hoàn tiền hoặc liên hệ hỗ trợ TotMart kèm mã thanh toán.",
     );
-    router.replace("/");
-  }, [router]);
+  }, []);
 
   // ── Khôi phục đơn sau refresh: /checkout?code=<paymentCode> ──
   useEffect(() => {
@@ -161,13 +210,35 @@ export function useCheckout() {
           finishPaid();
           return;
         }
-        if (info.cancelled) {
-          handleCancelled();
+        if (info.cancelled || info.status === "cancelled") {
+          activeCodeRef.current = resumeCode;
+          setPaymentMethod("online");
+          setPaymentCode(resumeCode);
+          setQrUrl("");
+          setOnlineAmount(info.remainingAmount ?? info.totalAmount);
+          setPaymentStatus("cancelled");
+          setStep("payment");
+          toast.error(
+            "Mã thanh toán không còn hiệu lực nhận thanh toán. Nếu bạn đã chuyển khoản, khoản tiền sẽ vào quy trình đối soát hoàn tiền hoặc liên hệ hỗ trợ TotMart kèm mã thanh toán.",
+          );
           return;
         }
-        if (!info.qrUrl) {
-          // Đơn không phải online-pending (vd. COD) → không có gì để quét
-          toast.error("Đơn này không có mã QR để thanh toán.");
+        if (info.onHold || info.status === "on_hold") {
+          activeCodeRef.current = resumeCode;
+          setPaymentMethod("online");
+          setPaymentCode(resumeCode);
+          setQrUrl("");
+          setOnlineAmount(info.remainingAmount ?? info.totalAmount);
+          setPaymentStatus("on_hold");
+          setStep("payment");
+          toast.error(
+            "Đơn hàng đang tạm giữ để kiểm tra tồn kho. Vui lòng kiểm tra mục Đơn hàng của tôi hoặc liên hệ hỗ trợ TotMart.",
+          );
+          return;
+        }
+        if (!info.payable || !info.qrUrl) {
+          // Đơn không phải online-pending hoặc không payable (vd. COD) → không có gì để quét
+          toast.error("Đơn này không thể thanh toán trực tuyến hoặc không có mã QR.");
           router.replace("/profile/orders");
           return;
         }
@@ -176,8 +247,9 @@ export function useCheckout() {
         setPaymentCode(resumeCode);
         setQrUrl(info.qrUrl);
         setOnlineAmount(info.remainingAmount ?? info.totalAmount);
-        setPaymentStatus("awaiting_payment");
+        setPaymentStatus(info.status === "underpaid" ? "underpaid" : "awaiting_payment");
         setStep("payment");
+        return;
       })
       .finally(() => {
         if (active) setResuming(false);
@@ -213,14 +285,28 @@ export function useCheckout() {
 
   // ── Polling trạng thái thanh toán khi đang hiện QR ──
   useEffect(() => {
-    if (!paymentCode || paymentStatus !== "awaiting_payment") return;
+    if (!paymentCode || !["awaiting_payment", "underpaid"].includes(paymentStatus)) return;
     return pollPaymentStatus(paymentCode, {
       onStatusChange: (info) => {
         const { status } = info;
         if (status === "paid") finishPaid();
-        else if (status === "cancelled") handleCancelled();
+        else if (status === "cancelled" || info.cancelled) handleCancelled();
+        else if (status === "on_hold" || info.onHold) {
+          setPaymentStatus("on_hold");
+          setQrUrl("");
+          toast.error("Đơn hàng đang tạm giữ để kiểm tra tồn kho. Vui lòng kiểm tra mục Đơn hàng của tôi hoặc liên hệ hỗ trợ TotMart.");
+        }
         else if (status === "timeout") setPaymentStatus("timeout");
-        else if (status === 'pending') { setQrUrl(info.qrUrl || ''); setOnlineAmount(info.remainingAmount ?? info.totalAmount); }
+        else if (status === "underpaid") {
+          setPaymentStatus("underpaid");
+          setQrUrl(info.qrUrl || "");
+          setOnlineAmount(info.remainingAmount);
+        }
+        else if (status === 'pending') {
+          setPaymentStatus("awaiting_payment");
+          setQrUrl(info.qrUrl || '');
+          setOnlineAmount(info.remainingAmount ?? info.totalAmount);
+        }
       },
     });
   }, [paymentCode, paymentStatus, pollAttempt, finishPaid, handleCancelled]);
@@ -246,6 +332,7 @@ export function useCheckout() {
       }
       submittingRef.current = true;
       setSubmitting(true);
+      let info = null;
       try {
         if (String(user?._id || user?.id) !== String(getTokenUserId())) throw new Error('Tài khoản đã thay đổi. Tải lại thông tin trước khi thanh toán.');
         const result = await placeOrder({
@@ -260,10 +347,15 @@ export function useCheckout() {
         if (!mounted.current || String(user?._id || user?.id) !== String(getTokenUserId())) return;
         contextKey.current ||= getPendingCheckout()?.key;
         if (!result.success) {
-          if (result.invalidated) { contextKey.current = null; refreshAttempt(n => n + 1); }
+          if (result.invalidated) { contextKey.current = null; setStep("address"); refreshAttempt(n => n + 1); }
           if (result.cartVersion !== undefined) setCartVersion(result.cartVersion);
           if (result.status === 409) { setQuote(null); setQuoteGeneration(value => value + 1); }
           if (result.prepared || result.invalidated) { toast.info(result.error); return; }
+          if (result.confirming) {
+            refreshAttempt(n => n + 1);
+            toast.info(result.error || "Hệ thống đang xác nhận kết quả giao dịch. Vui lòng bấm kiểm tra lại.");
+            return;
+          }
           throw new Error(result.error || "Không thể đặt hàng.");
         }
         if (!result.paymentMethod) {
@@ -287,7 +379,7 @@ export function useCheckout() {
         // Persist the recoverable URL before the next network operation.
         router.replace(`/checkout?code=${encodeURIComponent(code)}`);
         if (result.consumeCart) clearCart(cartItems);
-        const info = await checkPaymentNow(code);
+        info = await checkPaymentNow(code);
         if (!mounted.current) return;
         if (info.status === "error") {
           // Đơn đã tạo; vẫn vào màn QR — nút "kiểm tra lại" sẽ lấy lại qrUrl
@@ -298,10 +390,22 @@ export function useCheckout() {
         setPaymentCode(code);
         setQrUrl(info.qrUrl ?? "");
         setOnlineAmount(info.remainingAmount ?? result.totalAmount ?? info.totalAmount ?? 0);
-        setPaymentStatus(info.status === "paid" ? "paid" : "awaiting_payment");
+        if (info.status === "paid") {
+          finishPaid();
+        } else if (info.status === "on_hold" || info.onHold) {
+          setPaymentStatus("on_hold");
+          setQrUrl("");
+          toast.error(
+            "Đơn hàng đang tạm giữ để kiểm tra tồn kho. Vui lòng kiểm tra mục Đơn hàng của tôi hoặc liên hệ hỗ trợ TotMart.",
+          );
+        } else if (info.status === "cancelled" || info.cancelled) {
+          setPaymentStatus("cancelled");
+          setQrUrl("");
+        } else {
+          setPaymentStatus(info.status === "underpaid" ? "underpaid" : "awaiting_payment");
+        }
         // Giỏ đã được tiêu thụ ở BE; giữ paymentCode trên URL để khôi phục sau refresh
         router.replace(`/checkout?code=${encodeURIComponent(code)}`);
-        if (info.status === "paid") setOrderSuccess(true);
       } catch (error) {
         if (mounted.current) toast.error(error.message);
       } finally {
@@ -322,6 +426,7 @@ export function useCheckout() {
       clearCart,
       user,
       router,
+      finishPaid,
     ],
   );
 
@@ -369,8 +474,16 @@ export function useCheckout() {
         finishPaid();
         return;
       }
-      if (info.cancelled) {
+      if (info.cancelled || info.status === "cancelled") {
         handleCancelled();
+        return;
+      }
+      if (info.onHold || info.status === "on_hold") {
+        setPaymentStatus("on_hold");
+        setQrUrl("");
+        toast.error(
+          "Đơn hàng đang tạm giữ để kiểm tra tồn kho. Vui lòng kiểm tra mục Đơn hàng của tôi hoặc liên hệ hỗ trợ TotMart.",
+        );
         return;
       }
       setQrUrl(info.qrUrl || "");
@@ -436,8 +549,10 @@ export function useCheckout() {
       if (submittingRef.current) return;
       submittingRef.current = true;
       setSubmitting(true);
+      let info = null;
       try {
-        await startNewCheckout(contextKey.current);
+        const key = contextKey.current || activeAttempt?.key || getPendingCheckout()?.key;
+        await startNewCheckout(key);
         contextKey.current = null;
         activeCodeRef.current = null;
         setPaymentCode(null); setPaymentStatus('idle'); setOrderSuccess(false);

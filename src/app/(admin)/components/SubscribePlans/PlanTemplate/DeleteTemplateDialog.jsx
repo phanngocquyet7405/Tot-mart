@@ -1,7 +1,7 @@
+"use client";
 // components/SubscribePlans/DeleteTemplateDialog.jsx
 // Xác nhận xoá một Subscription Template.
 // Logic gọi API nằm ở page.js (onConfirm callback).
-"use client";
 
 import { Loader2, Trash2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -1,5 +1,5 @@
-// components/layout/category/category_card.jsx
 "use client";
+// components/layout/category/category_card.jsx
 
 import React from "react";
 import Image from "next/image";

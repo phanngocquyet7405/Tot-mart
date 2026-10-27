@@ -1,6 +1,7 @@
 "use client";
 
 import { Info, Star } from "lucide-react";
+import { sanitizeHtml } from "@/app/util/htmlSanitizer";
 
 const TABS = [
   { key: "details", label: "Mô tả sản phẩm" },
@@ -16,12 +17,16 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
   return (
     <div className="tm-section">
       {/* Header điều hướng tab */}
-      <div className="tm-tab-list" role="group" aria-label="Thông tin sản phẩm">
+      <div className="tm-tab-list" role="tablist" aria-label="Thông tin sản phẩm">
         {TABS.map((tab) => (
           <button
             key={tab.key}
+            id={`tab-${tab.key}`}
+            role="tab"
+            aria-selected={activeTab === tab.key}
+            aria-controls={`tabpanel-${tab.key}`}
             onClick={() => onTabChange(tab.key)}
-            aria-pressed={activeTab === tab.key} aria-controls="product-information"
+            className="transition-colors motion-reduce:transition-none"
           >
             {tab.label}
             {activeTab === tab.key && (
@@ -33,12 +38,12 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
 
       {/* Tab: Mô tả */}
       {activeTab === "details" && (
-        <div id="product-information" className="space-y-4">
+        <div id="tabpanel-details" role="tabpanel" aria-labelledby="tab-details" className="space-y-4">
           <div className="bg-stone-50 rounded-xl p-5 text-sm text-stone-700 leading-relaxed">
             {product.description ? (
               <div
                 className="prose prose-sm max-w-none prose-p:my-2 prose-p:leading-relaxed prose-stone"
-                dangerouslySetInnerHTML={{ __html: product.description }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }}
               />
             ) : (
               <span className="italic text-stone-400">
@@ -51,7 +56,7 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
 
       {/* Tab: Đánh giá */}
       {activeTab === "reviews" && (
-        <div id="product-information" className="space-y-6">
+        <div id="tabpanel-reviews" role="tabpanel" aria-labelledby="tab-reviews" className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-black uppercase tracking-widest text-stone-800 mb-2">
@@ -93,7 +98,7 @@ export function ProductInfoTabs({ product, activeTab, onTabChange }) {
 
       {/* Tab: Thông số */}
       {activeTab === "specs" && (
-        <div id="product-information" className="space-y-1">
+        <div id="tabpanel-specs" role="tabpanel" aria-labelledby="tab-specs" className="space-y-1">
           {product.sku && (
             <div className="flex justify-between py-3 border-b border-stone-100 text-sm">
               <span className="text-stone-500">Mã sản phẩm (SKU)</span>

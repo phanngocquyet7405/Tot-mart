@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { Trash2, Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -25,7 +26,7 @@ export default function DeleteCategory({ categoryId, onSuccess }) {
       await deleteCategoryApi(categoryId);
       onSuccess();
     } catch (error) {
-      console.error(error);
+      logger.error(error);
     } finally {
       setIsDeleting(false);
     }

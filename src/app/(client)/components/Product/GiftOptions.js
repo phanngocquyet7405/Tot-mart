@@ -1,29 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Gift } from "lucide-react";
 import { formatPrice } from "./productDetailService";
+import { axiosConfig } from "@/app/services/api/axiosConfig";
 
-const WRAP_OPTIONS = [
-  { id: "classic", label: "Gói giấy cổ điển kèm ruy băng", price: 15000 },
-  { id: "premium", label: "Hộp quà cao cấp", price: 35000 },
-  { id: "eco", label: "Gói giấy tái chế thân thiện môi trường", price: 15000 },
-];
+const WRAP_LABELS = {
+  classic: "Gói giấy cổ điển kèm ruy băng",
+  premium: "Hộp quà cao cấp",
+  eco: "Gói giấy tái chế thân thiện môi trường",
+};
 
 const MESSAGE_LIMIT = 150;
 
 /**
  * @param {(giftData: {enabled:boolean, option:object|null, message:string}) => void=} onChange
- *   Callback báo lại lựa chọn quà tặng cho page cha (ví dụ để cộng thêm phí
- *   gói quà vào tổng đơn ở bước checkout). Không truyền vẫn hoạt động, chỉ
- *   không có nơi nào nhận state này.
+ * @param {boolean} [ownerConfirmed=false] Chỉ bật khi owner/merchant đã xác nhận cho phép gói quà
+ * @param {object} [policy] Chính sách commerce-policy từ BE nếu có sẵn
  */
-export function GiftOptions({ onChange }) {
+export function GiftOptions({ onChange, ownerConfirmed = false, policy = null }) {
+  const [fetchedFees, setFetchedFees] = useState(null);
+  const wrappingFees = policy?.wrappingFees || fetchedFees;
   const [enabled, setEnabled] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [message, setMessage] = useState("");
 
-  const selectedOption = WRAP_OPTIONS.find((o) => o.id === selectedId) || null;
+  useEffect(() => {
+    if (!ownerConfirmed || policy?.wrappingFees) return;
+    let active = true;
+    axiosConfig
+      .get("/commerce-policy")
+      .then((res) => {
+        if (active && res.data?.data?.wrappingFees) {
+          setFetchedFees(res.data.data.wrappingFees);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [ownerConfirmed, policy?.wrappingFees]);
+
+  if (!ownerConfirmed) {
+    return null;
+  }
+
+  const wrapOptions = [
+    { id: "classic", label: WRAP_LABELS.classic, price: wrappingFees?.classic ?? 0 },
+    { id: "premium", label: WRAP_LABELS.premium, price: wrappingFees?.premium ?? 0 },
+    { id: "eco", label: WRAP_LABELS.eco, price: wrappingFees?.eco ?? 0 },
+  ];
+
+  const selectedOption = wrapOptions.find((o) => o.id === selectedId) || null;
 
   const handleToggle = () => {
     const next = !enabled;
@@ -66,7 +94,7 @@ export function GiftOptions({ onChange }) {
       {enabled && (
         <div className="space-y-3 pt-1">
           <div className="space-y-2">
-            {WRAP_OPTIONS.map((option) => (
+            {wrapOptions.map((option) => (
               <label
                 key={option.id}
                 className={`flex items-center justify-between gap-3 p-3 bg-white rounded-xl border-2 cursor-pointer transition-all ${

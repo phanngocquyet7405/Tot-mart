@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { BrandCard } from "./brand_card";
@@ -21,7 +22,7 @@ export default function BrandsGrid() {
           setBrands(data);
         }
       } catch (err) {
-        console.error("Lỗi khi lấy gian hàng:", err);
+        logger.error("Lỗi khi lấy gian hàng:", err);
         setError("Không thể tải danh sách gian hàng.");
       } finally {
         setLoading(false);

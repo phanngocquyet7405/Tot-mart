@@ -178,3 +178,124 @@ test("checkout success consumes the actual unwrapped response shape", async () =
   assert.equal(result.orderCode, "original");
   assert.equal(result.totalAmount, 12345);
 });
+
+
+test("readOrderStatus derives paid, cancelled, on_hold, underpaid and payable flags without client clock drift", () => {
+  const { context: c } = require("./helpers/attemptHarness.cjs")();
+
+  // Paid
+  const paid = c.readOrderStatus({ data: { paymentStatus: "paid", totalAmount: 100000, payable: true } });
+  assert.equal(paid.status, "paid");
+  assert.equal(paid.payable, false);
+  assert.equal(paid.remainingAmount, 0);
+
+  // Cancelled via paymentStatus
+  const cancelled1 = c.readOrderStatus({ data: { paymentStatus: "cancelled", totalAmount: 100000, payable: true } });
+  assert.equal(cancelled1.status, "cancelled");
+  assert.equal(cancelled1.cancelled, true);
+  assert.equal(cancelled1.payable, false);
+
+  // Cancelled via order status
+  const cancelled2 = c.readOrderStatus({ data: { paymentStatus: "pending", totalAmount: 100000, payable: true, orders: [{ status: "cancelled" }] } });
+  assert.equal(cancelled2.status, "cancelled");
+  assert.equal(cancelled2.cancelled, true);
+  assert.equal(cancelled2.payable, false);
+
+  // Clock drift: BE says pending + payable=true, client clock should NOT force expired
+  const past = new Date(Date.now() - 60000).toISOString();
+  const clientClockDrift = c.readOrderStatus({ data: { paymentStatus: "pending", totalAmount: 100000, payable: true, expiresAt: past } });
+  assert.equal(clientClockDrift.status, "pending");
+  assert.equal(clientClockDrift.payable, true);
+  assert.equal(clientClockDrift.cancelled, false);
+
+  // On-hold: in BE reality, on_hold occurs after payment is settled (paymentStatus === 'paid')
+  const onHold = c.readOrderStatus({
+    data: {
+      paymentStatus: "paid",
+      totalAmount: 100000,
+      payable: false,
+      orders: [{ orderId: "ORD-HOLD", status: "on_hold", paymentStatus: "paid" }],
+    },
+  });
+  assert.equal(onHold.status, "on_hold");
+  assert.equal(onHold.onHold, true);
+  assert.equal(onHold.payable, false);
+
+  // Underpaid (partially paid, still active)
+  const future = new Date(Date.now() + 600000).toISOString();
+  const underpaid = c.readOrderStatus({ data: { paymentStatus: "pending", totalAmount: 100000, receivedAmount: 40000, payable: true, expiresAt: future, qrUrl: "https://qr" } });
+  assert.equal(underpaid.status, "underpaid");
+  assert.equal(underpaid.underpaid, true);
+  assert.equal(underpaid.remainingAmount, 60000);
+  assert.equal(underpaid.payable, true);
+  assert.equal(underpaid.qrUrl, "https://qr");
+
+  // Normal pending
+  const pending = c.readOrderStatus({ data: { paymentStatus: "pending", totalAmount: 100000, payable: true, expiresAt: future, qrUrl: "https://qr" } });
+  assert.equal(pending.status, "pending");
+  assert.equal(pending.payable, true);
+});
+
+for (const terminalStatus of ["paid", "cancelled", "on_hold"]) {
+  test(`pollPaymentStatus stops immediately when status is ${terminalStatus}`, async () => {
+    const { context: c } = require("./helpers/attemptHarness.cjs")();
+    let pollCalls = 0;
+    const history = [];
+
+    const mockResponse = {
+      paid: { data: { paymentStatus: "paid" } },
+      cancelled: { data: { paymentStatus: "cancelled" } },
+      on_hold: { data: { paymentStatus: "paid", orders: [{ status: "on_hold", paymentStatus: "paid" }] } },
+    }[terminalStatus];
+
+    c.paymentGatewayService = {
+      getOrderStatus: async () => {
+        pollCalls++;
+        return mockResponse;
+      },
+    };
+
+    const stop = c.pollPaymentStatus("CODE123", {
+      intervalMs: 20,
+      timeoutMs: 500,
+      onStatusChange: (info) => history.push(info),
+    });
+
+    await new Promise((r) => setTimeout(r, 80));
+    stop();
+
+    assert.equal(pollCalls, 1, `Polling must stop after 1 call on ${terminalStatus}`);
+    assert.equal(history.length, 1);
+    assert.equal(history[0].status, terminalStatus);
+  });
+}
+
+test("pollPaymentStatus continues polling on underpaid and pending until stopped", async () => {
+  const { context: c } = require("./helpers/attemptHarness.cjs")();
+  let pollCalls = 0;
+  const history = [];
+
+  const future = new Date(Date.now() + 600000).toISOString();
+  c.paymentGatewayService = {
+    getOrderStatus: async () => {
+      pollCalls++;
+      if (pollCalls === 1) {
+        return { data: { paymentStatus: "pending", totalAmount: 100000, expiresAt: future } };
+      }
+      return { data: { paymentStatus: "pending", totalAmount: 100000, receivedAmount: 30000, expiresAt: future } };
+    },
+  };
+
+  const stop = c.pollPaymentStatus("CODE123", {
+    intervalMs: 25,
+    timeoutMs: 500,
+    onStatusChange: (info) => history.push(info),
+  });
+
+  await new Promise((r) => setTimeout(r, 90));
+  stop();
+
+  assert.ok(pollCalls >= 3, `Expected at least 3 polls, got ${pollCalls}`);
+  assert.equal(history[0].status, "pending");
+  assert.equal(history[1].status, "underpaid");
+});

@@ -55,15 +55,122 @@ export default withNextIntl({
     remotePatterns: hosts.map((hostname) => ({ protocol: "https", hostname })),
   },
   async headers() {
+    const isReportOnlyScope =
+      process.env.TOTMART_CSP_REPORT_ONLY === "1" ||
+      process.env.TOTMART_ENV === "staging" ||
+      process.env.APP_ENV === "staging" ||
+      process.env.CI === "true";
+
+    const cspDirectives = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      `img-src 'self' data: blob: ${hosts.map((h) => "https://" + h).join(" ")}`,
+      "connect-src 'self' https: http://localhost:*",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      ...(isReportOnlyScope ? ["report-uri /csp-report"] : []),
+    ].join("; ");
+
+    const commonHeaders = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "X-Frame-Options", value: "DENY" },
+    ];
+
+    if (isReportOnlyScope) {
+      commonHeaders.push({
+        key: "Content-Security-Policy-Report-Only",
+        value: cspDirectives,
+      });
+    }
+
+    const publicCatalogRoutes = [
+      "/",
+      "/homepage",
+      "/products",
+      "/products/:path*",
+      "/brands",
+      "/brands/:path*",
+      "/categories",
+      "/categories/:path*",
+      "/box",
+      "/box/:path*",
+    ];
+
+    const privateRoutes = [
+      "/checkout",
+      "/checkout/:path*",
+      "/cart",
+      "/cart/:path*",
+      "/profile",
+      "/profile/:path*",
+    ];
+
+    const sessionCookieMissing = [
+      { type: "cookie", key: "token" },
+      { type: "cookie", key: "refreshToken" },
+    ];
+
     return [
       {
         source: "/:path*",
-        headers: [
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "DENY" },
-        ],
+        headers: commonHeaders,
       },
+      ...publicCatalogRoutes.map((source) => ({
+        source,
+        missing: sessionCookieMissing,
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=60, stale-while-revalidate=300",
+          },
+          {
+            key: "Vary",
+            value: "Accept-Encoding, Cookie",
+          },
+        ],
+      })),
+      ...publicCatalogRoutes.map((source) => ({
+        source,
+        has: [{ type: "cookie", key: "token" }],
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, max-age=0, must-revalidate",
+          },
+          {
+            key: "Vary",
+            value: "Accept-Encoding, Cookie",
+          },
+        ],
+      })),
+      ...publicCatalogRoutes.map((source) => ({
+        source,
+        has: [{ type: "cookie", key: "refreshToken" }],
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, max-age=0, must-revalidate",
+          },
+          {
+            key: "Vary",
+            value: "Accept-Encoding, Cookie",
+          },
+        ],
+      })),
+      ...privateRoutes.map((source) => ({
+        source,
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, max-age=0, must-revalidate",
+          },
+        ],
+      })),
     ];
   },
 });

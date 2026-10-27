@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -28,7 +29,7 @@ export function useCreateCategory() {
         const data = await fetchAdminCategories();
         if (isMounted) setExistingCategories(data);
       } catch (err) {
-        console.error("Lỗi fetch categories:", err);
+        logger.error("Lỗi fetch categories:", err);
       }
     };
     fetchCats();
@@ -61,7 +62,7 @@ export function useCreateCategory() {
         router.push("/admin-categories");
         router.refresh();
       } catch (err) {
-        console.error("Lỗi:", err);
+        logger.error("Lỗi:", err);
         const errorMsg = err.response?.data?.message || "Lỗi khi lưu dữ liệu";
         toast.error(errorMsg);
       } finally {

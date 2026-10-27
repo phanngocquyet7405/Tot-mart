@@ -1,5 +1,6 @@
-// components/layout/brand/BrandBaseLayout.jsx
 "use client";
+import logger from "@/app/util/Logger";
+// components/layout/brand/BrandBaseLayout.jsx
 
 import React, { useState, useEffect } from "react";
 import AnnouncementBar from "../../ui/AnnouncementBar";
@@ -16,15 +17,19 @@ function parseList(res) {
   return Array.isArray(data) ? data : [];
 }
 
-export default function BrandBaseLayout({ children, slug }) {
+export default function BrandBaseLayout({ children, slug, initialBrand = null }) {
   // Logic đóng mở menu trên mobile giống ProductPage
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [brand, setBrand] = useState(null);
-  const [loadingBrand, setLoadingBrand] = useState(true);
+  const [brand, setBrand] = useState(initialBrand);
+  const [loadingBrand, setLoadingBrand] = useState(!initialBrand);
 
   // Không có endpoint GET brand theo slug ở BE, nên lấy cả danh sách rồi tìm
   // đúng slug — giống cách admin-brands/hooks/useUpdateBrand.js đang làm.
   useEffect(() => {
+    if (initialBrand) {
+      setLoadingBrand(false);
+      return;
+    }
     if (!slug) return;
     let isMounted = true;
     (async () => {
@@ -35,7 +40,7 @@ export default function BrandBaseLayout({ children, slug }) {
         const found = parseList(res).find((b) => b.slug === slug) || null;
         setBrand(found);
       } catch (error) {
-        console.error("Lỗi tải thông tin gian hàng:", error);
+        logger.error("Lỗi tải thông tin gian hàng:", error);
         if (isMounted) setBrand(null);
       } finally {
         if (isMounted) setLoadingBrand(false);
@@ -44,7 +49,7 @@ export default function BrandBaseLayout({ children, slug }) {
     return () => {
       isMounted = false;
     };
-  }, [slug]);
+  }, [slug, initialBrand]);
 
   return (
     <div className="min-h-screen bg-gray-50">

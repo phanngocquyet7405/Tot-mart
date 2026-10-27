@@ -1,0 +1,148 @@
+name: E2E Smoke & Performance Pipeline
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, master, staging, fe/f-fix]
+  push:
+    branches: [main, master, staging]
+
+# CI Status Note:
+# In accordance with Phase F07.0 / F07.2:
+# Remote execution on GitHub Actions is BLOCKED pending BE remote CI passing on commit e31517d8f2116f611a27dae96d9446ce8109bffc.
+# This workflow prepares the full pipeline specification. If BE credentials or infrastructure are missing,
+# the job will fail explicitly with diagnostic exit codes (never silently skip or label E2E as passed).
+
+jobs:
+  e2e-smoke:
+    name: Playwright E2E & Smoke Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 1. Checkout FE Repository
+        uses: actions/checkout@v4
+
+      - name: 2. Checkout Locked BE Snapshot
+        uses: actions/checkout@v4
+        with:
+          repository: phanngocquyet7405/TotMartAPI
+          ref: e31517d8f2116f611a27dae96d9446ce8109bffc
+          path: be-repo
+          token: ${{ secrets.BE_REPO_ACCESS_TOKEN || github.token }}
+        continue-on-error: true
+
+      - name: 3. Verify BE Integrity & Fail Explicitly on Missing Infrastructure
+        run: |
+          if [ ! -d "be-repo" ] || [ ! -f "be-repo/package.json" ]; then
+            echo "::error::[BLOCKED] BE repository could not be cloned or credentials are missing."
+            echo "::error::Configure BE_REPO_ACCESS_TOKEN secret in GitHub Repository Settings."
+            exit 1
+          fi
+          cd be-repo
+          BE_HEAD=$(git rev-parse HEAD)
+          EXPECTED_SHA="e31517d8f2116f611a27dae96d9446ce8109bffc"
+          echo "BE HEAD Commit: $BE_HEAD"
+          echo "Expected Locked Commit: $EXPECTED_SHA"
+          if [ "$BE_HEAD" != "$EXPECTED_SHA" ]; then
+            echo "::error::[BLOCKED] BE commit mismatch! Expected $EXPECTED_SHA, got $BE_HEAD"
+            exit 1
+          fi
+          cd ..
+
+      - name: 4. Setup Node.js Runtime (Node 24 matching BE Engine)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: 5. Initialize MongoDB Replica Set
+        run: |
+          echo "Initializing MongoDB rs0 replica set for transaction support..."
+          MONGO_CID=$(docker ps -q --filter ancestor=mongo:7.0)
+          docker exec "$MONGO_CID" mongosh --eval 'rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "127.0.0.1:27017" }] })'
+          sleep 3
+          docker exec "$MONGO_CID" mongosh --eval 'rs.status().ok'
+
+      - name: 6. Install FE & BE Dependencies
+        run: |
+          npm ci
+          cd be-repo && npm ci && cd ..
+
+      - name: 7. Run E2E Bootstrap & Install Playwright Browsers
+        run: |
+          npm run test:e2e:bootstrap
+          npx playwright install --with-deps chromium
+
+      - name: 8. Start BE Fixture Service on Port 3102
+        env:
+          TOTMART_BE_ROOT: "${{ github.workspace }}/be-repo"
+          FE_TEST_API_PORT: "3102"
+        run: |
+          echo "Starting BE fixture server in background on port 3102..."
+          node scripts/verify-f07-fixture.cjs be-repo --serve &
+          for i in $(seq 1 30); do
+            if curl -s http://127.0.0.1:3102/__fixture/f07-info > /dev/null; then
+              echo "BE fixture is healthy and ready on port 3102 (attempt $i)."
+              break
+            fi
+            sleep 1
+          done
+
+      - name: 9. Build Next.js Production Bundle (Without Fallback Flag)
+        env:
+          CI: "true"
+          API_URL: "http://127.0.0.1:3102/api"
+        run: |
+          npm run build
+
+      - name: 10. Execute Mandatory F07 Smoke Suite (Real UI Clicks)
+        env:
+          CI: "true"
+          TOTMART_BE_ROOT: "${{ github.workspace }}/be-repo"
+          FE_TEST_API_PORT: "3102"
+          FE_PORT: "3217"
+        run: |
+          npm run test:smoke
+
+      - name: 11. Execute Performance Profiling
+        env:
+          CI: "true"
+          FE_TEST_API_PORT: "3102"
+          FE_PORT: "3217"
+        run: |
+          npm run test:perf
+
+      - name: 12. Upload Test Artifacts (Traces, Screenshots, Reports)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f07-e2e-artifacts
+          path: |
+            .cache/traces/
+            .cache/videos/
+            .cache/perf/
+            .cache/playwright-results.json
+            .cache/f07-smoke-results.json
+          retention-days: 14

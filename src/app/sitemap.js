@@ -1,7 +1,14 @@
-import { getAllProductsApi, getAllCategoriesApi, getAllBrandsApi } from "@/app/services/api/productServices";
-import { getAllBoxesApi } from "@/app/services/api/boxService";
+import {
+  getServerProducts,
+  getServerCategories,
+  getServerBrands,
+  getServerBoxes,
+  getPublicSiteUrl,
+  getLastKnownGoodSitemap,
+  saveLastKnownGoodSitemap,
+} from "@/app/services/server/serverCatalog";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+export const revalidate = 3600;
 
 // Trang tĩnh — cập nhật thủ công khi thêm route mới không thuộc dạng động
 const STATIC_ROUTES = [
@@ -20,25 +27,8 @@ const STATIC_ROUTES = [
   { path: "/pages/offers-discounts-coupons", priority: 0.6, changeFrequency: "weekly" },
 ];
 
-// Gọi API lỗi thì trả mảng rỗng — 1 nguồn dữ liệu lỗi không nên làm sitemap
-// rỗng hoàn toàn, các phần còn lại vẫn nên có trong sitemap.
-async function safeFetchList(apiCall) {
-  try {
-    const res = await apiCall();
-    const data = res?.data?.data || res?.data || [];
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
-}
-
 export default async function sitemap() {
-  const [products, categories, brands, boxes] = await Promise.all([
-    safeFetchList(getAllProductsApi),
-    safeFetchList(getAllCategoriesApi),
-    safeFetchList(getAllBrandsApi),
-    safeFetchList(getAllBoxesApi),
-  ]);
+  const SITE_URL = getPublicSiteUrl();
 
   const staticEntries = STATIC_ROUTES.map((r) => ({
     url: `${SITE_URL}${r.path}`,
@@ -47,45 +37,78 @@ export default async function sitemap() {
     priority: r.priority,
   }));
 
-  const productEntries = products
-    .filter((p) => p.isActive !== false)
-    .map((p) => ({
-      url: `${SITE_URL}/products/${p.slug || "san-pham"}-${p._id}`,
-      lastModified: p.updatedAt ? new Date(p.updatedAt) : new Date(),
-      changeFrequency: "weekly",
-      priority: 0.7,
-    }));
+  try {
+    const [products, categories, brands, boxes] = await Promise.all([
+      getServerProducts(),
+      getServerCategories(),
+      getServerBrands(),
+      getServerBoxes(),
+    ]);
 
-  const categoryEntries = categories
-    .filter((c) => c.isActive !== false)
-    .map((c) => ({
-      url: `${SITE_URL}/categories/${c.slug || c._id}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.6,
-    }));
+    const productEntries = products
+      .filter((p) => p && p.isActive !== false && !p.archivedAt)
+      .map((p) => ({
+        url: `${SITE_URL}/products/${p.slug || "san-pham"}-${p._id}`,
+        lastModified: p.updatedAt ? new Date(p.updatedAt) : new Date(),
+        changeFrequency: "weekly",
+        priority: 0.7,
+      }));
 
-  const brandEntries = brands
-    .filter((b) => b.isActive !== false)
-    .map((b) => ({
-      url: `${SITE_URL}/brands/${b.slug || b._id}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.6,
-    }));
+    const categoryEntries = categories
+      .filter((c) => c && c.isActive !== false)
+      .map((c) => ({
+        url: `${SITE_URL}/categories/${c.slug || c._id}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly",
+        priority: 0.6,
+      }));
 
-  const boxEntries = boxes.map((box) => ({
-    url: `${SITE_URL}/products/box/${box._id}`,
-    lastModified: box.updatedAt ? new Date(box.updatedAt) : new Date(),
-    changeFrequency: "weekly",
-    priority: 0.6,
-  }));
+    const brandEntries = brands
+      .filter((b) => b && b.isActive !== false)
+      .map((b) => ({
+        url: `${SITE_URL}/brands/${b.slug || b._id}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly",
+        priority: 0.6,
+      }));
 
-  return [
-    ...staticEntries,
-    ...productEntries,
-    ...categoryEntries,
-    ...brandEntries,
-    ...boxEntries,
-  ];
+    const boxEntries = boxes
+      .filter((box) => box && box.isActive !== false && !box.archivedAt)
+      .map((box) => ({
+        url: `${SITE_URL}/products/box/${box._id}`,
+        lastModified: box.updatedAt ? new Date(box.updatedAt) : new Date(),
+        changeFrequency: "weekly",
+        priority: 0.6,
+      }));
+
+    const dynamicEntries = [
+      ...productEntries,
+      ...categoryEntries,
+      ...brandEntries,
+      ...boxEntries,
+    ];
+
+    if (dynamicEntries.length > 0) {
+      saveLastKnownGoodSitemap(dynamicEntries);
+    }
+
+    return [...staticEntries, ...dynamicEntries];
+  } catch (err) {
+    // Fail-closed mặc định ở mọi môi trường; chỉ cho phép dự phòng khi có biến bật rõ ràng cho CI test
+    if (process.env.ALLOW_SITEMAP_FALLBACK === "true") {
+      console.warn(
+        `[Sitemap Fallback Permitted] Backend fetch failed (${err.message}). Using last-known-good cache.`,
+      );
+      const cachedDynamic = getLastKnownGoodSitemap();
+      if (cachedDynamic && cachedDynamic.length > 0) {
+        return [...staticEntries, ...cachedDynamic];
+      }
+      return staticEntries;
+    }
+
+    console.error(
+      `[Sitemap Error] Backend catalog fetch failed: ${err.message}. Fail-closed active (ALLOW_SITEMAP_FALLBACK is not enabled).`,
+    );
+    throw err;
+  }
 }

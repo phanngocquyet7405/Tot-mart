@@ -54,3 +54,4 @@ audit-*.json
 .codex/
 AGENTS.md
 .claude/
+.claude/settings.local.json

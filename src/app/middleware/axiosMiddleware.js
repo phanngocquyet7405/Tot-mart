@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import { getAccessToken, getTokenUserId, saveToken, clearSession } from './tokenMiddleware';
+import { getAccessToken, getTokenUserId, saveToken, clearSession } from './tokenMiddleware.js';
 let refreshing = null;
 export function setupAxiosMiddleware(instance) {
   instance.interceptors.request.use(config => {
@@ -12,6 +12,9 @@ export function setupAxiosMiddleware(instance) {
     const token = getAccessToken();
     if (token) config.headers.Authorization = `Bearer ${token}`;
     else delete config.headers.Authorization;
+    if (/\/checkout\/(attempts|check-out)|\/subcribe-plans\/user-subscribe/.test(config.url || '')) {
+      config.timeout ||= 35000;
+    }
     return config;
   });
   instance.interceptors.response.use(response => response.data, async error => {
@@ -31,10 +34,14 @@ export function setupAxiosMiddleware(instance) {
         config.headers.Authorization = `Bearer ${token}`;
         return instance(config);
       } catch (failure) {
-        if (getTokenUserId() === config._requestUserId) {
-          clearSession();
-          if (typeof window !== 'undefined' && [401,403].includes(failure.response?.status)) window.dispatchEvent(new Event('totmart:session-expired'));
+        const failureStatus = failure.response?.status;
+        if ([401, 403].includes(failureStatus)) {
+          if (getTokenUserId() === config._requestUserId) {
+            clearSession();
+            if (typeof window !== 'undefined') window.dispatchEvent(new Event('totmart:session-expired'));
+          }
         }
+        return Promise.reject(failure);
       }
     }
     return Promise.reject(error);

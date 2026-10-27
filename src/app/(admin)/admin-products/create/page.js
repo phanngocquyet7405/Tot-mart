@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { formatCurrency } from "@/app/util/formatter";
 import { useState, useEffect, useRef } from "react";
@@ -184,7 +185,7 @@ export default function AddProductPage() {
     } catch (error) {
       const errorMsg = error.response?.data?.message || "Lỗi khi lưu sản phẩm";
       toast.error(errorMsg);
-      console.error("Submit Error:", error);
+      logger.error("Submit Error:", error);
     } finally {
       setIsSubmitting(false);
     }
