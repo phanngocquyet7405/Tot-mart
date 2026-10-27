@@ -66,45 +66,51 @@ async function main() {
 
   fs.mkdirSync('.cache', { recursive: true });
   const runtimeFile = path.resolve('.cache/f07-runtime.json');
-  if (fs.existsSync(runtimeFile)) {
-    fs.unlinkSync(runtimeFile);
-  }
-
   const FIXTURE_PORT = process.env.FE_TEST_API_PORT || '3102';
 
-  // Spin up disposable Redis container if Docker is available
-  let redisContainerId = null;
-  const runId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
-  const REDIS_PORT = '6389';
-  try {
-    const isDockerAvailable = await new Promise((res) => {
-      execSync('docker version', { stdio: 'ignore' });
-      res(true);
-    }).catch(() => false);
-
-    if (isDockerAvailable) {
-      console.log(`Starting disposable Redis container (totmart-f07-redis-${runId}) on port ${REDIS_PORT}...`);
-      const cid = execSync(
-        `docker run -d --name totmart-f07-redis-${runId} --label owner=totmart-f07-runner -p ${REDIS_PORT}:6379 redis:7.4-alpine`,
-        { stdio: ['ignore', 'pipe', 'pipe'] }
-      ).toString().trim();
-      if (cid) {
-        redisContainerId = cid;
-        console.log(`[Disposable Redis] Started container: ${redisContainerId.slice(0, 12)}`);
-      }
-    }
-  } catch (dErr) {
-    console.warn('[Warning] Could not start disposable Redis container:', dErr.message);
-  }
-
+  // Check if fixture is already running
   let isFixtureRunning = false;
+  let fixtureInfo = null;
   try {
     const chk = await fetch(`http://127.0.0.1:${FIXTURE_PORT}/__fixture/f07-info`);
-    if (chk.status === 200) isFixtureRunning = true;
+    if (chk.status === 200) {
+      isFixtureRunning = true;
+      fixtureInfo = await chk.json();
+    }
   } catch {}
 
+  let redisContainerId = null;
   let fixtureProc = null;
+
   if (!isFixtureRunning) {
+    if (fs.existsSync(runtimeFile)) {
+      try { fs.unlinkSync(runtimeFile); } catch {}
+    }
+
+    // Spin up disposable Redis container if Docker is available
+    const runId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+    const REDIS_PORT = '6389';
+    try {
+      const isDockerAvailable = await new Promise((res) => {
+        execSync('docker version', { stdio: 'ignore' });
+        res(true);
+      }).catch(() => false);
+
+      if (isDockerAvailable) {
+        console.log(`Starting disposable Redis container (totmart-f07-redis-${runId}) on port ${REDIS_PORT}...`);
+        const cid = execSync(
+          `docker run -d --name totmart-f07-redis-${runId} --label owner=totmart-f07-runner -p ${REDIS_PORT}:6379 redis:7.4-alpine`,
+          { stdio: ['ignore', 'pipe', 'pipe'] }
+        ).toString().trim();
+        if (cid) {
+          redisContainerId = cid;
+          console.log(`[Disposable Redis] Started container: ${redisContainerId.slice(0, 12)}`);
+        }
+      }
+    } catch (dErr) {
+      console.warn('[Warning] Could not start disposable Redis container:', dErr.message);
+    }
+
     console.log(`1. Starting F07 BE fixture server (--serve) on port ${FIXTURE_PORT}...`);
     fixtureProc = spawn('node', ['scripts/verify-f07-fixture.cjs', beRoot, '--serve'], {
       stdio: ['pipe', 'pipe', 'inherit'],
@@ -112,7 +118,7 @@ async function main() {
         ...process.env,
         FE_TEST_ORIGIN: FE_ORIGIN,
         FE_TEST_API_PORT: FIXTURE_PORT,
-        REDIS_URL: redisContainerId ? `redis://127.0.0.1:${REDIS_PORT}` : '',
+        REDIS_URL: redisContainerId ? `redis://127.0.0.1:${REDIS_PORT}` : (process.env.REDIS_URL || ''),
         NODE_ENV: 'test',
       },
     });
@@ -122,6 +128,14 @@ async function main() {
     fixtureProc.on('error', (err) => console.error(`[Fixture error]`, err));
   } else {
     console.log(`1. Reusing existing F07 BE fixture server on port ${FIXTURE_PORT}...`);
+    if (!fs.existsSync(runtimeFile) && fixtureInfo) {
+      const reconstructed = {
+        origin: `http://127.0.0.1:${FIXTURE_PORT}`,
+        ...fixtureInfo,
+      };
+      fs.writeFileSync(runtimeFile, JSON.stringify(reconstructed, null, 2));
+      console.log(`[Fixture Info] Reconstructed ${runtimeFile} from live endpoint.`);
+    }
   }
 
   let nextProc = null;
