@@ -71,6 +71,7 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
                 aria-label="Giảm số lượng hộp"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 disabled={quantity <= 1 || stock <= 0}
+                className="transition-colors motion-reduce:transition-none"
               >
                 <Minus size={18} />
               </button>
@@ -80,6 +81,7 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
                 aria-label="Tăng số lượng hộp"
                 onClick={() => setQuantity((q) => Math.min(Math.min(999, stock), q + 1))}
                 disabled={stock <= 0 || quantity >= Math.min(999, stock)}
+                className="transition-colors motion-reduce:transition-none"
               >
                 <Plus size={18} />
               </button>
@@ -106,7 +108,7 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
           )}
           <button
             type="button"
-            className="tm-button tm-button--primary w-full"
+            className="tm-button tm-button--primary w-full transition-colors motion-reduce:transition-none"
             disabled={!canBuy}
             onClick={handleAddToCart}
           >

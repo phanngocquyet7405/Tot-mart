@@ -310,11 +310,19 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
       onSuccess?.();
       onOpenChange(false);
     } catch (err) {
-      const msg =
+      const status = err?.response?.status;
+      const requestId = err?.response?.data?.requestId || err?.requestId || err?.response?.headers?.["x-request-id"];
+      let msg =
         err?.response?.data?.errors?.map((e) => e.message).join(" | ") ||
         err?.response?.data?.message ||
         err?.message ||
         "Đã có lỗi xảy ra";
+      if (status >= 500) {
+        msg = "Lỗi hệ thống. Vui lòng thử lại.";
+      }
+      if (requestId) {
+        msg = `${msg} (Request ID: ${requestId})`;
+      }
       toast.error(msg);
     } finally {
       setIsSaving(false);

@@ -93,9 +93,16 @@ export function useProductDetail(slug, initialProduct = null) {
       } catch (err) {
         if (!cancelled) {
           setProduct(null);
-          setError(err.response?.status === 404 ? null : "Không tải được thông tin sản phẩm. Hãy kiểm tra kết nối và thử lại.");
+          const status = err.response?.status;
+          const requestId = err.response?.data?.requestId || err.requestId || err.response?.headers?.['x-request-id'];
+          let errorMsg = null;
+          if (status !== 404) {
+            const safeBase = status >= 500 ? "Lỗi hệ thống. Vui lòng thử lại." : (err.response?.data?.message || "Không tải được thông tin sản phẩm. Hãy kiểm tra kết nối và thử lại.");
+            errorMsg = requestId ? `${safeBase} (Mã yêu cầu: ${requestId})` : safeBase;
+          }
+          setError(errorMsg);
           logger.error("Lỗi tải sản phẩm:", err);
-          toast.error("Có lỗi xảy ra khi tải sản phẩm");
+          toast.error(errorMsg || "Có lỗi xảy ra khi tải sản phẩm");
         }
       } finally {
         if (!cancelled) setLoading(false);

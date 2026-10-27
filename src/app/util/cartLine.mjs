@@ -8,7 +8,9 @@ export function giftOptions(value = {}) {
 function itemIdentity(item) {
   const type = item.itemType ?? item.type ?? (item.boxId ? 'box' : 'product');
   if (!['box', 'product'].includes(type)) throw new Error('Cart item type invalid');
-  const value = (type === 'box' ? item.boxId : item.productId) ?? item.id ?? item._id;
+  const rawProduct = (item.productId && typeof item.productId === 'object') ? item.productId._id : item.productId;
+  const productVal = (typeof rawProduct === 'string' && /^[a-f\d]{24}$/i.test(rawProduct)) ? rawProduct : (item._id ?? item.id ?? rawProduct);
+  const value = (type === 'box' ? item.boxId : productVal) ?? item.id ?? item._id;
   const id = typeof value === 'object' && value ? value._id : value;
   if (typeof id !== 'string' || !/^[a-f\d]{24}$/i.test(id)) throw new Error('Cart item ID invalid');
   return { type, id };

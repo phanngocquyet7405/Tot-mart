@@ -15,7 +15,7 @@ export function ProductGallery({ images = [], productName, selectedImage, onSele
     {gallery.length > 1 && <div className="tm-gallery__thumbnails" role="group" aria-label="Chọn ảnh sản phẩm">
       {gallery.map((image, index) => <button key={`${image.url}-${index}`} type="button"
         onClick={() => onSelectImage(image.url)} aria-label={`Xem ảnh ${index + 1} của ${productName || 'sản phẩm'}`}
-        aria-pressed={current === image.url} className="tm-gallery__thumbnail">
+        aria-pressed={current === image.url} className="tm-gallery__thumbnail transition-all motion-reduce:transition-none">
         <Image src={image.url} alt="" fill sizes="72px" className="object-contain p-1" />
       </button>)}
     </div>}
