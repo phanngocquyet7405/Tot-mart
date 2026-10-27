@@ -12,7 +12,7 @@ const { spawn, execSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const beRoot = process.env.TOTMART_BE_ROOT || (process.argv[2] && !process.argv[2].startsWith('-') ? process.argv[2] : 'C:/Users/84862/Desktop/totmart/be-pinned');
+const beRoot = path.resolve(process.env.TOTMART_BE_ROOT || (process.argv[2] && !process.argv[2].startsWith('-') ? process.argv[2] : 'C:/Users/84862/Desktop/totmart/be-pinned'));
 const FE_PORT = process.env.FE_PORT || '3217';
 const FE_ORIGIN = `http://127.0.0.1:${FE_PORT}`;
 const PERF_DIR = path.resolve('.cache/perf');
@@ -25,6 +25,9 @@ function killProcess(proc) {
     if (process.platform === 'win32') {
       execSync(`taskkill /pid ${proc.pid} /T /F`, { stdio: 'ignore' });
     } else {
+      try {
+        execSync(`pkill -P ${proc.pid} -9`, { stdio: 'ignore' });
+      } catch {}
       proc.kill('SIGKILL');
     }
   } catch {}

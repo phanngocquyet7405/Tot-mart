@@ -6,16 +6,19 @@ const http = require('node:http');
 const { createRequire } = require('node:module');
 const { randomUUID, randomBytes } = require('node:crypto');
 
-const root = process.env.TOTMART_BE_ROOT || process.argv[2] || 'C:/Users/84862/Desktop/totmart/be-pinned';
+const root = path.resolve(process.env.TOTMART_BE_ROOT || process.argv[2] || 'C:/Users/84862/Desktop/totmart/be-pinned');
 if (!root || !path.isAbsolute(root)) throw new Error('Supply absolute BE source path');
 const be = createRequire(path.join(root, 'package.json'));
+
+const externalMongoUri = process.env.TEST_MONGODB_URI || process.env.EXTERNAL_MONGODB_URI || (process.env.MONGODB_URI && !process.env.MONGODB_URI.includes('127.0.0.1:1/unused') ? process.env.MONGODB_URI : null);
+const externalRedisUrl = process.env.TEST_REDIS_URL || process.env.REDIS_URL || '';
 
 const SEPAY_KEY = 'local-fixture-sepay-key';
 Object.assign(process.env, {
   NODE_ENV: 'test',
-  MONGODB_URI: 'mongodb://127.0.0.1:1/unused',
-  REDIS_URL: '',
-  REDIS_NAMESPACE: 'totmart:f07:' + randomUUID(),
+  MONGODB_URI: externalMongoUri || 'mongodb://127.0.0.1:1/unused',
+  REDIS_URL: externalRedisUrl,
+  REDIS_NAMESPACE: process.env.REDIS_NAMESPACE || ('totmart:f07:' + randomUUID()),
   JWT_SECRET: randomBytes(32).toString('hex'),
   JWT_REFRESH_SECRET: randomBytes(32).toString('hex'),
   FRONTEND_URL: 'http://127.0.0.1:3217',
@@ -40,17 +43,26 @@ const fixture = be(path.join(root, 'tests/helpers/factories'));
 let simulate503 = false;
 
 async function main() {
-  const repl = await MongoMemoryReplSet.create({
-    binary: {
-      version: '7.0.14',
-      downloadDir: path.resolve('.cache/manager-backend-verification'),
-    },
-    replSet: { count: 1, storageEngine: 'wiredTiger' },
-  });
+  let repl = null;
+  let targetUri = externalMongoUri;
+
+  if (!targetUri) {
+    repl = await MongoMemoryReplSet.create({
+      binary: {
+        version: '7.0.14',
+        downloadDir: path.resolve('.cache/manager-backend-verification'),
+      },
+      replSet: { count: 1, storageEngine: 'wiredTiger' },
+    });
+    targetUri = repl.getUri('fe_f07_' + randomUUID().replaceAll('-', ''));
+    console.log('[F07 Fixture] Using in-memory MongoMemoryReplSet.');
+  } else {
+    console.log(`[F07 Fixture] Connecting to external MongoDB Replica Set: ${targetUri}`);
+  }
 
   let server;
   try {
-    await mongoose.connect(repl.getUri('fe_f07_' + randomUUID().replaceAll('-', '')));
+    await mongoose.connect(targetUri);
     await Promise.all(Object.values(mongoose.models).map((m) => m.init()));
 
     const User = be(path.join(root, 'src/models/User'));
@@ -460,7 +472,7 @@ async function main() {
     }
     if (server) await new Promise((r) => server.close(r));
     await mongoose.disconnect();
-    await repl.stop();
+    if (repl) await repl.stop();
   }
 }
 

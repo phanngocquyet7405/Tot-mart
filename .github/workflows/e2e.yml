@@ -9,14 +9,13 @@ on:
 
 # CI Status Note:
 # In accordance with Phase F07.0 / F07.2:
-# Remote execution on GitHub Actions is BLOCKED pending BE remote CI passing on commit e31517d8f2116f611a27dae96d9446ce8109bffc.
-# This workflow prepares the full pipeline specification. If BE credentials or infrastructure are missing,
-# the job will fail explicitly with diagnostic exit codes (never silently skip or label E2E as passed).
+# Remote execution on GitHub Actions verifies the full regression suite on clean Ubuntu 24.04.
+# If BE credentials or infrastructure are missing, the job fails explicitly with diagnostic exit codes.
 
 jobs:
   e2e-smoke:
     name: Playwright E2E & Smoke Verification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     services:
@@ -26,16 +25,6 @@ jobs:
           - 6379:6379
         options: >-
           --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      mongodb:
-        image: mongo:7.0
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -50,7 +39,7 @@ jobs:
           repository: phanngocquyet7405/TotMartAPI
           ref: e31517d8f2116f611a27dae96d9446ce8109bffc
           path: be-repo
-          token: ${{ secrets.BE_REPO_ACCESS_TOKEN || github.token }}
+          token: ${{ secrets.BE_REPO_ACCESS_TOKEN || secrets.BE_REPO_TOKEN || github.token }}
         continue-on-error: true
 
       - name: 3. Verify BE Integrity & Fail Explicitly on Missing Infrastructure
@@ -77,13 +66,57 @@ jobs:
           node-version: 24
           cache: npm
 
-      - name: 5. Initialize MongoDB Replica Set
+      - name: 5. Start MongoDB Replica Set Container
         run: |
-          echo "Initializing MongoDB rs0 replica set for transaction support..."
-          MONGO_CID=$(docker ps -q --filter ancestor=mongo:7.0)
-          docker exec "$MONGO_CID" mongosh --eval 'rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "127.0.0.1:27017" }] })'
-          sleep 3
-          docker exec "$MONGO_CID" mongosh --eval 'rs.status().ok'
+          echo "Starting MongoDB 7 container with replica set rs0..."
+          MONGO_CONTAINER="totmart-e2e-mongo-${{ github.run_id }}-${{ github.run_attempt }}"
+          echo "MONGO_CONTAINER=$MONGO_CONTAINER" >> "$GITHUB_ENV"
+          docker run -d \
+            --name "$MONGO_CONTAINER" \
+            --label "owner=totmart-e2e-runner" \
+            --label "run_id=${{ github.run_id }}" \
+            -p 127.0.0.1:27017:27017 \
+            mongo:7 \
+            --replSet rs0 \
+            --bind_ip_all
+
+          echo "Waiting for MongoDB to accept connections (up to 60s)..."
+          READY=0
+          for i in $(seq 1 60); do
+            if docker exec "$MONGO_CONTAINER" mongosh --quiet --eval 'db.adminCommand({ping: 1}).ok' 2>/dev/null | grep -q '1'; then
+              echo "MongoDB is accepting connections (attempt $i)."
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$READY" -ne 1 ]; then
+            echo "::error::MongoDB failed to start within 60s!"
+            docker logs "$MONGO_CONTAINER"
+            exit 1
+          fi
+
+          echo "Initiating replica set rs0..."
+          INIT_OUTPUT=$(docker exec "$MONGO_CONTAINER" mongosh --quiet --eval "rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: '127.0.0.1:27017' }] })" 2>&1)
+          echo "rs.initiate result: $INIT_OUTPUT"
+
+          echo "Waiting for replica set PRIMARY state (up to 60s)..."
+          IS_PRIMARY=0
+          for i in $(seq 1 60); do
+            STATE=$(docker exec "$MONGO_CONTAINER" mongosh --quiet --eval "rs.status().members && rs.status().members[0] ? rs.status().members[0].stateStr : 'NOT_READY'" 2>/dev/null | tr -d '\r' | tail -n 1)
+            if [ "$STATE" = "PRIMARY" ]; then
+              echo "MongoDB replica set rs0 is in PRIMARY state (attempt $i)."
+              IS_PRIMARY=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$IS_PRIMARY" -ne 1 ]; then
+            echo "::error::MongoDB replica set failed to reach PRIMARY state within 60s! Last state: $STATE"
+            docker logs "$MONGO_CONTAINER"
+            exit 1
+          fi
+          echo "MongoDB replica set rs0 is fully initialized and operational."
 
       - name: 6. Install FE & BE Dependencies
         run: |
@@ -99,9 +132,11 @@ jobs:
         env:
           TOTMART_BE_ROOT: "${{ github.workspace }}/be-repo"
           FE_TEST_API_PORT: "3102"
+          MONGODB_URI: "mongodb://127.0.0.1:27017/totmart_f07?replicaSet=rs0&directConnection=true"
+          REDIS_URL: "redis://127.0.0.1:6379"
         run: |
           echo "Starting BE fixture server in background on port 3102..."
-          node scripts/verify-f07-fixture.cjs be-repo --serve &
+          node scripts/verify-f07-fixture.cjs --serve &
           for i in $(seq 1 30); do
             if curl -s http://127.0.0.1:3102/__fixture/f07-info > /dev/null; then
               echo "BE fixture is healthy and ready on port 3102 (attempt $i)."
@@ -123,26 +158,47 @@ jobs:
           TOTMART_BE_ROOT: "${{ github.workspace }}/be-repo"
           FE_TEST_API_PORT: "3102"
           FE_PORT: "3217"
+          MONGODB_URI: "mongodb://127.0.0.1:27017/totmart_f07?replicaSet=rs0&directConnection=true"
+          REDIS_URL: "redis://127.0.0.1:6379"
         run: |
           npm run test:smoke
 
       - name: 11. Execute Performance Profiling
         env:
           CI: "true"
+          TOTMART_BE_ROOT: "${{ github.workspace }}/be-repo"
           FE_TEST_API_PORT: "3102"
           FE_PORT: "3217"
+          MONGODB_URI: "mongodb://127.0.0.1:27017/totmart_f07?replicaSet=rs0&directConnection=true"
+          REDIS_URL: "redis://127.0.0.1:6379"
         run: |
           npm run test:perf
 
-      - name: 12. Upload Test Artifacts (Traces, Screenshots, Reports)
+      - name: Collect Diagnostics & Container Logs
+        if: always()
+        run: |
+          mkdir -p .cache/logs
+          if [ -n "$MONGO_CONTAINER" ]; then
+            echo "Dumping MongoDB logs to .cache/logs/mongo.log..."
+            docker logs "$MONGO_CONTAINER" > .cache/logs/mongo.log 2>&1 || true
+          fi
+          echo "Dumping Redis service container logs to .cache/logs/redis.log..."
+          REDIS_CID=$(docker ps -a -q --filter ancestor=redis:7-alpine | head -n 1)
+          if [ -n "$REDIS_CID" ]; then
+            docker logs "$REDIS_CID" > .cache/logs/redis.log 2>&1 || true
+          fi
+
+      - name: 12. Upload Test Artifacts (Traces, Screenshots, Reports, Logs)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: f07-e2e-artifacts
+          if-no-files-found: warn
           path: |
             .cache/traces/
             .cache/videos/
             .cache/perf/
+            .cache/logs/
             .cache/playwright-results.json
             .cache/f07-smoke-results.json
           retention-days: 14
