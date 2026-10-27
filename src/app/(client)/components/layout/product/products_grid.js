@@ -1,7 +1,7 @@
 "use client";
 import logger from "@/app/util/Logger";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { ProductCard } from "./product_card";
 import {
@@ -10,22 +10,57 @@ import {
 import { useAddToCart } from "@/app/hook/useAddToCart";
 import { useWishlist } from "@/app/context/WishlistContext";
 
-export default function ProductsGrid({ categoryId, brandSlug, searchQuery = "" }) {
+export default function ProductsGrid({
+  categoryId,
+  brandSlug,
+  searchQuery = "",
+  initialProducts = null,
+  initialPagination = null,
+  initialPage = 1,
+  initialSort = "newest",
+  initialError = null,
+}) {
   const { addToCart } = useAddToCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [sortBy, setSortBy] = useState("newest");
+  const [products, setProducts] = useState(initialProducts || []);
+  const [loading, setLoading] = useState(!initialProducts && !initialError);
+  const [error, setError] = useState(initialError);
+  const [reloadToken, setReloadToken] = useState(0);
+  const [sortBy, setSortBy] = useState(initialSort || "newest");
   const [viewMode, setViewMode] = useState("grid");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(initialPage || 1);
   const pageSize = 12;
 
-  const [pagination, setPagination] = useState({ total: 0, totalPages: 0 });
+  const [pagination, setPagination] = useState(
+    initialPagination || {
+      total: initialProducts?.length || 0,
+      totalPages: Math.ceil((initialProducts?.length || 0) / pageSize) || 1,
+    }
+  );
   const totalPages = pagination.totalPages;
   const visibleProducts = products;
+  const isInitialMount = useRef(Boolean(initialProducts));
 
   useEffect(() => {
+    if (initialProducts) {
+      setProducts(initialProducts);
+      setLoading(false);
+    }
+    if (initialPagination) {
+      setPagination(initialPagination);
+    }
+    if (initialPage) {
+      setCurrentPage(initialPage);
+    }
+    if (initialError !== undefined) {
+      setError(initialError);
+    }
+  }, [initialProducts, initialPagination, initialPage, initialError]);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      return;
+    }
     setCurrentPage(1);
   }, [categoryId, brandSlug, searchQuery, sortBy]);
 
@@ -34,35 +69,75 @@ export default function ProductsGrid({ categoryId, brandSlug, searchQuery = "" }
   }, [currentPage, totalPages]);
 
   useEffect(() => {
+    if (isInitialMount.current && reloadToken === 0 && !initialError) {
+      isInitialMount.current = false;
+      return;
+    }
+
     let active = true;
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError(null);
-        const res = await getAllProductsApi({ page: currentPage, limit: pageSize, keyword: searchQuery.trim() || undefined, category: categoryId || undefined, brandSlug: brandSlug || undefined, sort: sortBy === 'price-asc' ? 'price_asc' : sortBy === 'price-desc' ? 'price_desc' : undefined });
+        const res = await getAllProductsApi({
+          page: currentPage,
+          limit: pageSize,
+          keyword: searchQuery.trim() || undefined,
+          category: categoryId || undefined,
+          brandSlug: brandSlug || undefined,
+          sort: sortBy === "price-asc" ? "price_asc" : sortBy === "price-desc" ? "price_desc" : undefined,
+        });
         if (!active) return;
-        setProducts(res.data || []); setPagination(res.pagination);
+        setProducts(res.data || []);
+        setPagination(res.pagination || { total: res.data?.length || 0, totalPages: 1 });
       } catch (err) {
         if (!active) return;
         logger.error("Error fetching products:", err);
-        setError("Could not load products.");
+        const status = err?.response?.status;
+        const requestId = err?.response?.data?.requestId || err?.requestId || err?.response?.headers?.["x-request-id"];
+        const safeMessage = status >= 500 ? "Lỗi hệ thống. Vui lòng thử lại." : (err?.response?.data?.message || "Không thể tải danh sách sản phẩm.");
+        setError({ message: safeMessage, requestId });
       } finally {
         if (active) setLoading(false);
       }
     };
     fetchProducts();
-    return () => { active = false; };
-  }, [categoryId, brandSlug, searchQuery, sortBy, currentPage]);
+    return () => {
+      active = false;
+    };
+  }, [categoryId, brandSlug, searchQuery, sortBy, currentPage, reloadToken, initialError]);
 
   if (loading)
     return (
-      <div className="py-20 text-center text-gray-500 italic">
-        Loading products...
+      <div className="py-12" role="status" aria-label="Đang tải danh sách sản phẩm">
+        <span className="sr-only">Đang tải danh sách sản phẩm...</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="animate-pulse motion-reduce:animate-none bg-gray-100 rounded-lg aspect-square border border-gray-200"
+            />
+          ))}
+        </div>
       </div>
     );
   if (error)
     return (
-      <div className="py-20 text-center text-red-500 font-medium">{error}</div>
+      <div role="alert" className="py-20 text-center space-y-4">
+        <p className="text-red-600 font-semibold text-base">{error.message}</p>
+        {error.requestId && (
+          <p className="text-xs text-gray-500 font-mono">Mã yêu cầu (Request ID): {error.requestId}</p>
+        )}
+        <div>
+          <button
+            type="button"
+            onClick={() => setReloadToken((n) => n + 1)}
+            className="px-4 py-2 bg-green-700 text-white text-sm font-semibold rounded-md hover:bg-green-800 transition-colors"
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
     );
 
   return (
@@ -175,7 +250,7 @@ export default function ProductsGrid({ categoryId, brandSlug, searchQuery = "" }
           ))
         ) : (
           <div className="col-span-full text-center py-20 bg-gray-50 rounded-lg border border-dashed border-gray-300 text-gray-500">
-            No products available in this category.
+            Không tìm thấy sản phẩm phù hợp.
           </div>
         )}
       </div>
@@ -186,7 +261,10 @@ export default function ProductsGrid({ categoryId, brandSlug, searchQuery = "" }
           <button
             type="button"
             disabled={currentPage === 1}
-            onClick={() => setCurrentPage((page) => page - 1)}
+            onClick={() => {
+              isInitialMount.current = false;
+              setCurrentPage((page) => page - 1);
+            }}
             className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
             aria-label="Previous page"
           >
@@ -197,7 +275,10 @@ export default function ProductsGrid({ categoryId, brandSlug, searchQuery = "" }
               key={page}
               type="button"
               aria-current={page === currentPage ? "page" : undefined}
-              onClick={() => setCurrentPage(page)}
+              onClick={() => {
+                isInitialMount.current = false;
+                setCurrentPage(page);
+              }}
               className={`min-w-10 px-3 py-2 rounded-md ${page === currentPage ? "bg-green-700 text-white" : "border border-gray-300 text-gray-700 hover:bg-gray-50"}`}
             >
               {page}
@@ -206,7 +287,10 @@ export default function ProductsGrid({ categoryId, brandSlug, searchQuery = "" }
           <button
             type="button"
             disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((page) => page + 1)}
+            onClick={() => {
+              isInitialMount.current = false;
+              setCurrentPage((page) => page + 1);
+            }}
             className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
             aria-label="Next page"
           >

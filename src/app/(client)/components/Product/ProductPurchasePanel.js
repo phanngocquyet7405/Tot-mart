@@ -1,6 +1,6 @@
 "use client";
 import { Minus, Plus, ShoppingCart, Heart, Share2, Truck, Loader2 } from "lucide-react";
-export function ProductPurchasePanel({ product, finalPrice, quantity, onIncrease, onDecrease, isAddingToCart, onAddToCart,
+export function ProductPurchasePanel({ product, finalPrice, quantity, onIncrease, onDecrease, isAddingToCart, onAddToCart, isReady = true,
   isBuyingNow, onBuyNow, isWishlisted, onWishlist, onShare, fmtPrice }) {
   const discount = product.salePercent || 0;
   const stock = product.stock ?? 0;
@@ -19,16 +19,16 @@ export function ProductPurchasePanel({ product, finalPrice, quantity, onIncrease
     <p className={stock > 0 ? 'text-sm font-semibold text-green-800' : 'text-sm font-semibold text-red-700'}>{stock > 0 ? `Còn ${stock} sản phẩm` : 'Tạm hết hàng'}</p>
     <div className="tm-quantity-row"><span id="product-quantity-label" className="font-medium">Số lượng</span>
       <div className="tm-quantity" role="group" aria-labelledby="product-quantity-label">
-        <button type="button" aria-label="Giảm số lượng" disabled={quantity <= 1 || busy || stock <= 0} onClick={onDecrease}><Minus size={18} /></button>
+        <button type="button" aria-label="Giảm số lượng" disabled={quantity <= 1 || busy || stock <= 0 || !isReady} onClick={onDecrease}><Minus size={18} /></button>
         <output aria-live="polite" aria-atomic="true">{quantity}</output>
-        <button type="button" aria-label="Tăng số lượng" disabled={stock <= 0 || quantity >= stock || busy} onClick={onIncrease}><Plus size={18} /></button>
+        <button type="button" aria-label="Tăng số lượng" disabled={stock <= 0 || quantity >= stock || busy || !isReady} onClick={onIncrease}><Plus size={18} /></button>
       </div>
     </div>
     <div className="space-y-3" aria-busy={Boolean(busy)}>
-      <button type="button" className="tm-button tm-button--primary w-full" disabled={busy || stock <= 0 || !hasPrice} onClick={onAddToCart}>
+      <button type="button" className="tm-button tm-button--primary w-full" disabled={busy || stock <= 0 || !hasPrice || !isReady} onClick={onAddToCart}>
         {isAddingToCart ? <Loader2 size={19} className="animate-spin" /> : <ShoppingCart size={19} />}{isAddingToCart ? 'Đang thêm…' : stock <= 0 ? 'Tạm hết hàng' : 'Thêm vào giỏ hàng'}
       </button>
-      <button type="button" className="tm-button tm-button--outline w-full" disabled={busy || stock <= 0 || !hasPrice} onClick={onBuyNow}>{isBuyingNow ? 'Đang chuyển đến thanh toán…' : 'Mua ngay'}</button>
+      <button type="button" className="tm-button tm-button--outline w-full" disabled={busy || stock <= 0 || !hasPrice || !isReady} onClick={onBuyNow}>{isBuyingNow ? 'Đang chuyển đến thanh toán…' : 'Mua ngay'}</button>
       <p className="text-sm text-stone-600">Mua ngay sẽ thanh toán cùng các sản phẩm đang có trong giỏ.</p>
     </div>
     <div className="flex flex-wrap gap-3">

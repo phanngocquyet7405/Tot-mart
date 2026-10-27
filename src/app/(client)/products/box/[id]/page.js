@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import NavMenu from "@/app/(client)/components/ui/nav_menu";
@@ -11,19 +11,23 @@ import BoxDetailInteractive from "./BoxDetailInteractive";
 
 export const revalidate = 60;
 
-export async function generateMetadata({ params: paramsPromise }) {
+export async function generateMetadata({ params: paramsPromise, searchParams: searchParamsPromise }) {
   const params = await paramsPromise;
+  const searchParams = searchParamsPromise ? await searchParamsPromise : {};
   const id = params?.id || "";
   const detail = await getServerBoxDetail(id);
 
   if (!detail || !detail.box) {
-    return {
-      title: "Không tìm thấy hộp sản phẩm | TotMart",
-      description: "Hộp sản phẩm không tồn tại hoặc đã ngừng kinh doanh trên TotMart.",
-    };
+    notFound();
   }
 
   const { box } = detail;
+  const canonicalId = String(box._id);
+  if (id !== canonicalId) {
+    const qs = new URLSearchParams(searchParams).toString();
+    permanentRedirect(`/products/box/${canonicalId}${qs ? `?${qs}` : ""}`);
+  }
+
   const siteUrl = getPublicSiteUrl();
   const canonicalUrl = `${siteUrl}/products/box/${box._id}`;
   const title = `${box.name} | TotMart`;
@@ -49,8 +53,9 @@ export async function generateMetadata({ params: paramsPromise }) {
   };
 }
 
-export default async function BoxDetailPage({ params: paramsPromise }) {
+export default async function BoxDetailPage({ params: paramsPromise, searchParams: searchParamsPromise }) {
   const params = await paramsPromise;
+  const searchParams = searchParamsPromise ? await searchParamsPromise : {};
   const id = params?.id || "";
   const detail = await getServerBoxDetail(id);
 
@@ -59,6 +64,11 @@ export default async function BoxDetailPage({ params: paramsPromise }) {
   }
 
   const { box, boxProducts } = detail;
+  const canonicalId = String(box._id);
+  if (id !== canonicalId) {
+    const qs = new URLSearchParams(searchParams).toString();
+    permanentRedirect(`/products/box/${canonicalId}${qs ? `?${qs}` : ""}`);
+  }
   const siteUrl = getPublicSiteUrl();
   const canonicalUrl = `${siteUrl}/products/box/${box._id}`;
   const salePrice = boxSalePrice(box);

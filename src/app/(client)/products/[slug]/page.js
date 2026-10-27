@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
@@ -16,20 +16,24 @@ import ProductDetailInteractive from "./ProductDetailInteractive";
 
 export const revalidate = 60;
 
-export async function generateMetadata({ params: paramsPromise }) {
+export async function generateMetadata({ params: paramsPromise, searchParams: searchParamsPromise }) {
   const params = await paramsPromise;
+  const searchParams = searchParamsPromise ? await searchParamsPromise : {};
   const slug = params?.slug || "";
   const product = await getServerProductDetail(slug);
 
   if (!product) {
-    return {
-      title: "Không tìm thấy sản phẩm | TotMart",
-      description: "Sản phẩm không tồn tại hoặc đã ngừng kinh doanh trên TotMart.",
-    };
+    notFound();
+  }
+
+  const canonicalSlug = `${product.slug || "san-pham"}-${product._id}`;
+  if (slug !== canonicalSlug) {
+    const qs = new URLSearchParams(searchParams).toString();
+    permanentRedirect(`/products/${canonicalSlug}${qs ? `?${qs}` : ""}`);
   }
 
   const siteUrl = getPublicSiteUrl();
-  const canonicalUrl = `${siteUrl}/products/${product.slug || "san-pham"}-${product._id}`;
+  const canonicalUrl = `${siteUrl}/products/${canonicalSlug}`;
   const title = `${product.name} | TotMart`;
   const description = (product.descriptions || product.name || "").slice(0, 160);
   const images = (product.images || [])
@@ -53,8 +57,9 @@ export async function generateMetadata({ params: paramsPromise }) {
   };
 }
 
-export default async function ProductDetailPage({ params: paramsPromise }) {
+export default async function ProductDetailPage({ params: paramsPromise, searchParams: searchParamsPromise }) {
   const params = await paramsPromise;
+  const searchParams = searchParamsPromise ? await searchParamsPromise : {};
   const slug = params?.slug || "";
   const product = await getServerProductDetail(slug);
 
@@ -62,8 +67,14 @@ export default async function ProductDetailPage({ params: paramsPromise }) {
     notFound();
   }
 
+  const canonicalSlug = `${product.slug || "san-pham"}-${product._id}`;
+  if (slug !== canonicalSlug) {
+    const qs = new URLSearchParams(searchParams).toString();
+    permanentRedirect(`/products/${canonicalSlug}${qs ? `?${qs}` : ""}`);
+  }
+
   const siteUrl = getPublicSiteUrl();
-  const canonicalUrl = `${siteUrl}/products/${product.slug || "san-pham"}-${product._id}`;
+  const canonicalUrl = `${siteUrl}/products/${canonicalSlug}`;
   const salePercent = product.salePercent || 0;
   const finalPrice =
     salePercent > 0

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import CategoryDetailClient from "./CategoryDetailClient";
 import {
   getServerCategoryDetail,
@@ -7,21 +7,25 @@ import {
 
 export const revalidate = 60;
 
-export async function generateMetadata({ params: paramsPromise }) {
+export async function generateMetadata({ params: paramsPromise, searchParams: searchParamsPromise }) {
   const params = await paramsPromise;
+  const searchParams = searchParamsPromise ? await searchParamsPromise : {};
   const id = params?.id || "";
   const detail = await getServerCategoryDetail(id);
 
   if (!detail || !detail.category) {
-    return {
-      title: "Không tìm thấy danh mục | TotMart",
-      description: "Danh mục sản phẩm không tồn tại hoặc đã ngừng hoạt động.",
-    };
+    notFound();
   }
 
   const { category } = detail;
+  const canonicalId = category.slug || String(category._id);
+  if (id !== canonicalId) {
+    const qs = new URLSearchParams(searchParams).toString();
+    permanentRedirect(`/categories/${canonicalId}${qs ? `?${qs}` : ""}`);
+  }
+
   const siteUrl = getPublicSiteUrl();
-  const canonicalUrl = `${siteUrl}/categories/${category.slug || category._id}`;
+  const canonicalUrl = `${siteUrl}/categories/${canonicalId}`;
   const title = `${category.name} | Danh mục TotMart`;
   const description =
     category.description ||
@@ -44,8 +48,9 @@ export async function generateMetadata({ params: paramsPromise }) {
   };
 }
 
-export default async function Page({ params: paramsPromise }) {
+export default async function Page({ params: paramsPromise, searchParams: searchParamsPromise }) {
   const params = await paramsPromise;
+  const searchParams = searchParamsPromise ? await searchParamsPromise : {};
   const id = params?.id || "";
   const detail = await getServerCategoryDetail(id);
 
@@ -54,6 +59,11 @@ export default async function Page({ params: paramsPromise }) {
   }
 
   const { category } = detail;
+  const canonicalId = category.slug || String(category._id);
+  if (id !== canonicalId) {
+    const qs = new URLSearchParams(searchParams).toString();
+    permanentRedirect(`/categories/${canonicalId}${qs ? `?${qs}` : ""}`);
+  }
 
   return (
     <>

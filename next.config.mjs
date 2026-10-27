@@ -88,11 +88,89 @@ export default withNextIntl({
       });
     }
 
+    const publicCatalogRoutes = [
+      "/",
+      "/homepage",
+      "/products",
+      "/products/:path*",
+      "/brands",
+      "/brands/:path*",
+      "/categories",
+      "/categories/:path*",
+      "/box",
+      "/box/:path*",
+    ];
+
+    const privateRoutes = [
+      "/checkout",
+      "/checkout/:path*",
+      "/cart",
+      "/cart/:path*",
+      "/profile",
+      "/profile/:path*",
+    ];
+
+    const sessionCookieMissing = [
+      { type: "cookie", key: "token" },
+      { type: "cookie", key: "refreshToken" },
+    ];
+
     return [
       {
         source: "/:path*",
         headers: commonHeaders,
       },
+      ...publicCatalogRoutes.map((source) => ({
+        source,
+        missing: sessionCookieMissing,
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=60, stale-while-revalidate=300",
+          },
+          {
+            key: "Vary",
+            value: "Accept-Encoding, Cookie",
+          },
+        ],
+      })),
+      ...publicCatalogRoutes.map((source) => ({
+        source,
+        has: [{ type: "cookie", key: "token" }],
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, max-age=0, must-revalidate",
+          },
+          {
+            key: "Vary",
+            value: "Accept-Encoding, Cookie",
+          },
+        ],
+      })),
+      ...publicCatalogRoutes.map((source) => ({
+        source,
+        has: [{ type: "cookie", key: "refreshToken" }],
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, max-age=0, must-revalidate",
+          },
+          {
+            key: "Vary",
+            value: "Accept-Encoding, Cookie",
+          },
+        ],
+      })),
+      ...privateRoutes.map((source) => ({
+        source,
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, max-age=0, must-revalidate",
+          },
+        ],
+      })),
     ];
   },
 });

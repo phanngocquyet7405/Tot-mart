@@ -1,5 +1,6 @@
 "use client";
 
+import { useCart } from "@/app/context/CartContext";
 import { useProductDetail } from "@/app/hook/useProductDetail";
 import { ProductGallery } from "../../components/Product/ProductGallery";
 import { ProductPurchasePanel } from "../../components/Product/ProductPurchasePanel";
@@ -9,6 +10,7 @@ import { ProductLoadingState } from "../../components/Product/ProductLoadingStat
 import { ProductNotFoundState } from "../../components/Product/ProductNotFoundState";
 
 export default function ProductDetailInteractive({ initialProduct, slug }) {
+  const { isMounted: isCartMounted } = useCart();
   const {
     product,
     loading,
@@ -59,12 +61,13 @@ export default function ProductDetailInteractive({ initialProduct, slug }) {
           onAddToCart={handleAddToCart}
           onBuyNow={handleBuyNow}
           onShare={handleShare}
-          onToggleWishlist={handleWishlist}
+          onWishlist={handleWishlist}
           isWishlisted={isWishlisted}
           isAddingToCart={isAddingToCart}
           isBuyingNow={isBuyingNow}
           finalPrice={finalPrice}
           fmtPrice={fmtPrice}
+          isReady={Boolean(isCartMounted)}
         />
       </div>
 

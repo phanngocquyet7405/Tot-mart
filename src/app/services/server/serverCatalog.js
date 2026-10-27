@@ -82,7 +82,7 @@ export async function fetchServerJson(endpointPath, options = {}) {
           ...(options.headers || {}),
         },
         signal: controller.signal,
-        next: options.next,
+        next: options.next || (isGet && !options.cache ? { revalidate: 60 } : undefined),
         cache: options.cache,
       });
 
@@ -100,7 +100,8 @@ export async function fetchServerJson(endpointPath, options = {}) {
           errJson?.message || `Server request failed with status ${res.status}`,
         );
         error.status = res.status;
-        error.requestId = errJson?.requestId;
+        error.requestId =
+          errJson?.requestId || res.headers?.get?.("x-request-id") || undefined;
 
         // User policy: KHÔNG retry 4xx; ném lỗi ngay
         if (res.status >= 400 && res.status < 500) {
@@ -177,6 +178,71 @@ export async function fetchPaginatedServer(endpointPath, queryParams = {}) {
   return items;
 }
 
+export async function getServerProductsCatalog({
+  page = 1,
+  limit = 12,
+  keyword,
+  category,
+  brandSlug,
+  sort,
+} = {}) {
+  const safePage = Math.max(1, parseInt(page, 10) || 1);
+  const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 12));
+  const query = new URLSearchParams({
+    page: String(safePage),
+    limit: String(safeLimit),
+  });
+
+  if (keyword && String(keyword).trim()) {
+    query.set("keyword", String(keyword).trim());
+  }
+  if (category && String(category).trim()) {
+    query.set("category", String(category).trim());
+  }
+  if (brandSlug && String(brandSlug).trim()) {
+    query.set("brandSlug", String(brandSlug).trim());
+  }
+  if (sort) {
+    const s = String(sort).trim();
+    if (s === "price-asc") query.set("sort", "price_asc");
+    else if (s === "price-desc") query.set("sort", "price_desc");
+    else if (s) query.set("sort", s);
+  }
+
+  try {
+    const res = await fetchServerJson(`/products/get-all-products?${query.toString()}`, {
+      cache: "no-store",
+    });
+    if (!res.ok || !res.data) {
+      return {
+        products: [],
+        pagination: { total: 0, totalPages: 1, page: safePage, limit: safeLimit },
+      };
+    }
+    const rawList = Array.isArray(res.data) ? res.data : [];
+    const products = rawList.filter((p) => p && p.isActive !== false && !p.archivedAt);
+    const pagination = res.pagination || {
+      total: products.length,
+      totalPages: Math.max(1, Math.ceil(products.length / safeLimit)),
+      page: safePage,
+      limit: safeLimit,
+    };
+    return { products, pagination };
+  } catch (err) {
+    const status = err?.status;
+    const requestId = err?.requestId;
+    const safeMessage =
+      status >= 500
+        ? "Lỗi hệ thống. Vui lòng thử lại."
+        : err?.message || "Không thể tải danh sách sản phẩm.";
+    return {
+      products: [],
+      pagination: { total: 0, totalPages: 1, page: safePage, limit: safeLimit },
+      error: { message: safeMessage, requestId, status },
+    };
+  }
+}
+
 export async function getServerProducts() {
   const items = await fetchPaginatedServer("/products/get-all-products");
   return items.filter((p) => p && p.isActive !== false && !p.archivedAt);
@@ -215,7 +281,7 @@ export async function getServerBoxDetail(id) {
   if (!id) return null;
   try {
     const [detailRes, contentsRes] = await Promise.allSettled([
-      fetchServerJson(`/boxes/get-box-by-id/${id}`),
+      fetchServerJson(`/boxes/public/${id}`).then((r) => (r.ok ? r : fetchServerJson(`/boxes/get-box-by-id/${id}`))),
       fetchServerJson(`/boxes/get-products-in-box/${id}`),
     ]);
     const box = detailRes.status === "fulfilled" && detailRes.value.ok ? detailRes.value.data : null;

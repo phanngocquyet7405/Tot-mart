@@ -10,6 +10,7 @@ const babel = require('next/dist/compiled/babel/core');
 
 const root = path.resolve(__dirname, '../src');
 const modules = new Map();
+let activeRouter = { push() {}, replace() {} };
 
 function load(filename) {
   const resolved = ['', '.js', '.jsx', '.mjs'].map(ext => filename + ext).find(file => fs.existsSync(file));
@@ -48,8 +49,22 @@ function load(filename) {
           err.digest = 'NEXT_NOT_FOUND';
           throw err;
         },
+        redirect(url) {
+          const err = new Error(`NEXT_REDIRECT: ${url}`);
+          err.digest = `NEXT_REDIRECT;replace;${url};307;;`;
+          err.url = url;
+          err.statusCode = 307;
+          throw err;
+        },
+        permanentRedirect(url) {
+          const err = new Error(`NEXT_REDIRECT: ${url}`);
+          err.digest = `NEXT_REDIRECT;replace;${url};308;;`;
+          err.url = url;
+          err.statusCode = 308;
+          throw err;
+        },
         useParams: () => ({ id: 'cat-1', slug: 'brand-1' }),
-        useRouter: () => ({ push() {}, replace() {} }),
+        useRouter: () => activeRouter,
         usePathname: () => '/products',
         useSearchParams: () => new URLSearchParams(),
       };
@@ -74,6 +89,7 @@ function load(filename) {
 const ServerCatalog = load(path.join(root, 'app/services/server/serverCatalog.js'));
 const SitemapModule = load(path.join(root, 'app/sitemap.js'));
 const ProductPageModule = load(path.join(root, 'app/(client)/products/[slug]/page.js'));
+const ProductsCatalogPageModule = load(path.join(root, 'app/(client)/products/page.js'));
 const BoxPageModule = load(path.join(root, 'app/(client)/products/box/[id]/page.js'));
 const CategoryPageModule = load(path.join(root, 'app/(client)/categories/[id]/page.js'));
 const BrandPageModule = load(path.join(root, 'app/(client)/brands/[slug]/page.js'));
@@ -672,3 +688,392 @@ test('ServerCatalog: fetchServerJson retry policy enforces GET-only, 5xx/timeout
   );
   assert.equal(networkAttempts, 3, 'Network error must retry exactly 2 times (3 total attempts)');
 });
+
+test('F03b: /products Server Component renders product names and prices in HTML without JS', async () => {
+  const originalFetch = global.fetch;
+  try {
+    global.fetch = async (url) => {
+      const u = String(url);
+      if (u.includes('/products/get-all-products')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            success: true,
+            data: [
+              {
+                _id: 'p_catalog_1',
+                name: 'Hạt Sen Sấy Giòn F03b',
+                slug: 'hat-sen-say-gion-f03b',
+                price: 95000,
+                salePercent: 0,
+                stock: 10,
+                images: [{ url: '/assets/lotus.jpg' }],
+                brand: { name: 'Đồng Tháp Organic' },
+              },
+              {
+                _id: 'p_catalog_2',
+                name: 'Trà Cổ Thụ Tà Xùa',
+                slug: 'tra-co-thu-ta-xua',
+                price: 180000,
+                salePercent: 10,
+                stock: 15,
+                images: [{ url: '/assets/tea.jpg' }],
+                brand: { name: 'Tây Bắc Tea' },
+              },
+            ],
+            pagination: { page: 1, limit: 12, total: 26, totalPages: 3 },
+          }),
+        };
+      }
+      return { ok: true, status: 200, json: async () => ({ success: true, data: [] }) };
+    };
+
+    const ProductsPage = ProductsCatalogPageModule.default;
+    const jsx = await ProductsPage({ searchParams: Promise.resolve({ page: '1' }) });
+    const html = ReactDOMServer.renderToString(wrapWithProviders(jsx));
+
+    // Verify product name and price rendered directly into server HTML
+    assert.match(html, /Hạt Sen Sấy Giòn F03b/);
+    assert.match(html, /95\.000/);
+    assert.match(html, /Trà Cổ Thụ Tà Xùa/);
+    assert.match(html, /162\.000/); // 180000 * 0.9 = 162000
+    // Verify semantic product card contains links directly in server HTML
+    assert.match(html, /href="\/products\/hat-sen-say-gion-f03b-p_catalog_1"/);
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test('F03b: /products generateMetadata produces canonical URL and title with pagination', async () => {
+  // Page 1: default canonical without ?page=1
+  const meta1 = await ProductsCatalogPageModule.generateMetadata({
+    searchParams: Promise.resolve({ page: '1' }),
+  });
+  assert.equal(meta1.title, 'Sản phẩm hữu cơ chọn lọc | TotMart');
+  assert.equal(meta1.alternates.canonical, 'https://totmart.vn/products');
+
+  // Page 2: canonical with ?page=2
+  const meta2 = await ProductsCatalogPageModule.generateMetadata({
+    searchParams: Promise.resolve({ page: '2' }),
+  });
+  assert.equal(meta2.title, 'Sản phẩm hữu cơ - Trang 2 | TotMart');
+  assert.equal(meta2.alternates.canonical, 'https://totmart.vn/products?page=2');
+
+  // Page 3 with search query
+  const meta3 = await ProductsCatalogPageModule.generateMetadata({
+    searchParams: Promise.resolve({ page: '3', search: 'hạt điều' }),
+  });
+  assert.match(meta3.title, /hạt điều/);
+  assert.match(meta3.alternates.canonical, /page=3/);
+  assert.match(meta3.alternates.canonical, /search=/);
+});
+
+test('F03b: multi-page pagination >= 3 pages in getServerProductsCatalog', async () => {
+  const originalFetch = global.fetch;
+  try {
+    global.fetch = async (url) => {
+      const u = new URL(String(url));
+      const page = Number(u.searchParams.get('page') || '1');
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          success: true,
+          data: [
+            { _id: `prod_p${page}_1`, name: `Product Page ${page} Item 1`, price: 100000 },
+            { _id: `prod_p${page}_2`, name: `Product Page ${page} Item 2`, price: 200000 },
+          ],
+          pagination: { page, limit: 12, total: 30, totalPages: 3 },
+        }),
+      };
+    };
+
+    const p1 = await ServerCatalog.getServerProductsCatalog({ page: 1, limit: 12 });
+    assert.equal(p1.pagination.totalPages, 3);
+    assert.equal(p1.products[0]._id, 'prod_p1_1');
+
+    const p2 = await ServerCatalog.getServerProductsCatalog({ page: 2, limit: 12 });
+    assert.equal(p2.pagination.page, 2);
+    assert.equal(p2.products[0]._id, 'prod_p2_1');
+
+    const p3 = await ServerCatalog.getServerProductsCatalog({ page: 3, limit: 12 });
+    assert.equal(p3.pagination.page, 3);
+    assert.equal(p3.products[0]._id, 'prod_p3_1');
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test('F03b: canonical slug redirect when accessed via wrong slug or raw ID', async () => {
+  const originalFetch = global.fetch;
+  try {
+    global.fetch = async (url) => {
+      const u = String(url);
+      if (u.includes('/products/get-products-by-id/p_canon_1')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            success: true,
+            data: {
+              _id: 'p_canon_1',
+              name: 'Hạt Macca Sấy',
+              slug: 'hat-macca-say',
+              price: 150000,
+              stock: 10,
+            },
+          }),
+        };
+      }
+      return { ok: false, status: 404, json: async () => ({}) };
+    };
+
+    // 1. Accessed with wrong slug: wrong-name-p_canon_1 -> redirects 308 to hat-macca-say-p_canon_1 preserving query string
+    await assert.rejects(
+      async () => {
+        await ProductPageModule.default({
+          params: Promise.resolve({ slug: 'wrong-name-p_canon_1' }),
+          searchParams: Promise.resolve({ utm_source: 'fb' }),
+        });
+      },
+      (err) => err.url === '/products/hat-macca-say-p_canon_1?utm_source=fb' && err.statusCode === 308,
+      'Should permanentRedirect 308 to canonical slug in Page'
+    );
+
+    // 2. generateMetadata also redirects 308 when slug is non-canonical
+    await assert.rejects(
+      async () => {
+        await ProductPageModule.generateMetadata({
+          params: Promise.resolve({ slug: 'p_canon_1' }),
+          searchParams: Promise.resolve({ utm_source: 'fb' }),
+        });
+      },
+      (err) => err.url === '/products/hat-macca-say-p_canon_1?utm_source=fb' && err.statusCode === 308,
+      'Should permanentRedirect 308 to canonical slug in generateMetadata'
+    );
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test('F03b: missing resource calls notFound() in generateMetadata preventing 200 stream', async () => {
+  const originalFetch = global.fetch;
+  try {
+    global.fetch = async () => ({
+      ok: false,
+      status: 404,
+      json: async () => ({ success: false, message: 'Not found' }),
+    });
+
+    // Product metadata: missing product must call notFound()
+    await assert.rejects(
+      async () => {
+        await ProductPageModule.generateMetadata({
+          params: Promise.resolve({ slug: '1' }),
+        });
+      },
+      (err) => err.digest === 'NEXT_NOT_FOUND',
+      'Product generateMetadata must call notFound() when product does not exist'
+    );
+
+    // Box metadata: missing box must call notFound()
+    await assert.rejects(
+      async () => {
+        await BoxPageModule.generateMetadata({
+          params: Promise.resolve({ id: 'nonexistent-box' }),
+        });
+      },
+      (err) => err.digest === 'NEXT_NOT_FOUND',
+      'Box generateMetadata must call notFound() when box does not exist'
+    );
+
+    // Brand metadata: missing brand must call notFound()
+    await assert.rejects(
+      async () => {
+        await BrandPageModule.generateMetadata({
+          params: Promise.resolve({ slug: 'nonexistent-brand' }),
+        });
+      },
+      (err) => err.digest === 'NEXT_NOT_FOUND',
+      'Brand generateMetadata must call notFound() when brand does not exist'
+    );
+
+    // Category metadata: missing category must call notFound()
+    await assert.rejects(
+      async () => {
+        await CategoryPageModule.generateMetadata({
+          params: Promise.resolve({ id: 'nonexistent-cat' }),
+        });
+      },
+      (err) => err.digest === 'NEXT_NOT_FOUND',
+      'Category generateMetadata must call notFound() when category does not exist'
+    );
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test('F03c / D2: next.config.mjs configures cookie-aware caching with Vary and private authenticated rules', async () => {
+  const nextConfigModule = await import('../next.config.mjs');
+  const nextConfig = nextConfigModule.default;
+  const headersList = await nextConfig.headers();
+
+  // Anonymous public catalog: requires missing token and refreshToken cookies, sets public s-maxage and Vary
+  const publicProductRules = headersList.filter((h) => h.source === '/products');
+  assert.ok(publicProductRules.length >= 3, 'Must have rules for anonymous, token, and refreshToken');
+
+  const anonRule = publicProductRules.find((h) => h.missing && h.missing.some((m) => m.key === 'token'));
+  assert.ok(anonRule, 'Rule for anonymous /products must exist');
+  assert.deepEqual(anonRule.missing, [
+    { type: 'cookie', key: 'token' },
+    { type: 'cookie', key: 'refreshToken' },
+  ]);
+  const anonCache = anonRule.headers.find((h) => h.key === 'Cache-Control');
+  assert.equal(anonCache.value, 'public, s-maxage=60, stale-while-revalidate=300');
+  const anonVary = anonRule.headers.find((h) => h.key === 'Vary');
+  assert.equal(anonVary.value, 'Accept-Encoding, Cookie');
+
+  // Authenticated catalog: token cookie present -> private no-cache no-store
+  const tokenRule = publicProductRules.find((h) => h.has && h.has.some((m) => m.key === 'token'));
+  assert.ok(tokenRule, 'Rule for token cookie must exist');
+  const tokenCache = tokenRule.headers.find((h) => h.key === 'Cache-Control');
+  assert.equal(tokenCache.value, 'private, no-cache, no-store, max-age=0, must-revalidate');
+
+  // Authenticated catalog: refreshToken cookie present -> private no-cache no-store
+  const refreshRule = publicProductRules.find((h) => h.has && h.has.some((m) => m.key === 'refreshToken'));
+  assert.ok(refreshRule, 'Rule for refreshToken cookie must exist');
+  const refreshCache = refreshRule.headers.find((h) => h.key === 'Cache-Control');
+  assert.equal(refreshCache.value, 'private, no-cache, no-store, max-age=0, must-revalidate');
+
+  // Checkout route: always private
+  const checkoutRule = headersList.find((h) => h.source === '/checkout');
+  assert.ok(checkoutRule, 'Rule for /checkout must exist');
+  const checkoutCacheHeader = checkoutRule.headers.find((h) => h.key === 'Cache-Control');
+  assert.equal(checkoutCacheHeader.value, 'private, no-cache, no-store, max-age=0, must-revalidate');
+});
+
+test('F03c / D5: MerchantRedirectGuard redirects merchant to /manager; anonymous and admin unaffected', () => {
+  const MerchantRedirectGuardModule = load(path.join(root, 'app/(client)/MerchantRedirectGuard.jsx'));
+  const MerchantRedirectGuard = MerchantRedirectGuardModule.default;
+
+  let currentContext = { user: null, isLoading: false };
+  let replacedUrl = null;
+
+  const mockRouter = {
+    replace(url) {
+      replacedUrl = url;
+    },
+  };
+
+  const origUseContext = React.useContext;
+  const origUseEffect = React.useEffect;
+
+  const origRouter = activeRouter;
+  try {
+    activeRouter = mockRouter;
+    React.useContext = (ctx) => {
+      if (ctx === AppContext) return currentContext;
+      return origUseContext(ctx);
+    };
+    // Execute effect synchronously during test run
+    React.useEffect = (effect) => {
+      effect();
+    };
+
+    // Case 1: Merchant role -> redirects to /manager
+    currentContext = { user: { role: 'merchant', name: 'Seller 1' }, isLoading: false };
+    replacedUrl = null;
+    MerchantRedirectGuard();
+    assert.equal(replacedUrl, '/manager', 'Merchant role must be redirected to /manager');
+
+    // Case 2: Anonymous user -> no redirect
+    currentContext = { user: null, isLoading: false };
+    replacedUrl = null;
+    MerchantRedirectGuard();
+    assert.equal(replacedUrl, null, 'Anonymous user must NOT be redirected');
+
+    // Case 3: Admin role -> no redirect
+    currentContext = { user: { role: 'admin', name: 'Administrator' }, isLoading: false };
+    replacedUrl = null;
+    MerchantRedirectGuard();
+    assert.equal(replacedUrl, null, 'Admin user must NOT be redirected');
+
+    // Case 4: Customer role -> no redirect
+    currentContext = { user: { role: 'customer', name: 'Shopper' }, isLoading: false };
+    replacedUrl = null;
+    MerchantRedirectGuard();
+    assert.equal(replacedUrl, null, 'Customer role must NOT be redirected');
+
+    // Case 5: Merchant still loading -> no redirect until loaded
+    currentContext = { user: { role: 'merchant', name: 'Seller 1' }, isLoading: true };
+    replacedUrl = null;
+    MerchantRedirectGuard();
+    assert.equal(replacedUrl, null, 'Merchant while isLoading=true must NOT trigger premature redirect');
+  } finally {
+    activeRouter = origRouter;
+    React.useContext = origUseContext;
+    React.useEffect = origUseEffect;
+  }
+});
+
+test('F03c / D6: blocked localStorage falls back to in-memory cart and keep Add to Cart functional', () => {
+  const { read, store, cartReducer } = CartModule;
+  const ProductPurchasePanelModule = load(path.join(root, 'app/(client)/components/Product/ProductPurchasePanel.js'));
+  const { ProductPurchasePanel } = ProductPurchasePanelModule;
+
+  const originalLocalStorage = global.localStorage;
+  try {
+    // Simulate completely blocked localStorage (SecurityError)
+    Object.defineProperty(global, 'localStorage', {
+      get() {
+        throw new Error('SecurityError: The operation is insecure.');
+      },
+      configurable: true,
+    });
+
+    // 1. read() safely returns empty defaults without throwing
+    assert.doesNotThrow(() => {
+      const result = read('totmart_cart_guest');
+      assert.deepEqual(result, { items: [], version: 0, present: false });
+    }, 'read() must not throw when localStorage is blocked');
+
+    // 2. store() safely no-ops without throwing
+    assert.doesNotThrow(() => {
+      store('totmart_cart_guest', JSON.stringify({ items: [], version: 0 }));
+    }, 'store() must not throw when localStorage is blocked');
+
+    // 3. In-memory reducer handles cart operations
+    const initialState = { items: [], version: 0 };
+    const nextState = cartReducer(initialState, {
+      type: 'ADD_ITEM',
+      normalized: { _id: 'prod_sec_1', name: 'Organic Tea', price: 50000, itemType: 'product' },
+      quantity: 2,
+    });
+    assert.equal(nextState.items.length, 1);
+    assert.equal(nextState.items[0]._id, 'prod_sec_1');
+    assert.equal(nextState.items[0].quantity, 2);
+
+    // 4. ProductPurchasePanel with isReady=true renders active (not disabled) Add to Cart button
+    const rendered = ReactDOMServer.renderToString(
+      React.createElement(ProductPurchasePanel, {
+        product: { name: 'Organic Tea', price: 50000, stock: 10 },
+        finalPrice: 50000,
+        quantity: 1,
+        isReady: true,
+        isAddingToCart: false,
+        onAddToCart: () => {},
+        fmtPrice: (n) => `${n} đ`,
+      })
+    );
+    assert.match(rendered, /Thêm vào giỏ hàng/);
+    assert.doesNotMatch(rendered, /disabled="" class="[^"]*tm-button--primary/);
+  } finally {
+    Object.defineProperty(global, 'localStorage', {
+      value: originalLocalStorage,
+      configurable: true,
+      writable: true,
+    });
+  }
+});
+
