@@ -152,6 +152,23 @@ jobs:
         run: |
           npm run build
 
+      - name: 9.5. Start Next.js Production Server on Port 3217
+        env:
+          CI: "true"
+          PORT: "3217"
+          API_URL: "http://127.0.0.1:3102/api"
+          NEXT_PUBLIC_API_URL: "/api"
+        run: |
+          echo "Starting Next.js production server in background on port 3217..."
+          node node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3217 &
+          for i in $(seq 1 30); do
+            if curl -s http://127.0.0.1:3217/ > /dev/null; then
+              echo "Next.js server is ready on port 3217 (attempt $i)."
+              break
+            fi
+            sleep 1
+          done
+
       - name: 10. Execute Mandatory F07 Smoke Suite (Real UI Clicks)
         env:
           CI: "true"

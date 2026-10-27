@@ -19,7 +19,7 @@ const PERF_DIR = path.resolve('.cache/perf');
 
 const spawnedPids = new Set();
 
-function killProcess(proc) {
+function killProcess(proc, portToFree = null) {
   if (!proc || !proc.pid) return;
   try {
     if (proc.stdout) {
@@ -29,7 +29,9 @@ function killProcess(proc) {
       try { proc.stderr.destroy(); } catch {}
     }
     if (process.platform === 'win32') {
-      execSync(`taskkill /pid ${proc.pid} /T /F`, { stdio: 'ignore' });
+      try {
+        execSync(`taskkill /pid ${proc.pid} /T /F`, { stdio: 'ignore' });
+      } catch {}
     } else {
       try {
         execSync(`pkill -P ${proc.pid} -9`, { stdio: 'ignore' });
@@ -39,6 +41,11 @@ function killProcess(proc) {
       } catch {}
     }
   } catch {}
+  if (portToFree && process.platform !== 'win32') {
+    try {
+      execSync(`fuser -k ${portToFree}/tcp`, { stdio: 'ignore' });
+    } catch {}
+  }
   spawnedPids.delete(proc.pid);
 }
 
@@ -448,18 +455,37 @@ async function main() {
   if (!isFeRunning || forceStandalone) {
     serversStartedByMe = true;
     console.log(`Starting Next.js production server on port ${FE_PORT}...`);
-    nextProc = spawn('npx', ['next', 'start', '-H', '127.0.0.1', '-p', String(FE_PORT)], {
-      stdio: ['ignore', 'pipe', 'pipe'],
-      shell: true,
-      env: {
-        ...process.env,
-        CI: 'true',
-        PORT: String(FE_PORT),
-        API_URL: `${runtime.origin}/api`,
-        NEXT_PUBLIC_API_URL: '/api',
-      },
-    });
+    let nextBin;
+    try { nextBin = require.resolve('next/dist/bin/next'); } catch {}
+    if (nextBin) {
+      nextProc = spawn(process.execPath, [nextBin, 'start', '-H', '127.0.0.1', '-p', String(FE_PORT)], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: {
+          ...process.env,
+          CI: 'true',
+          PORT: String(FE_PORT),
+          API_URL: `${runtime.origin}/api`,
+          NEXT_PUBLIC_API_URL: '/api',
+        },
+      });
+    } else {
+      nextProc = spawn('npx', ['next', 'start', '-H', '127.0.0.1', '-p', String(FE_PORT)], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: process.platform === 'win32',
+        env: {
+          ...process.env,
+          CI: 'true',
+          PORT: String(FE_PORT),
+          API_URL: `${runtime.origin}/api`,
+          NEXT_PUBLIC_API_URL: '/api',
+        },
+      });
+    }
     if (nextProc.pid) spawnedPids.add(nextProc.pid);
+    nextProc.stdout.on('data', (d) => process.stdout.write(`[Next.js stdout] ${d}`));
+    nextProc.stderr.on('data', (d) => process.stderr.write(`[Next.js stderr] ${d}`));
+    nextProc.on('exit', (code, sig) => console.log(`[Next.js exited] code=${code} signal=${sig}`));
+    nextProc.on('error', (err) => console.error(`[Next.js error]`, err));
 
     console.log('Waiting for Next.js production server to be ready...');
     await waitFor(
@@ -537,8 +563,8 @@ async function main() {
   } finally {
     if (serversStartedByMe) {
       console.log('Cleaning up processes and containers started for profiling...');
-      if (nextProc) killProcess(nextProc);
-      if (fixtureProc) killProcess(fixtureProc);
+      if (nextProc) killProcess(nextProc, FE_PORT);
+      if (fixtureProc) killProcess(fixtureProc, FIXTURE_PORT);
       if (redisContainerId) {
         try {
           console.log(`[Disposable Redis] Stopping and removing container ${redisContainerId.slice(0, 12)}...`);
