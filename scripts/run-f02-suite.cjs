@@ -4,7 +4,7 @@ const { spawn, execSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const beRoot = process.env.TOTMART_BE_ROOT || process.argv[2] || 'C:/Users/84862/Desktop/totmart/TotMartAPI';
+const beRoot = process.env.TOTMART_BE_ROOT || process.argv[2] || 'C:/Users/84862/Desktop/totmart/be-pinned';
 const FE_PORT = 3217;
 const FE_ORIGIN = `http://localhost:${FE_PORT}`;
 
@@ -57,7 +57,7 @@ async function main() {
     fs.unlinkSync(runtimeFile);
   }
 
-  const FIXTURE_PORT = process.env.FE_TEST_API_PORT || '3101';
+  const FIXTURE_PORT = process.env.FE_TEST_API_PORT || '3102';
   console.log(`1. Starting BE fixture server (--serve) on port ${FIXTURE_PORT}...`);
   const fixtureProc = spawn('node', ['scripts/verify-checkout-attempts.cjs', beRoot, '--serve'], {
     stdio: ['pipe', 'pipe', 'inherit'],

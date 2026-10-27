@@ -13,7 +13,11 @@
     "test:e2e:ui": "node scripts/checkout-browser-e2e.cjs",
     "test:e2e:purchase": "node scripts/purchase-ui-regression.cjs",
     "test:browser:services": "node scripts/verify-checkout-attempts.cjs --gaps",
-    "test:fixtures": "node scripts/verify-checkout-attempts.cjs --serve"
+    "test:fixtures": "node scripts/verify-checkout-attempts.cjs --serve",
+    "test:e2e:bootstrap": "node scripts/bootstrap-e2e.cjs",
+    "test:smoke": "node scripts/run-f07-smoke.cjs",
+    "test:perf": "node scripts/measure-performance.cjs",
+    "run-f07-suite": "node scripts/run-f07-smoke.cjs"
   },
   "dependencies": {
     "@fontsource/playfair-display": "^5.3.0",
