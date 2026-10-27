@@ -15,13 +15,21 @@ const spawnedPids = new Set();
 function killProcess(proc) {
   if (!proc || !proc.pid) return;
   try {
+    if (proc.stdout) {
+      try { proc.stdout.destroy(); } catch {}
+    }
+    if (proc.stderr) {
+      try { proc.stderr.destroy(); } catch {}
+    }
     if (process.platform === 'win32') {
       execSync(`taskkill /pid ${proc.pid} /T /F`, { stdio: 'ignore' });
     } else {
       try {
         execSync(`pkill -P ${proc.pid} -9`, { stdio: 'ignore' });
       } catch {}
-      proc.kill('SIGKILL');
+      try {
+        proc.kill('SIGKILL');
+      } catch {}
     }
   } catch {
     // Process already exited
@@ -245,7 +253,12 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error('\n[F07 Suite Orchestrator Error]:', err.message);
-  process.exitCode = 1;
-});
+main()
+  .then(() => {
+    console.log('Smoke orchestrator completed cleanly.');
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error('\n[F07 Suite Orchestrator Error]:', err.message);
+    process.exit(1);
+  });
