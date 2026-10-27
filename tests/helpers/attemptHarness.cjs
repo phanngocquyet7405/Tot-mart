@@ -3,7 +3,7 @@ module.exports = function setup({storageFails=false, storage=new Map(), loseFirs
   const calls=[], saved=[], sync=[], http=[];
   const storageApi={getItem:k=>{if(storageFails)throw Error('denied');return storage.get(k)||null;},setItem:(k,v)=>{if(storageFails)throw Error('denied');storage.set(k,v);},removeItem:k=>storage.delete(k)};
   const context=vm.createContext({crypto:require('node:crypto').webcrypto,localStorage:storageApi,sessionStorage:storageApi,
-    setTimeout:globalThis.setTimeout,clearTimeout:globalThis.clearTimeout,
+    AbortController:globalThis.AbortController,setTimeout:globalThis.setTimeout,clearTimeout:globalThis.clearTimeout,
     navigator:{locks:{request:async(_scope,fn)=>fn()}},getTokenUserId:()=>userId,
     syncCartApi:async(items,version)=>{sync.push({items,version});return {version:3};},
     checkoutService:{createOrder:async(payload,key)=>{calls.push({payload,key});if(loseFirstCreate && calls.length===1)throw Error('lost response');return {success:true,data:{orderCode:'original',orderId:'id',totalAmount:12345}};}},

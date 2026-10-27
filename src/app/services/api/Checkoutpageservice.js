@@ -183,12 +183,35 @@ export async function saveCheckoutAddress(/** @type {any} */ user, /** @type {an
 export function readOrderStatus(/** @type {any} */ response) {
   const data = response.data || {};
   const totalAmount = data.totalAmount ?? data.orders?.reduce((/** @type {number} */ sum, /** @type {any} */ order) => sum + order.totalAmount, 0) ?? 0;
-  const remainingAmount = data.remainingAmount ?? (data.paymentStatus === 'paid' ? 0 : totalAmount);
-  return { status: data.paymentStatus === 'paid' ? 'paid' : data.paymentStatus === 'cancelled' ? 'cancelled' : 'pending',
-    cancelled: data.paymentStatus === 'cancelled' || (data.orders?.some((/** @type {any} */ order) => order.status === 'cancelled') ?? false),
-    payable: Boolean(data.payable), qrUrl: data.payable && remainingAmount > 0 ? data.qrUrl : undefined,
-    totalAmount, receivedAmount: data.receivedAmount ?? 0, remainingAmount, kind: data.kind, expiresAt: data.expiresAt };
+  const receivedAmount = data.receivedAmount ?? 0;
+  const remainingAmount = data.remainingAmount ?? (data.paymentStatus === 'paid' ? 0 : Math.max(0, totalAmount - receivedAmount));
+  const isPaid = data.paymentStatus === 'paid';
+  const isCancelled = data.paymentStatus === 'cancelled' || (data.orders?.some((/** @type {any} */ order) => order.status === 'cancelled') ?? false);
+  const isOnHold = Boolean(data.orders?.some((/** @type {any} */ order) => order.status === 'on_hold'));
+  const isUnderpaid = !isPaid && !isCancelled && !isOnHold && receivedAmount > 0 && remainingAmount > 0;
+  const payable = Boolean(data.payable) && !isPaid && !isCancelled && !isOnHold && remainingAmount > 0;
 
+  let derivedStatus = 'pending';
+  if (isOnHold) derivedStatus = 'on_hold';
+  else if (isPaid) derivedStatus = 'paid';
+  else if (isCancelled) derivedStatus = 'cancelled';
+  else if (isUnderpaid) derivedStatus = 'underpaid';
+
+  return {
+    status: derivedStatus,
+    rawStatus: data.paymentStatus,
+    cancelled: isCancelled,
+    onHold: isOnHold,
+    underpaid: isUnderpaid,
+    payable,
+    qrUrl: payable ? data.qrUrl : undefined,
+    totalAmount,
+    receivedAmount,
+    remainingAmount,
+    kind: data.kind,
+    expiresAt: data.expiresAt,
+    orders: data.orders,
+  };
 }
 
 /**
@@ -203,7 +226,17 @@ export function pollPaymentStatus(paymentCode, { intervalMs = 4000, timeoutMs = 
   const stop = () => { stopped = true; clearTimeout(timer); clearTimeout(deadline); controller.abort(); };
   const deadline = setTimeout(() => { if (!stopped) { stop(); onStatusChange?.({ status: 'timeout' }); } }, timeoutMs);
   const tick = async () => {
-    try { const response = await paymentGatewayService.getOrderStatus(paymentCode, controller.signal); if (stopped) return; const info = readOrderStatus(response); if (info.status === 'paid' || info.cancelled) { stop(); onStatusChange?.({ ...info, status: info.cancelled ? 'cancelled' : 'paid' }); return; } onStatusChange?.(info); }
+    try {
+      const response = await paymentGatewayService.getOrderStatus(paymentCode, controller.signal);
+      if (stopped) return;
+      const info = readOrderStatus(response);
+      if (info.status === 'paid' || info.cancelled || info.onHold) {
+        stop();
+        onStatusChange?.(info);
+        return;
+      }
+      onStatusChange?.(info);
+    }
     catch { if (stopped) return; } // A transient network error is retried until the wall-clock deadline.
     if (!stopped) timer = setTimeout(tick, intervalMs);
   };
