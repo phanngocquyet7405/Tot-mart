@@ -11,23 +11,23 @@ export default function CategoryDropdown({ root, columns, onMouseEnter, onMouseL
     <div
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className="absolute left-0 top-full z-50 w-full border-t border-[#F0DDD5] bg-white shadow-xl"
+      className="absolute left-0 top-full z-50 w-full border-t border-border bg-card shadow-xl"
     >
       <div className="mx-auto flex max-w-5xl gap-10 p-8">
         {/* Panel giới thiệu danh mục gốc */}
-        <div className="w-56 shrink-0 border-r border-[#F0DDD5] pr-8">
+        <div className="w-56 shrink-0 border-r border-border pr-8">
           <span className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl ring-1 ${tintClass}`}>
             <Icon className="h-5 w-5" />
           </span>
-          <h3 className="mb-1 font-serif text-lg font-bold text-[#2C1810]">{root.name}</h3>
+          <h3 className="mb-1 font-serif text-lg font-bold text-foreground">{root.name}</h3>
           {root.description && (
-            <p className="mb-4 line-clamp-3 text-xs leading-relaxed text-[#2C1810]/50">
+            <p className="mb-4 line-clamp-3 text-xs leading-relaxed text-foreground/50">
               {root.description}
             </p>
           )}
           <Link
             href={`/categories/${root.slug || root._id}`}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[#C85C3C] hover:text-[#B14B2D]"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/90"
           >
             Xem tất cả
             <ChevronRight className="h-3.5 w-3.5" />
@@ -43,9 +43,9 @@ export default function CategoryDropdown({ root, columns, onMouseEnter, onMouseL
                 <div key={idx} className="space-y-3">
                   <Link
                     href={col.titleHref}
-                    className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide text-[#2C1810] hover:text-[#C85C3C]"
+                    className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide text-foreground hover:text-primary"
                   >
-                    <visual.Icon className="h-3.5 w-3.5 text-[#C85C3C]" />
+                    <visual.Icon className="h-3.5 w-3.5 text-primary" />
                     {col.title}
                   </Link>
                   {col.links.length > 0 && (
@@ -54,7 +54,7 @@ export default function CategoryDropdown({ root, columns, onMouseEnter, onMouseL
                         <li key={lIdx}>
                           <Link
                             href={link.href}
-                            className="text-[13px] text-[#2C1810]/50 transition-colors hover:text-[#C85C3C]"
+                            className="text-[13px] text-foreground/50 transition-colors hover:text-primary"
                           >
                             {link.label}
                           </Link>
@@ -67,7 +67,7 @@ export default function CategoryDropdown({ root, columns, onMouseEnter, onMouseL
             })}
           </div>
         ) : (
-          <div className="flex flex-1 items-center text-sm text-[#2C1810]/40">
+          <div className="flex flex-1 items-center text-sm text-foreground/40">
             Chưa có danh mục con nào.
           </div>
         )}

@@ -56,13 +56,13 @@ function SectionTitle({ icon: Icon, color, label, aside }) {
 function Field({ label, error, required, hint, children }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-semibold text-slate-600">
+      <Label className="text-xs font-semibold text-foreground">
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {required && <span className="text-destructive-text ml-0.5">*</span>}
       </Label>
       {children}
-      {hint && !error && <p className="text-[11px] text-slate-400">{hint}</p>}
-      {error && <p className="text-[11px] text-red-500 font-medium">{error}</p>}
+      {hint && !error && <p className="text-[11px] text-muted-foreground">{hint}</p>}
+      {error && <p className="text-[11px] text-destructive-text font-medium">{error}</p>}
     </div>
   );
 }
@@ -154,18 +154,18 @@ export function PlanFormDialog({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
     >
       {/* Panel */}
-      <div className="relative w-full max-w-2xl max-h-[94vh] flex flex-col rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200 overflow-hidden">
+      <div className="relative w-full max-w-2xl max-h-[94vh] flex flex-col rounded-2xl bg-white shadow-2xl ring-1 ring-border overflow-hidden">
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50">
-              <Settings2 size={16} className="text-indigo-600" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+              <Settings2 size={16} className="text-primary" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-800 leading-tight">
+              <h2 className="text-sm font-bold text-foreground leading-tight">
                 {isEdit ? "Chỉnh sửa mẫu gói" : "Tạo mẫu gói mới"}
               </h2>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-[11px] text-muted-foreground mt-0.5">
                 {isEdit
                   ? `Đang sửa: ${editTarget?.name}`
                   : "Mẫu gói sẽ hiển thị cho khách hàng chọn đăng ký"}
@@ -174,7 +174,7 @@ export function PlanFormDialog({
           </div>
           <button
             onClick={() => !isSaving && onOpenChange(false)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             <X size={16} />
           </button>
@@ -183,15 +183,15 @@ export function PlanFormDialog({
         {/* ── Scrollable body ── */}
         <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
           {/* ── SECTION 1: Thông tin cơ bản ── */}
-          <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-5 space-y-4">
+          <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-4">
             <SectionTitle
               icon={Tag}
-              color="text-indigo-500"
+              color="text-primary"
               label="Thông tin mẫu gói"
               aside={
                 // Toggle isActive ngay trong header section
                 <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <span className="text-xs text-slate-500 font-medium">
+                  <span className="text-xs text-muted-foreground font-medium">
                     {form.isActive ? "Đang hiển thị" : "Đã ẩn"}
                   </span>
                   <Switch
@@ -235,12 +235,12 @@ export function PlanFormDialog({
                     onClick={() => set("planType", v)}
                     className={`rounded-lg border px-3 py-2.5 text-center transition-all ${
                       form.planType === v
-                        ? "border-indigo-400 bg-indigo-50 text-indigo-700 font-semibold ring-1 ring-indigo-300"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                        ? "border-primary bg-primary/10 text-primary font-semibold ring-1 ring-primary/30"
+                        : "border-border bg-white text-foreground hover:border-border hover:bg-muted/30"
                     }`}
                   >
                     <p className="text-xs font-medium leading-tight">{l}</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
                       {PLAN_TYPE_DELIVERY_HINT[v]}
                     </p>
                   </button>
@@ -250,7 +250,7 @@ export function PlanFormDialog({
           </div>
 
           {/* ── SECTION 2: Box & Giá ── */}
-          <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-5 space-y-4">
+          <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-4">
             <SectionTitle
               icon={Package}
               color="text-violet-500"
@@ -261,7 +261,7 @@ export function PlanFormDialog({
               {/* Chọn box */}
               <div className="space-y-4">
                 <Field
-                  label="Box chính"
+                  label="Combo chính"
                   required
                   error={errors.boxId}
                   hint="Giá gốc lấy từ giá trị box"
@@ -307,19 +307,19 @@ export function PlanFormDialog({
 
               {/* Price preview */}
               {pricePreview ? (
-                <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-4 space-y-2.5">
-                  <p className="text-[11px] font-bold text-indigo-400 uppercase tracking-wide flex items-center gap-1">
+                <div className="rounded-xl bg-primary/10 border border-primary/20 p-4 space-y-2.5">
+                  <p className="text-[11px] font-bold text-primary uppercase tracking-wide flex items-center gap-1">
                     <Info size={10} /> Xem trước giá
                   </p>
 
                   <div className="space-y-1.5 text-xs">
-                    <div className="flex justify-between text-slate-500">
+                    <div className="flex justify-between text-muted-foreground">
                       <span>Giá gốc (từ box)</span>
                       <span
                         className={
                           form.discountPercent > 0
-                            ? "line-through text-slate-400"
-                            : "font-semibold text-indigo-700"
+                            ? "line-through text-muted-foreground"
+                            : "font-semibold text-primary"
                         }
                       >
                         {pricePreview.formattedBase}
@@ -328,11 +328,11 @@ export function PlanFormDialog({
 
                     {form.discountPercent > 0 && (
                       <>
-                        <div className="flex justify-between text-red-500">
+                        <div className="flex justify-between text-destructive-text">
                           <span>Giảm {form.discountPercent}%</span>
                           <span>−{pricePreview.formattedDiscount}</span>
                         </div>
-                        <div className="flex justify-between font-bold text-sm text-indigo-700 border-t border-indigo-100 pt-2">
+                        <div className="flex justify-between font-bold text-sm text-primary border-t border-primary/20 pt-2">
                           <span>Giá sau giảm</span>
                           <span>{pricePreview.formattedFinal}</span>
                         </div>
@@ -340,15 +340,15 @@ export function PlanFormDialog({
                     )}
                   </div>
 
-                  <p className="text-[11px] text-indigo-300 leading-relaxed pt-1 border-t border-indigo-100">
+                  <p className="text-[11px] text-primary/70 leading-relaxed pt-1 border-t border-primary/20">
                     Giá gốc do hệ thống lấy tự động từ box — admin không cần
                     nhập thủ công.
                   </p>
                 </div>
               ) : (
-                <div className="rounded-xl bg-slate-100 border border-slate-200 p-4 flex flex-col items-center justify-center min-h-32.5 gap-2">
-                  <Package size={22} className="text-slate-300" />
-                  <p className="text-xs text-slate-400 text-center">
+                <div className="rounded-xl bg-muted border border-border p-4 flex flex-col items-center justify-center min-h-32.5 gap-2">
+                  <Package size={22} className="text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground text-center">
                     Chọn box để xem
                     <br />
                     giá tự động tính
@@ -360,11 +360,11 @@ export function PlanFormDialog({
             {/* Gift boxes */}
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
-                  <Gift size={12} className="text-pink-500" />
+                <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Gift size={12} className="text-primary" />
                   Box quà tặng kèm gói
                   {form.gift.length > 0 && (
-                    <Badge className="ml-1 bg-pink-100 text-pink-700 border-0 text-[11px] py-0 h-4">
+                    <Badge className="ml-1 bg-primary/10 text-primary border-0 text-[11px] py-0 h-4">
                       {form.gift.length}
                     </Badge>
                   )}
@@ -373,7 +373,7 @@ export function PlanFormDialog({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="h-7 text-xs text-pink-600 border-pink-200 hover:bg-pink-50"
+                  className="h-7 text-xs text-primary border-primary/20 hover:bg-primary/5"
                   onClick={addGift}
                 >
                   <Plus size={11} className="mr-1" />
@@ -382,13 +382,13 @@ export function PlanFormDialog({
               </div>
 
               {form.gift.length === 0 && (
-                <p className="text-[11px] text-slate-400 pl-0.5">
+                <p className="text-[11px] text-muted-foreground pl-0.5">
                   Không có quà kèm — khách chỉ nhận box chính.
                 </p>
               )}
 
               {form.gift.length > 0 && (
-                <div className="space-y-2 bg-pink-50/60 border border-pink-100 rounded-xl p-3">
+                <div className="space-y-2 bg-primary/5 border border-primary/20 rounded-xl p-3">
                   {form.gift.map((g, i) => (
                     <div
                       key={i}
@@ -402,7 +402,7 @@ export function PlanFormDialog({
                             updateGift(i, "boxId", e.target.value)
                           }
                         >
-                          <option value="">— Chọn box quà —</option>
+                          <option value="">— Chọn combo quà —</option>
                           {boxes.map((b) => (
                             <option key={b._id} value={b._id}>
                               {b.name}
@@ -410,7 +410,7 @@ export function PlanFormDialog({
                           ))}
                         </select>
                         {errors[`gift_${i}_boxId`] && (
-                          <p className="text-[11px] text-red-500">
+                          <p className="text-[11px] text-destructive-text">
                             {errors[`gift_${i}_boxId`]}
                           </p>
                         )}
@@ -427,7 +427,7 @@ export function PlanFormDialog({
                           placeholder="SL"
                         />
                         {errors[`gift_${i}_qty`] && (
-                          <p className="text-[11px] text-red-500">
+                          <p className="text-[11px] text-destructive-text">
                             {errors[`gift_${i}_qty`]}
                           </p>
                         )}
@@ -436,7 +436,7 @@ export function PlanFormDialog({
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="col-span-1 h-8 w-8 text-red-400 hover:bg-red-50 hover:text-red-600"
+                        className="col-span-1 h-8 w-8 text-destructive-text hover:bg-destructive/10 hover:text-destructive-text"
                         onClick={() => removeGift(i)}
                       >
                         <Trash2 size={12} />
@@ -449,9 +449,9 @@ export function PlanFormDialog({
           </div>
 
           {/* ── Note ── */}
-          <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-100 px-4 py-3">
-            <Info size={13} className="text-amber-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-amber-700 leading-relaxed">
+          <div className="flex items-start gap-2 rounded-lg bg-warning/15 border border-warning/20 px-4 py-3">
+            <Info size={13} className="text-warning-text mt-0.5 shrink-0" />
+            <p className="text-xs text-warning-text leading-relaxed">
               Đây là <strong>mẫu gói</strong> hiển thị cho khách hàng chọn đăng
               ký. Sau khi khách đăng ký, hệ thống sẽ tạo một subscription riêng
               gắn với tài khoản của họ. Thông tin giao hàng và lịch giao sẽ được
@@ -461,19 +461,19 @@ export function PlanFormDialog({
         </div>
 
         {/* ── Footer ── */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-border shrink-0">
           {/* isActive summary */}
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <ToggleLeft
               size={14}
-              className={form.isActive ? "text-emerald-500" : "text-slate-400"}
+              className={form.isActive ? "text-success-text" : "text-muted-foreground"}
             />
             {form.isActive ? (
-              <span className="text-emerald-600 font-medium">
+              <span className="text-success-text font-medium">
                 Sẽ hiển thị cho khách hàng
               </span>
             ) : (
-              <span className="text-slate-400">
+              <span className="text-muted-foreground">
                 Sẽ ẩn — khách không thấy gói này
               </span>
             )}
@@ -488,7 +488,7 @@ export function PlanFormDialog({
               Huỷ
             </Button>
             <Button
-              className="bg-indigo-600 hover:bg-indigo-700 min-w-32"
+              className="min-w-32 min-h-11"
               onClick={handleSave}
               disabled={isSaving}
             >

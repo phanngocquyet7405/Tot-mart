@@ -43,7 +43,7 @@ export default function HomePage() {
   return (
     <div className="page-canvas min-h-screen">
       {/* Header Section */}
-      <div className="sticky top-0 bg-white shadow-sm z-1000">
+      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border shadow-xs z-50">
         <AnnouncementBar />
         <MainHeader />
         <div className="cursor-pointer">
@@ -55,7 +55,7 @@ export default function HomePage() {
       <HeroSection />
 
       {loading ? (
-        <div className="py-20 text-center text-gray-500 italic">
+        <div className="py-16 text-center text-muted-foreground">
           Đang tải dữ liệu từ hệ thống...
         </div>
       ) : (
@@ -89,7 +89,7 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="pt-10 bg-white">
+      <div className="pt-10 bg-background border-t border-border">
         <TotmartLanding />
       </div>
 

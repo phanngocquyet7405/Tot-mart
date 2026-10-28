@@ -11,7 +11,7 @@ export default function PlanComparison({ plans = [], selectedId, onSelect }) {
   if (!available.length) return <p role="status" className="tm-plan-help">Chưa có kỳ hạn khả dụng cho hộp này.</p>;
   return <fieldset className="tm-plan-comparison">
     <legend>{onSelect ? 'Chọn kỳ hạn nhận hộp' : 'So sánh kỳ hạn'}</legend>
-    <div className="flex justify-between gap-3 text-sm text-stone-600"><span>Kỳ hạn</span><span>Tổng trả trước</span></div>
+    <div className="flex justify-between gap-3 text-sm text-muted-foreground"><span>Kỳ hạn</span><span>Tổng trả trước</span></div>
     {available.map(plan => {
       const months = periods[plan.planType];
       const total = plan.discountPrice ?? plan.basePrice;

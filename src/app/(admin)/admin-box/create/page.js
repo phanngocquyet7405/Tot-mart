@@ -220,7 +220,7 @@ export default function CreateBoxPage() {
       });
 
       await createBoxApi(formData);
-      toast.success("Tạo box thành công!");
+      toast.success("Tạo combo thành công!");
       router.push("/admin-box");
     } catch (err) {
       const status = err.response?.status;
@@ -262,19 +262,19 @@ export default function CreateBoxPage() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6">
+    <div className="min-h-screen bg-muted/30 dark:bg-background p-6">
       <div className="max-w-3xl mx-auto">
         <BoxFormHeader />
 
         {apiError && (
-          <div className="mb-5 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 flex items-start gap-2 text-sm">
+          <div className="mb-5 p-3 rounded-lg border border-destructive/20 bg-destructive/10 text-destructive-text flex items-start gap-2 text-sm">
             <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
             <span className="whitespace-pre-wrap">{apiError}</span>
           </div>
         )}
 
         <Card>
-          <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
+          <CardContent className="p-0 divide-y divide-border dark:divide-border">
             <div className="p-6 space-y-2">
               <label htmlFor="combo-merchant">Merchant sở hữu</label>
               <select id="combo-merchant" className="w-full rounded border p-2" value={ownerId} disabled={loading} onChange={event => { setOwnerId(event.target.value); setProducts([EMPTY_PRODUCT()]); }}>

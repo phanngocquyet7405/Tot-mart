@@ -86,13 +86,13 @@ export function MonthlyThemes() {
     <section className="mb-20">
       {/* Section Header */}
       <div className="text-center max-w-2xl mx-auto mb-10">
-        <span className="text-[11px] font-black uppercase tracking-widest text-[#C85C3C]">
+        <span className="text-[11px] font-black uppercase tracking-widest text-primary">
           DISCOVER MONTHLY THEMES
         </span>
-        <h2 className="font-serif text-2xl lg:text-3xl font-black text-[#2C1810] mt-1">
+        <h2 className="font-serif text-2xl lg:text-3xl font-black text-foreground mt-1">
           Khám Phá Các Chủ Đề Hàng Tháng
         </h2>
-        <p className="text-sm text-[#7A645D] mt-3 leading-relaxed">
+        <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
           Mỗi tháng một bộ sưu tập mới xoay quanh lễ hội, vùng miền và mùa sắc
           đặc trưng của Nhật Bản.
         </p>
@@ -104,10 +104,10 @@ export function MonthlyThemes() {
         <button
           onClick={prevSlide}
           disabled={currentSlide === 0}
-          className="absolute left-0 z-10 -translate-x-5 rounded-full bg-white border border-[#F0DDD5] shadow-md p-2 hover:border-[#C85C3C]/40 hover:shadow-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+          className="absolute left-0 z-10 -translate-x-5 rounded-full bg-card border border-border shadow-md p-2 hover:border-primary/50 hover:shadow-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
           aria-label="Previous themes"
         >
-          <ChevronLeft className="h-5 w-5 text-[#2C1810]" />
+          <ChevronLeft className="h-5 w-5 text-foreground" />
         </button>
 
         {/* Carousel Track */}
@@ -123,7 +123,7 @@ export function MonthlyThemes() {
                 className="shrink-0 px-2 group cursor-pointer"
               >
                 {/* Card Image */}
-                <div className="aspect-4/5 rounded-2xl overflow-hidden border border-[#F0DDD5] bg-[#F0DDD5] relative mb-3">
+                <div className="aspect-4/5 rounded-2xl overflow-hidden border border-border bg-muted relative mb-3">
                   <Image
                     src={theme.image}
                     alt={theme.title}
@@ -135,7 +135,7 @@ export function MonthlyThemes() {
                 </div>
 
                 {/* Label */}
-                <h3 className="font-serif text-[11px] font-black text-[#2C1810] tracking-wider text-center group-hover:text-[#C85C3C] transition-colors leading-tight uppercase">
+                <h3 className="font-serif text-[11px] font-black text-foreground tracking-wider text-center group-hover:text-primary transition-colors leading-tight uppercase">
                   {theme.title}
                 </h3>
               </div>
@@ -147,10 +147,10 @@ export function MonthlyThemes() {
         <button
           onClick={nextSlide}
           disabled={currentSlide === maxSlide}
-          className="absolute right-0 z-10 translate-x-5 rounded-full bg-white border border-[#F0DDD5] shadow-md p-2 hover:border-[#C85C3C]/40 hover:shadow-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+          className="absolute right-0 z-10 translate-x-5 rounded-full bg-card border border-border shadow-md p-2 hover:border-primary/50 hover:shadow-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
           aria-label="Next themes"
         >
-          <ChevronRight className="h-5 w-5 text-[#2C1810]" />
+          <ChevronRight className="h-5 w-5 text-foreground" />
         </button>
       </div>
 
@@ -162,8 +162,8 @@ export function MonthlyThemes() {
             onClick={() => setCurrentSlide(i)}
             className={`rounded-full transition-all duration-300 ${
               i === currentSlide
-                ? "w-5 h-2 bg-[#C85C3C]"
-                : "w-2 h-2 bg-[#F0DDD5] hover:bg-[#C85C3C]/40"
+                ? "w-5 h-2 bg-primary"
+                : "w-2 h-2 bg-muted hover:bg-primary/40"
             }`}
             aria-label={`Go to slide ${i + 1}`}
           />

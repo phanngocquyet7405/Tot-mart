@@ -16,7 +16,8 @@
  */
 
 import { useState, useCallback } from "react";
-import { Plus, RefreshCw, Search, Filter, ChevronDown } from "lucide-react";
+import { Plus, RefreshCw, Search, Filter, ChevronDown, CreditCard } from "lucide-react";
+import { AdminPageHeader } from "../components/shared";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,50 +107,46 @@ export default function AdminSubscribePlanPage() {
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-slate-50/60 p-6 space-y-6">
+    <div className="p-6 space-y-6">
       {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Mẫu gói đăng ký
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Quản lý các mẫu gói hiển thị cho khách hàng chọn đăng ký
-          </p>
-        </div>
+      <AdminPageHeader
+        title="Mẫu gói đăng ký"
+        description="Quản lý các mẫu gói hiển thị cho khách hàng chọn đăng ký"
+        icon={CreditCard}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={fetchPlans}
+              disabled={isLoading}
+              className="min-h-11 min-w-11"
+              size="icon"
+            >
+              <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
+            </Button>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchPlans}
-            disabled={isLoading}
-          >
-            <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
-          </Button>
-
-          <Button
-            size="sm"
-            className="bg-indigo-600 hover:bg-indigo-700"
-            onClick={handleOpenCreate}
-          >
-            <Plus size={14} className="mr-1.5" />
-            Tạo mẫu gói
-          </Button>
-        </div>
-      </div>
+            <Button
+              className="min-h-11 gap-1.5"
+              onClick={handleOpenCreate}
+            >
+              <Plus size={16} />
+              Tạo mẫu gói
+            </Button>
+          </div>
+        }
+      />
 
       {/* ── Stats ── */}
       <PlanStats plans={plans} />
 
       {/* ── Table Card ── */}
-      <Card className="border-0 shadow-sm overflow-hidden">
-        <CardHeader className="border-b bg-white px-5 py-4">
+      <Card className="border border-border shadow-sm overflow-hidden">
+        <CardHeader className="border-b bg-card px-5 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <CardTitle className="text-sm font-semibold text-slate-700">
+            <CardTitle className="text-sm font-semibold text-foreground">
               Danh sách mẫu gói
               {hasActiveFilters && (
-                <span className="ml-2 text-xs font-normal text-indigo-500">
+                <span className="ml-2 text-xs font-normal text-primary">
                   (đang lọc)
                 </span>
               )}
@@ -162,7 +159,7 @@ export default function AdminSubscribePlanPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 gap-1 text-xs"
+                    className="min-h-11 gap-1 text-xs"
                   >
                     <Filter size={11} />
                     {
@@ -179,7 +176,7 @@ export default function AdminSubscribePlanPage() {
                       onClick={() => setStatusFilter(o.value)}
                       className={
                         statusFilter === o.value
-                          ? "bg-slate-50 font-medium"
+                          ? "bg-muted/50 font-medium"
                           : ""
                       }
                     >
@@ -195,7 +192,7 @@ export default function AdminSubscribePlanPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 gap-1 text-xs"
+                    className="min-h-11 gap-1 text-xs"
                   >
                     <Filter size={11} />
                     {
@@ -212,7 +209,7 @@ export default function AdminSubscribePlanPage() {
                       onClick={() => setPlanTypeFilter(o.value)}
                       className={
                         planTypeFilter === o.value
-                          ? "bg-slate-50 font-medium"
+                          ? "bg-muted/50 font-medium"
                           : ""
                       }
                     >
@@ -226,7 +223,7 @@ export default function AdminSubscribePlanPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 text-xs text-slate-400 hover:text-slate-600"
+                  className="h-8 text-xs text-muted-foreground hover:text-muted-foreground"
                   onClick={clearFilters}
                 >
                   Xoá bộ lọc
@@ -236,13 +233,13 @@ export default function AdminSubscribePlanPage() {
               <div className="relative">
                 <Search
                   size={13}
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                 />
                 <Input
                   placeholder="Tên gói, ID..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-8 h-8 text-xs w-44"
+                  className="pl-8 min-h-11 text-xs w-48"
                 />
               </div>
             </div>

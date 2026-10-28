@@ -40,6 +40,7 @@ export default function BrandsPage() {
             <Button
               variant="outline"
               size="icon"
+              className="min-h-11 min-w-11"
               onClick={() => fetchData(true)}
               disabled={isRefreshing}
             >
@@ -48,7 +49,7 @@ export default function BrandsPage() {
                 className={isRefreshing ? "animate-spin" : ""}
               />
             </Button>
-            <Button asChild className="gap-2">
+            <Button asChild className="gap-2 min-h-11">
               <Link href="/admin-brands/create">
                 <Plus size={16} />
                 Thêm thương hiệu
@@ -68,7 +69,7 @@ export default function BrandsPage() {
                 placeholder="Tìm thương hiệu..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
+                className="pl-9 min-h-11 text-base sm:text-sm"
               />
             </div>
           </div>

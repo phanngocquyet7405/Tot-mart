@@ -470,8 +470,8 @@ export default function AddProductPage() {
                     className={cn(
                       "text-[11px] font-bold px-2 py-0.5 rounded-full uppercase",
                       Number(form.stock) > 0
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700",
+                        ? "bg-success/15 text-success-text"
+                        : "bg-destructive/15 text-destructive-text",
                     )}
                   >
                     {Number(form.stock) > 0 ? "Còn hàng" : "Hết hàng"}

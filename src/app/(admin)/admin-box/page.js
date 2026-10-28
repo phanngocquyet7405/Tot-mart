@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { AdminPageHeader } from "../components/shared";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -93,23 +94,23 @@ export default function BoxManagement() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Package className="text-indigo-600" />
-            Quản lý Box Sản phẩm
+            <Package className="text-primary" />
+            Quản lý Combo Sản phẩm
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-muted-foreground mt-1">
             Quản lý các combo sản phẩm, quà tặng và ưu đãi
           </p>
         </div>
 
         <Button
-          className="bg-indigo-600 hover:bg-indigo-700"
+          className="min-h-11"
           onClick={() => {
             setEditTarget(null);
             setFormOpen(true);
           }}
         >
           <Plus className="mr-2 h-4 w-4" />
-          Tạo Box mới
+          Tạo Combo mới
         </Button>
       </div>
 
@@ -119,11 +120,11 @@ export default function BoxManagement() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-500">Tổng Box</p>
-                <h2 className="text-2xl font-bold">{boxes.length}</h2>
+                <p className="text-sm text-muted-foreground">Tổng combo</p>
+                <h2 className="text-2xl font-bold tabular-nums text-foreground mt-0.5">{boxes.length}</h2>
               </div>
-              <div className="p-3 rounded-xl bg-indigo-100">
-                <Boxes className="text-indigo-600" />
+              <div className="p-3 rounded-xl border border-border/40 bg-primary/10">
+                <Boxes className="text-primary size-5" />
               </div>
             </div>
           </CardContent>
@@ -133,13 +134,13 @@ export default function BoxManagement() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-500">Box quà tặng</p>
+                <p className="text-sm text-muted-foreground">Combo quà tặng</p>
                 <h2 className="text-2xl font-bold">
                   {boxes.filter((b) => b.isGift).length}
                 </h2>
               </div>
-              <div className="p-3 rounded-xl bg-pink-100">
-                <Gift className="text-pink-600" />
+              <div className="p-3 rounded-xl border border-destructive/20 bg-destructive/15">
+                <Gift className="text-destructive-text size-5" />
               </div>
             </div>
           </CardContent>
@@ -149,13 +150,13 @@ export default function BoxManagement() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-500">Đang hoạt động</p>
+                <p className="text-sm text-muted-foreground">Đang hoạt động</p>
                 <h2 className="text-2xl font-bold">
                   {boxes.filter((b) => !isExpired(b.validTo)).length}
                 </h2>
               </div>
-              <div className="p-3 rounded-xl bg-emerald-100">
-                <Calendar className="text-emerald-600" />
+              <div className="p-3 rounded-xl border border-success/20 bg-success/15">
+                <Calendar className="text-success-text size-5" />
               </div>
             </div>
           </CardContent>
@@ -165,13 +166,13 @@ export default function BoxManagement() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-500">Tổng tồn kho</p>
+                <p className="text-sm text-muted-foreground">Tổng tồn kho</p>
                 <h2 className="text-2xl font-bold">
                   {boxes.reduce((acc, item) => acc + (item.stock || 0), 0)}
                 </h2>
               </div>
-              <div className="p-3 rounded-xl bg-amber-100">
-                <Package className="text-amber-600" />
+              <div className="p-3 rounded-xl border border-warning/20 bg-warning/15">
+                <Package className="text-warning-text size-5" />
               </div>
             </div>
           </CardContent>
@@ -182,19 +183,19 @@ export default function BoxManagement() {
       <Card>
         <CardHeader className="border-b">
           <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-            <CardTitle>Danh sách Box</CardTitle>
+            <CardTitle>Danh sách Combo</CardTitle>
 
             <div className="flex items-center gap-3">
               <div className="relative w-full md:w-72">
                 <Search
                   size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                 />
                 <Input
-                  placeholder="Tìm kiếm box..."
+                  placeholder="Tìm kiếm combo..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 min-h-11 text-base sm:text-sm"
                 />
               </div>
 

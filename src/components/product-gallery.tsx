@@ -59,9 +59,9 @@ export function ProductGallery({
 
   if (!validImages.length) {
     return (
-      <div className="flex items-center justify-center bg-slate-100 rounded-xl aspect-square">
+      <div className="flex items-center justify-center bg-muted rounded-xl aspect-square">
         <div className="text-center space-y-2">
-          <div className="text-slate-400">
+          <div className="text-muted-foreground">
             <Image 
               width={48} 
               height={48} 
@@ -70,7 +70,7 @@ export function ProductGallery({
               className="mx-auto opacity-50"
             />
           </div>
-          <p className="text-sm text-slate-500">No image available</p>
+          <p className="text-sm text-muted-foreground">No image available</p>
         </div>
       </div>
     );
@@ -79,10 +79,10 @@ export function ProductGallery({
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100 group">
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-muted group">
         {isLoadingMain && (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-50 z-10">
-            <Loader2 className="h-8 w-8 text-slate-300 animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center bg-muted z-10">
+            <Loader2 className="h-8 w-8 text-muted-foreground/40 animate-spin" />
           </div>
         )}
 
@@ -100,7 +100,7 @@ export function ProductGallery({
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
-              <p className="text-sm text-slate-500">Image failed to load</p>
+              <p className="text-sm text-muted-foreground">Image failed to load</p>
             </div>
           </div>
         )}
@@ -114,8 +114,8 @@ export function ProductGallery({
           <Heart
             className={`h-6 w-6 transition-colors ${
               isFavorite
-                ? 'fill-red-500 stroke-red-500'
-                : 'stroke-slate-400 hover:stroke-red-500'
+                ? 'fill-destructive stroke-destructive'
+                : 'stroke-muted-foreground hover:stroke-destructive'
             }`}
           />
         </button>
@@ -155,8 +155,8 @@ export function ProductGallery({
               onClick={() => setSelectedIndex(idx)}
               className={`relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                 selectedIndex === idx
-                  ? 'border-indigo-600 ring-2 ring-indigo-300/50'
-                  : 'border-slate-200 hover:border-slate-300'
+                  ? 'border-primary ring-2 ring-primary/30'
+                  : 'border-border hover:border-border/80'
               }`}
               aria-label={`View image ${idx + 1}`}
             >
@@ -169,8 +169,8 @@ export function ProductGallery({
                   sizes="80px"
                 />
               ) : (
-                <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                  <span className="text-xs text-slate-400">Failed</span>
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <span className="text-xs text-muted-foreground">Failed</span>
                 </div>
               )}
             </button>

@@ -28,7 +28,7 @@ function UpdateBrandContent() {
   if (isLoading) {
     return (
       <div className="flex min-h-96 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-warning-text" />
       </div>
     );
   }
@@ -37,7 +37,7 @@ function UpdateBrandContent() {
     return (
       <div className="flex min-h-96 flex-col items-center justify-center gap-4 text-center px-4">
         <span className="text-5xl">🔍</span>
-        <h2 className="text-xl font-semibold text-zinc-800">
+        <h2 className="text-xl font-semibold text-foreground">
           Không tìm thấy thương hiệu
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -64,12 +64,12 @@ function UpdateBrandContent() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-800">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Cập nhật thương hiệu
           </h1>
           <p className="text-sm text-muted-foreground">
             Đang chỉnh sửa:{" "}
-            <span className="font-medium text-zinc-700">{original?.name}</span>
+            <span className="font-medium text-foreground">{original?.name}</span>
           </p>
         </div>
       </div>
@@ -103,7 +103,7 @@ export default function UpdateBrandPage() {
     <Suspense
       fallback={
         <div className="flex min-h-96 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-warning-text" />
         </div>
       }
     >

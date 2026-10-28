@@ -29,8 +29,8 @@ export function ConfirmActionDialog({
           <div
             className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full ${
               isDelete
-                ? "bg-red-100 text-destructive"
-                : "bg-amber-100 text-amber-600"
+                ? "bg-destructive/15 text-destructive-text"
+                : "bg-warning/15 text-warning-text"
             }`}
           >
             {isDelete ? <AlertTriangle size={22} /> : <Lock size={22} />}
@@ -38,7 +38,7 @@ export function ConfirmActionDialog({
 
           <AlertDialogTitle
             className={`text-center ${
-              isDelete ? "text-destructive" : "text-amber-600"
+              isDelete ? "text-destructive-text" : "text-warning-text"
             }`}
           >
             {isDelete ? "Xác nhận xóa vĩnh viễn?" : "Xác nhận khóa tài khoản?"}
@@ -63,7 +63,7 @@ export function ConfirmActionDialog({
         </AlertDialogHeader>
 
         <AlertDialogFooter className="sm:justify-center gap-2">
-          <AlertDialogCancel disabled={isLoading} className="w-28">
+          <AlertDialogCancel disabled={isLoading} className="w-28 min-h-11">
             Hủy
           </AlertDialogCancel>
           <AlertDialogAction
@@ -72,10 +72,10 @@ export function ConfirmActionDialog({
               onConfirm();
             }}
             disabled={isLoading}
-            className={`w-36 ${
+            className={`w-36 min-h-11 ${
               isDelete
                 ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                : "bg-amber-600 text-white hover:bg-amber-700"
+                : "bg-warning-text text-white hover:bg-warning-text/90"
             }`}
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

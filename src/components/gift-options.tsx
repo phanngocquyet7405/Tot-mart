@@ -91,8 +91,8 @@ export function GiftOptions({
           <Gift className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h3 className="font-semibold text-slate-900">Gift Options</h3>
-          <p className="text-xs text-slate-600">Make it extra special</p>
+          <h3 className="font-semibold text-foreground">Gift Options</h3>
+          <p className="text-xs text-muted-foreground">Make it extra special</p>
         </div>
       </div>
 
@@ -110,10 +110,10 @@ export function GiftOptions({
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
-                <div className="font-semibold text-slate-900 mb-0.5">
+                <div className="font-semibold text-foreground mb-0.5">
                   {option.name}
                 </div>
-                <p className="text-xs text-slate-600">{option.description}</p>
+                <p className="text-xs text-muted-foreground">{option.description}</p>
               </div>
               <div className="text-right shrink-0">
                 <div className="font-bold text-pink-600">
@@ -137,7 +137,7 @@ export function GiftOptions({
             />
             <Label
               htmlFor="include-message"
-              className="text-sm font-medium text-slate-900 cursor-pointer"
+              className="text-sm font-medium text-foreground cursor-pointer"
             >
               Include a gift message
             </Label>
@@ -154,7 +154,7 @@ export function GiftOptions({
                 className="resize-none text-sm"
               />
               <div className="flex justify-between items-center">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   {giftMessage.length}/150 characters
                 </p>
               </div>
@@ -166,7 +166,7 @@ export function GiftOptions({
       {/* Info */}
       <div className="flex gap-2 p-2.5 rounded bg-white/50 border border-pink-100">
         <AlertCircle className="h-4 w-4 text-pink-600 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-slate-700">
+        <p className="text-xs text-foreground/80">
           Gift options are added at checkout
         </p>
       </div>

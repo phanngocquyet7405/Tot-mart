@@ -15,26 +15,26 @@ import { sanitizeHtml } from "@/app/util/htmlSanitizer";
 export default function BrandDetailHero({ brand, loading }) {
   if (loading) {
     return (
-      <div className="mb-8 animate-pulse rounded-lg border border-gray-100 bg-white p-8 md:p-12">
-        <div className="mb-4 h-20 w-20 rounded-full bg-gray-100" />
-        <div className="mb-3 h-8 w-1/2 rounded bg-gray-100" />
-        <div className="h-4 w-3/4 rounded bg-gray-100" />
+      <div className="mb-8 animate-pulse rounded-lg border border-border bg-card p-8 md:p-12">
+        <div className="mb-4 h-20 w-20 rounded-full bg-muted" />
+        <div className="mb-3 h-8 w-1/2 rounded bg-muted" />
+        <div className="h-4 w-3/4 rounded bg-muted" />
       </div>
     );
   }
 
   if (!brand) {
     return (
-      <div className="mb-8 rounded-lg border border-gray-100 bg-white p-8 text-center text-gray-500 md:p-12">
+      <div className="mb-8 rounded-lg border border-border bg-card p-8 text-center text-muted-foreground md:p-12">
         Không tìm thấy gian hàng này.
       </div>
     );
   }
 
   return (
-    <div className="relative mb-8 overflow-hidden rounded-lg border border-green-100 bg-gradient-to-br from-green-50 via-white to-yellow-50 p-8 md:p-12">
+    <div className="relative mb-8 overflow-hidden rounded-lg border border-border bg-card p-8 md:p-12 shadow-xs">
       <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center">
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-green-100 bg-white shadow-sm md:h-24 md:w-24">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-card shadow-sm md:h-24 md:w-24">
           {brand.logo ? (
             <div className="relative h-full w-full">
               <Image
@@ -46,21 +46,21 @@ export default function BrandDetailHero({ brand, loading }) {
               />
             </div>
           ) : (
-            <Store className="h-8 w-8 text-green-700/40" />
+            <Store className="h-8 w-8 text-muted-foreground/50" />
           )}
         </div>
 
         <div className="max-w-3xl">
-          <div className="mb-2 inline-block rounded-full bg-green-100/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-green-700">
+          <div className="mb-2 inline-block rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary border border-primary/20">
             Gian hàng đối tác
           </div>
 
-          <h1 className="mb-2 font-serif text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
+          <h1 className="mb-2 font-serif text-3xl font-bold leading-tight text-foreground md:text-4xl">
             {brand.name}
           </h1>
 
           {brand.cityAddress && (
-            <p className="mb-3 flex items-center gap-1.5 text-sm text-gray-500">
+            <p className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground">
               <MapPin className="h-4 w-4" />
               {brand.cityAddress}
             </p>
@@ -68,11 +68,11 @@ export default function BrandDetailHero({ brand, loading }) {
 
           {brand.description ? (
             <div
-              className="prose prose-sm max-w-none text-gray-700 prose-p:my-1.5 prose-p:leading-relaxed"
+              className="prose prose-sm max-w-none text-foreground/80 prose-p:my-1.5 prose-p:leading-relaxed"
               dangerouslySetInnerHTML={{ __html: sanitizeHtml(brand.description) }}
             />
           ) : (
-            <p className="text-gray-500 italic">
+            <p className="text-muted-foreground italic">
               Gian hàng chưa cập nhật mô tả giới thiệu.
             </p>
           )}

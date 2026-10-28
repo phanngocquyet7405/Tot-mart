@@ -40,15 +40,15 @@ export function BulkDiscounts({
   const currentDiscount = getCurrentDiscount(selectedQuantity);
 
   return (
-    <div className="space-y-4 p-5 rounded-lg bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200">
+    <div className="space-y-4 p-5 rounded-lg bg-card border border-border">
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
           <TrendingDown className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h3 className="font-semibold text-slate-900">Buy More, Save More</h3>
-          <p className="text-xs text-slate-600">Volume discounts available</p>
+          <h3 className="font-semibold text-foreground">Buy More, Save More</h3>
+          <p className="text-xs text-muted-foreground">Volume discounts available</p>
         </div>
       </div>
 
@@ -67,30 +67,30 @@ export function BulkDiscounts({
               onClick={() => onSelectQuantity?.(discount.minQuantity)}
               className={`w-full p-3 rounded-lg border-2 transition-all text-left ${
                 isActive
-                  ? 'bg-white border-indigo-600 shadow-sm'
-                  : 'bg-white/50 border-transparent hover:bg-white hover:border-indigo-200'
+                  ? 'bg-card border-primary shadow-sm'
+                  : 'bg-card/50 border-transparent hover:bg-card hover:border-border'
               }`}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-foreground">
                       {quantityRange}
                     </span>
                     {isActive && (
-                      <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200 text-xs">
+                      <Badge className="bg-primary/10 text-primary border-border text-xs">
                         Current
                       </Badge>
                     )}
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-bold text-indigo-600">
+                    <span className="text-lg font-bold text-primary">
                       ${discount.price.toFixed(2)}
                     </span>
-                    <span className="text-xs text-slate-500 line-through">
+                    <span className="text-xs text-muted-foreground line-through">
                       ${currentPrice.toFixed(2)}
                     </span>
-                    <span className="text-xs font-semibold text-green-600">
+                    <span className="text-xs font-semibold text-success-text">
                       Save {savings}%
                     </span>
                   </div>
@@ -98,7 +98,7 @@ export function BulkDiscounts({
                 <div className="text-right">
                   <Badge 
                     variant="secondary"
-                    className="bg-red-100 text-red-700 border-red-200"
+                    className="bg-destructive/15 text-destructive-text border-destructive/30"
                   >
                     -{discount.discountPercent}%
                   </Badge>
@@ -110,9 +110,9 @@ export function BulkDiscounts({
       </div>
 
       {/* Info Message */}
-      <div className="flex gap-2 p-2.5 rounded bg-white/50 border border-indigo-100">
-        <Info className="h-4 w-4 text-indigo-600 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-slate-700">
+      <div className="flex gap-2 p-2.5 rounded bg-card/50 border border-border">
+        <Info className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-foreground/80">
           Discounts are automatically applied when you add items to cart
         </p>
       </div>

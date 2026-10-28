@@ -20,12 +20,12 @@ export function FormFooter({
   const router = useRouter();
 
   return (
-    <div className="px-6 py-4 border-t border-[#F0DDD5] flex items-center justify-between bg-[#FFFAF8] rounded-b-2xl">
+    <div className="px-6 py-4 border-t border-border flex items-center justify-between bg-card rounded-b-2xl">
       <Button
         variant="outline"
         type="button"
         onClick={() => router.push(cancelHref)}
-        className="border-[#F0DDD5] bg-white text-[#2C1810]/70 hover:bg-[#F0DDD5] hover:text-[#2C1810]"
+        className="border-border bg-white text-[var(--foreground)]/70 hover:bg-border hover:text-[var(--foreground)]"
       >
         Huỷ
       </Button>
@@ -35,7 +35,7 @@ export function FormFooter({
         type="button"
         onClick={onSubmit}
         disabled={loading}
-        className="flex items-center gap-1.5 bg-[#C85C3C] text-white hover:bg-[#C85C3C]/90"
+        className="flex items-center gap-1.5 bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90"
       >
         <Package size={14} />
         {loading ? "Đang tạo..." : "Tạo box"}

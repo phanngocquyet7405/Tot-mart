@@ -29,21 +29,21 @@ export default function ProductCategoriesShowcase() {
   }, []);
 
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-16 md:py-24 bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-12">
-          <p className="text-sm font-semibold text-yellow-600 uppercase tracking-wider mb-2">
+          <p className="text-sm font-semibold text-primary font-bold uppercase tracking-wider mb-2">
             Bộ Sưu Tập
           </p>
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900">
+          <h2 className="text-4xl md:text-5xl font-serif font-bold text-foreground">
             Phân loại sản phẩm
           </h2>
         </div>
 
         {/* Categories Grid */}
         {loading ? (
-          <div className="py-12 text-center text-gray-500">Đang tải danh mục...</div>
+          <div className="py-12 text-center text-muted-foreground">Đang tải danh mục...</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {categories.map((category) => (
@@ -52,7 +52,7 @@ export default function ProductCategoriesShowcase() {
                 href={`/categories/${category.slug || category._id}`}
                 className="group"
               >
-                <div className="relative mb-4 h-64 overflow-hidden rounded-lg bg-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg md:h-72">
+                <div className="relative mb-4 h-64 overflow-hidden rounded-lg bg-muted shadow-sm transition-all duration-300 hover:shadow-lg md:h-72">
                   <Image
                     src={category.image || "/assets/placeholder.png"}
                     alt={category.name}
@@ -66,10 +66,10 @@ export default function ProductCategoriesShowcase() {
 
                 {/* Category Info */}
                 <div className="text-center">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest tabular-nums mb-2">
                     {category.productCount || 0} Sản Phẩm
                   </p>
-                  <h3 className="text-lg font-serif font-bold text-gray-900 group-hover:text-green-700 transition-colors duration-300">
+                  <h3 className="text-lg font-serif font-bold text-foreground group-hover:text-primary transition-colors duration-300">
                     {category.name}
                   </h3>
                 </div>

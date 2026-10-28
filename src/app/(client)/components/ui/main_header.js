@@ -49,7 +49,7 @@ export default function MainHeader() {
   };
 
   return (
-    <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-1000">
+    <header className="w-full bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-8 py-4">
         <div className="flex items-center justify-between gap-8">
           <div className="flex items-center space-x-6">
@@ -63,7 +63,7 @@ export default function MainHeader() {
                 className="h-12 w-auto object-contain"
               />
             </Link>
-            <div className="hidden lg:block bg-[#4a7c44] text-white text-[11px] font-bold px-4 py-1.5 rounded-sm tracking-widest uppercase">
+            <div className="hidden lg:block bg-primary text-white text-[11px] font-bold px-4 py-1.5 rounded-sm tracking-widest uppercase">
               Khám phá sản phẩm
             </div>
           </div>
@@ -75,18 +75,18 @@ export default function MainHeader() {
           <div className="flex items-center space-x-6">
             <div className="flex items-center min-w-30 justify-end">
               {loading ? (
-                <div className="w-24 h-9 bg-gray-100 animate-pulse rounded-md" />
+                <div className="w-24 h-9 bg-muted animate-pulse rounded-md" />
               ) : !userData ? (
                 <div className="flex items-center gap-4 animate-in fade-in duration-500">
                   <Link
                     href="/login"
-                    className="text-sm font-bold text-gray-700 hover:text-[#4a7c44] transition-colors uppercase tracking-tight"
+                    className="text-sm font-bold text-foreground hover:text-primary transition-colors uppercase tracking-tight"
                   >
                     {t("signIn")}
                   </Link>
                   <Link
                     href="/register"
-                    className="text-[11px] font-bold bg-[#1e3040] text-white px-5 py-2.5 rounded-sm hover:bg-[#4a7c44] transition-all uppercase tracking-widest shadow-sm"
+                    className="text-[11px] font-bold bg-primary text-primary-foreground px-5 py-2.5 rounded-sm hover:bg-primary transition-all uppercase tracking-widest shadow-sm"
                   >
                     {t("signUp")}
                   </Link>
@@ -95,19 +95,19 @@ export default function MainHeader() {
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-2 group outline-none animate-in fade-in duration-500">
-                      <div className="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center border border-gray-200 group-hover:border-[#4a7c44] transition-all">
+                      <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center border border-border group-hover:border-primary transition-all">
                         <User
-                          className={`w-5 h-5 ${userData.role === "admin" ? "text-blue-600" : "text-gray-600"} group-hover:text-[#4a7c44]`}
+                          className={`w-5 h-5 ${userData.role === "admin" ? "text-blue-600" : "text-muted-foreground"} group-hover:text-primary`}
                         />
                       </div>
                       <div className="hidden lg:flex flex-col items-start leading-none text-left">
-                        <span className="text-[11px] font-bold text-gray-900 uppercase tracking-tight">
+                        <span className="text-[11px] font-bold text-foreground uppercase tracking-tight">
                           {userData.role === "admin"
                             ? t("administrator")
                             : t("myAccount")}
                         </span>
                         {/* userData từ JWT: { _id, name, email, role, avatar } */}
-                        <span className="text-[11px] text-gray-500 flex items-center gap-0.5">
+                        <span className="text-[11px] text-muted-foreground flex items-center gap-0.5">
                           {userData.name || "User"}
                           <ChevronDown className="w-3 h-3" />
                         </span>
@@ -118,12 +118,12 @@ export default function MainHeader() {
                   <DropdownMenuContent
                     align="end"
                     sideOffset={12}
-                    className="w-52 z-1100 shadow-xl border-gray-100 p-1 animate-in slide-in-from-top-2 duration-200"
+                    className="w-52 z-1100 shadow-xl border-border p-1 animate-in slide-in-from-top-2 duration-200"
                   >
                     {userData.role === "admin" ? (
                       <DropdownMenuItem
                         asChild
-                        className="py-2.5 cursor-pointer rounded-md focus:bg-blue-50 focus:text-blue-700"
+                        className="py-2.5 cursor-pointer rounded-md focus:bg-muted focus:text-foreground"
                       >
                         <Link
                           href="/dashboard"
@@ -136,7 +136,7 @@ export default function MainHeader() {
                     ) : (
                       <DropdownMenuItem
                         asChild
-                        className="py-2.5 cursor-pointer rounded-md focus:bg-green-50 focus:text-green-700"
+                        className="py-2.5 cursor-pointer rounded-md focus:bg-muted focus:text-foreground"
                       >
                         <Link
                           href="/profile"
@@ -150,7 +150,7 @@ export default function MainHeader() {
                     <DropdownMenuSeparator className="my-1" />
                     <DropdownMenuItem
                       onClick={handleLogout}
-                      className="py-2.5 text-red-600 font-bold cursor-pointer rounded-md focus:bg-red-50 focus:text-red-700"
+                      className="py-2.5 text-destructive-text font-bold cursor-pointer rounded-md focus:bg-destructive/15 focus:text-destructive-text"
                     >
                       <LogOut className="mr-3 h-4 w-4" />
                       <span>{t("logOut")}</span>
@@ -160,14 +160,14 @@ export default function MainHeader() {
               )}
             </div>
 
-            <div className="flex items-center gap-4 border-l pl-6 border-gray-100">
+            <div className="flex items-center gap-4 border-l pl-6 border-border">
               <Link
                 href="/wishlist"
-                className="relative p-2 hover:bg-gray-100 rounded-full transition-all group"
+                className="relative p-2 hover:bg-muted rounded-full transition-all group"
               >
-                <Heart className="w-5 h-5 text-gray-700 group-hover:text-red-500 transition-colors" />
+                <Heart className="w-5 h-5 text-foreground group-hover:text-destructive transition-colors" />
                 {wishlistCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-[#8cc63f] text-white text-[11px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-sm">
+                  <span className="absolute top-0 right-0 bg-primary text-white text-[11px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-sm">
                     {wishlistCount}
                   </span>
                 )}

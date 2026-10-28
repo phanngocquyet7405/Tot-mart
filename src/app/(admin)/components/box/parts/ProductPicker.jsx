@@ -31,36 +31,36 @@ export function ProductPicker({ onSelect, availableProducts = [] }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 h-9 px-3 text-sm rounded-lg border border-input bg-white hover:bg-slate-50 text-slate-600 transition-colors w-full truncate focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
+        className="flex items-center gap-2 h-9 px-3 text-sm rounded-lg border border-input bg-card hover:bg-muted/50 text-foreground border-border transition-colors w-full truncate focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary min-h-11"
       >
-        <Search size={14} className="text-slate-400 shrink-0" />
-        <span className="truncate text-slate-500">Tìm và chọn sản phẩm...</span>
+        <Search size={14} className="text-muted-foreground shrink-0" />
+        <span className="truncate text-muted-foreground">Tìm và chọn sản phẩm...</span>
         <ChevronDown
           size={14}
-          className={`ml-auto text-slate-400 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`ml-auto text-muted-foreground shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
-          <div className="p-3 border-b border-slate-100">
+        <div className="absolute z-50 top-full mt-2 left-0 right-0 bg-card border border-border rounded-xl shadow-lg overflow-hidden">
+          <div className="p-3 border-b border-border">
             <div className="relative">
               <Search
                 size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               />
               <input
                 autoFocus
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Nhập tên sản phẩm..."
-                className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
             </div>
           </div>
           <div className="max-h-56 overflow-y-auto">
             {filtered.length === 0 ? (
-              <div className="py-8 text-center text-sm text-slate-400">
+              <div className="py-8 text-center text-sm text-muted-foreground">
                 <Package size={24} className="mx-auto mb-2 opacity-40" />
                 <p>Không tìm thấy sản phẩm</p>
               </div>
@@ -79,9 +79,9 @@ export function ProductPicker({ onSelect, availableProducts = [] }) {
                       setOpen(false);
                       setSearch("");
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 transition-colors text-left border-b border-slate-50 last:border-b-0"
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left border-b border-border last:border-b-0"
                   >
-                    <div className="w-10 h-10 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden shrink-0 relative">
+                    <div className="w-10 h-10 rounded-lg border border-border bg-muted overflow-hidden shrink-0 relative">
                       {imgUrl ? (
                         <Image
                           src={imgUrl}
@@ -92,16 +92,16 @@ export function ProductPicker({ onSelect, availableProducts = [] }) {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Package size={14} className="text-slate-300" />
+                          <Package size={14} className="text-muted-foreground" />
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-800 truncate">
+                      <p className="text-sm font-medium text-foreground truncate">
                         {p.name}
                       </p>
-                      <p className="text-xs text-indigo-600 font-semibold mt-0.5">
-                        {fmtPrice(p.price)}
+                      <p className="text-xs text-primary font-semibold mt-0.5">
+                        <span className="tabular-nums">{fmtPrice(p.price)}</span>
                       </p>
                     </div>
                   </button>

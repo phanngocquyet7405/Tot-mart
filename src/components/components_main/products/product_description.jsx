@@ -7,14 +7,14 @@ import ReactMarkdown from "react-markdown";
 const components = {
   // ## Tiêu đề phần (ví dụ: "Your Basket Includes:")
   h2: ({ children }) => (
-    <h2 className="text-sm font-black text-[#2C1810] uppercase tracking-wider mt-6 mb-3">
+    <h2 className="text-sm font-black text-foreground uppercase tracking-wider mt-6 mb-3">
       {children}
     </h2>
   ),
 
   // h3 nếu cần
   h3: ({ children }) => (
-    <h3 className="text-sm font-bold text-stone-600 mt-4 mb-2">{children}</h3>
+    <h3 className="text-sm font-bold text-muted-foreground mt-4 mb-2">{children}</h3>
   ),
 
   // ul: wrapper của danh sách sản phẩm
@@ -22,24 +22,24 @@ const components = {
 
   // li: mỗi dòng sản phẩm — có đường kẻ trái terracotta
   li: ({ children }) => (
-    <li className="text-sm text-stone-600 leading-relaxed pl-3 border-l-2 border-[#F0DDD5]">
+    <li className="text-sm text-muted-foreground leading-relaxed pl-3 border-l-2 border-border">
       {children}
     </li>
   ),
 
   // p: đoạn văn intro hoặc ghi chú
   p: ({ children }) => (
-    <p className="text-sm text-stone-600 leading-relaxed my-2">{children}</p>
+    <p className="text-sm text-muted-foreground leading-relaxed my-2">{children}</p>
   ),
 
   // **đậm** → tên sản phẩm nổi bật màu đậm
   strong: ({ children }) => (
-    <strong className="font-black text-[#2C1810]">{children}</strong>
+    <strong className="font-black text-foreground">{children}</strong>
   ),
 
   // *nghiêng* → chú thích nhỏ
   em: ({ children }) => (
-    <em className="text-stone-400 text-xs not-italic">{children}</em>
+    <em className="text-muted-foreground text-xs not-italic">{children}</em>
   ),
 };
 
@@ -70,7 +70,7 @@ function splitNotes(markdown) {
 export function ProductDescription({ markdown }) {
   if (!markdown?.trim()) {
     return (
-      <p className="text-sm text-stone-400 italic">Chưa có mô tả sản phẩm.</p>
+      <p className="text-sm text-muted-foreground italic">Chưa có mô tả sản phẩm.</p>
     );
   }
 
@@ -83,13 +83,13 @@ export function ProductDescription({ markdown }) {
 
       {/* Khung ghi chú cuối */}
       {notes && (
-        <div className="mt-4 rounded-xl bg-[#FFF8F5] border border-[#F0DDD5] px-4 py-3">
+        <div className="mt-4 rounded-xl bg-muted/40 border border-border px-4 py-3">
           <ReactMarkdown
             components={{
               ...components,
               // p trong khung note → nhỏ hơn, italic
               p: ({ children }) => (
-                <p className="text-xs text-stone-500 leading-relaxed italic">
+                <p className="text-xs text-muted-foreground leading-relaxed italic">
                   {children}
                 </p>
               ),

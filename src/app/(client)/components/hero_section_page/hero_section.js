@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function HeroSection() {
   return (
-    <div className="w-full bg-white">
+    <div className="w-full bg-background">
       {/* Main Hero Banner */}
       <div className="relative w-full h-96 md:h-[500px] overflow-hidden group">
         {/* Background Image */}
@@ -25,7 +25,7 @@ export default function HeroSection() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
             <div className="max-w-2xl">
               {/* Label */}
-              <p className="text-sm font-semibold text-yellow-300 uppercase tracking-widest mb-4">
+              <p className="text-sm font-semibold text-primary-foreground font-bold uppercase tracking-widest mb-4">
                 Lựa Chọn Cao Cấp
               </p>
 
@@ -45,7 +45,7 @@ export default function HeroSection() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   href="/products"
-                  className="px-8 py-3.5 bg-green-700 text-white font-semibold rounded-lg hover:bg-green-800 transition-colors duration-300 flex items-center justify-center gap-2 group/btn"
+                  className="px-8 py-3.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-xs transition-colors duration-300 flex items-center justify-center gap-2 group/btn"
                 >
                   Mua Ngay
                   <svg
@@ -64,7 +64,7 @@ export default function HeroSection() {
                 </Link>
                 <Link
                   href="/categories"
-                  className="px-8 py-3.5 bg-white/20 text-white font-semibold rounded-lg hover:bg-white/30 transition-colors duration-300 backdrop-blur-sm border border-white/30"
+                  className="px-8 py-3.5 bg-background/20 text-white font-semibold rounded-lg hover:bg-background/30 transition-colors duration-300 backdrop-blur-sm border border-white/30"
                 >
                   Tìm Hiểu Thêm
                 </Link>

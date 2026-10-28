@@ -47,20 +47,20 @@ export function FrequentlyBought({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold text-slate-900">
+        <h3 className="text-lg font-semibold text-foreground">
           Frequently Bought Together
         </h3>
-        <p className="text-sm text-slate-600">Customers often purchase these items with this product</p>
+        <p className="text-sm text-muted-foreground">Customers often purchase these items with this product</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {displayProducts.map((product) => (
           <div
             key={product.id}
-            className="group p-4 rounded-lg border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all bg-white"
+            className="group p-4 rounded-lg border border-border hover:border-primary/50 hover:shadow-md transition-all bg-card"
           >
             {/* Image */}
-            <div className="relative w-full aspect-square mb-3 rounded-lg overflow-hidden bg-slate-100">
+            <div className="relative w-full aspect-square mb-3 rounded-lg overflow-hidden bg-muted">
               <Image
                 src={product.image}
                 alt={product.name}
@@ -69,7 +69,7 @@ export function FrequentlyBought({
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
               {product.purchaseCount && product.purchaseCount > 100 && (
-                <Badge className="absolute top-2 right-2 bg-orange-500">
+                <Badge className="absolute top-2 right-2 bg-primary">
                   Popular
                 </Badge>
               )}
@@ -77,7 +77,7 @@ export function FrequentlyBought({
 
             {/* Content */}
             <div className="space-y-2">
-              <h4 className="font-medium text-slate-900 line-clamp-2 text-sm">
+              <h4 className="font-medium text-foreground line-clamp-2 text-sm">
                 {product.name}
               </h4>
 
@@ -90,13 +90,13 @@ export function FrequentlyBought({
                         key={i}
                         className={`h-3.5 w-3.5 ${
                           i < Math.round(product.rating!)
-                            ? 'fill-amber-400 stroke-amber-400'
-                            : 'stroke-slate-300'
+                            ? 'fill-warning stroke-warning'
+                            : 'stroke-muted-foreground/30'
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-slate-600">
+                  <span className="text-xs text-muted-foreground">
                     ({product.reviewCount || 0})
                   </span>
                 </div>
@@ -104,7 +104,7 @@ export function FrequentlyBought({
 
               {/* Price */}
               <div className="flex items-baseline gap-2">
-                <span className="text-lg font-bold text-indigo-600">
+                <span className="text-lg font-bold text-primary">
                   ${product.price.toFixed(2)}
                 </span>
               </div>
@@ -114,7 +114,7 @@ export function FrequentlyBought({
                 onClick={() => handleAddToCart(product.id)}
                 disabled={loadingId === product.id || isLoading}
                 size="sm"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5"
               >
                 <ShoppingCart className="h-4 w-4" />
                 {loadingId === product.id ? 'Adding...' : 'Add'}
@@ -127,7 +127,7 @@ export function FrequentlyBought({
       {products.length > 3 && (
         <Button
           variant="outline"
-          className="w-full border-indigo-200 hover:bg-indigo-50"
+          className="w-full border-border hover:bg-muted text-foreground"
         >
           View All {products.length} Recommendations
         </Button>

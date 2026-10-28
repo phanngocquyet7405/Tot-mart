@@ -26,28 +26,28 @@ export default function CategorySidebar({ currentId }) {
 
   return (
     <aside className="w-full lg:w-64 shrink-0 space-y-6">
-      <div className="bg-white border border-gray-200 p-5 rounded-sm">
-        <h2 className="text-[16px] font-medium mb-4 text-gray-800 uppercase tracking-wider">
+      <div className="bg-card border border-border p-5 rounded-xl">
+        <h2 className="text-[16px] font-medium mb-4 text-foreground uppercase tracking-wider">
           Danh mục sản phẩm
         </h2>
         {loading ? (
-          <p className="text-sm text-gray-500 italic">Đang tải...</p>
+          <p className="text-sm text-muted-foreground italic">Đang tải...</p>
         ) : (
-          <ul className="space-y-3 text-sm text-gray-600 max-h-125 overflow-y-auto pr-2 custom-scrollbar">
+          <ul className="space-y-3 text-sm text-muted-foreground max-h-125 overflow-y-auto pr-2 custom-scrollbar">
             <li>
               <Link
                 href="/categories"
-                className={`block transition-colors ${!currentId ? "text-orange-600 font-bold" : "hover:text-orange-600"}`}
+                className={`block transition-colors ${!currentId ? "text-primary font-bold" : "hover:text-primary"}`}
               >
                 Tất cả danh mục
               </Link>
             </li>
-            <hr className="my-2 border-gray-100" />
+            <hr className="my-2 border-border" />
             {categories.map((cat) => (
               <li key={cat._id || cat.id}>
                 <Link
                   href={`/categories/${cat._id || cat.id}`}
-                  className={`block transition-colors ${currentId === (cat._id || cat.id) ? "text-orange-600 font-bold" : "hover:text-orange-600"}`}
+                  className={`block transition-colors ${currentId === (cat._id || cat.id) ? "text-primary font-bold" : "hover:text-primary"}`}
                 >
                   {cat.name}
                 </Link>

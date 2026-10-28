@@ -11,45 +11,47 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useAdminSubscriptions } from "@/app/hook/adminSub/UseAdminSubscriptions";
 import { SubscriberTable } from "../../components/SubscribePlans/Subscribe/SubscriberTable";
 import { SubscriberFilters } from "../../components/SubscribePlans/Subscribe/SubscriberFilters";
 import { SubscriberDetailDialog } from "../../components/SubscribePlans/Subscribe/SubscriberDetailDialog";
+import { AdminPageHeader } from "../../components/shared";
 import { formatCurrency } from "@/app/util/formatter";
 
 // ─── Stat Card ───────────────────────────────────────────────────────────────
 function StatCard({ icon: Icon, label, value, color, sub }) {
   const colorMap = {
-    blue: { bg: "bg-blue-50", icon: "text-blue-500", value: "text-blue-700" },
+    blue: { bg: "bg-primary/10", icon: "text-primary", value: "text-primary" },
     green: {
-      bg: "bg-green-50",
-      icon: "text-green-500",
-      value: "text-green-700",
+      bg: "bg-success/15",
+      icon: "text-success-text",
+      value: "text-success-text",
     },
-    red: { bg: "bg-red-50", icon: "text-red-500", value: "text-red-700" },
+    red: { bg: "bg-destructive/15", icon: "text-destructive-text", value: "text-destructive-text" },
     orange: {
-      bg: "bg-orange-50",
-      icon: "text-[#C85C3C]",
-      value: "text-[#C85C3C]",
+      bg: "bg-warning/15",
+      icon: "text-warning-text",
+      value: "text-warning-text",
     },
   };
   const c = colorMap[color] ?? colorMap.blue;
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-5 flex items-start gap-4">
+    <div className="bg-card rounded-2xl border border-border p-5 flex items-start gap-4 shadow-sm">
       <div
         className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center shrink-0`}
       >
         <Icon size={18} className={c.icon} />
       </div>
       <div>
-        <p className="text-[11px] font-black uppercase tracking-widest text-stone-400">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
           {label}
         </p>
-        <p className={`text-2xl font-black ${c.value} leading-tight mt-0.5`}>
+        <p className={`text-2xl font-bold ${c.value} leading-tight mt-0.5 tabular-nums`}>
           {value}
         </p>
-        {sub && <p className="text-[11px] text-stone-400 mt-0.5">{sub}</p>}
+        {sub && <p className="text-[11px] text-muted-foreground mt-0.5">{sub}</p>}
       </div>
     </div>
   );
@@ -59,29 +61,31 @@ function StatCard({ icon: Icon, label, value, color, sub }) {
 function TodayDeliveryPanel({ deliveries, loading, onLoad }) {
   if (!deliveries.length && !loading) {
     return (
-      <button
+      <Button
+        variant="outline"
+        size="sm"
         onClick={onLoad}
-        className="flex items-center gap-2 text-xs text-[#C85C3C] font-bold hover:text-[#B14B2D] transition-colors px-4 py-2.5 rounded-xl border border-[#C85C3C]/20 bg-[#FFF8F5] hover:bg-[#FFF0EB]"
+        className="min-h-11 gap-2 text-xs"
       >
-        <Truck size={13} />
-        Xem đơn giao hôm nay
-      </button>
+        <Truck size={14} className="text-muted-foreground" />
+        Kiểm tra giao hôm nay
+      </Button>
     );
   }
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-xs text-stone-400 px-4 py-2.5">
-        <Loader2 size={12} className="animate-spin" />
-        Đang tải...
+      <div className="flex items-center gap-2 text-xs text-muted-foreground min-h-11 px-3">
+        <Loader2 size={13} className="animate-spin text-primary" />
+        Đang kiểm tra...
       </div>
     );
   }
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center gap-3">
-      <Truck size={14} className="text-amber-600 shrink-0" />
-      <span className="text-xs font-bold text-amber-800">
+    <div className="bg-warning/15 border border-warning/20 rounded-xl px-4 min-h-11 flex items-center gap-2.5">
+      <Truck size={15} className="text-warning-text shrink-0" />
+      <span className="text-xs font-semibold text-warning-text tabular-nums">
         {deliveries.length} đơn cần giao hôm nay
       </span>
     </div>
@@ -116,126 +120,105 @@ export default function RegisteredSubscriptionsPage() {
   } = useAdminSubscriptions();
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-        {/* ─── Header ─── */}
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-black text-stone-800 tracking-tight">
-              Danh sách đăng ký
-            </h1>
-            <p className="text-sm text-stone-400 mt-1">
-              Quản lý tất cả các gói đăng ký của người dùng
-            </p>
-          </div>
-
+    <div className="p-6 space-y-6">
+      <AdminPageHeader
+        title="Danh sách đăng ký"
+        description="Quản lý tiến độ giao hàng và danh sách gói đăng ký định kỳ của khách hàng"
+        icon={Users}
+        actions={
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Today deliveries */}
             <TodayDeliveryPanel
               deliveries={todayDeliveries}
               loading={todayLoading}
               onLoad={loadTodayDeliveries}
             />
 
-            {/* Trigger delivery */}
-            <button
+            <Button
+              variant="outline"
               onClick={handleTriggerDelivery}
               disabled={triggeringDelivery}
-              className="flex items-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl border border-stone-200 bg-white hover:border-stone-300 text-stone-600 hover:text-stone-800 transition-all disabled:opacity-50"
+              className="gap-2 min-h-11 text-xs"
             >
               {triggeringDelivery ? (
-                <Loader2 size={12} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin" />
               ) : (
-                <Zap size={13} />
+                <Zap size={14} />
               )}
               Xử lý giao hàng
-            </button>
+            </Button>
 
-            {/* Refresh */}
-            <button
+            <Button
+              variant="outline"
               onClick={refresh}
               disabled={loading}
-              className="flex items-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl border border-stone-200 bg-white hover:border-stone-300 text-stone-600 transition-all disabled:opacity-50"
+              className="gap-2 min-h-11 text-xs"
             >
-              <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
               Làm mới
-            </button>
+            </Button>
           </div>
+        }
+      />
+
+      {error && (
+        <div className="flex items-center gap-3 bg-destructive/10 border border-destructive/20 rounded-xl px-4 py-3 text-destructive-text">
+          <AlertCircle size={16} className="shrink-0" />
+          <p className="text-xs font-medium">{error}</p>
         </div>
+      )}
 
-        {/* ─── Error ─── */}
-        {error && (
-          <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-            <AlertCircle size={14} className="text-red-500 shrink-0" />
-            <p className="text-xs text-red-700 font-medium">{error}</p>
-          </div>
-        )}
-
-        {/* ─── Stats ─── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            icon={Users}
-            label="Tổng đăng ký"
-            value={stats.total}
-            color="blue"
-            sub="Tất cả trạng thái"
-          />
-          <StatCard
-            icon={TrendingUp}
-            label="Đang hoạt động"
-            value={stats.active}
-            color="green"
-            sub={`${stats.total ? Math.round((stats.active / stats.total) * 100) : 0}% tổng số`}
-          />
-          <StatCard
-            icon={XCircle}
-            label="Đã hủy"
-            value={stats.cancelled}
-            color="red"
-          />
-          <StatCard
-            icon={DollarSign}
-            label="Doanh thu hiện tại"
-            value={formatCurrency(stats.revenue)}
-            color="orange"
-            sub="Từ gói đang active"
-          />
-        </div>
-
-        {/* ─── Filters ─── */}
-        <div className="bg-white rounded-2xl border border-stone-200 p-4">
-          <SubscriberFilters
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            planFilter={planFilter}
-            setPlanFilter={setPlanFilter}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            totalCount={
-              // raw count before filter (re-compute from hook)
-              subscriptions.length
-            }
-            filteredCount={subscriptions.length}
-          />
-        </div>
-
-        {/* ─── Table ─── */}
-        {loading ? (
-          <div className="bg-white rounded-2xl border border-stone-200 py-24 flex flex-col items-center gap-4">
-            <Loader2 size={32} className="animate-spin text-stone-300" />
-            <p className="text-sm text-stone-400">Đang tải dữ liệu...</p>
-          </div>
-        ) : (
-          <SubscriberTable
-            subscriptions={subscriptions}
-            onViewDetail={openDetail}
-          />
-        )}
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          icon={Users}
+          label="Tổng đăng ký"
+          value={stats.total}
+          color="blue"
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="Đang hoạt động"
+          value={stats.active}
+          color="green"
+          sub={`${stats.total ? Math.round((stats.active / stats.total) * 100) : 0}% tổng số`}
+        />
+        <StatCard
+          icon={XCircle}
+          label="Đã hủy"
+          value={stats.cancelled}
+          color="red"
+          sub={`${stats.pendingCancel} chờ hủy`}
+        />
+        <StatCard
+          icon={DollarSign}
+          label="Doanh thu active"
+          value={formatCurrency(stats.totalRevenue)}
+          color="orange"
+          sub="Doanh thu từ các gói đang chạy"
+        />
       </div>
 
-      {/* ─── Detail Dialog ─── */}
+      {/* Filter */}
+      <SubscriberFilters
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        planFilter={planFilter}
+        setPlanFilter={setPlanFilter}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        totalCount={stats.total}
+        filteredCount={subscriptions.length}
+      />
+
+      {/* Table */}
+      <SubscriberTable
+        subscriptions={subscriptions}
+        onViewDetail={openDetail}
+      />
+
+      {/* Detail Dialog */}
       <SubscriberDetailDialog
         subscription={selectedSubscription}
         open={detailOpen}

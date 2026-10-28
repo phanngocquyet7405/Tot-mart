@@ -4,7 +4,6 @@
  * Dialog xem chi tiết một đăng ký — thông tin user, gói, lịch giao hàng, quà tặng
  */
 
-
 import {
   X,
   User,
@@ -17,19 +16,19 @@ import {
   Truck,
 } from "lucide-react";
 import { SubscriberStatusBadge } from "./Subscriberstatusbadge";
-import { PLAN_TYPE_LABELS } from "@/app/util/formatter";
-import { formatCurrency } from "@/app/util/formatter";
+import { Button } from "@/components/ui/button";
+import { PLAN_TYPE_LABELS, formatCurrency } from "@/app/util/formatter";
 import { cn } from "@/lib/utils";
 
 function DetailRow({ label, value, className }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-2.5 border-b border-stone-100 last:border-0">
-      <span className="text-[11px] uppercase tracking-wider font-bold text-stone-400 shrink-0">
+    <div className="flex items-start justify-between gap-4 py-2.5 border-b border-border/60 last:border-0">
+      <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground shrink-0">
         {label}
       </span>
       <span
         className={cn(
-          "text-xs font-semibold text-stone-700 text-right",
+          "text-xs font-semibold text-foreground text-right",
           className,
         )}
       >
@@ -42,10 +41,10 @@ function DetailRow({ label, value, className }) {
 function SectionTitle({ icon: Icon, title }) {
   return (
     <div className="flex items-center gap-2 mb-3">
-      <div className="w-6 h-6 rounded-lg bg-[#FFF0EB] flex items-center justify-center">
-        <Icon size={12} className="text-[#C85C3C]" />
+      <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+        <Icon size={12} className="text-primary" />
       </div>
-      <span className="text-[11px] font-black uppercase tracking-widest text-stone-500">
+      <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
         {title}
       </span>
     </div>
@@ -70,190 +69,183 @@ export function SubscriberDetailDialog({ subscription, open, onClose }) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity"
         onClick={onClose}
       />
 
       {/* Panel */}
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-white shadow-2xl flex flex-col">
+      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-card border-l border-border shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-stone-100 flex items-start justify-between shrink-0">
+        <div className="px-6 py-5 border-b border-border flex items-start justify-between shrink-0">
           <div>
-            <h2 className="text-base font-black text-stone-800">
-              Chi tiết đăng ký
-            </h2>
-            <p className="text-[11px] text-stone-400 mt-0.5 font-mono">
-              #{subscription._id?.slice(-8).toUpperCase()}
-            </p>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-mono text-muted-foreground">
+                #{subscription._id?.slice(-8)}
+              </span>
+              <SubscriberStatusBadge
+                status={subscription.status}
+                size="sm"
+              />
+            </div>
+            <h3 className="text-base font-bold text-foreground">
+              {subscription.templateId?.name ?? "Đăng ký định kỳ"}
+            </h3>
           </div>
-          <div className="flex items-center gap-3">
-            <SubscriberStatusBadge status={subscription.status} size="md" />
-            <button
-              onClick={onClose}
-              className="w-8 h-8 rounded-lg hover:bg-stone-100 flex items-center justify-center transition-colors text-stone-400 hover:text-stone-600"
-            >
-              <X size={16} />
-            </button>
-          </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="min-h-11 min-w-11 text-muted-foreground"
+          >
+            <X size={18} />
+          </Button>
         </div>
 
-        {/* Scrollable content */}
+        {/* Content */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
-          {/* ─── Thông tin người dùng ─── */}
+          {/* User info */}
           <div>
-            <SectionTitle icon={User} title="Người đăng ký" />
-            <div className="bg-stone-50 rounded-2xl px-4 py-1">
-              <DetailRow label="Họ tên" value={subscription.userId?.name} />
-              <DetailRow label="Email" value={subscription.userId?.email} />
+            <SectionTitle icon={User} title="Khách hàng" />
+            <div className="bg-muted/30 rounded-xl p-4 border border-border/60">
+              <DetailRow
+                label="Họ tên"
+                value={subscription.userId?.name}
+              />
+              <DetailRow
+                label="Email"
+                value={subscription.userId?.email}
+              />
+              <DetailRow
+                label="Điện thoại"
+                value={subscription.userId?.phone || addr?.phone}
+                className="tabular-nums"
+              />
             </div>
           </div>
 
-          {/* ─── Thông tin gói ─── */}
+          {/* Delivery address */}
+          {addr && (
+            <div>
+              <SectionTitle icon={MapPin} title="Địa chỉ nhận hàng" />
+              <div className="bg-muted/30 rounded-xl p-4 border border-border/60">
+                <DetailRow label="Người nhận" value={addr.receiverName || subscription.userId?.name} />
+                <DetailRow label="SĐT nhận" value={addr.phone} className="tabular-nums" />
+                <DetailRow
+                  label="Địa chỉ"
+                  value={[addr.address, addr.district, addr.city]
+                    .filter(Boolean)
+                    .join(", ")}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Plan & Pricing */}
           <div>
-            <SectionTitle icon={Package} title="Gói đăng ký" />
-            <div className="bg-stone-50 rounded-2xl px-4 py-1">
+            <SectionTitle icon={Package} title="Gói & Thanh toán" />
+            <div className="bg-muted/30 rounded-xl p-4 border border-border/60">
               <DetailRow
-                label="Tên gói"
-                value={subscription.templateId?.name}
-              />
-              <DetailRow
-                label="Loại gói"
+                label="Chu kỳ"
                 value={
                   PLAN_TYPE_LABELS[subscription.planType] ??
                   subscription.planType
                 }
               />
-              <DetailRow label="Hộp" value={subscription.boxId?.name} />
               <DetailRow
-                label="Giá gốc"
-                value={formatCurrency(subscription.oldPrice ?? 0)}
+                label="Tổng số lần giao"
+                value={`${subscription.totalDeliveries ?? 0} lần`}
+                className="tabular-nums"
               />
               <DetailRow
-                label="Giảm giá"
-                value={
-                  subscription.discountPercent
-                    ? `${subscription.discountPercent}%`
-                    : "Không có"
-                }
+                label="Còn lại"
+                value={`${subscription.remainDeliveries ?? 0} lần`}
+                className="tabular-nums"
+              />
+              <DetailRow
+                label="Giá gốc"
+                value={formatCurrency(subscription.oldPrice ?? subscription.price ?? 0)}
+                className="line-through text-muted-foreground tabular-nums"
               />
               <DetailRow
                 label="Giá thanh toán"
-                value={
-                  <span className="text-[#C85C3C] font-black">
-                    {formatCurrency(subscription.price ?? 0)}
-                  </span>
-                }
+                value={formatCurrency(subscription.price ?? 0)}
+                className="text-primary font-bold text-sm tabular-nums"
               />
-            </div>
-          </div>
-
-          {/* ─── Lịch giao hàng ─── */}
-          <div>
-            <SectionTitle icon={Truck} title="Lịch giao hàng" />
-            <div className="bg-stone-50 rounded-2xl px-4 py-1">
-              <DetailRow
-                label="Bắt đầu kỳ"
-                value={formatDate(subscription.currentPeriodStart)}
-              />
-              <DetailRow
-                label="Kết thúc kỳ"
-                value={formatDate(subscription.currentPeriodEnd)}
-              />
-              <DetailRow
-                label="Giao hàng tiếp"
-                value={
-                  subscription.nextDeliveries
-                    ? formatDate(subscription.nextDeliveries)
-                    : "Không có"
-                }
-              />
-              <DetailRow
-                label="Số lần giao"
-                value={`${subscription.remainDeliveries ?? 0} / ${subscription.totalDeliveries ?? 0}`}
-              />
-              {subscription.cancelAtPeriodEnd && (
-                <div className="py-2.5 flex items-center gap-2">
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                    ⚠ Sẽ hủy cuối kỳ
-                  </span>
-                </div>
+              {subscription.discountPercent > 0 && (
+                <DetailRow
+                  label="Giảm giá"
+                  value={`-${subscription.discountPercent}%`}
+                  className="text-destructive-text tabular-nums"
+                />
               )}
             </div>
           </div>
 
-          {/* ─── Địa chỉ giao hàng ─── */}
-          {addr && (
-            <div>
-              <SectionTitle icon={MapPin} title="Địa chỉ giao hàng" />
-              <div className="bg-stone-50 rounded-2xl p-4 space-y-1">
-                <p className="text-xs font-semibold text-stone-700">
-                  {addr.address}
-                </p>
-                <p className="text-[11px] text-stone-500">
-                  {[addr.district, addr.city, addr.country]
-                    .filter(Boolean)
-                    .join(", ")}
-                </p>
-                {addr.phone && (
-                  <p className="text-[11px] text-stone-400">📞 {addr.phone}</p>
-                )}
-                {addr.zipCode && (
-                  <p className="text-[11px] text-stone-400">
-                    ZIP: {addr.zipCode}
-                  </p>
-                )}
-              </div>
+          {/* Schedule */}
+          <div>
+            <SectionTitle icon={Calendar} title="Lịch trình" />
+            <div className="bg-muted/30 rounded-xl p-4 border border-border/60">
+              <DetailRow
+                label="Bắt đầu"
+                value={formatDate(subscription.startDate)}
+                className="tabular-nums"
+              />
+              <DetailRow
+                label="Kết thúc"
+                value={formatDate(subscription.endDate)}
+                className="tabular-nums"
+              />
+              <DetailRow
+                label="Giao tiếp theo"
+                value={formatDate(subscription.nextDeliveries)}
+                className="text-primary font-semibold tabular-nums"
+              />
+              {subscription.cancelAtPeriodEnd && (
+                <DetailRow
+                  label="Lưu ý"
+                  value="Hủy khi hết chu kỳ hiện tại"
+                  className="text-warning-text"
+                />
+              )}
             </div>
-          )}
+          </div>
 
-          {/* ─── Quà tặng ─── */}
+          {/* Gifts */}
           {subscription.gift && subscription.gift.length > 0 && (
             <div>
-              <SectionTitle icon={Gift} title="Quà tặng đi kèm" />
+              <SectionTitle icon={Gift} title="Quà tặng kèm" />
               <div className="space-y-2">
-                {subscription.gift.map((g, i) => (
+                {subscription.gift.map((g, idx) => (
                   <div
-                    key={i}
-                    className="flex items-center justify-between bg-[#FFF8F5] border border-[#F0DDD5] rounded-xl px-4 py-2.5"
+                    key={idx}
+                    className="flex items-center gap-3 p-3 bg-primary/5 rounded-xl border border-primary/20"
                   >
-                    <span className="text-xs font-semibold text-stone-700">
-                      {g.boxId?.name ?? `Quà ${i + 1}`}
-                    </span>
-                    {g.deliverAtMonth && (
-                      <span className="text-[11px] font-bold text-[#C85C3C] bg-[#FFE8DF] px-2 py-0.5 rounded-full">
-                        Tháng {g.deliverAtMonth}
-                      </span>
-                    )}
+                    <Gift size={16} className="text-primary shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-foreground truncate">
+                        {g.boxId?.name ?? `Quà tặng #${idx + 1}`}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Combo quà tặng kèm gói
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
-
-          {/* ─── Metadata ─── */}
-          <div>
-            <SectionTitle icon={Calendar} title="Thời gian" />
-            <div className="bg-stone-50 rounded-2xl px-4 py-1">
-              <DetailRow
-                label="Ngày tạo"
-                value={formatDate(subscription.createdAt)}
-              />
-              <DetailRow
-                label="Cập nhật lần cuối"
-                value={formatDate(subscription.updatedAt)}
-              />
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-stone-100 shrink-0">
-          <button
+        <div className="px-6 py-4 border-t border-border flex justify-end shrink-0">
+          <Button
+            variant="outline"
             onClick={onClose}
-            className="w-full py-3 rounded-xl border-2 border-stone-200 text-sm font-bold text-stone-600 hover:border-stone-300 hover:bg-stone-50 transition-all"
+            className="min-h-11"
           >
             Đóng
-          </button>
+          </Button>
         </div>
       </div>
     </>

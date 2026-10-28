@@ -28,7 +28,7 @@ export default function UsersManagement() {
         description="Admin: Xem, khóa và quản lý tài khoản"
         icon={Users}
         actions={
-          <Button className="gap-2" onClick={() => setIsAddUserOpen(true)}>
+          <Button className="gap-2 min-h-11" onClick={() => setIsAddUserOpen(true)}>
             <UserPlus size={16} /> Thêm người dùng
           </Button>
         }
@@ -44,7 +44,7 @@ export default function UsersManagement() {
               />
               <Input
                 placeholder="Tìm kiếm theo tên hoặc email..."
-                className="pl-9"
+                className="pl-9 min-h-11"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -54,7 +54,7 @@ export default function UsersManagement() {
               variant="outline"
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="gap-2"
+              className="gap-2 min-h-11"
             >
               <RefreshCw
                 size={16}

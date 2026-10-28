@@ -9,13 +9,11 @@ export default function ProductSection({
   reverse = false, 
   isDark = false 
 }) {
-  const bgColor = isDark ? 'bg-green-900' : 'bg-gray-50';
-  const textColor = isDark ? 'text-white' : 'text-gray-900';
-  const subTextColor = isDark ? 'text-yellow-300' : 'text-yellow-600'; 
-  const descColor = isDark ? 'text-gray-100' : 'text-gray-700';
-  const btnClass = isDark 
-    ? 'bg-green-600 text-white hover:bg-green-700' 
-    : 'bg-green-700 text-white hover:bg-green-800';
+  const bgColor = isDark ? 'bg-card border-y border-border' : 'bg-background';
+  const textColor = 'text-foreground';
+  const subTextColor = 'text-primary font-bold'; 
+  const descColor = 'text-muted-foreground';
+  const btnClass = 'bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl';
 
   return (
     <section className="w-full relative overflow-hidden">
@@ -41,7 +39,7 @@ export default function ProductSection({
             </p>
             <Link
               href="/products"
-              className={`${btnClass} px-8 py-3.5 transition-all duration-300 group inline-flex items-center gap-3 rounded-lg font-bold uppercase text-sm tracking-wider`}
+              className={`${btnClass} px-8 py-3.5 transition-all duration-300 group inline-flex items-center gap-3 rounded-xl font-bold uppercase text-sm tracking-wider shadow-xs active:scale-[0.97]`}
             >
               <span>Mua Ngay</span>
               <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

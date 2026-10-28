@@ -29,7 +29,7 @@ function AddressField({ name, label, value, onChange, error, required = false, a
     <label htmlFor={id}>{label}{required && <span aria-hidden="true"> *</span>}</label>
     <input id={id} name={name} value={value} type={type} onChange={onChange} required={required} autoComplete={autoComplete}
       aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} />
-    {error && <p id={`${id}-error`} className="text-sm text-red-700">Vui lòng kiểm tra {label.toLowerCase()}.</p>}
+    {error && <p id={`${id}-error`} className="text-sm text-destructive-text">Vui lòng kiểm tra {label.toLowerCase()}.</p>}
   </div>;
 }
 
@@ -301,17 +301,17 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
     <DialogContent showCloseButton={false} className="tm-commerce tm-commerce--atelier tm-modal w-[calc(100%-1rem)] max-w-5xl sm:max-w-5xl gap-0 z-100"
       onCloseAutoFocus={event => { event.preventDefault(); opener.current?.focus(); }}
       onEscapeKeyDown={event => { if (submitting) event.preventDefault(); }} onInteractOutside={event => { if (submitting) event.preventDefault(); }}>
-      <button type="button" className="absolute right-3 top-3 z-10 grid min-h-11 min-w-11 place-items-center rounded-full border border-[#F0DDD5] bg-white" aria-label="Đóng chọn gói" onClick={onClose} disabled={submitting}><X size={20} /></button>
+      <button type="button" className="absolute right-3 top-3 z-10 grid min-h-11 min-w-11 place-items-center rounded-full border border-border bg-card" aria-label="Đóng chọn gói" onClick={onClose} disabled={submitting}><X size={20} /></button>
       <div className="tm-modal__layout">
         <div className="tm-modal__gallery">
           <ProductGallery compact images={galleryImages} productName={box.name} selectedImage={selectedImage} onSelectImage={setSelectedImage} />
-          <p className="mt-6 text-sm text-stone-600">Trả trước theo kỳ đã chọn. Sau xác nhận thanh toán, lượt giao đầu tiên đến hạn sau một tháng.</p>
+          <p className="mt-6 text-sm text-muted-foreground">Trả trước theo kỳ đã chọn. Sau xác nhận thanh toán, lượt giao đầu tiên đến hạn sau một tháng.</p>
           <div className="tm-delivery-note mt-5"><Truck size={20} className="shrink-0" /><p>Khách trả phí vận chuyển riêng cho từng lần giao, ngoài tiền gói TotMart.</p></div>
         </div>
         <div className="tm-modal__body">
           <DialogTitle className="tm-product-title pr-10">{step === 1 ? box.name : 'Địa chỉ nhận hàng'}</DialogTitle>
-          <DialogDescription className="mt-3 text-sm text-stone-600">{step === 1 ? 'So sánh tổng trả trước và bình quân tháng để chọn kỳ hạn phù hợp.' : `Nhận ${box.name} theo kỳ hạn ${selectedPlan?._months} tháng đã chọn.`}</DialogDescription>
-          <p className="my-5 text-sm font-semibold text-stone-600" aria-live="polite">Bước {step}/2 · {step === 1 ? 'Chọn kỳ hạn' : 'Chọn địa chỉ'}</p>
+          <DialogDescription className="mt-3 text-sm text-muted-foreground">{step === 1 ? 'So sánh tổng trả trước và bình quân tháng để chọn kỳ hạn phù hợp.' : `Nhận ${box.name} theo kỳ hạn ${selectedPlan?._months} tháng đã chọn.`}</DialogDescription>
+          <p className="my-5 text-sm font-semibold text-muted-foreground" aria-live="polite">Bước {step}/2 · {step === 1 ? 'Chọn kỳ hạn' : 'Chọn địa chỉ'}</p>
           {pending && <section className="tm-notice mb-6" role="status">
             <h3>{pending.state === 'created' ? 'Đăng ký đã được tạo' : pending.state === 'confirming' ? 'Đang xác nhận kết quả đăng ký' : 'Kiểm tra yêu cầu đăng ký trước'}</h3>
             <p className="mt-2">{pending.summary?.name || pending.payload?.templateId} · {pending.summary?.months || '?'} tháng.</p>
@@ -328,19 +328,19 @@ export default function ChoosePlanModal({ box, onClose, plansProps = EMPTY_PLANS
           </section>}
           {step === 1 ? <>
             {loadingPlans ? <p role="status" className="py-8">Đang tải kỳ hạn…</p> : plansError ? <div role="alert" className="space-y-3"><p>{plansError}</p><button type="button" className="tm-button tm-button--outline" onClick={()=>{setPlansError('');setPlansReload(n=>n+1);}}>Thử tải lại</button></div> : <PlanComparison plans={displayPlans} selectedId={selectedPlan?._id} onSelect={setSelectedPlan} />}
-            {giftItems.length > 0 && <div className="mt-5 border-t border-[#F0DDD5] pt-4"><h3 className="font-semibold">Quà tặng kèm của kỳ hạn này</h3><ul className="mt-2 text-sm text-stone-600">{giftItems.map((gift,i)=><li key={i}>{gift.boxId.name} × {gift.quantity || 1}</li>)}</ul></div>}
+            {giftItems.length > 0 && <div className="mt-5 border-t border-border pt-4"><h3 className="font-semibold">Quà tặng kèm của kỳ hạn này</h3><ul className="mt-2 text-sm text-muted-foreground">{giftItems.map((gift,i)=><li key={i}>{gift.boxId.name} × {gift.quantity || 1}</li>)}</ul></div>}
           </> : <form id="subscription-address-form" onSubmit={event => {event.preventDefault();handleSubscribe();}}>
-            {userData && <p className="mb-4 text-sm text-stone-600">Tài khoản: {userData.name || userData.email}</p>}
+            {userData && <p className="mb-4 text-sm text-muted-foreground">Tài khoản: {userData.name || userData.email}</p>}
             {loadingUser && <p role="status">Đang tải địa chỉ…</p>}
-            {userError && <p role="alert" className="mb-4 text-sm text-red-700">{userError}</p>}
-            {!loadingUser && savedAddresses.length > 0 && <fieldset className="space-y-3"><legend className="mb-3 font-semibold">Địa chỉ đã lưu</legend>{savedAddresses.map((address,index)=><label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 ${!useManual && selectedSavedAddr === index ? 'border-[#B14B2D] bg-[#FFF0EB]' : 'border-[#F0DDD5]'}`} key={address._id || index}>
+            {userError && <p role="alert" className="mb-4 text-sm text-destructive-text">{userError}</p>}
+            {!loadingUser && savedAddresses.length > 0 && <fieldset className="space-y-3"><legend className="mb-3 font-semibold">Địa chỉ đã lưu</legend>{savedAddresses.map((address,index)=><label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 ${!useManual && selectedSavedAddr === index ? 'border-primary bg-primary/10' : 'border-border'}`} key={address._id || index}>
               <input className="mt-1 h-5 w-5 shrink-0" type="radio" name="saved-address" checked={!useManual && selectedSavedAddr === index} onChange={()=>selectSaved(address,index)} />
               <span className="text-sm"><strong className="block">{address.fullName || `Địa chỉ ${index+1}`}</strong>{[address.address,address.district,address.city].filter(Boolean).join(', ')}<span className="block mt-1">{address.phone}</span></span>
             </label>)}<button type="button" className="tm-text-button" onClick={useManual ? ()=>{setUseManual(false);setSelectedSavedAddr(0);} : switchToManual}>{useManual ? 'Dùng địa chỉ đã lưu' : 'Nhập địa chỉ khác'}</button></fieldset>}
             {!loadingUser && (useManual || savedAddresses.length === 0) && <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">{fields.map(([name,label,autoComplete,required])=><div key={name} className={name === 'address' || name === 'phone' ? 'sm:col-span-2' : ''}><AddressField name={name} label={label} value={manualAddress[name]} autoComplete={autoComplete} required={required} type={name === 'phone' ? 'tel' : 'text'} error={addressErrors[name]} onChange={handleManualChange} /></div>)}</div>}
           </form>}
           <div className="tm-modal__footer">
-            <div aria-live="polite"><p className="text-sm text-stone-600">Tổng trả trước</p><p className="tm-price mt-1">{selectedPlan ? formatCurrency(selectedPlan._totalPrice) : 'Chưa có kỳ hạn'}</p>{selectedPlan && <p className="mt-2 text-sm text-stone-600">{selectedPlan._months} tháng · Bình quân {formatCurrency(Math.round(selectedPlan._pricePerMonth))}/tháng</p>}<p className="mt-2 text-sm text-stone-600">Phí giao hàng trả riêng cho từng lần nhận.</p></div>
+            <div aria-live="polite"><p className="text-sm text-muted-foreground">Tổng trả trước</p><p className="tm-price mt-1">{selectedPlan ? formatCurrency(selectedPlan._totalPrice) : 'Chưa có kỳ hạn'}</p>{selectedPlan && <p className="mt-2 text-sm text-muted-foreground">{selectedPlan._months} tháng · Bình quân {formatCurrency(Math.round(selectedPlan._pricePerMonth))}/tháng</p>}<p className="mt-2 text-sm text-muted-foreground">Phí giao hàng trả riêng cho từng lần nhận.</p></div>
             {step === 1 ? <button type="button" className="tm-button tm-button--primary w-full" disabled={Boolean(pending) || loadingPlans || !selectedPlan?._isReal} onClick={handleNextStep}>Chọn địa chỉ nhận hàng<ChevronRight size={18} /></button> : <div className="flex flex-wrap gap-3"><button type="button" className="tm-button tm-button--outline" disabled={submitting} onClick={handleBack}><ChevronLeft size={18} />Đổi kỳ hạn</button><button type="submit" form="subscription-address-form" className="tm-button tm-button--primary grow" disabled={submitting || loadingUser || Boolean(pending)}>{submitting ? <><Loader2 size={18} className="animate-spin" />Đang gửi…</> : 'Xác nhận đăng ký'}</button></div>}
           </div>
         </div>

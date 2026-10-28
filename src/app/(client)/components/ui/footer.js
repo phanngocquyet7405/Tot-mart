@@ -68,7 +68,7 @@ const SOCIAL = [
 
 export default function Footer() {
   return (
-    <footer className="bg-[#1c2a33] text-white w-full font-sans">
+    <footer className="bg-foreground text-white w-full font-sans">
       {/* ── Main grid ── */}
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
@@ -90,7 +90,7 @@ export default function Footer() {
               </div>
             </Link>
 
-            <p className="text-xs text-gray-200 mb-4 font-medium leading-relaxed">
+            <p className="text-xs text-background/80 mb-4 font-medium leading-relaxed">
               Download our app to get
               <br />
               app-exclusive offers and
@@ -99,7 +99,7 @@ export default function Footer() {
             </p>
 
             <div className="w-24 h-24 bg-white p-1 rounded-sm flex items-center justify-center">
-              <div className="border border-gray-300 w-full h-full flex items-center justify-center text-gray-800 text-[11px] font-bold">
+              <div className="border border-background/20 w-full h-full flex items-center justify-center text-background text-[11px] font-bold">
                 QR CODE
               </div>
             </div>
@@ -115,7 +115,7 @@ export default function Footer() {
                 <li key={label}>
                   <Link
                     href={href}
-                    className="text-sm text-gray-200 hover:text-white transition-colors font-medium"
+                    className="text-sm text-background/80 hover:text-white transition-colors font-medium"
                   >
                     {label}
                   </Link>
@@ -134,7 +134,7 @@ export default function Footer() {
                 <li key={label}>
                   <Link
                     href={href}
-                    className="text-sm text-gray-200 hover:text-white transition-colors font-medium"
+                    className="text-sm text-background/80 hover:text-white transition-colors font-medium"
                   >
                     {label}
                   </Link>
@@ -153,7 +153,7 @@ export default function Footer() {
                 <li key={label}>
                   <Link
                     href={href}
-                    className="text-sm text-gray-200 hover:text-white transition-colors font-medium"
+                    className="text-sm text-background/80 hover:text-white transition-colors font-medium"
                   >
                     {label}
                   </Link>
@@ -184,10 +184,10 @@ export default function Footer() {
       </div>
 
       {/* ── Bottom bar ── */}
-      <div className="border-t border-white/10 bg-[#1c2a33]">
+      <div className="border-t border-white/10 bg-foreground">
         <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row justify-between items-center gap-6">
           {/* Copyright */}
-          <p className="text-[11px] md:text-xs text-gray-400 tracking-widest uppercase font-medium order-2 md:order-1">
+          <p className="text-[11px] md:text-xs text-background/60 tracking-widest uppercase font-medium order-2 md:order-1">
             © 2026 TotMart Box. All rights reserved.
           </p>
 
@@ -198,7 +198,7 @@ export default function Footer() {
                 key={label}
                 href={href}
                 aria-label={label}
-                className="text-gray-400 hover:text-white transition-all hover:scale-110"
+                className="text-background/60 hover:text-white transition-all hover:scale-110"
               >
                 <svg
                   className="w-5 h-5"

@@ -141,15 +141,14 @@ function AddressTab({ userId, addresses = [] }) {
 
       <Button
         variant="outline"
-        size="sm"
         onClick={addAddress}
-        className="w-full gap-1.5 border-dashed border-2"
+        className="w-full gap-1.5 border-dashed border-2 min-h-11"
       >
         <Plus size={14} /> Thêm địa chỉ mới
       </Button>
 
       <div className="flex justify-end gap-2 pt-2">
-        <Button onClick={handleSave} disabled={isSaving} size="sm">
+        <Button onClick={handleSave} disabled={isSaving} className="min-h-11">
           {isSaving && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
           Lưu danh sách địa chỉ
         </Button>
@@ -241,7 +240,7 @@ export default function UserDialog({ open, onOpenChange, user, onSuccess }) {
             {isEdit ? (
               <span>
                 Chỉnh sửa người dùng:{" "}
-                <span className="text-indigo-600 font-bold">{user.name}</span>
+                <span className="text-primary font-bold">{user.name}</span>
               </span>
             ) : (
               "Thêm người dùng mới"
@@ -350,13 +349,13 @@ export default function UserDialog({ open, onOpenChange, user, onSuccess }) {
             </div>
 
             <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" className="min-h-11" onClick={() => onOpenChange(false)}>
                 Hủy
               </Button>
               <Button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="min-h-11"
               >
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEdit ? "Lưu thay đổi" : "Tạo người dùng"}

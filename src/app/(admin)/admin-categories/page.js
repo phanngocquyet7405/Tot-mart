@@ -6,6 +6,7 @@ import GetAllCategories from "../components/categories/get_all_categories.js";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AdminPageHeader } from "../components/shared";
 import { cn } from "@/lib/utils";
 import {
   Search,
@@ -16,7 +17,6 @@ import {
   Layers,
   CheckCircle2,
   AlertCircle,
-  Info,
 } from "lucide-react";
 import { useAdminCategoriesList } from "./hooks/useAdminCategoriesList";
 
@@ -37,49 +37,41 @@ export default function CategoriesPage() {
   } = useAdminCategoriesList();
 
   return (
-    <div className="container mx-auto py-8 space-y-8 max-w-7xl">
-      {/* Header đồng nhất với AddCategory - Màu cam chủ đạo */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-800 flex items-center gap-3">
-            <div className="p-2 bg-orange-600 rounded-xl shadow-lg shadow-orange-200">
-              <FolderTree className="h-6 w-6 text-white" />
-            </div>
-            Cấu trúc Danh mục
-          </h1>
-          <p className="text-muted-foreground mt-1 flex items-center gap-1 italic">
-            <Info className="h-3 w-3" /> Quản lý phân cấp dựa trên mảng
-            Reference IDs
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            onClick={fetchCategories}
-            className="border-zinc-200 hover:bg-zinc-50"
-            disabled={isLoading}
-          >
-            <RotateCcw
-              className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")}
-            />
-            Làm mới
-          </Button>
-          <Button
-            className="bg-orange-600 hover:bg-orange-700 shadow-lg shadow-orange-200"
-            onClick={() => router.push("/admin-categories/create")}
-          >
-            <Plus className="h-4 w-4 mr-2" /> Thêm danh mục mới
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Cấu trúc Danh mục"
+        description="Quản lý phân cấp dựa trên mảng Reference IDs"
+        icon={FolderTree}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={fetchCategories}
+              className="min-h-11"
+              disabled={isLoading}
+            >
+              <RotateCcw
+                className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")}
+              />
+              Làm mới
+            </Button>
+            <Button
+              className="min-h-11"
+              onClick={() => router.push("/admin-categories/create")}
+            >
+              <Plus className="h-4 w-4 mr-2" /> Thêm danh mục mới
+            </Button>
+          </div>
+        }
+      />
 
-      {/* Stats Cards - Màu sắc đồng bộ */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatsCard
           label="Tổng danh mục"
           value={stats.total}
           icon={<Layers className="h-5 w-5" />}
-          color="blue"
+          color="primary"
           isActive={filterType === "all"}
           onClick={() => setFilterType("all")}
         />
@@ -87,7 +79,7 @@ export default function CategoriesPage() {
           label="Đang hoạt động"
           value={stats.active}
           icon={<CheckCircle2 className="h-5 w-5" />}
-          color="green"
+          color="success"
           isActive={filterType === "active"}
           onClick={() => setFilterType("active")}
         />
@@ -95,35 +87,35 @@ export default function CategoriesPage() {
           label="Danh mục gốc"
           value={stats.root}
           icon={<FolderTree className="h-5 w-5" />}
-          color="orange"
+          color="warning"
           isActive={filterType === "root"}
           onClick={() => setFilterType("root")}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="space-y-4">
-          {/* Search Box - Đồng nhất Input style */}
-          <Card className="border-orange-100 shadow-sm overflow-hidden">
-            <CardHeader className="pb-3 border-b bg-orange-50/30">
-              <CardTitle className="text-xs font-bold uppercase text-orange-800 tracking-wider">
+          {/* Search Box */}
+          <Card className="border-border shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 border-b border-border bg-muted/40">
+              <CardTitle className="text-xs font-bold uppercase text-foreground tracking-wider">
                 Bộ lọc & Tìm kiếm
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Tìm theo tên..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 focus-visible:ring-orange-500 border-zinc-200 h-10"
+                  className="pl-9 min-h-11 text-base sm:text-sm"
                 />
               </div>
 
               <Button
-                variant="secondary"
-                className="w-full justify-start gap-2 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border-none"
+                variant="outline"
+                className="w-full justify-start gap-2 min-h-11"
                 onClick={toggleExpandAll}
                 disabled={searchQuery.length > 0 || filterType !== "all"}
               >
@@ -133,12 +125,12 @@ export default function CategoriesPage() {
             </CardContent>
           </Card>
 
-          {/* Guide Box - Giống trang Add */}
-          <div className="p-4 rounded-xl bg-blue-50 border border-blue-100 text-[11px] text-blue-700 space-y-2">
-            <p className="font-bold flex items-center gap-1 uppercase tracking-tighter">
-              <AlertCircle className="h-3 w-3" /> Thông tin Schema
+          {/* Guide Box */}
+          <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 text-xs text-foreground space-y-2">
+            <p className="font-bold flex items-center gap-1 uppercase tracking-tighter text-primary">
+              <AlertCircle className="h-3.5 w-3.5" /> Thông tin Schema
             </p>
-            <p className="opacity-80 leading-relaxed">
+            <p className="opacity-80 leading-relaxed text-muted-foreground">
               Dữ liệu được tổ chức theo <code>childrenIds[]</code>. Danh mục con
               nằm bên trong mảng của danh mục cha.
             </p>
@@ -147,14 +139,14 @@ export default function CategoriesPage() {
 
         {/* Tree Table Area */}
         <div className="lg:col-span-3">
-          <Card className="shadow-xl border-none overflow-hidden rounded-2xl bg-white">
-            <CardHeader className="bg-zinc-900 text-white py-4 px-6 flex flex-row items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] opacity-70">
+          <Card className="shadow-sm border border-border overflow-hidden rounded-xl bg-card">
+            <CardHeader className="bg-muted/50 border-b border-border py-4 px-6 flex flex-row items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-foreground">
                 {filterType === "all"
                   ? "Cấu trúc phân cấp hệ thống"
                   : `Danh sách lọc: ${filterType}`}
               </span>
-              <div className="hidden md:flex gap-12 text-[11px] font-bold uppercase tracking-widest opacity-70 mr-8">
+              <div className="hidden md:flex gap-12 text-xs font-bold uppercase tracking-wider text-muted-foreground mr-8">
                 <span>Trạng thái</span>
                 <span>Thao tác</span>
               </div>
@@ -176,38 +168,32 @@ export default function CategoriesPage() {
   );
 }
 
-// Sub-component cho Stats Card để code sạch hơn
 function StatsCard({ label, value, icon, color, isActive, onClick }) {
   const colorMap = {
-    blue: "bg-blue-500 border-blue-100 text-blue-600",
-    green: "bg-green-500 border-green-100 text-green-600",
-    orange: "bg-orange-500 border-orange-100 text-orange-600",
+    primary: "bg-primary/10 text-primary border-primary/25",
+    success: "bg-success/15 text-success-text border-success/30",
+    warning: "bg-warning/15 text-warning-text border-warning/30",
   };
+
+  const c = colorMap[color] || colorMap.primary;
 
   return (
     <Card
       onClick={onClick}
       className={cn(
-        "cursor-pointer transition-all duration-300 border-2",
-        isActive
-          ? `border-${color}-500 shadow-lg scale-[1.02]`
-          : "border-transparent hover:border-zinc-200",
+        "cursor-pointer transition-all border border-border bg-card hover:border-border/80",
+        isActive && "border-primary shadow-sm scale-[1.01]",
       )}
     >
       <CardContent className="p-5 flex items-center gap-4">
-        <div
-          className={cn(
-            "p-3 rounded-xl text-white shadow-inner",
-            colorMap[color].split(" ")[0],
-          )}
-        >
+        <div className={cn("p-3 rounded-xl border shrink-0", c)}>
           {icon}
         </div>
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider opacity-60">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {label}
           </p>
-          <p className="text-2xl font-black text-zinc-800">{value}</p>
+          <p className="text-2xl font-bold tabular-nums text-foreground">{value}</p>
         </div>
       </CardContent>
     </Card>

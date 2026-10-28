@@ -6,7 +6,7 @@ import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const ANNOUNCEMENTS = [
   {
-    text: "Ship trả trực tiếp bên giao hàng theo địa chỉ",
+    text: "Phí giao hàng xác nhận riêng theo địa chỉ",
     cta: "Mua ngay →",
     href: "/homepage",
   },
@@ -61,7 +61,7 @@ export default function AnnouncementBarBox() {
     // fixed top-0, toàn chiều ngang, z-50 để nằm trên mọi thứ
     // Nav sẽ được đặt top = BAR_H bên dưới
     <div
-      className="fixed left-0 right-0 top-0 z-50 w-full bg-stone-900 text-white overflow-hidden"
+      className="fixed left-0 right-0 top-0 z-50 w-full bg-foreground text-background overflow-hidden"
       style={{ height: BAR_H }}
     >
       <div className="h-full max-w-7xl mx-auto px-3 sm:px-6 flex items-center gap-2">
@@ -71,7 +71,7 @@ export default function AnnouncementBarBox() {
             clearInterval(timerRef.current);
             goto(idx - 1);
           }}
-          className="shrink-0 w-6 h-6 flex items-center justify-center text-stone-500 hover:text-white rounded-full hover:bg-white/10 transition-all"
+          className="shrink-0 w-6 h-6 flex items-center justify-center text-background/60 hover:text-background rounded-full hover:bg-background/10 transition-colors"
           aria-label="Trước"
         >
           <ChevronLeft size={14} />
@@ -82,12 +82,12 @@ export default function AnnouncementBarBox() {
           className="flex-1 flex items-center justify-center gap-2 sm:gap-3 min-w-0"
           style={{ opacity: fading ? 0 : 1, transition: "opacity 0.22s" }}
         >
-          <p className="text-[11px] sm:text-xs font-medium text-stone-200 truncate leading-none">
+          <p className="text-[11px] sm:text-xs font-medium text-background/90 truncate leading-none">
             {text}
           </p>
           <Link
             href={href}
-            className="shrink-0 text-[11px] sm:text-xs font-bold text-amber-400 hover:text-amber-300 whitespace-nowrap transition-colors"
+            className="shrink-0 text-[11px] sm:text-xs font-bold text-primary-foreground font-bold hover:underline whitespace-nowrap transition-colors"
           >
             {cta}
           </Link>
@@ -107,7 +107,7 @@ export default function AnnouncementBarBox() {
                 width: i === idx ? 14 : 5,
                 height: 5,
                 borderRadius: 99,
-                background: i === idx ? "#f59e0b" : "rgba(255,255,255,0.2)",
+                background: i === idx ? "var(--primary)" : "rgba(255,255,255,0.25)",
                 transition: "all 0.3s",
               }}
             />
@@ -120,7 +120,7 @@ export default function AnnouncementBarBox() {
             clearInterval(timerRef.current);
             goto(idx + 1);
           }}
-          className="shrink-0 w-6 h-6 flex items-center justify-center text-stone-500 hover:text-white rounded-full hover:bg-white/10 transition-all"
+          className="shrink-0 w-6 h-6 flex items-center justify-center text-background/60 hover:text-background rounded-full hover:bg-background/10 transition-colors"
           aria-label="Tiếp theo"
         >
           <ChevronRight size={14} />
@@ -129,7 +129,7 @@ export default function AnnouncementBarBox() {
         {/* Dismiss */}
         <button
           onClick={() => setDismissed(true)}
-          className="shrink-0 w-6 h-6 flex items-center justify-center text-stone-600 hover:text-white rounded-full hover:bg-white/10 transition-all"
+          className="shrink-0 w-6 h-6 flex items-center justify-center text-background/60 hover:text-background rounded-full hover:bg-background/10 transition-colors"
           aria-label="Đóng"
         >
           <X size={12} />

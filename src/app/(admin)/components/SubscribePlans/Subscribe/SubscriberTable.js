@@ -1,12 +1,14 @@
 "use client";
 /**
  * SubscriberTable.js
- * Bảng hiển thị danh sách người đăng ký với pagination + row click mở detail
+ * Bảng hiển thị danh sách người đăng ký với pagination + row click mở detail.
+ * Hỗ trợ mobile card layout dưới 768px.
  */
 
-
 import { useState } from "react";
-import { Eye, ChevronLeft, ChevronRight, Package } from "lucide-react";
+import { Eye, ChevronLeft, ChevronRight, Package, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { SubscriberStatusBadge } from "./Subscriberstatusbadge";
 import { formatCurrency, PLAN_TYPE_LABELS } from "@/app/util/formatter";
 
@@ -14,21 +16,17 @@ const PAGE_SIZE = 10;
 
 function EmptyRow() {
   return (
-    <tr>
-      <td colSpan={7} className="py-20 text-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-stone-100 flex items-center justify-center">
-            <Package size={24} className="text-stone-300" />
-          </div>
-          <p className="text-sm font-semibold text-stone-400">
-            Không có dữ liệu
-          </p>
-          <p className="text-xs text-stone-300">
-            Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
-          </p>
+    <div className="py-16 text-center text-muted-foreground">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+          <Package size={24} className="text-muted-foreground opacity-40" />
         </div>
-      </td>
-    </tr>
+        <p className="text-sm font-semibold text-foreground">Không có dữ liệu</p>
+        <p className="text-xs text-muted-foreground">
+          Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -48,135 +46,217 @@ export function SubscriberTable({ subscriptions, onViewDetail }) {
         })
       : "—";
 
-  // Reset về page 1 khi list thay đổi
   const safeSetPage = (p) => setPage(Math.min(p, Math.max(totalPages, 1)));
 
   return (
-    <div className="flex flex-col gap-0 bg-white rounded-2xl border border-stone-200 overflow-hidden">
-      {/* Table */}
-      <div className="overflow-x-auto">
+    <div className="flex flex-col gap-0 bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
+      {/* Mobile Card Layout (< 768px) */}
+      <div className="md:hidden divide-y divide-border">
+        {paginated.length === 0 ? (
+          <EmptyRow />
+        ) : (
+          paginated.map((sub, idx) => (
+            <Card
+              key={sub._id}
+              className="rounded-none border-x-0 border-t-0 shadow-none cursor-pointer hover:bg-muted/30 transition-colors"
+              onClick={() => onViewDetail(sub)}
+            >
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-xs font-bold text-primary">
+                      {sub.userId?.name?.charAt(0)?.toUpperCase() ?? "?"}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">
+                        {sub.userId?.name ?? "—"}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {sub.userId?.email ?? "—"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="min-h-11 min-w-11 shrink-0 -mr-2 -mt-2 text-muted-foreground"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewDetail(sub);
+                    }}
+                  >
+                    <Eye size={18} />
+                  </Button>
+                </div>
+
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Gói đăng ký:</span>
+                    <span className="font-medium text-foreground">
+                      {sub.templateId?.name ?? "—"} (
+                      {PLAN_TYPE_LABELS[sub.planType] ?? sub.planType})
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Tiến độ giao:</span>
+                    <span className="font-semibold text-foreground tabular-nums">
+                      {sub.remainDeliveries ?? 0}/{sub.totalDeliveries ?? 0} lần
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Giá:</span>
+                    <span className="font-bold text-primary tabular-nums">
+                      {formatCurrency(sub.price ?? 0)}
+                    </span>
+                  </div>
+                  {sub.nextDeliveries && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Giao tiếp theo:</span>
+                      <span className="font-medium text-foreground tabular-nums">
+                        {formatDate(sub.nextDeliveries)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/60">
+                  <SubscriberStatusBadge status={sub.status} size="sm" />
+                  {sub.cancelAtPeriodEnd && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-warning-text">
+                      <AlertTriangle size={12} /> Hủy cuối kỳ
+                    </span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Desktop Table View (>= 768px) */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-100 bg-stone-50">
-              <th className="text-left px-5 py-3.5 text-[11px] font-black uppercase tracking-widest text-stone-400">
+            <tr className="border-b border-border bg-muted/40">
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-muted-foreground">
                 #
               </th>
-              <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-widest text-stone-400">
+              <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground">
                 Người dùng
               </th>
-              <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-widest text-stone-400">
+              <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground">
                 Gói
               </th>
-              <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-widest text-stone-400">
+              <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground">
                 Trạng thái
               </th>
-              <th className="text-left px-4 py-3.5 text-[11px] font-black uppercase tracking-widest text-stone-400">
+              <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground">
                 Giao tiếp theo
               </th>
-              <th className="text-right px-4 py-3.5 text-[11px] font-black uppercase tracking-widest text-stone-400">
+              <th className="text-right px-4 py-3.5 text-xs font-semibold text-muted-foreground">
                 Giá
               </th>
-              <th className="px-5 py-3.5" />
+              <th className="px-5 py-3.5 text-right text-xs font-semibold text-muted-foreground">
+                Thao tác
+              </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-stone-50">
+          <tbody className="divide-y divide-border">
             {paginated.length === 0 ? (
-              <EmptyRow />
+              <tr>
+                <td colSpan={7}>
+                  <EmptyRow />
+                </td>
+              </tr>
             ) : (
               paginated.map((sub, idx) => (
                 <tr
                   key={sub._id}
-                  className="hover:bg-stone-50 transition-colors group cursor-pointer"
+                  className="hover:bg-muted/30 transition-colors group cursor-pointer"
                   onClick={() => onViewDetail(sub)}
                 >
-                  {/* # */}
                   <td className="px-5 py-4">
-                    <span className="text-[11px] font-mono text-stone-400">
+                    <span className="text-xs font-mono text-muted-foreground tabular-nums">
                       {start + idx + 1}
                     </span>
                   </td>
 
-                  {/* User */}
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
-                      {/* Avatar placeholder */}
-                      <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#F0DDD5] to-[#C85C3C]/30 flex items-center justify-center shrink-0 text-[11px] font-black text-[#C85C3C]">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-xs font-bold text-primary">
                         {sub.userId?.name?.charAt(0)?.toUpperCase() ?? "?"}
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-stone-800 leading-tight">
+                        <p className="text-xs font-semibold text-foreground leading-tight">
                           {sub.userId?.name ?? "—"}
                         </p>
-                        <p className="text-[11px] text-stone-400 leading-tight">
+                        <p className="text-xs text-muted-foreground leading-tight">
                           {sub.userId?.email ?? "—"}
                         </p>
                       </div>
                     </div>
                   </td>
 
-                  {/* Plan */}
                   <td className="px-4 py-4">
                     <div>
-                      <p className="text-xs font-semibold text-stone-700">
+                      <p className="text-xs font-semibold text-foreground">
                         {sub.templateId?.name ?? "—"}
                       </p>
-                      <p className="text-[11px] text-stone-400">
+                      <p className="text-xs text-muted-foreground tabular-nums">
                         {PLAN_TYPE_LABELS[sub.planType] ?? sub.planType}
                         {" · "}
-                        {sub.remainDeliveries ?? 0}/{sub.totalDeliveries ?? 0}{" "}
-                        lần
+                        {sub.remainDeliveries ?? 0}/{sub.totalDeliveries ?? 0} lần
                       </p>
                     </div>
                   </td>
 
-                  {/* Status */}
                   <td className="px-4 py-4">
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1 items-start">
                       <SubscriberStatusBadge status={sub.status} size="sm" />
                       {sub.cancelAtPeriodEnd && (
-                        <span className="text-[11px] font-bold text-amber-600">
-                          ⚠ Hủy cuối kỳ
+                        <span className="text-[11px] font-medium text-warning-text flex items-center gap-1">
+                          <AlertTriangle size={11} /> Hủy cuối kỳ
                         </span>
                       )}
                     </div>
                   </td>
 
-                  {/* Next delivery */}
                   <td className="px-4 py-4">
-                    <span className="text-xs text-stone-600">
+                    <span className="text-xs text-foreground tabular-nums">
                       {sub.nextDeliveries ? (
                         formatDate(sub.nextDeliveries)
                       ) : (
-                        <span className="text-stone-300">—</span>
+                        <span className="text-muted-foreground">—</span>
                       )}
                     </span>
                   </td>
 
-                  {/* Price */}
                   <td className="px-4 py-4 text-right">
                     <div>
-                      <p className="text-xs font-black text-[#C85C3C]">
+                      <p className="text-xs font-bold text-primary tabular-nums">
                         {formatCurrency(sub.price ?? 0)}
                       </p>
                       {sub.discountPercent > 0 && (
-                        <p className="text-[11px] text-stone-400 line-through">
+                        <p className="text-[11px] text-muted-foreground line-through tabular-nums">
                           {formatCurrency(sub.oldPrice ?? 0)}
                         </p>
                       )}
                     </div>
                   </td>
 
-                  {/* Action */}
-                  <td className="px-5 py-4">
-                    <button
+                  <td className="px-5 py-4 text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
                         onViewDetail(sub);
                       }}
-                      className="w-8 h-8 rounded-lg border border-stone-200 flex items-center justify-center text-stone-400 hover:text-[#C85C3C] hover:border-[#C85C3C]/30 hover:bg-[#FFF0EB] transition-all opacity-0 group-hover:opacity-100"
+                      className="h-8 w-8 pointer-coarse:min-h-11 pointer-coarse:min-w-11 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <Eye size={13} />
-                    </button>
+                      <Eye size={15} />
+                    </Button>
                   </td>
                 </tr>
               ))
@@ -187,25 +267,25 @@ export function SubscriberTable({ subscriptions, onViewDetail }) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="px-5 py-3.5 border-t border-stone-100 flex items-center justify-between">
-          <span className="text-xs text-stone-400">
-            Trang <span className="font-bold text-stone-600">{page}</span>
-            {" / "}
-            <span className="font-bold text-stone-600">{totalPages}</span>
+        <div className="px-5 py-3 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 bg-muted/20">
+          <span className="text-xs text-muted-foreground tabular-nums">
+            Trang <strong className="text-foreground">{page}</strong> / {totalPages}
           </span>
 
           <div className="flex items-center gap-1">
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => safeSetPage(page - 1)}
               disabled={page === 1}
-              className="w-8 h-8 rounded-lg border border-stone-200 flex items-center justify-center text-stone-400 hover:text-stone-700 hover:border-stone-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="min-h-11 min-w-11"
             >
-              <ChevronLeft size={14} />
-            </button>
+              <ChevronLeft size={16} />
+            </Button>
 
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter(
-                (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1,
+                (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1
               )
               .reduce((acc, p, i, arr) => {
                 if (i > 0 && p - arr[i - 1] > 1) acc.push("...");
@@ -216,32 +296,31 @@ export function SubscriberTable({ subscriptions, onViewDetail }) {
                 item === "..." ? (
                   <span
                     key={`dots-${i}`}
-                    className="text-xs text-stone-300 px-1"
+                    className="text-xs text-muted-foreground px-1"
                   >
                     ...
                   </span>
                 ) : (
-                  <button
+                  <Button
                     key={item}
+                    variant={page === item ? "default" : "outline"}
                     onClick={() => safeSetPage(item)}
-                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
-                      page === item
-                        ? "bg-[#C85C3C] text-white"
-                        : "border border-stone-200 text-stone-600 hover:border-stone-300"
-                    }`}
+                    className="min-h-11 min-w-11 text-xs tabular-nums"
                   >
                     {item}
-                  </button>
-                ),
+                  </Button>
+                )
               )}
 
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => safeSetPage(page + 1)}
               disabled={page === totalPages}
-              className="w-8 h-8 rounded-lg border border-stone-200 flex items-center justify-center text-stone-400 hover:text-stone-700 hover:border-stone-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="min-h-11 min-w-11"
             >
-              <ChevronRight size={14} />
-            </button>
+              <ChevronRight size={16} />
+            </Button>
           </div>
         </div>
       )}

@@ -47,7 +47,7 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
         <section className="tm-purchase lg:col-span-5" aria-label="Thông tin mua hộp">
           <div>
             <h1 className="tm-product-title">{box.name}</h1>
-            <p className="mt-3 text-sm text-stone-600">
+            <p className="mt-3 text-sm text-muted-foreground">
               {box.isGift ? "Hộp quà TotMart" : "Combo sản phẩm TotMart"}
             </p>
           </div>
@@ -55,12 +55,12 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
             <div className="flex flex-wrap items-baseline gap-4">
               <p className="tm-price">{salePrice.toLocaleString("vi-VN")} ₫</p>
               {originalPrice && (
-                <del className="text-stone-500">{originalPrice.toLocaleString("vi-VN")} ₫</del>
+                <del className="text-muted-foreground">{originalPrice.toLocaleString("vi-VN")} ₫</del>
               )}
             </div>
-            <p className="mt-2 text-sm text-stone-600">Giá cuối cùng được xác nhận tại thanh toán.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Giá cuối cùng được xác nhận tại thanh toán.</p>
           </div>
-          <p className={stock > 0 ? "font-semibold text-green-800" : "font-semibold text-red-700"}>
+          <p className={stock > 0 ? "font-semibold text-success-text" : "font-semibold text-destructive-text"}>
             {stock > 0 ? `Còn ${stock} hộp` : "Tạm hết hàng"}
           </p>
           <div className="tm-quantity-row">
@@ -88,7 +88,7 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
             </div>
           </div>
           {box.sourceComboId && (
-            <div className="rounded-xl border border-[#F0DDD5] bg-[#FFF0EB] p-5 text-sm space-y-3">
+            <div className="rounded-xl border border-border bg-card p-5 text-sm space-y-3">
               <h2 className="font-bold text-base">Ưu đãi & tiện ích theo hộp</h2>
               {(box.giftPolicy?.bulkTiers || []).map((t) => (
                 <p key={t.minQuantity}>
@@ -134,9 +134,9 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
               return (
                 <li
                   key={product._id || index}
-                  className="flex items-center gap-4 rounded-xl border border-[#F0DDD5] p-4"
+                  className="flex items-center gap-4 rounded-xl border border-border p-4 bg-card"
                 >
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-white">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
                     <Image
                       src={product.images?.[0]?.url || PLACEHOLDER_IMAGE}
                       alt={product.name || "Sản phẩm trong hộp"}
@@ -147,20 +147,20 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-semibold">{product.name || "Sản phẩm trong hộp"}</h3>
-                    <p className="text-sm text-stone-600">Số lượng: {item.quantity || 1}</p>
+                    <p className="text-sm text-muted-foreground">Số lượng: {item.quantity || 1}</p>
                   </div>
                 </li>
               );
             })}
           </ul>
         ) : (
-          <p className="text-stone-600">Chưa có thông tin chi tiết sản phẩm trong hộp.</p>
+          <p className="text-muted-foreground">Chưa có thông tin chi tiết sản phẩm trong hộp.</p>
         )}
       </section>
 
       <section className="tm-section">
         <h2>Về hộp sản phẩm</h2>
-        <p className="max-w-prose whitespace-pre-line text-stone-600">
+        <p className="max-w-prose whitespace-pre-line text-muted-foreground">
           {box.descriptions || "Chưa có mô tả chi tiết cho hộp này."}
         </p>
       </section>

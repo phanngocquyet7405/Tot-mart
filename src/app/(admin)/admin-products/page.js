@@ -49,7 +49,7 @@ export default function ProductListPage() {
         icon={Package}
         backHref="/admin"
         actions={
-          <Button asChild>
+          <Button asChild className="min-h-11">
             <Link href="/admin-products/create">
               <Plus className="mr-2 h-4 w-4" /> Thêm mới
             </Link>
@@ -61,10 +61,10 @@ export default function ProductListPage() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full sm:w-72">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-3.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Tìm tên sản phẩm..."
-                className="pl-8"
+                className="pl-8 min-h-11 text-base sm:text-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -72,7 +72,7 @@ export default function ProductListPage() {
             <Button
               variant="outline"
               onClick={() => setFilterOpen(true)}
-              className="w-fit"
+              className="w-fit min-h-11"
             >
               <Filter className="mr-2 h-4 w-4" /> Lọc nâng cao
             </Button>
