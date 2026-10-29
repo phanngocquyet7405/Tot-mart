@@ -4,7 +4,6 @@
  * Card hiển thị một gói đăng ký trong trang My Subscriptions
  */
 
-
 import {
   MapPin,
   Gift,
@@ -36,7 +35,6 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
   const [expanded, setExpanded] = useState(false);
 
   // Sản phẩm bên trong box của gói này — chỉ tải khi người dùng mở "Chi tiết"
-  // để tránh gọi API cho toàn bộ danh sách subscription ngay khi vào trang.
   const boxId = sub.boxId?._id;
   const {
     products: boxProducts,
@@ -68,25 +66,33 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
   return (
     <div
       className={cn(
-        "bg-white rounded-3xl border-2 overflow-hidden transition-all duration-300",
+        "bg-card rounded-2xl border transition-all duration-300 overflow-hidden shadow-xs",
         sub.status === "active"
-          ? "border-[#F0DDD5] shadow-sm hover:shadow-md"
-          : "border-stone-100 opacity-75",
+          ? "border-border"
+          : "border-border/60 opacity-80",
       )}
     >
-      {sub.status === "pending_payment" && <div className="p-4"><Link className="underline font-semibold" href={`/checkout?code=${encodeURIComponent(sub.paymentCode)}`}>Thanh toán để kích hoạt gói</Link></div>}
+      {sub.status === "pending_payment" && (
+        <div className="p-3.5 bg-warning-text/10 border-b border-warning-text/25 text-xs">
+          <Link
+            className="underline font-bold text-warning-text hover:text-foreground transition-colors"
+            href={`/checkout?code=${encodeURIComponent(sub.paymentCode)}`}
+          >
+            Vui lòng thanh toán để kích hoạt gói đăng ký này
+          </Link>
+        </div>
+      )}
+
       {/* ─── Card Header ─── */}
       <div className="p-5 flex items-start gap-4">
         {/* Box image */}
-        <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-stone-100 shrink-0">
+        <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-muted border border-border shrink-0">
           <Image
             fill
             src={sub.boxId?.images?.[0] ?? PLACEHOLDER}
             alt={sub.boxId?.name || "Box"}
             className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.src = PLACEHOLDER;
-            }}
+            sizes="64px"
           />
         </div>
 
@@ -94,17 +100,17 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 flex-wrap">
             <div>
-              <h3 className="text-sm font-black text-stone-800 leading-tight">
-                {sub.templateId?.name ?? "Gói đăng ký"}
+              <h3 className="text-sm font-bold text-foreground leading-tight">
+                {sub.templateId?.name ?? "Gói đăng ký định kỳ"}
               </h3>
-              <p className="text-[11px] text-stone-400 mt-0.5">
+              <p className="text-[11px] text-muted-foreground mt-0.5">
                 {planLabel} · {sub.boxId?.name}
               </p>
             </div>
 
             {/* Status badge */}
             <span
-              className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide shrink-0"
+              className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shrink-0"
               style={{
                 backgroundColor: config.bg,
                 color: config.text,
@@ -120,16 +126,16 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
           </div>
 
           {/* Price row */}
-          <div className="flex items-center gap-3 mt-2.5">
-            <span className="text-base font-black text-[#C85C3C]">
+          <div className="flex items-center gap-2.5 mt-2.5">
+            <span className="text-base font-bold text-primary tabular-nums">
               {formatCurrency(sub.price ?? 0)}
             </span>
             {sub.discountPercent > 0 && (
               <>
-                <span className="text-xs text-stone-300 line-through">
+                <span className="text-xs text-muted-foreground line-through tabular-nums">
                   {formatCurrency(sub.oldPrice ?? 0)}
                 </span>
-                <span className="text-[11px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                <span className="text-[11px] font-bold text-success-text bg-success-text/10 border border-success-text/25 px-1.5 py-0.5 rounded-md tabular-nums">
                   -{sub.discountPercent}%
                 </span>
               </>
@@ -149,13 +155,13 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
       )}
 
       {/* ─── Quick info strip ─── */}
-      <div className="px-5 pb-4 flex flex-wrap gap-3">
+      <div className="px-5 pb-4 flex flex-wrap items-center gap-3 border-b border-border/50">
         {sub.nextDeliveries && sub.status === "active" && (
-          <div className="flex items-center gap-1.5 text-[11px] text-stone-500">
-            <Calendar size={11} className="text-[#C85C3C]" />
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <Calendar size={12} className="text-primary shrink-0" />
             <span>
-              Giao tiếp:{" "}
-              <span className="font-bold">
+              Lần giao kế tiếp:{" "}
+              <span className="font-bold text-foreground tabular-nums">
                 {formatDate(sub.nextDeliveries)}
               </span>
             </span>
@@ -163,41 +169,41 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
         )}
 
         {daysLeft !== null && sub.status === "active" && (
-          <div className="flex items-center gap-1.5 text-[11px] text-stone-500">
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <span
               className={cn(
-                "font-bold",
-                daysLeft <= 7 ? "text-amber-600" : "text-stone-600",
+                "font-bold tabular-nums",
+                daysLeft <= 7 ? "text-warning-text" : "text-foreground",
               )}
             >
               {daysLeft} ngày còn lại
             </span>
-            <span>trong kỳ</span>
+            <span>trong chu kỳ</span>
           </div>
         )}
 
         {sub.cancelAtPeriodEnd && (
-          <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-            ⚠ Hủy vào {formatDate(sub.currentPeriodEnd)}
+          <span className="text-[11px] font-bold text-warning-text bg-warning-text/10 border border-warning-text/25 px-2 py-0.5 rounded-full">
+            ⚠ Sẽ hủy vào {formatDate(sub.currentPeriodEnd)}
           </span>
         )}
       </div>
 
       {/* ─── Expanded detail ─── */}
       {expanded && (
-        <div className="border-t border-stone-100 px-5 py-4 space-y-3 bg-stone-50/50">
+        <div className="px-5 py-4 space-y-3.5 bg-muted/20 border-b border-border/60">
           {/* Address */}
           {sub.shippingAddress && (
             <div className="flex items-start gap-2">
-              <MapPin size={12} className="text-[#C85C3C] mt-0.5 shrink-0" />
+              <MapPin size={13} className="text-primary mt-0.5 shrink-0" />
               <div>
-                <p className="text-[11px] font-black uppercase tracking-widest text-stone-400 mb-0.5">
-                  Địa chỉ giao hàng
+                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">
+                  Địa chỉ nhận hàng
                 </p>
-                <p className="text-xs text-stone-600">
+                <p className="text-xs font-medium text-foreground">
                   {sub.shippingAddress.address}
                 </p>
-                <p className="text-[11px] text-stone-400">
+                <p className="text-[11px] text-muted-foreground">
                   {[sub.shippingAddress.district, sub.shippingAddress.city]
                     .filter(Boolean)
                     .join(", ")}
@@ -208,14 +214,14 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
 
           {/* Sản phẩm trong hộp */}
           <div>
-            <p className="text-[11px] font-black uppercase tracking-widest text-stone-400 mb-1.5 flex items-center gap-1.5">
-              <Package size={12} className="text-[#C85C3C]" />
-              Sản phẩm trong hộp
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+              <Package size={13} className="text-primary" />
+              Sản phẩm dự kiến trong hộp
             </p>
 
             {loadingProducts ? (
-              <div className="flex items-center gap-2 text-[11px] text-stone-400 py-2">
-                <Loader2 size={12} className="animate-spin" />
+              <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+                <Loader2 size={13} className="animate-spin" />
                 Đang tải danh sách sản phẩm...
               </div>
             ) : boxProducts.length > 0 ? (
@@ -226,7 +232,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
                     : null;
                   const row = (
                     <>
-                      <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white border border-stone-100 shrink-0">
+                      <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-card border border-border shrink-0">
                         {p.images?.[0]?.url ? (
                           <Image
                             src={p.images[0].url}
@@ -237,20 +243,20 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Package size={12} className="text-stone-300" />
+                            <Package size={12} className="text-muted-foreground" />
                           </div>
                         )}
                       </div>
-                      <span className="flex-1 min-w-0 text-xs text-stone-600 truncate">
+                      <span className="flex-1 min-w-0 text-xs font-medium text-foreground truncate">
                         {p.name || "Sản phẩm"}
                       </span>
-                      <span className="text-[11px] text-stone-400 shrink-0">
+                      <span className="text-[11px] text-muted-foreground tabular-nums shrink-0">
                         x{p.quantity || 1}
                       </span>
                       {href && (
                         <ChevronRight
                           size={12}
-                          className="text-stone-300 shrink-0"
+                          className="text-muted-foreground shrink-0"
                         />
                       )}
                     </>
@@ -259,14 +265,14 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
                     <Link
                       key={p._id || i}
                       href={href}
-                      className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 -mx-1.5 hover:bg-white transition-colors"
+                      className="flex items-center gap-2.5 rounded-lg px-2 py-1 -mx-2 hover:bg-card transition-colors"
                     >
                       {row}
                     </Link>
                   ) : (
                     <div
                       key={p._id || i}
-                      className="flex items-center gap-2.5 px-1.5 py-1 -mx-1.5"
+                      className="flex items-center gap-2.5 px-2 py-1 -mx-2"
                     >
                       {row}
                     </div>
@@ -275,16 +281,16 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
                 {boxProducts.length > 4 && boxId && (
                   <Link
                     href={`/products/box/${boxId}`}
-                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#C85C3C] hover:text-[#B14B2D] mt-1"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline mt-1"
                   >
-                    Xem tất cả {boxProducts.length} sản phẩm
+                    Xem toàn bộ {boxProducts.length} sản phẩm
                     <ChevronRight size={11} />
                   </Link>
                 )}
               </div>
             ) : (
-              <p className="text-[11px] text-stone-400 italic">
-                Chưa có thông tin sản phẩm chi tiết cho hộp này.
+              <p className="text-xs text-muted-foreground italic">
+                Chưa có danh sách sản phẩm chi tiết cho combo này.
               </p>
             )}
           </div>
@@ -292,19 +298,19 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
           {/* Gifts */}
           {sub.gift && sub.gift.length > 0 && (
             <div className="flex items-start gap-2">
-              <Gift size={12} className="text-[#C85C3C] mt-0.5 shrink-0" />
+              <Gift size={13} className="text-primary mt-0.5 shrink-0" />
               <div>
-                <p className="text-[11px] font-black uppercase tracking-widest text-stone-400 mb-1.5">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
                   Quà tặng đi kèm
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {sub.gift.map((g, i) => (
                     <span
                       key={i}
-                      className="text-[11px] font-semibold px-2 py-0.5 bg-[#FFF0EB] text-[#C85C3C] rounded-full border border-[#F0DDD5]"
+                      className="text-[11px] font-semibold px-2 py-0.5 bg-primary/10 text-primary rounded-full border border-primary/20"
                     >
-                      {g.boxId?.name ?? `Quà ${i + 1}`}
-                      {g.deliverAtMonth && ` · T${g.deliverAtMonth}`}
+                      {g.boxId?.name ?? `Quà tặng ${i + 1}`}
+                      {g.deliverAtMonth && ` · Tháng ${g.deliverAtMonth}`}
                     </span>
                   ))}
                 </div>
@@ -313,20 +319,20 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
           )}
 
           {/* Dates */}
-          <div className="flex gap-6">
+          <div className="flex gap-6 pt-1 text-xs">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-widest text-stone-400">
-                Bắt đầu
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Ngày bắt đầu
               </p>
-              <p className="text-xs font-semibold text-stone-600 mt-0.5">
+              <p className="font-semibold text-foreground mt-0.5 tabular-nums">
                 {formatDate(sub.currentPeriodStart)}
               </p>
             </div>
             <div>
-              <p className="text-[11px] font-black uppercase tracking-widest text-stone-400">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Kết thúc kỳ
               </p>
-              <p className="text-xs font-semibold text-stone-600 mt-0.5">
+              <p className="font-semibold text-foreground mt-0.5 tabular-nums">
                 {formatDate(sub.currentPeriodEnd)}
               </p>
             </div>
@@ -335,24 +341,26 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
       )}
 
       {/* ─── Footer actions ─── */}
-      <div className="border-t border-stone-100 px-5 py-3 flex items-center justify-between">
+      <div className="px-5 py-3 flex items-center justify-between flex-wrap gap-2">
         {/* Cancel actions */}
         <div className="flex items-center gap-2">
           {canCancel && (
             <>
               <button
+                type="button"
                 onClick={() => onCancel(sub, "at_end")}
-                className="text-[11px] font-bold text-stone-400 hover:text-amber-600 transition-colors flex items-center gap-1"
+                className="min-h-9 px-2 text-xs font-semibold text-muted-foreground hover:text-warning-text transition-colors flex items-center gap-1.5"
               >
-                <XCircle size={11} />
-                Hủy cuối kỳ
+                <XCircle size={13} />
+                Hủy vào cuối kỳ
               </button>
-              <span className="text-stone-200">|</span>
+              <span className="text-border">|</span>
               <button
+                type="button"
                 onClick={() => onCancel(sub, "immediately")}
-                className="text-[11px] font-bold text-stone-400 hover:text-red-500 transition-colors flex items-center gap-1"
+                className="min-h-9 px-2 text-xs font-semibold text-muted-foreground hover:text-destructive-text transition-colors flex items-center gap-1.5"
               >
-                <Zap size={11} />
+                <Zap size={13} />
                 Hủy ngay
               </button>
             </>
@@ -361,16 +369,17 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
 
         {/* Expand toggle */}
         <button
+          type="button"
           onClick={() => setExpanded((p) => !p)}
-          className="flex items-center gap-1 text-[11px] font-bold text-stone-400 hover:text-stone-600 transition-colors"
+          className="min-h-9 px-3 rounded-lg border border-border bg-background hover:bg-muted text-xs font-bold text-foreground transition-colors flex items-center gap-1 ml-auto"
         >
           {expanded ? (
             <>
-              <ChevronUp size={12} /> Thu gọn
+              <ChevronUp size={13} /> Thu gọn
             </>
           ) : (
             <>
-              <ChevronDown size={12} /> Chi tiết
+              <ChevronDown size={13} /> Xem chi tiết
             </>
           )}
         </button>

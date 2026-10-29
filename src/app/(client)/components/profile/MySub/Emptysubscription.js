@@ -4,43 +4,44 @@
  * Trạng thái rỗng khi user chưa có gói đăng ký nào
  */
 
-
 import Link from "next/link";
 import { Package, Sparkles } from "lucide-react";
 
 export function EmptySubscription({ filtered = false }) {
   return (
-    <div className="flex flex-col items-center justify-center py-24 gap-6">
+    <div className="flex flex-col items-center justify-center py-16 gap-5 rounded-2xl border border-dashed border-border bg-card p-8 text-center">
       {/* Icon */}
       <div className="relative">
-        <div className="w-24 h-24 rounded-3xl bg-linear-to-br from-[#FFF0EB] to-[#F0DDD5] flex items-center justify-center">
-          <Package size={40} className="text-[#C85C3C]/40" />
+        <div className="w-20 h-20 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+          <Package size={36} className="text-primary/60" />
         </div>
-        <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-[#C85C3C] flex items-center justify-center">
-          <Sparkles size={14} className="text-white" />
+        <div className="absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-xs">
+          <Sparkles size={13} />
         </div>
       </div>
 
       {/* Text */}
-      <div className="text-center space-y-2 max-w-xs">
-        <h3 className="text-lg font-black text-stone-700">
-          {filtered ? "Không có gói nào" : "Bạn chưa đăng ký gói nào"}
+      <div className="text-center space-y-1.5 max-w-sm">
+        <h3 className="text-base font-bold text-foreground">
+          {filtered ? "Không có gói đăng ký nào" : "Bạn chưa đăng ký gói nào"}
         </h3>
-        <p className="text-sm text-stone-400 leading-relaxed">
+        <p className="text-xs text-muted-foreground leading-relaxed">
           {filtered
-            ? "Không có gói đăng ký nào khớp với bộ lọc hiện tại."
-            : "Khám phá các gói subscription box được tuyển chọn đặc biệt từ TotMart và bắt đầu hành trình nhận hộp quà mỗi tháng."}
+            ? "Không có gói đăng ký định kỳ nào phù hợp với bộ lọc hiện tại."
+            : "Khám phá các combo subscription được tuyển chọn đặc biệt từ TotMart để nhận hộp sản phẩm định kỳ mỗi tháng."}
         </p>
       </div>
 
       {!filtered && (
-        <Link
-          href="/subscribe"
-          className="flex items-center gap-2 px-6 py-3 bg-[#C85C3C] hover:bg-[#B14B2D] text-white rounded-2xl text-sm font-black uppercase tracking-wider transition-all shadow-lg shadow-[#C85C3C]/20 hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <Sparkles size={14} />
-          Khám phá gói đăng ký
-        </Link>
+        <div className="pt-2">
+          <Link
+            href="/products/Subscriber"
+            className="inline-flex items-center gap-2 min-h-11 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
+          >
+            <Sparkles size={14} />
+            Khám phá các gói đăng ký
+          </Link>
+        </div>
       )}
     </div>
   );

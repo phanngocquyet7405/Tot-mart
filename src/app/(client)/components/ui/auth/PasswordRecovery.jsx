@@ -102,24 +102,95 @@ export default function PasswordRecovery({ reset = false, token = "" }) {
 
   return (
     <AuthContainer>
-      <div className="w-full max-w-md mx-auto px-4 py-12">
+      <div className="w-full max-w-md mx-auto">
         <AuthCard>
-          <h1 className="text-2xl font-bold mb-4">{reset ? "Đặt lại mật khẩu" : "Quên mật khẩu"}</h1>
-          {done ? <p role="status" className="text-green-700 mb-6">{reset
-            ? "Đã cập nhật mật khẩu. Vui lòng đăng nhập lại."
-            : "Nếu email đã được đăng ký, bạn sẽ nhận được liên kết đặt lại mật khẩu có hiệu lực trong 10 phút. Vui lòng kiểm tra cả thư mục spam."}</p>
-            : invalidToken ? <p role="alert" className="text-red-700 mb-6">Liên kết không hợp lệ. Vui lòng yêu cầu liên kết mới.</p>
-            : <form onSubmit={submit} className="space-y-5 mb-6">
-              {reset ? <>
-                <FormInput Label="Mật khẩu mới (ít nhất 8 ký tự)" id="password" name="password" type="password" minLength={8} autoComplete="new-password" required disabled={loading} />
-                <FormInput Label="Xác nhận mật khẩu" id="confirmPassword" name="confirmPassword" type="password" minLength={8} autoComplete="new-password" required disabled={loading} />
-              </> : <FormInput Label="Địa chỉ email" id="email" name="email" type="email" autoComplete="email" required disabled={loading} />}
-              {error && <p role="alert" className="text-red-700 text-sm">{error}</p>}
-              <AuthButton type="submit" disabled={loading}>{loading ? "Đang xử lý..." : reset ? "Lưu mật khẩu" : "Gửi liên kết"}</AuthButton>
-            </form>}
-          <div className="flex justify-between gap-4 text-sm text-green-700 underline">
-            <Link href="/login">Đăng nhập</Link>
-            {reset && <Link href="/forgot-password">Yêu cầu liên kết mới</Link>}
+          <div className="text-center space-y-1 mb-6">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              {reset ? "Đặt lại mật khẩu" : "Quên mật khẩu"}
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              {reset
+                ? "Nhập mật khẩu mới an toàn cho tài khoản của bạn"
+                : "Nhập email đã đăng ký để nhận liên kết đặt lại mật khẩu"}
+            </p>
+          </div>
+
+          {done ? (
+            <div
+              role="status"
+              className="p-4 rounded-xl bg-success-text/10 border border-success-text/25 text-success-text text-xs leading-relaxed mb-6"
+            >
+              {reset
+                ? "Đã cập nhật mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới."
+                : "Nếu email đã được đăng ký, bạn sẽ nhận được liên kết đặt lại mật khẩu có hiệu lực trong 10 phút. Vui lòng kiểm tra cả hộp thư chính và thư mục spam."}
+            </div>
+          ) : invalidToken ? (
+            <div
+              role="alert"
+              className="p-4 rounded-xl bg-destructive/10 border border-destructive/25 text-destructive-text text-xs leading-relaxed mb-6"
+            >
+              Liên kết không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu liên kết mới.
+            </div>
+          ) : (
+            <form onSubmit={submit} className="space-y-4 mb-6">
+              {reset ? (
+                <>
+                  <FormInput
+                    Label="Mật khẩu mới (ít nhất 8 ký tự)"
+                    id="password"
+                    name="password"
+                    type="password"
+                    minLength={8}
+                    autoComplete="new-password"
+                    required
+                    disabled={loading}
+                  />
+                  <FormInput
+                    Label="Xác nhận mật khẩu"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    minLength={8}
+                    autoComplete="new-password"
+                    required
+                    disabled={loading}
+                  />
+                </>
+              ) : (
+                <FormInput
+                  Label="Địa chỉ email"
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="name@example.com"
+                  required
+                  disabled={loading}
+                />
+              )}
+              {error && (
+                <div
+                  role="alert"
+                  className="p-3 rounded-xl bg-destructive/10 border border-destructive/25 text-destructive-text text-xs"
+                >
+                  {error}
+                </div>
+              )}
+              <AuthButton type="submit" disabled={loading}>
+                {loading ? "Đang xử lý..." : reset ? "Lưu mật khẩu" : "Gửi liên kết"}
+              </AuthButton>
+            </form>
+          )}
+
+          <div className="flex items-center justify-between gap-4 text-xs font-semibold text-primary pt-2 border-t border-border">
+            <Link href="/login" className="hover:underline">
+              ← Đăng nhập
+            </Link>
+            {reset && (
+              <Link href="/forgot-password" className="hover:underline">
+                Yêu cầu liên kết mới
+              </Link>
+            )}
           </div>
         </AuthCard>
       </div>

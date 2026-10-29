@@ -12,100 +12,120 @@ const formatPrice = (price) =>
     style: "currency",
     currency: "VND",
     maximumFractionDigits: 0,
-  }).format(price);
+  }).format(price || 0);
 
 export function CartManager({ cart, loading, onChangeQuantity, onRemoveItem }) {
-  const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
   return (
-    <Card className="border-emerald-100">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-emerald-700">Giỏ hàng</CardTitle>
+    <Card className="border-border bg-card shadow-xs rounded-2xl">
+      <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-3">
+        <CardTitle className="text-foreground text-lg font-bold">
+          Giỏ hàng của tôi
+        </CardTitle>
         <div className="flex items-center gap-2">
-          {/* Nút tạm thời trỏ đến trang /my-subscriptions */}
           <Link href="/profile/my-subscriptions">
             <Button
               variant="outline"
               size="sm"
-              className="text-xs border-emerald-200 text-emerald-700 hover:bg-emerald-50 h-7 px-2"
+              className="text-xs border-border text-foreground hover:bg-muted min-h-9 px-3 rounded-lg font-medium"
             >
-              <CalendarDays className="mr-1 h-3 w-3" />
+              <CalendarDays className="mr-1.5 h-3.5 w-3.5 text-primary" />
               Gói đăng ký của tôi
             </Button>
           </Link>
+          <Badge className="bg-primary/10 text-primary border border-primary/20 text-xs font-bold px-2.5 py-1">
+            <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
+            {cart.length} món
+          </Badge>
         </div>
-        <Badge className="bg-emerald-600">
-          <ShoppingCart className="mr-1 h-3 w-3" />
-          {cart.length} items
-        </Badge>
       </CardHeader>
       <CardContent className="space-y-4">
         {cart.length === 0 ? (
-          <p className="text-sm text-slate-500">
-            Giỏ hàng của bạn đang trống. Hãy thêm sản phẩm để tiếp tục.
-          </p>
+          <div className="py-8 text-center space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Giỏ hàng của bạn đang trống. Hãy thêm sản phẩm để tiếp tục mua sắm.
+            </p>
+            <Link
+              href="/products"
+              className="inline-flex items-center justify-center min-h-11 px-5 rounded-xl bg-primary text-primary-foreground font-bold text-xs uppercase tracking-wider hover:bg-primary/90 transition-colors shadow-xs"
+            >
+              Tiếp tục mua sắm
+            </Link>
+          </div>
         ) : null}
-        {cart.map((item) => (
-          <div
-            key={item.productId}
-            className="flex flex-col gap-3 rounded-lg border border-emerald-100 bg-white p-3 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <Image
-                src={item.imageUrl}
-                alt={item.productName}
-                className="h-14 w-14 rounded-md object-cover"
-              />
-              <div>
-                <p className="font-medium text-slate-800">{item.productName}</p>
-                <p className="text-sm text-slate-500">ID: {item.productId}</p>
-                <p className="text-sm font-semibold text-emerald-700">
-                  {formatPrice(item.price)}
-                </p>
+
+        <div className="divide-y divide-border/60">
+          {cart.map((item) => (
+            <div
+              key={item.productId}
+              className="flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center sm:justify-between first:pt-0 last:pb-0"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden border border-border bg-muted">
+                  <Image
+                    src={item.imageUrl}
+                    alt={item.productName}
+                    fill
+                    sizes="56px"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-sm text-foreground truncate">
+                    {item.productName}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground font-mono">
+                    Mã SP: {item.productId}
+                  </p>
+                  <p className="text-xs font-bold text-primary tabular-nums mt-0.5">
+                    {formatPrice(item.price)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between sm:justify-end gap-2 pt-1 sm:pt-0">
+                <div className="flex items-center border border-border rounded-xl bg-background overflow-hidden">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 text-muted-foreground hover:text-foreground rounded-none"
+                    disabled={loading || item.quantity <= 1}
+                    onClick={() =>
+                      onChangeQuantity(item.productId, item.quantity - 1)
+                    }
+                    aria-label="Giảm số lượng"
+                  >
+                    <Minus className="h-3.5 w-3.5" />
+                  </Button>
+                  <span className="min-w-9 text-center text-xs font-bold tabular-nums">
+                    {item.quantity}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 text-muted-foreground hover:text-foreground rounded-none"
+                    disabled={loading}
+                    onClick={() =>
+                      onChangeQuantity(item.productId, item.quantity + 1)
+                    }
+                    aria-label="Tăng số lượng"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 rounded-xl border-destructive/25 text-destructive-text hover:bg-destructive/10"
+                  disabled={loading}
+                  onClick={() => onRemoveItem(item.productId)}
+                  aria-label="Xóa sản phẩm khỏi giỏ"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                disabled={loading || item.quantity <= 1}
-                onClick={() =>
-                  onChangeQuantity(item.productId, item.quantity - 1)
-                }
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <span className="min-w-8 text-center text-sm font-semibold">
-                {item.quantity}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                disabled={loading}
-                onClick={() =>
-                  onChangeQuantity(item.productId, item.quantity + 1)
-                }
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="border-red-200 text-red-600 hover:bg-red-50"
-                disabled={loading}
-                onClick={() => onRemoveItem(item.productId)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
-
-        <div className="border-t border-emerald-100 pt-4 text-right">
-          <p className="text-sm text-slate-500">Total</p>
-          <p className="text-xl font-bold text-emerald-700">
-            {formatPrice(total)}
-          </p>
+          ))}
         </div>
       </CardContent>
     </Card>

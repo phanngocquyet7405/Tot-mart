@@ -7,10 +7,10 @@
  * Page này chỉ chịu trách nhiệm load data + render tab content.
  */
 
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { ArrowRight, ShoppingBag } from "lucide-react";
 
 import { AddressManager } from "../components/profile/AddressManager";
 import { CartManager } from "../components/profile/CartManager";
@@ -32,14 +32,14 @@ import logger from "@/app/util/Logger";
 
 function ProfileSkeleton() {
   return (
-    <Card className="border-[#F0DDD5]">
+    <Card className="border-border bg-card shadow-xs rounded-2xl">
       <CardHeader>
-        <div className="h-6 w-48 animate-pulse rounded bg-[#F0DDD5]" />
+        <div className="h-6 w-48 animate-pulse rounded-lg bg-muted" />
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="h-12 w-full animate-pulse rounded bg-[#F0DDD5]" />
-        <div className="h-12 w-full animate-pulse rounded bg-[#F0DDD5]" />
-        <div className="h-10 w-36 animate-pulse rounded bg-[#F0DDD5]" />
+        <div className="h-12 w-full animate-pulse rounded-xl bg-muted" />
+        <div className="h-12 w-full animate-pulse rounded-xl bg-muted" />
+        <div className="h-10 w-36 animate-pulse rounded-xl bg-muted" />
       </CardContent>
     </Card>
   );
@@ -269,14 +269,23 @@ export default function ProfilePage() {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 space-y-6">
       {/* Header */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-black text-[#2C1810] md:text-3xl tracking-tight">
-          Hồ sơ cá nhân
-        </h1>
-        <p className="text-sm text-stone-500">
-          Quản lý thông tin cá nhân, địa chỉ giao hàng và giỏ hàng.
-        </p>
-        <Link href="/profile/orders" className="inline-block text-green-700 underline">Xem đơn hàng của tôi</Link>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-border pb-5">
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground font-serif">
+            Hồ sơ cá nhân
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Quản lý thông tin cá nhân, sổ địa chỉ giao hàng và giỏ hàng của bạn.
+          </p>
+        </div>
+        <Link
+          href="/profile/orders"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-xs font-bold uppercase tracking-wider text-foreground transition-colors shadow-2xs self-start sm:self-auto"
+        >
+          <ShoppingBag size={14} className="text-primary" />
+          <span>Đơn hàng của tôi</span>
+          <ArrowRight size={13} className="text-muted-foreground" />
+        </Link>
       </div>
 
       {/* Content */}

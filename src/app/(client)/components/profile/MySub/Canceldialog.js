@@ -4,8 +4,7 @@
  * Hộp thoại xác nhận hủy đăng ký — hỗ trợ 2 mode: cuối kỳ và ngay lập tức
  */
 
-
-import { AlertTriangle, X, Loader2, Clock, Zap } from "lucide-react";
+import { X, Loader2, Clock, Zap } from "lucide-react";
 import { PLAN_TYPE_LABELS } from "@/app/util/formatter";
 
 export function CancelDialog({ target, open, cancelling, onClose, onConfirm }) {
@@ -27,54 +26,58 @@ export function CancelDialog({ target, open, cancelling, onClose, onConfirm }) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+        className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50"
         onClick={!cancelling ? onClose : undefined}
       />
 
       {/* Dialog */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div className="bg-card border border-border rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
           {/* Header */}
           <div
-            className={`px-6 pt-6 pb-5 ${
+            className={`px-6 pt-6 pb-5 border-b ${
               isImmediate
-                ? "bg-red-50 border-b border-red-100"
-                : "bg-amber-50 border-b border-amber-100"
+                ? "bg-destructive/10 border-destructive/25"
+                : "bg-warning-text/10 border-warning-text/25"
             }`}
           >
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-3">
                 <div
-                  className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
-                    isImmediate ? "bg-red-100" : "bg-amber-100"
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    isImmediate
+                      ? "bg-destructive/15 text-destructive-text"
+                      : "bg-warning-text/15 text-warning-text"
                   }`}
                 >
                   {isImmediate ? (
-                    <Zap size={18} className="text-red-600" />
+                    <Zap size={18} />
                   ) : (
-                    <Clock size={18} className="text-amber-600" />
+                    <Clock size={18} />
                   )}
                 </div>
                 <div>
                   <h3
-                    className={`text-base font-black ${isImmediate ? "text-red-800" : "text-amber-800"}`}
+                    className={`text-base font-bold ${
+                      isImmediate ? "text-destructive-text" : "text-warning-text"
+                    }`}
                   >
-                    {isImmediate ? "Hủy ngay lập tức?" : "Hủy vào cuối kỳ?"}
+                    {isImmediate ? "Hủy gói ngay lập tức?" : "Hủy vào cuối chu kỳ?"}
                   </h3>
-                  <p
-                    className={`text-xs mt-0.5 ${isImmediate ? "text-red-600" : "text-amber-700"}`}
-                  >
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                     {isImmediate
-                      ? "Gói của bạn sẽ dừng ngay hôm nay"
-                      : `Gói vẫn hoạt động đến ${formatDate(sub.currentPeriodEnd)}`}
+                      ? "Gói của bạn sẽ dừng hoạt động ngay hôm nay."
+                      : `Gói vẫn hoạt động bình thường đến hết ngày ${formatDate(sub.currentPeriodEnd)}.`}
                   </p>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={onClose}
                 disabled={cancelling}
-                className="w-8 h-8 rounded-lg hover:bg-white/60 flex items-center justify-center transition-colors text-stone-400"
+                className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors text-muted-foreground"
+                aria-label="Đóng"
               >
                 <X size={16} />
               </button>
@@ -84,79 +87,60 @@ export function CancelDialog({ target, open, cancelling, onClose, onConfirm }) {
           {/* Body */}
           <div className="px-6 py-5 space-y-4">
             {/* Subscription summary */}
-            <div className="bg-stone-50 rounded-2xl p-4 space-y-2">
-              <div className="flex justify-between items-start">
+            <div className="bg-muted/40 border border-border rounded-xl p-4 space-y-2">
+              <div className="flex justify-between items-start gap-2">
                 <div>
-                  <p className="text-xs font-black text-stone-700">
-                    {sub.templateId?.name ?? "Gói đăng ký"}
+                  <p className="text-xs font-bold text-foreground">
+                    {sub.templateId?.name ?? "Gói đăng ký định kỳ"}
                   </p>
-                  <p className="text-[11px] text-stone-400 mt-0.5">
-                    {PLAN_TYPE_LABELS[sub.planType] ?? sub.planType}
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {PLAN_TYPE_LABELS[sub.planType] ?? sub.planType} · {sub.boxId?.name}
                   </p>
                 </div>
-                <span className="text-xs font-black text-[#C85C3C]">
-                  {sub.remainDeliveries} lần còn lại
+                <span className="text-xs font-bold text-primary tabular-nums shrink-0">
+                  {sub.remainDeliveries} lần giao còn lại
                 </span>
               </div>
             </div>
 
-            {/* Warning */}
-            <div
-              className={`flex items-start gap-3 rounded-xl p-3.5 ${
-                isImmediate
-                  ? "bg-red-50 border border-red-100"
-                  : "bg-amber-50 border border-amber-100"
-              }`}
-            >
-              <AlertTriangle
-                size={14}
-                className={`shrink-0 mt-0.5 ${isImmediate ? "text-red-500" : "text-amber-500"}`}
-              />
-              <p
-                className={`text-[11px] leading-relaxed ${isImmediate ? "text-red-700" : "text-amber-700"}`}
-              >
-                {isImmediate
-                  ? "Hành động này không thể hoàn tác. Lịch giao hàng còn lại sẽ bị hủy toàn bộ ngay lập tức."
-                  : "Bạn sẽ tiếp tục nhận hàng cho đến hết chu kỳ đã thanh toán."}
-              </p>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="px-6 pb-6 flex gap-3">
-            <button
-              onClick={onClose}
-              disabled={cancelling}
-              className="flex-1 py-3 rounded-xl border-2 border-stone-200 text-sm font-bold text-stone-600 hover:border-stone-300 hover:bg-stone-50 transition-all disabled:opacity-50"
-            >
-              Giữ lại
-            </button>
-
-            <button
-              onClick={onConfirm}
-              disabled={cancelling}
-              className={`flex-1 py-3 rounded-xl text-sm font-black text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70 ${
-                isImmediate
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-amber-500 hover:bg-amber-600"
-              }`}
-            >
-              {cancelling ? (
+            {/* Warning notes */}
+            <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-4 leading-relaxed">
+              {isImmediate ? (
                 <>
-                  <Loader2 size={14} className="animate-spin" />
-                  Đang xử lý...
-                </>
-              ) : isImmediate ? (
-                <>
-                  <Zap size={13} />
-                  Hủy ngay
+                  <li>Các đợt giao chưa thực hiện sẽ không được gửi tiếp.</li>
+                  <li>Bạn có thể đăng ký lại bất kỳ lúc nào tại cửa hàng TotMart.</li>
                 </>
               ) : (
                 <>
-                  <Clock size={13} />
-                  Xác nhận hủy cuối kỳ
+                  <li>Bạn vẫn sẽ nhận đầy đủ các đợt giao đã thanh toán trong chu kỳ này.</li>
+                  <li>Hệ thống sẽ không tự động gia hạn khi kết thúc chu kỳ.</li>
                 </>
               )}
+            </ul>
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 bg-muted/20 border-t border-border flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={cancelling}
+              className="px-4 py-2.5 min-h-11 rounded-xl border border-border bg-card hover:bg-muted text-xs font-semibold text-foreground transition-colors"
+            >
+              Giữ lại gói
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              disabled={cancelling}
+              className={`px-4 py-2.5 min-h-11 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 ${
+                isImmediate
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90"
+              } disabled:opacity-50`}
+            >
+              {cancelling && <Loader2 size={13} className="animate-spin" />}
+              {cancelling ? "Đang xử lý..." : isImmediate ? "Xác nhận hủy ngay" : "Xác nhận hủy cuối kỳ"}
             </button>
           </div>
         </div>
