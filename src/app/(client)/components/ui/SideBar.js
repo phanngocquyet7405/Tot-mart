@@ -1,7 +1,7 @@
 "use client";
 import logger from "@/app/util/Logger";
 import { ChevronDown, X, ChevronUp, SlidersHorizontal } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import {
   getAllBrandsApi,
   getAllCategoriesApi,
@@ -11,7 +11,45 @@ export default function SideBar({ isOpen: controlledOpen, onClose: controlledClo
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
   const isOpen = isControlled ? controlledOpen : internalOpen;
-  const onClose = isControlled ? controlledClose : () => setInternalOpen(false);
+  const onClose = useCallback(
+    () => (isControlled ? controlledClose?.() : setInternalOpen(false)),
+    [isControlled, controlledClose]
+  );
+  const openerRef = useRef(null);
+  const closeBtnRef = useRef(null);
+
+  // Khóa cuộn nền khi Drawer mở
+  useEffect(() => {
+    if (isOpen) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isOpen]);
+
+  // Đóng bằng phím Escape & trả focus về nút kích hoạt khi đóng
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+        if (openerRef.current) {
+          openerRef.current.focus();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
+  const handleClose = () => {
+    onClose();
+    if (openerRef.current) {
+      openerRef.current.focus();
+    }
+  };
 
   const [openSections, setOpenSections] = useState(['categories', 'brands', 'flavor', 'dietary']);
 
@@ -64,6 +102,7 @@ export default function SideBar({ isOpen: controlledOpen, onClose: controlledClo
       {!isControlled && (
         <div className="lg:hidden mb-4">
           <button
+            ref={openerRef}
             type="button"
             onClick={() => setInternalOpen(true)}
             className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-border bg-card text-foreground font-semibold text-sm hover:bg-muted transition-colors min-h-11 shadow-xs"
@@ -79,7 +118,7 @@ export default function SideBar({ isOpen: controlledOpen, onClose: controlledClo
       {isOpen && (
         <div
           className="fixed inset-0 bg-background/80 backdrop-blur-xs z-40 lg:hidden"
-          onClick={onClose}
+          onClick={handleClose}
         />
       )}
 

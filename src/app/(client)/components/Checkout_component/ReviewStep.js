@@ -2,10 +2,10 @@
 /**
  * ReviewStep.js
  * Bước 2 — Kiểm tra đơn: TẤT CẢ sản phẩm (kèm ảnh) + địa chỉ đã chọn.
+ * Chuẩn hóa màu sắc token, nút bấm cảm ứng >= 44px.
  */
 
 import { cartLineKey } from "@/app/util/cartLine.mjs";
-
 import { motion } from "framer-motion";
 import { Package, MapPin } from "lucide-react";
 import { SectionCard } from "./SectionCard";
@@ -19,20 +19,20 @@ function AddressSummary({ addr, user, onEdit }) {
 
   return (
     <div>
-      <p className="text-sm font-semibold text-[#2C1810]">
+      <p className="text-sm font-semibold text-foreground">
         {addr?.fullName || user?.name}
       </p>
       {addr?.phone && (
-        <p className="text-sm text-stone-600 mt-0.5">{addr.phone}</p>
+        <p className="text-sm text-muted-foreground mt-0.5 tabular-nums">{addr.phone}</p>
       )}
       {line && (
-        <p className="text-sm text-stone-500 mt-1 leading-relaxed">{line}</p>
+        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{line}</p>
       )}
       <button
         type="button"
         onClick={onEdit}
         className={[
-          "mt-3 text-sm font-semibold text-[#C85C3C] underline underline-offset-4 hover:text-[#B14B2D]",
+          "mt-3 text-sm font-semibold text-primary underline underline-offset-4 hover:text-primary/80 transition-colors pointer-coarse:min-h-11",
           FOCUS_RING,
         ].join(" ")}
       >
@@ -68,7 +68,7 @@ export function ReviewStep({
           icon={<Package size={16} />}
           aside={`${cartCount} sản phẩm`}
         >
-          <ul className="divide-y divide-dashed divide-[#F0DDD5]">
+          <ul className="divide-y divide-dashed divide-border">
             {cartItems.map((item) => (
               <li key={cartLineKey(item)} className="py-4 first:pt-0 last:pb-0">
                 <CartLine item={item} />

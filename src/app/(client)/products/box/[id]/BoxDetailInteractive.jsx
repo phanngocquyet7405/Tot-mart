@@ -164,6 +164,26 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
           {box.descriptions || "Chưa có mô tả chi tiết cho hộp này."}
         </p>
       </section>
+          {/* Mobile Sticky Purchase Bar with Safe Area */}
+      <div className="fixed bottom-0 left-0 right-0 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] bg-background/95 backdrop-blur-sm border-t border-border z-30 md:hidden flex items-center justify-between gap-3 shadow-lg pointer-events-auto">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs text-muted-foreground truncate">{box.name || "Combo TotMart"}</p>
+          <p className="text-base font-bold text-foreground tabular-nums">
+            {(box.value || box.price || 0).toLocaleString("vi-VN")} ₫
+          </p>
+        </div>
+        <button
+          type="button"
+          className="tm-button tm-button--primary px-4 py-2 min-h-11 text-xs font-bold shrink-0 shadow-xs active:scale-[0.97]"
+          disabled={!canBuy}
+          onClick={handleAddToCart}
+        >
+          <ShoppingCart size={16} />
+          <span>{stock > 0 ? "Thêm vào giỏ" : "Hết hàng"}</span>
+        </button>
+      </div>
+      {/* Khoảng đệm cuối trang tránh che nội dung */}
+      <div className="h-24 md:hidden" aria-hidden="true" />
     </>
   );
 }

@@ -2,9 +2,8 @@
 /**
  * OrderSuccessScreen.js
  * Màn hình xác nhận đặt hàng thành công
- * Palette: emerald-600 success icon (semantic), [#C85C3C] primary buttons
+ * Chuẩn hóa màu sắc token: success semantic, primary terracotta, viền border.
  */
-
 
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
@@ -15,41 +14,34 @@ export function OrderSuccessScreen({ onNew, submitting = false }) {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="min-h-screen bg-[#FFFAF8] flex items-center justify-center px-4">
-      {/* Ambient blobs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#C85C3C]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 right-0 w-80 h-80 bg-[#F0DDD5]/30 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <motion.div
-        initial={shouldReduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.92 }}
+        initial={shouldReduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.94 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease: "easeOut" }}
-        className="relative text-center max-w-md w-full"
+        transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: "easeOut" }}
+        className="relative text-center max-w-md w-full py-10"
       >
-        {/* Icon */}
+        {/* Success Icon */}
         <motion.div
           initial={shouldReduceMotion ? { scale: 1, rotate: 0 } : { scale: 0, rotate: -15 }}
           animate={{ scale: 1, rotate: 0 }}
-          transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.2, type: "spring", stiffness: 240, damping: 18 }}
-          className="w-24 h-24 rounded-3xl bg-emerald-50 border-2 border-emerald-600/20 flex items-center justify-center mx-auto mb-8 shadow-xl shadow-emerald-600/10"
+          transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.15, type: "spring", stiffness: 240, damping: 18 }}
+          className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-success-text/10 border-2 border-success-text/25 flex items-center justify-center mx-auto mb-6 shadow-xs"
         >
-          <CheckCircle2 size={48} className="text-emerald-600" />
+          <CheckCircle2 size={44} className="text-success-text" />
         </motion.div>
 
         {/* Text */}
         <motion.div
           initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.35 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.25 }}
         >
-          <h1 className="text-3xl font-black text-stone-900 mb-3 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-3 tracking-tight">
             Đặt hàng thành công!
           </h1>
-          <p className="text-stone-600 text-sm leading-relaxed mb-8 px-4">
-            Cảm ơn bạn đã tin tưởng TotMart. Đơn hàng đang được xử lý
-            và sẽ giao sớm nhất có thể.
+          <p className="text-muted-foreground text-sm leading-relaxed mb-8 px-4">
+            Cảm ơn bạn đã tin tưởng TotMart. Đơn hàng đang được xử lý và sẽ được liên hệ giao sớm nhất có thể.
           </p>
         </motion.div>
 
@@ -57,41 +49,43 @@ export function OrderSuccessScreen({ onNew, submitting = false }) {
         <motion.div
           initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.5 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.35 }}
           className="flex flex-col gap-3"
         >
           <button
+            type="button"
             onClick={() => router.push("/profile/orders")}
-            className="w-full bg-[#C85C3C] hover:bg-[#B14B2D] text-white py-4 rounded-xl font-black uppercase tracking-widest text-[12px] transition-all duration-200 active:scale-[0.98] shadow-lg shadow-[#C85C3C]/20 flex items-center justify-center gap-2"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3.5 min-h-11 rounded-xl font-bold uppercase tracking-widest text-xs transition-colors active:scale-[0.98] shadow-xs flex items-center justify-center gap-2"
           >
-            <ShoppingBag size={15} />
+            <ShoppingBag size={16} />
             Xem đơn hàng của tôi
           </button>
+          {onNew && (
+            <button
+              type="button"
+              onClick={onNew}
+              disabled={submitting}
+              className="w-full border border-border bg-card text-foreground py-3 min-h-11 rounded-xl font-bold hover:bg-muted transition-colors text-xs uppercase tracking-wider"
+            >
+              Đặt đơn mới
+            </button>
+          )}
           <button
-            onClick={onNew}
-            disabled={submitting || !onNew}
-            className="w-full border-2 border-stone-200 text-stone-600 py-3.5 rounded-xl font-bold hover:border-[#C85C3C]/30 hover:text-[#C85C3C] transition-colors"
-          >
-            Đặt đơn mới
-          </button>
-          <button
+            type="button"
             onClick={() => router.push("/")}
-            className="w-full border-2 border-stone-200 text-stone-600 py-3.5 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:border-[#C85C3C]/30 hover:text-[#C85C3C] transition-all duration-200 flex items-center justify-center gap-1.5"
+            className="w-full border border-border bg-card/60 text-muted-foreground hover:text-foreground py-3 min-h-11 rounded-xl font-semibold uppercase tracking-wider text-xs hover:bg-muted transition-colors flex items-center justify-center gap-1.5"
           >
             Tiếp tục mua sắm
-            <ArrowRight size={13} />
+            <ArrowRight size={14} />
           </button>
         </motion.div>
 
         {/* Decorative dots */}
-        <div className="flex justify-center gap-1.5 mt-10">
+        <div className="flex justify-center gap-2 mt-8">
           {[0, 1, 2].map((i) => (
-            <motion.div
+            <div
               key={i}
-              initial={shouldReduceMotion ? { scale: 1 } : { scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.6 + i * 0.1, type: "spring" }}
-              className={`rounded-full ${i === 1 ? "w-3 h-3 bg-[#C85C3C]" : "w-1.5 h-1.5 bg-stone-200"}`}
+              className={`rounded-full ${i === 1 ? "w-2.5 h-2.5 bg-primary" : "w-1.5 h-1.5 bg-border"}`}
             />
           ))}
         </div>

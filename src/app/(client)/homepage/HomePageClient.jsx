@@ -55,7 +55,7 @@ export default function HomePage() {
       <HeroSection />
 
       {loading ? (
-        <div className="py-20 text-center text-gray-500 italic">
+        <div className="py-20 text-center text-muted-foreground italic">
           Đang tải dữ liệu từ hệ thống...
         </div>
       ) : (

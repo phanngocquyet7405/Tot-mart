@@ -139,7 +139,7 @@ export function ProductPurchasePanel({
       )}
 
       {/* Sticky Purchase Bar for Mobile (< md) */}
-      <div className="fixed bottom-0 left-0 right-0 p-3 bg-background/95 backdrop-blur-sm border-t border-border z-40 md:hidden flex items-center justify-between gap-3 shadow-lg pointer-events-auto">
+      <div className="fixed bottom-0 left-0 right-0 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] bg-background/95 backdrop-blur-sm border-t border-border z-30 md:hidden flex items-center justify-between gap-3 shadow-lg pointer-events-auto">
         <div className="min-w-0 flex-1">
           <p className="text-xs text-muted-foreground truncate">{product.name}</p>
           <p className="text-base font-bold text-foreground tabular-nums">
@@ -162,6 +162,8 @@ export function ProductPurchasePanel({
           </button>
         </div>
       </div>
+      {/* Khoảng đệm cuối trang tránh che nội dung bởi thanh mua cố định */}
+      <div className="h-24 md:hidden" aria-hidden="true" />
     </section>
   );
 }

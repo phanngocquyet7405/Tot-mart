@@ -1,33 +1,33 @@
 /**
  * checkoutStyles.js
- * Class dùng chung cho checkout — "atelier" của TotMart (xem DESIGN.md):
- * cream #FFFAF8, clay #F0DDD5, terracotta #C85C3C / #B14B2D, espresso #2C1810.
+ * Class dùng chung cho checkout — chuẩn semantic tokens TotMart:
+ * bg-background, border-border, bg-primary (terracotta), text-foreground.
  * CTA storefront: bo 2xl, chữ hoa, tracking rộng. Tiêu đề: Playfair (font-serif).
  */
 
 const FOCUS =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C85C3C]";
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 export const BTN_PRIMARY = [
-  "inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5",
-  "bg-[#C85C3C] text-white text-[11px] font-extrabold uppercase tracking-[0.16em]",
-  "transition-colors duration-200 hover:bg-[#B14B2D] active:scale-[0.99]",
-  "disabled:bg-stone-200 disabled:text-stone-400 disabled:cursor-not-allowed",
+  "inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 min-h-11",
+  "bg-primary text-primary-foreground text-xs font-bold uppercase tracking-[0.14em]",
+  "transition-colors duration-200 hover:bg-primary/90 active:scale-[0.99]",
+  "disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed shadow-xs",
   FOCUS,
 ].join(" ");
 
 export const BTN_SECONDARY = [
-  "inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5",
-  "border border-[#F0DDD5] bg-white text-[#2C1810] text-[11px] font-extrabold uppercase tracking-[0.16em]",
-  "transition-colors duration-200 hover:border-[#C85C3C]/60 hover:text-[#B14B2D]",
+  "inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 min-h-11",
+  "border border-border bg-card text-foreground text-xs font-bold uppercase tracking-[0.14em]",
+  "transition-colors duration-200 hover:bg-muted hover:border-primary/60",
   "disabled:opacity-50 disabled:cursor-not-allowed",
   FOCUS,
 ].join(" ");
 
 export const INPUT = [
-  "w-full rounded-xl border border-[#F0DDD5] bg-white px-3.5 py-2.5 text-sm text-[#2C1810]",
-  "placeholder:text-stone-400 transition-colors duration-200",
-  "focus:outline-none focus:border-[#C85C3C] focus:ring-2 focus:ring-[#C85C3C]/15",
+  "w-full rounded-xl border border-border bg-background px-3.5 py-2.5 min-h-11 text-sm text-foreground",
+  "placeholder:text-muted-foreground transition-colors duration-200",
+  "focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring",
   "disabled:opacity-60",
 ].join(" ");
 

@@ -112,7 +112,7 @@ export default function CartDrawer({ open, setOpen }) {
             >
               <button
                 onClick={() => setShowSuggestions(!showSuggestions)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background p-1.5 border-y border-l border-border rounded-l-lg hover:bg-white text-muted-foreground hover:text-primary transition-colors shadow-sm active:scale-95"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background p-1.5 border-y border-l border-border rounded-l-lg hover:bg-card text-muted-foreground hover:text-foreground transition-colors shadow-sm active:scale-95"
               >
                 {showSuggestions ? (
                   <ChevronRight size={16} />
@@ -151,11 +151,11 @@ export default function CartDrawer({ open, setOpen }) {
                         suggestions.map((item) => (
                           <div
                             key={item._id}
-                            className="bg-white rounded-xl p-3 flex gap-4 items-center shadow-sm relative group border border-border hover:border-primary/50 transition-colors"
+                            className="bg-card rounded-xl p-3 flex gap-4 items-center shadow-xs relative group border border-border hover:border-primary/50 transition-colors"
                           >
                             <button
                               onClick={() => handleAddSuggestion(item)}
-                              className="absolute -left-2 -top-2 bg-primary text-white rounded-full p-1 shadow-md hover:bg-primary/90 active:scale-90 transition-all z-10"
+                              className="absolute -left-2 -top-2 bg-primary text-primary-foreground rounded-full p-1 shadow-md hover:bg-primary/90 active:scale-90 transition-all z-10"
                               aria-label="Thêm vào giỏ"
                             >
                               <PlusCircle size={18} />
@@ -208,7 +208,7 @@ export default function CartDrawer({ open, setOpen }) {
             {/* CỘT PHẢI: Giỏ hàng chính */}
             <div className="h-full w-screen md:w-105 bg-card flex flex-col shadow-2xl">
               {/* Header */}
-              <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-white shrink-0">
+              <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-card shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     <ShoppingCart size={16} />
@@ -217,7 +217,7 @@ export default function CartDrawer({ open, setOpen }) {
                     Giỏ hàng
                   </h2>
                   {isMounted && cartItems.length > 0 && (
-                    <span className="bg-primary text-white text-[11px] font-black px-2 py-0.5 rounded-full ml-1">
+                    <span className="bg-primary text-primary-foreground text-[11px] font-bold px-2 py-0.5 rounded-full ml-1 tabular-nums">
                       {cartItems.length}
                     </span>
                   )}
@@ -238,8 +238,8 @@ export default function CartDrawer({ open, setOpen }) {
                   ))
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-center px-4">
-                    <div className="w-20 h-20 bg-white border border-border shadow-sm rounded-full flex items-center justify-center mb-5">
-                      <ShoppingCart className="h-8 w-8 text-stone-300" />
+                    <div className="w-20 h-20 bg-background border border-border rounded-full flex items-center justify-center mb-5">
+                      <ShoppingCart className="h-8 w-8 text-muted-foreground/50" />
                     </div>
                     <p className="text-[15px] font-black text-foreground mb-2 uppercase tracking-wide">
                       Giỏ hàng trống
@@ -250,7 +250,7 @@ export default function CartDrawer({ open, setOpen }) {
                     </p>
                     <button
                       onClick={() => setOpen(false)}
-                      className="mt-6 text-[12px] font-bold text-primary hover:text-primary uppercase tracking-widest border-b-2 border-amber-300 hover:border-amber-600 transition-colors pb-1 active:translate-y-0.5"
+                      className="mt-6 text-[12px] font-bold text-primary hover:text-primary uppercase tracking-widest border-b-2 border-primary/40 hover:border-primary transition-colors pb-1 active:translate-y-0.5"
                     >
                       Tiếp tục mua sắm
                     </button>
@@ -260,14 +260,14 @@ export default function CartDrawer({ open, setOpen }) {
 
               {/* Footer Thanh toán */}
               {isMounted && cartItems.length > 0 && (
-                <div className="p-6 border-t border-border bg-white shrink-0">
+                <div className="p-6 border-t border-border bg-card shrink-0">
                   <div className="space-y-1 mb-5">
                     <div className="flex justify-between items-end">
                       <span className="text-[12px] text-muted-foreground uppercase tracking-widest font-bold">
                         {cartPriceConfirmed ? "Tiền hàng và tiện ích" : "Giá hàng niêm yết"}
                       </span>
-                      <span className="text-xl font-black text-primary">
-                        {cartTotal.toLocaleString("vi-VN")}₫
+                      <span className="text-xl font-bold text-foreground tabular-nums">
+                        {cartTotal.toLocaleString("vi-VN")} ₫
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground text-right">
@@ -281,7 +281,7 @@ export default function CartDrawer({ open, setOpen }) {
                         router.push("/checkout");
                         setOpen(false);
                       }}
-                      className="w-full bg-amber-800 hover:bg-amber-900 text-white py-4 rounded-xl font-black uppercase tracking-widest text-[12px] transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-900/20 active:scale-[0.98]"
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3.5 min-h-11 rounded-xl font-bold uppercase tracking-widest text-xs transition-colors flex items-center justify-center gap-2 shadow-xs active:scale-[0.98]"
                     >
                       Thanh toán ngay
                       <ArrowRight size={16} />
@@ -291,7 +291,7 @@ export default function CartDrawer({ open, setOpen }) {
                         router.push("/cart");
                         setOpen(false);
                       }}
-                      className="w-full bg-card border border-border text-foreground/80 hover:bg-white py-3.5 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:border-amber-400 hover:text-primary transition-all active:scale-[0.98]"
+                      className="w-full bg-card/60 border border-border text-foreground hover:bg-muted py-3 min-h-11 rounded-xl font-bold uppercase tracking-widest text-[11px] transition-colors active:scale-[0.98]"
                     >
                       Xem chi tiết giỏ hàng
                     </button>
