@@ -82,7 +82,7 @@ function TabSwitcher({ tab, setTab }) {
           onClick={() => setTab(key)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
             tab === key
-              ? "bg-white text-primary shadow-sm"
+              ? "bg-card text-primary shadow-sm"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >

@@ -148,7 +148,7 @@ export default function DeleteBoxPage() {
                   placeholder="Nhập tên box để xác nhận..."
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border dark:border-border bg-white dark:bg-card text-foreground dark:text-foreground focus:outline-none focus:ring-2 focus:ring-destructive/20 focus:border-destructive/50 mb-4"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-destructive/20 focus:border-destructive/50 mb-4"
                 />
                 <div className="flex items-center justify-between">
                   <button

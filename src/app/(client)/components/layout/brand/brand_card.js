@@ -36,7 +36,7 @@ export const BrandCard = ({ brand }) => {
         <div className="mt-auto">
           <Link
             href={brandHref}
-            className="text-xs font-semibold text-foreground hover:text-orange-600 transition-colors"
+            className="text-xs font-semibold text-foreground hover:text-primary transition-colors"
           >
             Chi tiết &gt;&gt;
           </Link>

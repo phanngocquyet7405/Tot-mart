@@ -23,7 +23,7 @@ export function Newsletter() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center">
           {/* Icon phong bì */}
-          <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-8">
+          <div className="w-16 h-16 bg-primary-foreground/15 rounded-2xl flex items-center justify-center mx-auto mb-8">
             <Mail className="h-8 w-8 text-primary-foreground" />
           </div>
 
@@ -37,7 +37,7 @@ export function Newsletter() {
 
           {isSubmitted ? (
             /* Thông báo khi đăng ký thành công */
-            <div className="flex items-center justify-center gap-3 bg-white/10 rounded-full px-6 py-4 max-w-md mx-auto">
+            <div className="flex items-center justify-center gap-3 bg-primary-foreground/15 rounded-full px-6 py-4 max-w-md mx-auto">
               <CheckCircle className="h-6 w-6 text-primary-foreground" />
               <span className="text-primary-foreground font-medium">
                 Thanks for subscribing! Check your inbox soon.
@@ -55,7 +55,7 @@ export function Newsletter() {
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-6 py-4 rounded-full bg-white text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/50"
+                  className="w-full px-6 py-4 rounded-full bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-foreground/50 border border-border"
                   required
                 />
               </div>

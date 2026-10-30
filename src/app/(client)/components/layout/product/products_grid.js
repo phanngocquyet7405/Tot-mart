@@ -265,7 +265,7 @@ export default function ProductsGrid({
               isInitialMount.current = false;
               setCurrentPage((page) => page - 1);
             }}
-            className="px-3 py-2 border border-gray-300 rounded-md text-foreground hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-2 border border-border rounded-md text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
             aria-label="Previous page"
           >
             Previous
@@ -279,7 +279,7 @@ export default function ProductsGrid({
                 isInitialMount.current = false;
                 setCurrentPage(page);
               }}
-              className={`min-w-10 px-3 py-2 rounded-md ${page === currentPage ? "bg-primary text-primary-foreground font-bold" : "border border-gray-300 text-foreground hover:bg-gray-50"}`}
+              className={`min-w-10 px-3 py-2 rounded-md ${page === currentPage ? "bg-primary text-primary-foreground font-bold" : "border border-border text-foreground hover:bg-muted"}`}
             >
               {page}
             </button>
@@ -291,7 +291,7 @@ export default function ProductsGrid({
               isInitialMount.current = false;
               setCurrentPage((page) => page + 1);
             }}
-            className="px-3 py-2 border border-gray-300 rounded-md text-foreground hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-2 border border-border rounded-md text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
             aria-label="Next page"
           >
             Next

@@ -37,7 +37,7 @@ export default function HeroSection() {
               </h1>
 
               {/* Description */}
-              <p className="text-gray-100 text-lg mb-8 max-w-xl leading-relaxed">
+              <p className="text-white/90 text-lg mb-8 max-w-xl leading-relaxed">
                 Khám phá bộ sưu tập các sản phẩm hữu cơ chất lượng cao, được tuyển chọn cẩn thận từ các nhà sản xuất bền vững trên toàn thế giới.
               </p>
 

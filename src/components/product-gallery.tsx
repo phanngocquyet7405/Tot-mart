@@ -108,7 +108,7 @@ export function ProductGallery({
         {/* Favorite Button */}
         <button
           onClick={handleFavoriteToggle}
-          className="absolute right-4 top-4 rounded-full bg-white shadow-lg p-2.5 hover:shadow-xl transition-all hover:scale-110 z-20"
+          className="absolute right-4 top-4 rounded-full bg-card/90 border border-border shadow-lg p-2.5 hover:shadow-xl transition-all hover:scale-110 z-20"
           aria-label="Add to favorites"
         >
           <Heart
@@ -125,14 +125,14 @@ export function ProductGallery({
           <>
             <button
               onClick={handlePrevious}
-              className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-20"
+              className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-card/80 border border-border p-2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-card z-20"
               aria-label="Previous image"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
             <button
               onClick={handleNext}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-20"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-card/80 border border-border p-2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-card z-20"
               aria-label="Next image"
             >
               <ChevronRight className="h-5 w-5" />

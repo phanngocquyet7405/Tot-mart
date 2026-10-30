@@ -28,7 +28,7 @@ export default function TotMartSupport() {
   return (
     <>
       {/* FAQ Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           <div className="text-center mb-16">
             <p className="text-xs tracking-widest text-primary mb-4 uppercase font-bold">
@@ -97,7 +97,7 @@ export default function TotMartSupport() {
               />
               <button
                 type="submit"
-                className="bg-yellow-500 hover:bg-yellow-600 text-foreground font-bold px-8 py-3.5 rounded-xl transition-colors duration-300 whitespace-nowrap uppercase tracking-wider text-sm"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 py-3.5 rounded-xl transition-colors duration-300 whitespace-nowrap uppercase tracking-wider text-sm"
               >
                 Tham Gia
               </button>

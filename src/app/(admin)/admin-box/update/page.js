@@ -269,7 +269,7 @@ export default function UpdateBoxPage() {
                   type="text"
                   value={form.name}
                   onChange={(e) => handleChange("name", e.target.value)}
-                  className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary ${errors.name ? "border-destructive/50" : "border-border dark:border-border"}`}
+                  className={`w-full px-3 py-2 text-sm rounded-md border bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary ${errors.name ? "border-destructive/50" : "border-border dark:border-border"}`}
                 />
                 {errors.name && (
                   <span className="text-xs text-destructive-text">{errors.name}</span>
@@ -309,7 +309,7 @@ export default function UpdateBoxPage() {
                     onChange={(e) =>
                       handleChange("discountPercent", +e.target.value)
                     }
-                    className="w-full px-3 py-2 text-sm rounded-md border border-border dark:border-border bg-white dark:bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full px-3 py-2 text-sm rounded-md border border-border dark:border-border bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -353,7 +353,7 @@ export default function UpdateBoxPage() {
                     type="date"
                     value={form.validFrom}
                     onChange={(e) => handleChange("validFrom", e.target.value)}
-                    className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary ${errors.validFrom ? "border-destructive/50" : "border-border dark:border-border"}`}
+                    className={`w-full px-3 py-2 text-sm rounded-md border bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary ${errors.validFrom ? "border-destructive/50" : "border-border dark:border-border"}`}
                   />
                   {errors.validFrom && (
                     <span className="text-xs text-destructive-text">
@@ -369,7 +369,7 @@ export default function UpdateBoxPage() {
                     type="date"
                     value={form.validTo}
                     onChange={(e) => handleChange("validTo", e.target.value)}
-                    className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary ${errors.validTo ? "border-destructive/50" : "border-border dark:border-border"}`}
+                    className={`w-full px-3 py-2 text-sm rounded-md border bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary ${errors.validTo ? "border-destructive/50" : "border-border dark:border-border"}`}
                   />
                   {errors.validTo && (
                     <span className="text-xs text-destructive-text">
@@ -403,7 +403,7 @@ export default function UpdateBoxPage() {
                       <select
                         value={p.productId}
                         onChange={(e) => handleSelectProduct(i, e.target.value)}
-                        className="px-2.5 py-1.5 text-sm rounded-md border border-border dark:border-border bg-white dark:bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="px-2.5 py-1.5 text-sm rounded-md border border-border dark:border-border bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                       >
                         <option value="">— Chọn sản phẩm —</option>
                         {availableProducts.map((ap) => (
@@ -419,7 +419,7 @@ export default function UpdateBoxPage() {
                         onChange={(e) =>
                           handleChangeProduct(i, "quantity", +e.target.value)
                         }
-                        className="px-2.5 py-1.5 text-sm rounded-md border border-border dark:border-border bg-white dark:bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="px-2.5 py-1.5 text-sm rounded-md border border-border dark:border-border bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                       <button
                         onClick={() => handleRemoveProduct(i)}

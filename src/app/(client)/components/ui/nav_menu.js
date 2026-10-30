@@ -111,7 +111,7 @@ export default function NavMenu() {
 
   return (
     <nav
-      className="relative z-50 w-full border-b bg-white"
+      className="relative z-50 w-full border-b border-border bg-background"
       onMouseLeave={() => setActiveDropdown(null)}
     >
       <div className="mx-auto flex max-w-7xl justify-center space-x-8">

@@ -444,7 +444,7 @@ export default function AddProductPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
-              <div className="aspect-square relative rounded-lg overflow-hidden border bg-white flex items-center justify-center">
+              <div className="aspect-square relative rounded-lg overflow-hidden border border-border bg-card flex items-center justify-center">
                 {images.length > 0 ? (
                   <Image
                     src={

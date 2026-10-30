@@ -69,20 +69,20 @@ function TodayDeliveryBanner({ deliveries }) {
 
   return (
     <div className="bg-primary text-primary-foreground rounded-2xl p-4 flex items-center gap-3.5 shadow-xs">
-      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-        <Truck size={20} className="text-white" />
+      <div className="w-10 h-10 rounded-xl bg-primary-foreground/20 flex items-center justify-center shrink-0">
+        <Truck size={20} className="text-primary-foreground" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-white">
+        <p className="text-xs font-semibold text-primary-foreground">
           Giao hàng hôm nay
         </p>
-        <p className="text-xs text-white/90 mt-0.5">
+        <p className="text-xs text-primary-foreground/90 mt-0.5">
           Bạn có <span className="font-bold underline">{deliveries.length}</span> đơn
           hàng định kỳ được giao hôm nay
         </p>
       </div>
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
-        <span className="text-xs font-bold text-white tabular-nums">
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-foreground/20">
+        <span className="text-xs font-bold text-primary-foreground tabular-nums">
           {deliveries.length}
         </span>
       </div>

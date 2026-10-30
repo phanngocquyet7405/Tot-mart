@@ -25,7 +25,7 @@ export function FormFooter({
         variant="outline"
         type="button"
         onClick={() => router.push(cancelHref)}
-        className="border-border bg-white text-[var(--foreground)]/70 hover:bg-border hover:text-[var(--foreground)]"
+        className="border-border bg-card text-[var(--foreground)]/70 hover:bg-border hover:text-[var(--foreground)]"
       >
         Huỷ
       </Button>

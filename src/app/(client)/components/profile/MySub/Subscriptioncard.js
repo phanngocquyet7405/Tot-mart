@@ -110,16 +110,13 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
 
             {/* Status badge */}
             <span
-              className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full shrink-0"
-              style={{
-                backgroundColor: config.bg,
-                color: config.text,
-                border: `1px solid ${config.border}`,
-              }}
+              className={cn(
+                "inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full shrink-0 border",
+                config.badgeClass,
+              )}
             >
               <span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ backgroundColor: config.dot }}
+                className={cn("w-1.5 h-1.5 rounded-full", config.dotClass)}
               />
               {config.label}
             </span>

@@ -34,8 +34,8 @@ function ProductPageContent() {
       {/* Hero Section */}
       <div className="bg-card border-b border-border py-12 md:py-16 relative overflow-hidden text-foreground">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-white blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-white blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-primary/20 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-primary/20 blur-3xl"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <p className="text-sm font-semibold uppercase tracking-wider mb-3 text-primary font-semibold">

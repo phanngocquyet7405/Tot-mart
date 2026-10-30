@@ -141,7 +141,7 @@ function DeleteBrandContent() {
 
             <div className="w-full rounded-xl border border-border bg-muted p-4 flex items-center gap-4 text-left">
               {brand?.logo ? (
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white p-1">
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-card border border-border p-1">
                   <Image
                     src={brand.logo}
                     alt={brand.name}

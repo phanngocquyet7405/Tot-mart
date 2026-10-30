@@ -105,7 +105,7 @@ export default function AddCategoryPage() {
                 <Label className="font-bold text-foreground">
                   Vị trí trong cây danh mục
                 </Label>
-                <div className="border rounded-xl overflow-hidden divide-y bg-white shadow-inner max-h-72 overflow-y-auto">
+                <div className="border border-border rounded-xl overflow-hidden divide-y divide-border bg-card shadow-inner max-h-72 overflow-y-auto">
                   <div
                     onClick={() => updateField("parentId", null)}
                     className={cn(
@@ -226,10 +226,10 @@ function RadioDot({ selected }) {
         "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
         selected
           ? "border-primary bg-primary"
-          : "border-border bg-white",
+          : "border-border bg-card",
       )}
     >
-      {selected && <div className="w-2 h-2 rounded-full bg-white" />}
+      {selected && <div className="w-2 h-2 rounded-full bg-primary-foreground" />}
     </div>
   );
 }

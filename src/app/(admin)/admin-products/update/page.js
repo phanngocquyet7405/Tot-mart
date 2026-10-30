@@ -257,7 +257,7 @@ export default function UpdateProductPage() {
               <div
                 key={p.id || p._id}
                 onClick={() => handleSelectProduct(p.id || p._id)}
-                className="flex items-center justify-between p-3 bg-white border rounded-2xl hover:border-primary hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]"
+                className="flex items-center justify-between p-3 bg-card border border-border rounded-2xl hover:border-primary hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]"
               >
                 <div className="flex items-center gap-4">
                   {/* Áp dụng chuẩn hiển thị từ ProductList */}
@@ -429,7 +429,7 @@ export default function UpdateProductPage() {
               {/* Preview Card đồng bộ style */}
               <Card className="bg-muted/30 border-dashed">
                 <CardContent className="pt-6 space-y-4">
-                  <div className="aspect-square relative rounded-xl overflow-hidden border bg-white">
+                  <div className="aspect-square relative rounded-xl overflow-hidden border border-border bg-card">
                     <Image
                       src={
                         newImages[0]?.preview ||

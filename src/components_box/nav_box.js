@@ -443,7 +443,7 @@ export function Navigation() {
                 isPastThreshold
                   ? "bg-primary text-white border-transparent hover:bg-primary/90"
                   : isLightPage
-                    ? "bg-white text-foreground border-transparent hover:bg-muted"
+                    ? "bg-card text-foreground border-border hover:bg-muted"
                     : "bg-muted text-muted-foreground border-border hover:bg-muted",
               )}
             >
@@ -500,7 +500,7 @@ export function Navigation() {
               <div className="rounded-xl border border-border overflow-hidden">
                 <button
                   onClick={() => setMobileShopOpen((v) => !v)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-foreground uppercase tracking-wider bg-white hover:bg-muted transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-foreground uppercase tracking-wider bg-card hover:bg-muted transition-colors"
                 >
                   Shop
                   <ChevronRight
@@ -541,7 +541,7 @@ export function Navigation() {
               <div className="rounded-xl border border-border overflow-hidden">
                 <button
                   onClick={() => setMobileAboutOpen((v) => !v)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-foreground uppercase tracking-wider bg-white hover:bg-muted transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-foreground uppercase tracking-wider bg-card hover:bg-muted transition-colors"
                 >
                   Về chúng tôi
                   <ChevronRight
@@ -589,7 +589,7 @@ export function Navigation() {
               <div className="rounded-xl border border-border overflow-hidden">
                 <button
                   onClick={() => setMobileBlogOpen((v) => !v)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-foreground uppercase tracking-wider bg-white hover:bg-muted transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-foreground uppercase tracking-wider bg-card hover:bg-muted transition-colors"
                 >
                   Blog
                   <ChevronRight
@@ -628,7 +628,7 @@ export function Navigation() {
               <Link
                 href="/brands"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-between px-4 py-3 bg-white border border-border rounded-xl text-sm font-black text-foreground uppercase tracking-wider hover:bg-muted hover:text-primary transition-colors"
+                className="flex items-center justify-between px-4 py-3 bg-card border border-border rounded-xl text-sm font-black text-foreground uppercase tracking-wider hover:bg-muted hover:text-primary transition-colors"
               >
                 Thương hiệu
                 <ChevronRight size={16} className="text-muted-foreground/60" />

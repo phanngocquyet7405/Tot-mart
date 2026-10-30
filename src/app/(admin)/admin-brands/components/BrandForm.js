@@ -141,7 +141,7 @@ export default function BrandForm({
                         e.stopPropagation();
                         onClearLogo();
                       }}
-                      className="absolute right-2 top-2 rounded-full bg-white/90 p-1 shadow hover:bg-white"
+                      className="absolute right-2 top-2 rounded-full bg-background/90 p-1 shadow hover:bg-background border border-border"
                     >
                       <X size={14} />
                     </button>

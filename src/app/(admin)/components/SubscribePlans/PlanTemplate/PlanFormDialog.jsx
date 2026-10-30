@@ -154,7 +154,7 @@ export function PlanFormDialog({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
     >
       {/* Panel */}
-      <div className="relative w-full max-w-2xl max-h-[94vh] flex flex-col rounded-2xl bg-white shadow-2xl ring-1 ring-border overflow-hidden">
+      <div className="relative w-full max-w-2xl max-h-[94vh] flex flex-col rounded-2xl bg-card shadow-2xl ring-1 ring-border overflow-hidden">
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2.5">
@@ -236,7 +236,7 @@ export function PlanFormDialog({
                     className={`rounded-lg border px-3 py-2.5 text-center transition-all ${
                       form.planType === v
                         ? "border-primary bg-primary/10 text-primary font-semibold ring-1 ring-primary/30"
-                        : "border-border bg-white text-foreground hover:border-border hover:bg-muted/30"
+                        : "border-border bg-card text-foreground hover:border-border hover:bg-muted/30"
                     }`}
                   >
                     <p className="text-xs font-medium leading-tight">{l}</p>
@@ -253,7 +253,7 @@ export function PlanFormDialog({
           <div className="rounded-xl border border-border bg-muted/30 p-5 space-y-4">
             <SectionTitle
               icon={Package}
-              color="text-violet-500"
+              color="text-primary"
               label="Box & Định giá"
             />
 
@@ -270,7 +270,7 @@ export function PlanFormDialog({
                     value={form.boxId}
                     onChange={(e) => set("boxId", e.target.value)}
                     disabled={loadingBoxes}
-                    className="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-60"
+                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-60"
                   >
                     <option value="">
                       {loadingBoxes ? "Đang tải..." : "— Chọn box —"}
@@ -396,7 +396,7 @@ export function PlanFormDialog({
                     >
                       <div className="col-span-8 space-y-0.5">
                         <select
-                          className="h-8 w-full rounded-md border border-input bg-white px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                          className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                           value={g.boxId}
                           onChange={(e) =>
                             updateGift(i, "boxId", e.target.value)

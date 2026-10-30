@@ -45,10 +45,10 @@ export default function BrandsGrid() {
     <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
       {/* Breadcrumb */}
       <div className="text-sm text-muted-foreground mb-8">
-        <Link href="/" className="hover:text-black">
+        <Link href="/" className="hover:text-foreground">
           Trang chủ
         </Link>{" "}
-        / <span className="text-black">Gian hàng</span>
+        / <span className="text-foreground font-medium">Gian hàng</span>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">

@@ -9,7 +9,7 @@ export default function BrandTable({ brands = [], onDeleteClick }) {
   const [hoveredRow, setHoveredRow] = useState(null);
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border bg-muted/30 text-xs uppercase tracking-widest text-muted-foreground">

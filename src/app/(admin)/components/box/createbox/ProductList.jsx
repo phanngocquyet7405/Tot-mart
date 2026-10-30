@@ -57,9 +57,9 @@ export function ProductList({
 
   return (
     <div className="space-y-4">
-      <div className="border border-border rounded-xl overflow-hidden bg-white shadow-sm">
+      <div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
         {/* Header table */}
-        <div className="grid grid-cols-12 gap-4 bg-card px-5 py-3 text-xs font-semibold text-[var(--foreground)]/60 border-b border-border select-none">
+        <div className="grid grid-cols-12 gap-4 bg-muted/40 px-5 py-3 text-xs font-semibold text-[var(--foreground)]/60 border-b border-border select-none">
           <div className="col-span-6">Tên sản phẩm *</div>
           <div className="col-span-2">Số lượng</div>
           <div className="col-span-3">Giá (đ)</div>
@@ -73,13 +73,13 @@ export function ProductList({
             return (
               <div
                 key={itemKey}
-                className="grid grid-cols-12 gap-4 px-5 py-4 items-start bg-white transition-colors hover:bg-card"
+                className="grid grid-cols-12 gap-4 px-5 py-4 items-start bg-card transition-colors hover:bg-muted/20"
               >
                 {/* ── Cột Tên sản phẩm ── */}
                 <div className="col-span-6 space-y-1.5">
                   <div
                     onClick={() => openProductDialog(index)}
-                    className="flex items-center justify-between border border-border px-3.5 h-10 text-sm rounded-md bg-white cursor-pointer hover:border-primary/40 hover:bg-card transition shadow-sm select-none"
+                    className="flex items-center justify-between border border-border px-3.5 h-10 text-sm rounded-md bg-background cursor-pointer hover:border-primary/40 hover:bg-muted/30 transition shadow-sm select-none"
                   >
                     <span className="truncate max-w-[85%] text-[var(--foreground)] font-medium">
                       {product.name
@@ -109,7 +109,7 @@ export function ProductList({
                         Math.max(1, parseInt(e.target.value) || 1),
                       )
                     }
-                    className="h-10 text-sm px-3 py-1.5 border-border bg-white text-[var(--foreground)] focus-visible:border-primary focus-visible:ring-primary/30"
+                    className="h-10 text-sm px-3 py-1.5 border-border bg-background text-[var(--foreground)] focus-visible:border-primary focus-visible:ring-primary/30"
                   />
                   {errors[`product_${index}_quantity`] && (
                     <span className="text-xs text-destructive-text block">
@@ -132,7 +132,7 @@ export function ProductList({
                         Math.max(0, parseInt(e.target.value) || 0),
                       )
                     }
-                    className="h-10 text-sm px-3 py-1.5 border-border bg-white text-[var(--foreground)] focus-visible:border-primary focus-visible:ring-primary/30"
+                    className="h-10 text-sm px-3 py-1.5 border-border bg-background text-[var(--foreground)] focus-visible:border-primary focus-visible:ring-primary/30"
                   />
                 </div>
 
@@ -157,7 +157,7 @@ export function ProductList({
         type="button"
         variant="outline"
         onClick={onAddProduct}
-        className="w-full flex items-center justify-center gap-2 border-dashed border-border bg-white text-[var(--foreground)] h-11 text-sm font-medium hover:bg-card transition shadow-sm"
+        className="w-full flex items-center justify-center gap-2 border-dashed border-border bg-card text-[var(--foreground)] h-11 text-sm font-medium hover:bg-muted/40 transition shadow-sm"
       >
         <Plus size={16} />
         Thêm sản phẩm mới vào box
@@ -165,7 +165,7 @@ export function ProductList({
 
       {/* ── Dialog chọn sản phẩm ── */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-xl md:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden bg-white border-border">
+        <DialogContent className="sm:max-w-xl md:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden bg-card border-border">
           <DialogHeader className="p-5 border-b border-border">
             <DialogTitle className="text-base font-semibold text-[var(--foreground)]">
               Chọn sản phẩm
@@ -173,7 +173,7 @@ export function ProductList({
           </DialogHeader>
 
           {/* Ô Tìm kiếm */}
-          <div className="p-4 bg-card border-b border-border flex items-center gap-3">
+          <div className="p-4 bg-muted/20 border-b border-border flex items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--foreground)]/30 select-none pointer-events-none" />
               <Input
@@ -182,7 +182,7 @@ export function ProductList({
                 autoFocus
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-9.5 text-sm bg-white border-border text-[var(--foreground)] focus-visible:border-primary focus-visible:ring-primary/30"
+                className="pl-9 h-9.5 text-sm bg-background border-border text-[var(--foreground)] focus-visible:border-primary focus-visible:ring-primary/30"
               />
             </div>
           </div>
@@ -226,7 +226,7 @@ export function ProductList({
                     <div
                       key={p._id}
                       onClick={() => handleSelectProduct(p)}
-                      className="p-3.5 border border-border rounded-xl bg-white hover:border-primary/50 hover:bg-primary/5 cursor-pointer flex items-center justify-between gap-4 transition shadow-sm"
+                      className="p-3.5 border border-border rounded-xl bg-card hover:border-primary/50 hover:bg-primary/5 cursor-pointer flex items-center justify-between gap-4 transition shadow-sm"
                     >
                       {/* Trái: Ảnh và Tên */}
                       <div className="flex items-center gap-4 flex-1 min-w-0">

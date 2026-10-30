@@ -12,9 +12,9 @@ export function Button({
     "inline-flex items-center gap-2 font-medium rounded-lg border transition-all duration-150 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed";
   const variants = {
     default:
-      "bg-white border-border text-foreground hover:bg-muted/30 dark:bg-card dark:border-border dark:text-foreground dark:hover:bg-muted",
-    primary: "bg-primary border-primary text-white hover:bg-primary/90",
-    danger: "bg-destructive/90 border-destructive text-white hover:bg-destructive/90",
+      "bg-card border-border text-foreground hover:bg-muted/30 dark:border-border dark:text-foreground dark:hover:bg-muted",
+    primary: "bg-primary border-primary text-primary-foreground hover:bg-primary/90",
+    danger: "bg-destructive/90 border-destructive text-destructive-foreground hover:bg-destructive/90",
     ghost:
       "border-transparent bg-transparent text-muted-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted",
     outline:
@@ -65,7 +65,7 @@ export function Input({ label, error, className = "", ...props }) {
         </label>
       )}
       <input
-        className={`w-full px-3 py-2 text-sm rounded-lg border bg-white text-foreground placeholder:text-muted-foreground
+        className={`w-full px-3 py-2 text-sm rounded-lg border bg-card text-foreground placeholder:text-muted-foreground
           focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors
           dark:bg-card dark:border-border dark:text-foreground
           disabled:opacity-50 disabled:cursor-not-allowed
@@ -87,7 +87,7 @@ export function Textarea({ label, error, className = "", ...props }) {
         </label>
       )}
       <textarea
-        className={`w-full px-3 py-2 text-sm rounded-lg border bg-white text-foreground placeholder:text-muted-foreground
+        className={`w-full px-3 py-2 text-sm rounded-lg border bg-card text-foreground placeholder:text-muted-foreground
           focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none
           dark:bg-card dark:border-border dark:text-foreground
           ${error ? "border-destructive/50" : "border-border"} ${className}`}
@@ -107,7 +107,7 @@ export function Select({ label, error, children, className = "", ...props }) {
         </label>
       )}
       <select
-        className={`w-full px-3 py-2 text-sm rounded-lg border bg-white text-foreground
+        className={`w-full px-3 py-2 text-sm rounded-lg border bg-card text-foreground
           focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors
           dark:bg-card dark:border-border dark:text-foreground
           ${error ? "border-destructive/50" : "border-border"} ${className}`}
@@ -123,7 +123,7 @@ export function Select({ label, error, children, className = "", ...props }) {
 export function Card({ children, className = "" }) {
   return (
     <div
-      className={`bg-white dark:bg-card border border-border dark:border-border rounded-xl ${className}`}
+      className={`bg-card border border-border dark:border-border rounded-xl ${className}`}
     >
       {children}
     </div>

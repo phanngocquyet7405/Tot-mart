@@ -193,7 +193,7 @@ export function PlanDetailDialog({
 
         {/* Quà tặng kèm */}
         {item.gift?.length > 0 ? (
-          <div className="rounded-xl bg-pink-50 border border-pink-100 p-3.5">
+          <div className="rounded-xl bg-primary/5 border border-primary/20 p-3.5">
             <SectionLabel
               icon={Gift}
               color="text-primary"
@@ -208,7 +208,7 @@ export function PlanDetailDialog({
                   <span className="text-foreground">
                     {g.boxId?.name || g.boxId}
                   </span>
-                  <span className="rounded-full bg-pink-100 text-pink-700 text-xs px-2 py-0.5 font-medium">
+                  <span className="rounded-full bg-primary/10 text-primary text-xs px-2 py-0.5 font-medium">
                     x{g.quantity}
                   </span>
                 </div>
