@@ -60,12 +60,12 @@ export function AddressManager({
       <CardContent className="space-y-6">
         {/* ── CREATE FORM ─────────────────────────────────────────────── */}
         <div className="rounded-xl border border-border/80 bg-muted/30 p-4 space-y-3">
-          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs font-semibold text-foreground">
             Thêm địa chỉ giao nhận mới
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <label htmlFor="new-country" className="text-[11px] font-semibold text-muted-foreground">
+              <label htmlFor="new-country" className="text-xs font-medium text-foreground">
                 Quốc gia *
               </label>
               <Input
@@ -79,7 +79,7 @@ export function AddressManager({
               />
             </div>
             <div className="space-y-1">
-              <label htmlFor="new-city" className="text-[11px] font-semibold text-muted-foreground">
+              <label htmlFor="new-city" className="text-xs font-medium text-foreground">
                 Tỉnh / Thành phố *
               </label>
               <Input
@@ -93,7 +93,7 @@ export function AddressManager({
               />
             </div>
             <div className="space-y-1">
-              <label htmlFor="new-district" className="text-[11px] font-semibold text-muted-foreground">
+              <label htmlFor="new-district" className="text-xs font-medium text-foreground">
                 Quận / Huyện *
               </label>
               <Input
@@ -107,7 +107,7 @@ export function AddressManager({
               />
             </div>
             <div className="space-y-1">
-              <label htmlFor="new-address" className="text-[11px] font-semibold text-muted-foreground">
+              <label htmlFor="new-address" className="text-xs font-medium text-foreground">
                 Địa chỉ chi tiết (số nhà, tên đường) *
               </label>
               <Input
@@ -121,7 +121,7 @@ export function AddressManager({
               />
             </div>
             <div className="space-y-1">
-              <label htmlFor="new-phone" className="text-[11px] font-semibold text-muted-foreground">
+              <label htmlFor="new-phone" className="text-xs font-medium text-foreground">
                 Số điện thoại liên hệ *
               </label>
               <Input
@@ -137,7 +137,7 @@ export function AddressManager({
               />
             </div>
             <div className="space-y-1">
-              <label htmlFor="new-zip" className="text-[11px] font-semibold text-muted-foreground">
+              <label htmlFor="new-zip" className="text-xs font-medium text-foreground">
                 Mã bưu điện (Zip code)
               </label>
               <Input
@@ -156,7 +156,7 @@ export function AddressManager({
             <Button
               onClick={onCreateAddress}
               disabled={!canCreate || loading}
-              className="min-h-11 bg-primary text-primary-foreground font-bold text-xs uppercase tracking-wider hover:bg-primary/90 rounded-xl px-4 shadow-xs"
+              className="min-h-11 bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 rounded-xl px-4 shadow-xs"
             >
               <Plus className="mr-1.5 h-4 w-4" />
               Thêm địa chỉ mới
@@ -181,7 +181,7 @@ export function AddressManager({
                 className="rounded-xl border border-border bg-card p-4 shadow-2xs space-y-2"
               >
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <Badge className="bg-primary/10 text-primary border border-primary/20 text-xs font-bold">
+                  <Badge className="bg-primary/10 text-primary border border-primary/20 text-xs font-semibold">
                     {item.city}
                   </Badge>
 
@@ -278,7 +278,7 @@ export function AddressManager({
                                 onUpsertAddress(editing);
                               }
                             }}
-                            className="min-h-11 bg-primary text-primary-foreground font-bold text-xs uppercase tracking-wider hover:bg-primary/90 rounded-xl px-5"
+                            className="min-h-11 bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 rounded-xl px-5"
                           >
                             Lưu thay đổi
                           </Button>

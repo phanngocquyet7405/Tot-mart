@@ -143,7 +143,7 @@ export default function RegisterPage() {
 
             {/* Password */}
             <div className="space-y-1.5 text-left">
-              <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground">
                 Mật khẩu <span className="text-destructive">*</span>
               </label>
               <div className="relative">
@@ -205,7 +205,7 @@ export default function RegisterPage() {
 
             {/* Confirm Password */}
             <div className="space-y-1.5 text-left">
-              <label htmlFor="confirmPassword" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
                 Xác nhận mật khẩu <span className="text-destructive">*</span>
               </label>
               <div className="relative">
@@ -297,7 +297,7 @@ export default function RegisterPage() {
           {/* Divider */}
           <div className="flex items-center gap-3 my-4">
             <div className="flex-1 h-px bg-border"></div>
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+            <span className="text-xs font-medium text-muted-foreground">
               Hoặc
             </span>
             <div className="flex-1 h-px bg-border"></div>

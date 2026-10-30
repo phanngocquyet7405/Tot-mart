@@ -33,7 +33,7 @@ export function BasicInfoSection({ form, errors, onChange }) {
   };
 
   const inputClass =
-    "border-border bg-card text-[var(--foreground)] placeholder:text-[var(--foreground)]/30 focus-visible:border-[hsl(var(--primary))] focus-visible:ring-[hsl(var(--primary))]/30";
+    "border-border bg-card text-[var(--foreground)] placeholder:text-[var(--foreground)]/30 focus-visible:border-primary focus-visible:ring-primary/30";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
@@ -144,7 +144,7 @@ export function BasicInfoSection({ form, errors, onChange }) {
             type="checkbox"
             checked={form.isGift}
             onChange={(e) => onChange("isGift", e.target.checked)}
-            className="w-4 h-4 rounded border-border text-[hsl(var(--primary))] focus:ring-[hsl(var(--primary))]/40"
+            className="w-4 h-4 rounded border-border text-primary focus:ring-primary/40"
           />
           <span className="text-sm text-[var(--foreground)]/70">Đây là combo quà tặng</span>
         </label>

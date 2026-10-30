@@ -79,7 +79,7 @@ export function ProductList({
                 <div className="col-span-6 space-y-1.5">
                   <div
                     onClick={() => openProductDialog(index)}
-                    className="flex items-center justify-between border border-border px-3.5 h-10 text-sm rounded-md bg-white cursor-pointer hover:border-[hsl(var(--primary))]/40 hover:bg-card transition shadow-sm select-none"
+                    className="flex items-center justify-between border border-border px-3.5 h-10 text-sm rounded-md bg-white cursor-pointer hover:border-primary/40 hover:bg-card transition shadow-sm select-none"
                   >
                     <span className="truncate max-w-[85%] text-[var(--foreground)] font-medium">
                       {product.name
@@ -109,7 +109,7 @@ export function ProductList({
                         Math.max(1, parseInt(e.target.value) || 1),
                       )
                     }
-                    className="h-10 text-sm px-3 py-1.5 border-border bg-white text-[var(--foreground)] focus-visible:border-[hsl(var(--primary))] focus-visible:ring-[hsl(var(--primary))]/30"
+                    className="h-10 text-sm px-3 py-1.5 border-border bg-white text-[var(--foreground)] focus-visible:border-primary focus-visible:ring-primary/30"
                   />
                   {errors[`product_${index}_quantity`] && (
                     <span className="text-xs text-destructive-text block">
@@ -132,7 +132,7 @@ export function ProductList({
                         Math.max(0, parseInt(e.target.value) || 0),
                       )
                     }
-                    className="h-10 text-sm px-3 py-1.5 border-border bg-white text-[var(--foreground)] focus-visible:border-[hsl(var(--primary))] focus-visible:ring-[hsl(var(--primary))]/30"
+                    className="h-10 text-sm px-3 py-1.5 border-border bg-white text-[var(--foreground)] focus-visible:border-primary focus-visible:ring-primary/30"
                   />
                 </div>
 
@@ -182,7 +182,7 @@ export function ProductList({
                 autoFocus
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-9.5 text-sm bg-white border-border text-[var(--foreground)] focus-visible:border-[hsl(var(--primary))] focus-visible:ring-[hsl(var(--primary))]/30"
+                className="pl-9 h-9.5 text-sm bg-white border-border text-[var(--foreground)] focus-visible:border-primary focus-visible:ring-primary/30"
               />
             </div>
           </div>
@@ -226,7 +226,7 @@ export function ProductList({
                     <div
                       key={p._id}
                       onClick={() => handleSelectProduct(p)}
-                      className="p-3.5 border border-border rounded-xl bg-white hover:border-[hsl(var(--primary))]/50 hover:bg-[hsl(var(--primary))]/5 cursor-pointer flex items-center justify-between gap-4 transition shadow-sm"
+                      className="p-3.5 border border-border rounded-xl bg-white hover:border-primary/50 hover:bg-primary/5 cursor-pointer flex items-center justify-between gap-4 transition shadow-sm"
                     >
                       {/* Trái: Ảnh và Tên */}
                       <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -262,7 +262,7 @@ export function ProductList({
 
                       {/* Phải: Giá */}
                       <div className="text-right shrink-0">
-                        <span className="text-sm font-bold text-[hsl(var(--primary))]">
+                        <span className="text-sm font-bold text-primary">
                           {formatVND(p.price || 0)}
                         </span>
                       </div>

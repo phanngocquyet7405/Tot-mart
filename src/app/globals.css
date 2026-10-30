@@ -165,10 +165,6 @@
     @apply hover:scale-[1.01] transition-transform duration-200 ease-out;
   }
 
-  /* Legacy utility alias mapped to terracotta primary */
-  .btn-primary-green {
-    @apply bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-2.5 rounded-lg transition-colors duration-200 active:scale-[0.97];
-  }
 
   /* Category card circular image */
   .category-image-wrapper {
@@ -225,14 +221,7 @@
     @apply hover:scale-[1.01];
   }
 
-  /* Legacy color aliases mapped to semantic tokens */
-  .text-green-primary {
-    @apply text-primary;
-  }
 
-  .bg-green-primary {
-    @apply bg-primary;
-  }
 }
 
 /* Keyframe animations with Emil Kowalski ease-out */

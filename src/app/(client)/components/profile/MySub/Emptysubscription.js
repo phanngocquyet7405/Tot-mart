@@ -36,7 +36,7 @@ export function EmptySubscription({ filtered = false }) {
         <div className="pt-2">
           <Link
             href="/products/Subscriber"
-            className="inline-flex items-center gap-2 min-h-11 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
+            className="inline-flex items-center gap-2 min-h-11 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-sm font-semibold transition-colors shadow-xs"
           >
             <Sparkles size={14} />
             Khám phá các gói đăng ký

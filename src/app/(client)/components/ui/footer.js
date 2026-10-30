@@ -173,7 +173,7 @@ export default function Footer() {
                   key={method}
                   className="bg-white rounded-xs flex items-center justify-center h-6 px-1 w-full shadow-sm"
                 >
-                  <div className="text-[8px] text-black font-bold truncate">
+                  <div className="text-[8px] text-foreground font-bold truncate">
                     {method}
                   </div>
                 </div>

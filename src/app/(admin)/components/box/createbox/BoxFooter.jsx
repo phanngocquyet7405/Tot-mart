@@ -35,7 +35,7 @@ export function FormFooter({
         type="button"
         onClick={onSubmit}
         disabled={loading}
-        className="flex items-center gap-1.5 bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90"
+        className="flex items-center gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
       >
         <Package size={14} />
         {loading ? "Đang tạo..." : "Tạo box"}

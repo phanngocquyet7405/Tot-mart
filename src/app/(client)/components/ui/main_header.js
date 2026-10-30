@@ -63,7 +63,7 @@ export default function MainHeader() {
                 className="h-12 w-auto object-contain"
               />
             </Link>
-            <div className="hidden lg:block bg-primary text-white text-[11px] font-bold px-4 py-1.5 rounded-sm tracking-widest uppercase">
+            <div className="hidden lg:block bg-primary text-primary-foreground text-[11px] font-bold px-4 py-1.5 rounded-sm tracking-widest uppercase">
               Khám phá sản phẩm
             </div>
           </div>
@@ -97,7 +97,7 @@ export default function MainHeader() {
                     <button className="flex items-center gap-2 group outline-none animate-in fade-in duration-500">
                       <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center border border-border group-hover:border-primary transition-all">
                         <User
-                          className={`w-5 h-5 ${userData.role === "admin" ? "text-blue-600" : "text-muted-foreground"} group-hover:text-primary`}
+                          className={`w-5 h-5 ${userData.role === "admin" ? "text-primary font-semibold" : "text-muted-foreground"} group-hover:text-primary`}
                         />
                       </div>
                       <div className="hidden lg:flex flex-col items-start leading-none text-left">
@@ -143,7 +143,7 @@ export default function MainHeader() {
                           className="flex items-center font-bold"
                         >
                           <UserCircle className="mr-3 h-4 w-4" />
-                          <span>My Profile</span>
+                          <span>{t("myAccount")}</span>
                         </Link>
                       </DropdownMenuItem>
                     )}
@@ -167,7 +167,7 @@ export default function MainHeader() {
               >
                 <Heart className="w-5 h-5 text-foreground group-hover:text-destructive transition-colors" />
                 {wishlistCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-primary text-white text-[11px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-sm">
+                  <span className="absolute top-0 right-0 bg-primary text-primary-foreground text-[11px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-sm">
                     {wishlistCount}
                   </span>
                 )}

@@ -41,12 +41,12 @@ export function BoxSection({
         />
 
         {computedValue > 0 && (
-          <div className="flex items-center justify-between px-3 py-2 bg-[hsl(var(--primary))]/10 rounded-lg mt-3 border border-[hsl(var(--primary))]/20">
-            <span className="text-xs text-[hsl(var(--primary))]">
+          <div className="flex items-center justify-between px-3 py-2 bg-primary/10 rounded-lg mt-3 border border-primary/20">
+            <span className="text-xs text-primary">
               Giá trị box{" "}
               {discountPercent > 0 ? `(sau giảm ${discountPercent}%)` : ""}
             </span>
-            <span className="text-sm font-semibold text-[hsl(var(--primary))]">
+            <span className="text-sm font-semibold text-primary">
               {fmtPrice(computedValue)}
             </span>
           </div>

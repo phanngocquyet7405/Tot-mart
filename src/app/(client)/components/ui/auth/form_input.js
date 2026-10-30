@@ -22,7 +22,7 @@ export default function FormInput({
       {displayLabel && (
         <label
           htmlFor={id}
-          className="block text-xs font-bold uppercase tracking-wider text-muted-foreground"
+          className="block text-sm font-medium text-foreground"
         >
           {displayLabel}
           {required && <span className="text-destructive ml-0.5">*</span>}

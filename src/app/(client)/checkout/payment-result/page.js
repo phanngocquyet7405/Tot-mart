@@ -10,67 +10,17 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Loader2, XCircle, ArrowRight, ShoppingBag, RefreshCw, Copy, Check } from "lucide-react";
+import { Loader2, XCircle, ArrowRight, ShoppingBag, RefreshCw } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 import { paymentGatewayService } from "@/app/services/api/paymentGatewayService";
 import { OrderSuccessScreen } from "../../components/Checkout_component/OrderSuccessScreen";
 import logger from "@/app/util/Logger";
 
-// ─── 0. Copy Reference Badge ──────────────────────────────────────────────────
-function ReferenceSnippet({ code }) {
-  const [copied, setCopied] = useState(false);
-  if (!code) return null;
-
-  const handleCopy = async () => {
-    try {
-      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
-    } catch {
-      // ignore clipboard error
-    }
-  };
-
-  return (
-    <div className="w-full bg-card border border-border rounded-xl p-3 flex items-center justify-between gap-2 text-left my-2">
-      <div className="min-w-0 flex-1">
-        <div className="text-[11px] text-muted-foreground uppercase font-semibold tracking-wider">
-          Mã tham chiếu đơn hàng
-        </div>
-        <div className="text-sm font-mono font-medium text-foreground truncate select-all">
-          {code}
-        </div>
-      </div>
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="shrink-0 px-2.5 py-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors text-xs flex items-center gap-1.5 border border-border"
-        aria-label="Sao chép mã tham chiếu"
-        title="Sao chép mã tham chiếu"
-      >
-        {copied ? (
-          <>
-            <Check size={13} className="text-success-text" />
-            <span className="text-[11px] font-medium text-success-text">Đã chép</span>
-          </>
-        ) : (
-          <>
-            <Copy size={13} />
-            <span className="text-[11px] font-medium">Sao chép</span>
-          </>
-        )}
-      </button>
-    </div>
-  );
-}
-
 // ─── 1. Checking Screen (Đang xác nhận) ──────────────────────────────────────
-function CheckingScreen({ refCode }) {
+function CheckingScreen() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="flex flex-col items-center gap-4 text-center max-w-sm py-12 w-full">
+      <div className="flex flex-col items-center gap-4 text-center max-w-sm py-12">
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
           <Loader2 className="animate-spin text-primary" size={32} />
         </div>
@@ -82,19 +32,18 @@ function CheckingScreen({ refCode }) {
             Hệ thống đang đối chiếu trạng thái giao dịch từ cổng thanh toán. Vui lòng không đóng hoặc tải lại trang trong giây lát.
           </p>
         </div>
-        <ReferenceSnippet code={refCode} />
       </div>
     </div>
   );
 }
 
 // ─── 2. Failed Screen (Thanh toán chưa thành công) ───────────────────────────
-function FailedScreen({ onRetry, refCode }) {
+function FailedScreen({ onRetry }) {
   const router = useRouter();
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="flex flex-col items-center gap-5 text-center max-w-md py-12 w-full">
+      <div className="flex flex-col items-center gap-5 text-center max-w-md py-12">
         <div className="w-20 h-20 rounded-3xl bg-destructive/10 border-2 border-destructive/25 flex items-center justify-center">
           <XCircle size={40} className="text-destructive" />
         </div>
@@ -106,7 +55,6 @@ function FailedScreen({ onRetry, refCode }) {
             Giao dịch bị huỷ hoặc chưa ghi nhận thành công từ phía ngân hàng. Đơn hàng của bạn vẫn được lưu giữ an toàn, bạn có thể thử thanh toán lại hoặc chọn phương thức khác.
           </p>
         </div>
-        <ReferenceSnippet code={refCode} />
         <div className="w-full flex flex-col gap-3 pt-2">
           <button
             type="button"
@@ -145,13 +93,6 @@ export default function PaymentResultPage() {
   const { clearCart } = useCart();
   const [status, setStatus] = useState("checking"); // checking | success | failed
 
-  const refCode =
-    searchParams.get("vnp_TxnRef") ||
-    searchParams.get("orderCode") ||
-    searchParams.get("orderId") ||
-    searchParams.get("code") ||
-    "";
-
   useEffect(() => {
     let cancelled = false;
 
@@ -181,7 +122,7 @@ export default function PaymentResultPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (status === "checking") return <CheckingScreen refCode={refCode} />;
+  if (status === "checking") return <CheckingScreen />;
   if (status === "success") return <OrderSuccessScreen onNew={() => router.push("/products")} />;
-  return <FailedScreen onRetry={() => router.push("/checkout")} refCode={refCode} />;
+  return <FailedScreen onRetry={() => router.push("/checkout")} />;
 }

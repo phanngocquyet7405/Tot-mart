@@ -16,7 +16,7 @@ export function ValiditySection({ form, errors, onChange }) {
   const today = new Date().toISOString().split("T")[0];
 
   const inputClass =
-    "border-border bg-card text-[var(--foreground)] focus-visible:border-[hsl(var(--primary))] focus-visible:ring-[hsl(var(--primary))]/30";
+    "border-border bg-card text-[var(--foreground)] focus-visible:border-primary focus-visible:ring-primary/30";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">

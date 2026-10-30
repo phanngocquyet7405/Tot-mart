@@ -63,7 +63,7 @@ function OrderCard({ order, onConfirmReceipt, confirming }) {
   return (
     <article className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-4 py-3 sm:px-5 bg-card/60">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
           <span
             className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold border ${
               statusTone[order.status] || "bg-muted text-muted-foreground border-border"
@@ -116,7 +116,7 @@ function OrderCard({ order, onConfirmReceipt, confirming }) {
 
       <footer className="flex flex-col gap-3 bg-muted/30 border-t border-border/70 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div>
-          <p className="text-[11px] uppercase font-bold tracking-wider text-muted-foreground">
+          <p className="text-xs font-medium text-muted-foreground">
             Tổng thanh toán
           </p>
           <p className="text-lg font-bold text-primary tabular-nums">
@@ -129,7 +129,7 @@ function OrderCard({ order, onConfirmReceipt, confirming }) {
               Chi tiết giao hàng <ChevronRight size={13} />
             </summary>
             <div className="absolute bottom-12 right-0 z-20 w-80 rounded-xl border border-border bg-card p-4 text-xs text-foreground shadow-lg space-y-2">
-              <p className="font-bold uppercase tracking-wider text-[11px] text-muted-foreground">
+              <p className="font-semibold text-xs text-muted-foreground">
                 Thông tin người nhận
               </p>
               <p className="font-semibold text-foreground">
@@ -387,7 +387,7 @@ export default function MyOrdersPage() {
             <div className="pt-2">
               <Link
                 href="/products"
-                className="inline-flex items-center justify-center min-h-11 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90 transition-colors shadow-xs"
+                className="inline-flex items-center justify-center min-h-11 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors shadow-xs"
               >
                 Mua sắm ngay
               </Link>

@@ -73,7 +73,7 @@ function TodayDeliveryBanner({ deliveries }) {
         <Truck size={20} className="text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-bold uppercase tracking-wider text-white">
+        <p className="text-xs font-semibold text-white">
           Giao hàng hôm nay
         </p>
         <p className="text-xs text-white/90 mt-0.5">
@@ -101,7 +101,7 @@ function OtherPlansSection({ excludeBoxIds, onSubscribed }) {
     <div className="pt-8 space-y-4">
       <div className="flex items-center gap-2 border-b border-border pb-3">
         <Package size={16} className="text-primary" />
-        <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
+        <h2 className="text-sm font-semibold text-foreground">
           Gói combo định kỳ gợi ý cho bạn
         </h2>
       </div>
@@ -209,7 +209,7 @@ export default function MySubscriptionsPage() {
 
               <Link
                 href="/products/Subscriber"
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 min-h-10 bg-primary text-primary-foreground rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 min-h-10 bg-primary text-primary-foreground rounded-xl text-xs font-semibold hover:bg-primary/90 transition-colors shadow-2xs"
               >
                 <Sparkles size={13} />
                 <span>Thêm gói mới</span>

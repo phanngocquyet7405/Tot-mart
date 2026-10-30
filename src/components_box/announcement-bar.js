@@ -87,7 +87,7 @@ export default function AnnouncementBarBox() {
           </p>
           <Link
             href={href}
-            className="shrink-0 text-[11px] sm:text-xs font-bold text-primary-foreground font-bold hover:underline whitespace-nowrap transition-colors"
+            className="shrink-0 text-[11px] sm:text-xs font-bold text-primary-foreground hover:underline whitespace-nowrap transition-colors"
           >
             {cta}
           </Link>
@@ -107,7 +107,10 @@ export default function AnnouncementBarBox() {
                 width: i === idx ? 14 : 5,
                 height: 5,
                 borderRadius: 99,
-                background: i === idx ? "var(--primary)" : "rgba(255,255,255,0.25)",
+                background:
+                  i === idx
+                    ? "var(--primary)"
+                    : "color-mix(in oklch, var(--background) 30%, transparent)",
                 transition: "all 0.3s",
               }}
             />

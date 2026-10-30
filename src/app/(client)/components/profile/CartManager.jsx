@@ -46,7 +46,7 @@ export function CartManager({ cart, loading, onChangeQuantity, onRemoveItem }) {
             </p>
             <Link
               href="/products"
-              className="inline-flex items-center justify-center min-h-11 px-5 rounded-xl bg-primary text-primary-foreground font-bold text-xs uppercase tracking-wider hover:bg-primary/90 transition-colors shadow-xs"
+              className="inline-flex items-center justify-center min-h-11 px-5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors shadow-xs"
             >
               Tiếp tục mua sắm
             </Link>

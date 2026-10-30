@@ -110,7 +110,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
 
             {/* Status badge */}
             <span
-              className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shrink-0"
+              className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full shrink-0"
               style={{
                 backgroundColor: config.bg,
                 color: config.text,
@@ -197,7 +197,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
             <div className="flex items-start gap-2">
               <MapPin size={13} className="text-primary mt-0.5 shrink-0" />
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">
+                <p className="text-xs font-medium text-muted-foreground mb-0.5">
                   Địa chỉ nhận hàng
                 </p>
                 <p className="text-xs font-medium text-foreground">
@@ -214,7 +214,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
 
           {/* Sản phẩm trong hộp */}
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+            <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
               <Package size={13} className="text-primary" />
               Sản phẩm dự kiến trong hộp
             </p>
@@ -300,7 +300,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
             <div className="flex items-start gap-2">
               <Gift size={13} className="text-primary mt-0.5 shrink-0" />
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                <p className="text-xs font-medium text-muted-foreground mb-1">
                   Quà tặng đi kèm
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -321,7 +321,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
           {/* Dates */}
           <div className="flex gap-6 pt-1 text-xs">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground">
                 Ngày bắt đầu
               </p>
               <p className="font-semibold text-foreground mt-0.5 tabular-nums">
@@ -329,7 +329,7 @@ export function SubscriptionCard({ subscription: sub, onCancel }) {
               </p>
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground">
                 Kết thúc kỳ
               </p>
               <p className="font-semibold text-foreground mt-0.5 tabular-nums">

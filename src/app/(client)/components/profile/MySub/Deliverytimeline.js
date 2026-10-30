@@ -29,7 +29,7 @@ export function DeliveryTimeline({ totalDeliveries, remainDeliveries }) {
     <div className="space-y-2">
       {/* Progress bar */}
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+        <span className="text-xs font-medium text-muted-foreground">
           Tiến độ giao nhận
         </span>
         <span className="text-[11px] font-bold text-foreground tabular-nums">

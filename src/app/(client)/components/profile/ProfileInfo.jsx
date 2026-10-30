@@ -54,7 +54,7 @@ export function ProfileInfo({ name, email, avatarUrl, onSave, saving }) {
               type="file"
               onChange={handleUploadPreview}
             />
-            <span className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-border px-4 py-2.5 min-h-11 text-xs font-bold uppercase tracking-wider text-foreground hover:bg-muted transition-colors">
+            <span className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-border px-4 py-2.5 min-h-11 text-xs font-semibold text-foreground hover:bg-muted transition-colors">
               <Camera className="h-4 w-4" />
               Thay đổi ảnh đại diện
             </span>
@@ -63,7 +63,7 @@ export function ProfileInfo({ name, email, avatarUrl, onSave, saving }) {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1.5 text-left">
-            <label htmlFor="profile-name" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            <label htmlFor="profile-name" className="block text-sm font-medium text-foreground">
               Họ và tên <span className="text-destructive">*</span>
             </label>
             <Input
@@ -80,8 +80,8 @@ export function ProfileInfo({ name, email, avatarUrl, onSave, saving }) {
             />
           </div>
           <div className="space-y-1.5 text-left">
-            <label htmlFor="profile-email" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Địa chỉ Email <span className="text-destructive">*</span>
+            <label htmlFor="profile-email" className="block text-sm font-medium text-foreground">
+              Địa chỉ email <span className="text-destructive">*</span>
             </label>
             <Input
               id="profile-email"
@@ -106,7 +106,7 @@ export function ProfileInfo({ name, email, avatarUrl, onSave, saving }) {
         )}
 
         <Button
-          className="min-h-11 bg-primary text-primary-foreground font-bold text-xs uppercase tracking-wider hover:bg-primary/90 rounded-xl px-5 shadow-xs"
+          className="min-h-11 bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 rounded-xl px-5 shadow-xs"
           onClick={handleSubmit}
           disabled={saving}
         >

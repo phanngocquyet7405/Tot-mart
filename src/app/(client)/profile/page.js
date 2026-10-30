@@ -280,7 +280,7 @@ export default function ProfilePage() {
         </div>
         <Link
           href="/profile/orders"
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-xs font-bold uppercase tracking-wider text-foreground transition-colors shadow-2xs self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-xs font-semibold text-foreground transition-colors shadow-2xs self-start sm:self-auto"
         >
           <ShoppingBag size={14} className="text-primary" />
           <span>Đơn hàng của tôi</span>

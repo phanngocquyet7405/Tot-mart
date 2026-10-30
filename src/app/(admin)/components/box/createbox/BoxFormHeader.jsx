@@ -30,8 +30,8 @@ export function BoxFormHeader({
 
       {/* Page Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--primary))]/10 border border-[hsl(var(--primary))]/20">
-          <Package size={18} className="text-[hsl(var(--primary))]" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
+          <Package size={18} className="text-primary" />
         </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">

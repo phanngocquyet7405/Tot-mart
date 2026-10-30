@@ -133,7 +133,7 @@ export function CancelDialog({ target, open, cancelling, onClose, onConfirm }) {
               type="button"
               onClick={onConfirm}
               disabled={cancelling}
-              className={`px-4 py-2.5 min-h-11 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 ${
+              className={`px-4 py-2.5 min-h-11 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 ${
                 isImmediate
                   ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   : "bg-primary text-primary-foreground hover:bg-primary/90"

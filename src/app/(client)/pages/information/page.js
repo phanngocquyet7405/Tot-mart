@@ -1,13 +1,7 @@
 "use client";
 
-import Head from "next/head";
-import { useState } from "react";
+import { useState, useId } from "react";
 import Layout from "../layout-page";
-import AnnouncementBarBox from "@/components_box/announcement-bar";
-import { Navigation } from "@/components_box/nav_box";
-import { Newsletter } from "@/components_box/newsletter";
-import Footer from "../../components/ui/footer";
-import CartDrawer from "../../components/Cart_component/cart_drawer";
 import {
   Shield,
   RotateCcw,
@@ -136,51 +130,65 @@ const POLICIES = [
   },
 ];
 
-function PolicySection({ policy }) {
+function PolicySection({ policy, idPrefix }) {
   const [open, setOpen] = useState(false);
   const Icon = policy.icon;
+  const buttonId = `${idPrefix}-btn`;
+  const panelId = `${idPrefix}-panel`;
 
   return (
     <div
-      className={`bg-white rounded-2xl border transition-all ${open ? "border-amber-200 shadow-sm" : "border-stone-100"}`}
+      className={`bg-card rounded-2xl border transition-all shadow-xs ${
+        open ? "border-primary/40" : "border-border"
+      }`}
     >
       <button
+        type="button"
+        id={buttonId}
+        aria-expanded={open}
+        aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-4 p-6 text-left"
+        className="w-full flex items-center justify-between gap-4 p-5 sm:p-6 text-left min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
       >
         <div className="flex items-center gap-4">
           <div
-            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${open ? "bg-amber-100" : "bg-stone-100"}`}
+            className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors shrink-0 ${
+              open ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+            }`}
           >
-            <Icon
-              size={20}
-              className={open ? "text-amber-800" : "text-stone-500"}
-            />
+            <Icon size={20} />
           </div>
           <div>
-            <p className="font-semibold text-stone-900 text-base">
+            <p className="font-semibold text-foreground text-base leading-tight">
               {policy.title}
             </p>
-            <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full mt-1 inline-block">
+            <span className="text-xs text-muted-foreground bg-muted px-2.5 py-0.5 rounded-full mt-1.5 inline-block">
               {policy.badge}
             </span>
           </div>
         </div>
         <ChevronDown
           size={20}
-          className={`text-stone-400 shrink-0 transition-transform ${open ? "rotate-180 text-amber-700" : ""}`}
+          className={`text-muted-foreground shrink-0 transition-transform ${
+            open ? "rotate-180 text-primary" : ""
+          }`}
         />
       </button>
 
       {open && (
-        <div className="px-6 pb-6 border-t border-stone-100">
+        <div
+          id={panelId}
+          role="region"
+          aria-labelledby={buttonId}
+          className="px-5 sm:px-6 pb-6 border-t border-border"
+        >
           <div className="pt-5 space-y-5">
             {policy.content.map((section) => (
               <div key={section.heading}>
-                <h4 className="font-semibold text-stone-800 text-sm mb-2">
+                <h3 className="font-medium text-foreground text-sm mb-1.5">
                   {section.heading}
-                </h4>
-                <p className="text-stone-600 text-sm leading-relaxed">
+                </h3>
+                <p className="text-muted-foreground text-sm leading-relaxed max-w-[65ch]">
                   {section.body}
                 </p>
               </div>
@@ -193,26 +201,26 @@ function PolicySection({ policy }) {
 }
 
 export default function InformationPage() {
+  const baseId = useId();
+
   return (
     <Layout>
-      <Head>
-        <title>Thông tin & Chính sách – TotMart</title>
-        <meta
-          name="description"
-          content="Tìm hiểu về chính sách vận chuyển, đổi trả, bảo mật và điều khoản sử dụng của TotMart."
-        />
-      </Head>
+      <title>Thông tin & Chính sách – TotMart</title>
+      <meta
+        name="description"
+        content="Tìm hiểu về chính sách vận chuyển, đổi trả, bảo mật và điều khoản sử dụng của TotMart."
+      />
 
       {/* Hero */}
-      <section className="bg-[#f5f0e8] pt-20 pb-16">
+      <section className="bg-card/60 border-b border-border py-16 sm:py-20">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <span className="inline-block text-xs font-semibold tracking-[0.18em] uppercase text-amber-700 bg-amber-100 px-4 py-1.5 rounded-full mb-6">
+          <span className="inline-block text-xs font-semibold tracking-wider uppercase text-primary bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full mb-6">
             Chính sách
           </span>
-          <h1 className="font-serif text-5xl text-stone-900 mb-5 leading-tight">
-            Minh bạch & <em className="text-amber-800">đáng tin cậy</em>
+          <h1 className="font-serif text-4xl sm:text-5xl text-foreground mb-5 leading-tight tracking-tight">
+            Minh bạch & <em className="text-primary not-italic font-serif">đáng tin cậy</em>
           </h1>
-          <p className="text-stone-600 text-base leading-relaxed max-w-xl mx-auto">
+          <p className="text-muted-foreground text-base leading-relaxed max-w-xl mx-auto">
             Chúng tôi tin vào sự minh bạch. Dưới đây là toàn bộ các chính sách
             và điều khoản để bạn mua sắm an tâm.
           </p>
@@ -226,10 +234,10 @@ export default function InformationPage() {
             <a
               key={p.id}
               href={`#${p.id}`}
-              className="flex items-center gap-1.5 px-4 py-2 bg-white border border-stone-200 rounded-full text-xs font-medium text-stone-600 hover:border-amber-300 hover:text-amber-800 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 bg-card border border-border rounded-full text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors min-h-11 shadow-xs"
             >
-              <p.icon size={13} />
-              {p.title}
+              <p.icon size={14} />
+              <span>{p.title}</span>
             </a>
           ))}
         </div>
@@ -237,25 +245,28 @@ export default function InformationPage() {
 
       {/* Policies */}
       <section className="max-w-4xl mx-auto px-6 pb-24 space-y-4">
-        {POLICIES.map((policy) => (
-          <div key={policy.id} id={policy.id}>
-            <PolicySection policy={policy} />
+        {POLICIES.map((policy, pIdx) => (
+          <div key={policy.id} id={policy.id} className="scroll-mt-28">
+            <PolicySection
+              policy={policy}
+              idPrefix={`${baseId}-policy-${pIdx}`}
+            />
           </div>
         ))}
 
         {/* Trust badges */}
-        <div className="mt-8 bg-stone-900 rounded-2xl p-8">
-          <p className="text-center text-stone-400 text-xs uppercase tracking-widest mb-6">
+        <div className="mt-10 bg-card border border-border rounded-2xl p-6 sm:p-8 text-center shadow-xs">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-6">
             Được bảo hộ bởi
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-8">
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8">
             {[
               "🔒 SSL Secured",
               "💳 PCI DSS",
               "🛡️ Fair Trade Vietnam",
               "🌿 Organic Certified",
             ].map((b) => (
-              <span key={b} className="text-stone-300 text-sm font-medium">
+              <span key={b} className="text-foreground text-sm font-medium">
                 {b}
               </span>
             ))}
