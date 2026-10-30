@@ -111,7 +111,7 @@ export default function NavMenu() {
 
   return (
     <nav
-      className="relative z-50 w-full border-b bg-white"
+      className="relative z-50 w-full border-b border-border bg-background"
       onMouseLeave={() => setActiveDropdown(null)}
     >
       <div className="mx-auto flex max-w-7xl justify-center space-x-8">
@@ -124,8 +124,8 @@ export default function NavMenu() {
             <Link
               href={`/categories/${root.slug || root._id}`}
               className={`text-[12px] font-bold uppercase transition-colors ${
-                activeDropDown === root._id ? "text-[#C85C3C]" : "text-zinc-600"
-              } hover:text-[#C85C3C]`}
+                activeDropDown === root._id ? "text-primary" : "text-muted-foreground"
+              } hover:text-primary`}
             >
               {root.name}
             </Link>
@@ -136,8 +136,8 @@ export default function NavMenu() {
           <Link
             href="/products"
             className={`text-[12px] font-bold uppercase transition-colors ${
-              activeDropDown === "products" ? "text-[#C85C3C]" : "text-zinc-600"
-            } hover:text-[#C85C3C]`}
+              activeDropDown === "products" ? "text-primary" : "text-muted-foreground"
+            } hover:text-primary`}
           >
             Sản phẩm
           </Link>
@@ -147,15 +147,15 @@ export default function NavMenu() {
           <Link
             href="/brands"
             className={`text-[12px] font-bold uppercase transition-colors ${
-              activeDropDown === "brands" ? "text-[#C85C3C]" : "text-zinc-600"
-            } hover:text-[#C85C3C]`}
+              activeDropDown === "brands" ? "text-primary" : "text-muted-foreground"
+            } hover:text-primary`}
           >
             Thương hiệu
           </Link>
         </div>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-6 border-t py-3 text-sm font-semibold"><Link href="/">Trang chính</Link><Link href="/homepage">Cửa hàng</Link><Link href="/subscription">Đăng ký tháng</Link><Link href="/box">Combo</Link><Link href="/gift">Hộp quà</Link></div>
+      <div className="flex flex-wrap justify-center gap-6 border-t border-border py-3 text-muted-foreground text-sm font-semibold"><Link href="/">Trang chính</Link><Link href="/homepage">Cửa hàng</Link><Link href="/subscription">Đăng ký tháng</Link><Link href="/box">Combo</Link><Link href="/gift">Hộp quà</Link></div>
       {activeRoot ? (
         <CategoryDropdown
           root={activeRoot}

@@ -31,7 +31,7 @@ export const adminNavigation = [
     ],
   },
   {
-    label: "Hộp",
+    label: "Combo",
     icon: Boxes,
     children: [
       { label: "Danh sách", icon: Album, href: "/admin-box" },

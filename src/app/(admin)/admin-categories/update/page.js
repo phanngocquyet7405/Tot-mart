@@ -34,8 +34,8 @@ function UpdateCategoryContent() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-100 space-y-4">
-        <Loader2 className="h-10 w-10 animate-spin text-orange-600" />
-        <p className="text-zinc-500 animate-pulse text-sm">
+        <Loader2 className="h-10 w-10 animate-spin text-warning-text" />
+        <p className="text-muted-foreground animate-pulse text-sm">
           Đang tải dữ liệu danh mục...
         </p>
       </div>
@@ -56,10 +56,10 @@ function UpdateCategoryContent() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-800">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Chỉnh sửa Danh mục
             </h1>
-            <p className="text-xs text-muted-foreground font-mono bg-zinc-100 px-2 py-1 rounded w-fit mt-1">
+            <p className="text-xs text-muted-foreground font-mono bg-muted px-2 py-1 rounded w-fit mt-1">
               ID: {categoryId}
             </p>
           </div>
@@ -71,7 +71,7 @@ function UpdateCategoryContent() {
           <Button
             onClick={handleUpdate}
             disabled={isSubmitting}
-            className="bg-orange-600 hover:bg-orange-700 text-white min-w-35 shadow-lg shadow-orange-200"
+            className="bg-warning-text hover:bg-warning-text text-white min-w-35 shadow-sm"
           >
             {isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -86,40 +86,40 @@ function UpdateCategoryContent() {
       <div className="grid gap-6 md:grid-cols-3">
         {/* Cột chính: Form nhập liệu */}
         <div className="md:col-span-2 space-y-4">
-          <Card className="border-orange-100 shadow-sm overflow-hidden">
-            <CardHeader className="bg-orange-50/30 border-b">
-              <CardTitle className="text-lg flex items-center gap-2 text-orange-800">
-                <LayoutGrid className="h-5 w-5 text-orange-600" />
+          <Card className="border-warning/20 shadow-sm overflow-hidden">
+            <CardHeader className="bg-warning/10/30 border-b">
+              <CardTitle className="text-lg flex items-center gap-2 text-warning-text">
+                <LayoutGrid className="h-5 w-5 text-warning-text" />
                 Cấu hình thuộc tính
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-5">
               <div className="space-y-2">
-                <Label className="font-bold text-zinc-700">
-                  Tên danh mục <span className="text-red-500">*</span>
+                <Label className="font-bold text-foreground">
+                  Tên danh mục <span className="text-destructive-text">*</span>
                 </Label>
                 <Input
                   value={formData.name}
                   onChange={(e) => updateField("name", e.target.value)}
-                  className="h-11 focus-visible:ring-orange-500 border-zinc-200"
+                  className="h-11 focus-visible:ring-primary border-border"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="font-bold text-zinc-700">
+                <Label className="font-bold text-foreground">
                   Mô tả (Description)
                 </Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => updateField("description", e.target.value)}
-                  className="min-h-30 border-zinc-200 focus-visible:ring-orange-500"
+                  className="min-h-30 border-border focus-visible:ring-primary"
                   placeholder="Nhập mô tả cho danh mục..."
                 />
               </div>
 
               {/* Thông tin về danh mục con hiện tại */}
-              <div className="p-4 rounded-xl border border-zinc-100 bg-zinc-50/50">
-                <Label className="text-xs font-bold uppercase text-zinc-500 tracking-wider">
+              <div className="p-4 rounded-xl border border-border bg-muted/30/50">
+                <Label className="text-xs font-bold uppercase text-muted-foreground tracking-wider">
                   Danh mục con trực thuộc
                 </Label>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -131,17 +131,17 @@ function UpdateCategoryContent() {
                       return (
                         <div
                           key={id}
-                          className="flex items-center gap-2 bg-white border px-3 py-1.5 rounded-lg text-sm shadow-sm"
+                          className="flex items-center gap-2 bg-card border border-border px-3 py-1.5 rounded-lg text-sm shadow-sm"
                         >
-                          <FolderTree className="h-3 w-3 text-orange-500" />
-                          <span className="font-medium text-zinc-700">
+                          <FolderTree className="h-3 w-3 text-warning-text" />
+                          <span className="font-medium text-foreground">
                             {child?.name || id}
                           </span>
                         </div>
                       );
                     })
                   ) : (
-                    <p className="text-sm text-zinc-400 italic">
+                    <p className="text-sm text-muted-foreground italic">
                       Danh mục này hiện chưa có danh mục con.
                     </p>
                   )}
@@ -150,9 +150,9 @@ function UpdateCategoryContent() {
             </CardContent>
           </Card>
 
-          <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl flex gap-3">
-            <Info className="h-5 w-5 text-blue-600 shrink-0" />
-            <div className="text-sm text-blue-900">
+          <div className="bg-primary/10 border border-primary/20 p-4 rounded-xl flex gap-3">
+            <Info className="h-5 w-5 text-primary shrink-0" />
+            <div className="text-sm text-primary">
               <p className="font-bold">Lưu ý về cấu trúc:</p>
               <p className="opacity-80">
                 Việc thay đổi tên hoặc mô tả tại đây sẽ cập nhật trực tiếp vào
@@ -164,7 +164,7 @@ function UpdateCategoryContent() {
 
         {/* Cột phụ: Trạng thái & Preview */}
         <div className="space-y-4">
-          <Card className="shadow-sm border-zinc-200">
+          <Card className="shadow-sm border-border">
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <Label className="font-bold">Kích hoạt</Label>
@@ -180,49 +180,49 @@ function UpdateCategoryContent() {
           </Card>
 
           {/* Live Preview Card */}
-          <Card className="bg-zinc-900 text-white border-none shadow-xl overflow-hidden">
-            <CardHeader className="pb-2 border-b border-zinc-800">
-              <CardTitle className="text-[11px] uppercase tracking-[0.2em] text-zinc-500">
+          <Card className="bg-card text-white border-none shadow-xl overflow-hidden">
+            <CardHeader className="pb-2 border-b border-border">
+              <CardTitle className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
                 Xem trước hiển thị
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <div className="space-y-3">
-                <div className="flex items-center gap-2 text-zinc-400">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <LayoutGrid className="h-4 w-4" />
                   <span className="text-xs font-mono">CATEGORY_NODE</span>
                 </div>
 
-                <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4">
+                <div className="bg-warning-text/10 border border-primary/30 rounded-xl p-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 bg-orange-500 rounded-lg">
+                    <div className="p-2 bg-warning-text rounded-lg">
                       <FolderTree className="h-4 w-4 text-white" />
                     </div>
-                    <h3 className="font-bold text-lg text-orange-50">
+                    <h3 className="font-bold text-lg text-primary">
                       {formData.name || "Tên danh mục..."}
                     </h3>
                   </div>
-                  <p className="text-xs text-zinc-400 line-clamp-2 italic leading-relaxed">
+                  <p className="text-xs text-muted-foreground line-clamp-2 italic leading-relaxed">
                     {formData.description ||
                       "Chưa có mô tả chi tiết cho danh mục này."}
                   </p>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-zinc-800 space-y-2 font-mono text-[11px]">
+              <div className="pt-4 border-t border-border space-y-2 font-mono text-[11px]">
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Trạng thái:</span>
+                  <span className="text-muted-foreground">Trạng thái:</span>
                   <span
                     className={
-                      formData.isActive ? "text-green-400" : "text-red-400"
+                      formData.isActive ? "text-success-text" : "text-destructive-text"
                     }
                   >
                     {formData.isActive ? "● ACTIVE" : "○ INACTIVE"}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Số lượng con:</span>
-                  <span className="text-orange-400">
+                  <span className="text-muted-foreground">Số lượng con:</span>
+                  <span className="text-primary">
                     {formData.childrenIds.length} Nodes
                   </span>
                 </div>
@@ -240,7 +240,7 @@ export default function UpdateCategoryPage() {
     <Suspense
       fallback={
         <div className="flex items-center justify-center h-screen">
-          <Loader2 className="animate-spin h-8 w-8 text-orange-600" />
+          <Loader2 className="animate-spin h-8 w-8 text-warning-text" />
         </div>
       }
     >

@@ -10,29 +10,24 @@ export function OrderStatusBadge({ status, size = "md" }) {
   const config = ORDER_STATUS_CONFIG[status] ?? ORDER_STATUS_CONFIG[ORDER_STATUS.PENDING];
 
   const sizeClasses = {
-    sm: "text-[11px] px-1.5 py-0.5 gap-1",
-    md: "text-[11px] px-2 py-1 gap-1.5",
+    sm: "text-[11px] px-2 py-0.5 gap-1",
+    md: "text-xs px-2.5 py-1 gap-1.5",
     lg: "text-xs px-3 py-1.5 gap-2",
   };
 
   const dotSize = {
-    sm: "w-1 h-1",
-    md: "w-1.5 h-1.5",
-    lg: "w-2 h-2",
+    sm: "size-1",
+    md: "size-1.5",
+    lg: "size-2",
   };
 
   return (
     <span
-      className={`inline-flex items-center font-bold rounded-full uppercase tracking-wide ${sizeClasses[size]}`}
-      style={{
-        backgroundColor: config.bg,
-        color: config.text,
-        border: `1px solid ${config.border}`,
-      }}
+      className={`inline-flex items-center font-medium rounded-full border tracking-wide ${config.badgeClass || 'border-border bg-muted text-muted-foreground'} ${sizeClasses[size]}`}
     >
       <span
-        className={`rounded-full shrink-0 ${dotSize[size]}`}
-        style={{ backgroundColor: config.dot }}
+        className={`rounded-full shrink-0 ${config.dotClass || 'bg-muted-foreground'} ${dotSize[size]}`}
+        aria-hidden="true"
       />
       {config.label}
     </span>

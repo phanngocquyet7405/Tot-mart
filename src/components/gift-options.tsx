@@ -84,15 +84,15 @@ export function GiftOptions({
   };
 
   return (
-    <div className="space-y-4 p-5 rounded-lg bg-pink-50 border border-pink-200">
+    <div className="space-y-4 p-5 rounded-lg bg-primary/5 border border-primary/20">
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center">
-          <Gift className="h-5 w-5 text-white" />
+        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+          <Gift className="h-5 w-5 text-primary-foreground" />
         </div>
         <div>
-          <h3 className="font-semibold text-slate-900">Gift Options</h3>
-          <p className="text-xs text-slate-600">Make it extra special</p>
+          <h3 className="font-semibold text-foreground">Gift Options</h3>
+          <p className="text-xs text-muted-foreground">Make it extra special</p>
         </div>
       </div>
 
@@ -104,19 +104,19 @@ export function GiftOptions({
             onClick={() => handleSelectOption(option.id)}
             className={`w-full p-3 rounded-lg border-2 transition-all text-left ${
               localSelectedId === option.id
-                ? 'bg-white border-pink-600 shadow-sm'
-                : 'bg-white/50 border-transparent hover:bg-white hover:border-pink-200'
+                ? 'bg-card border-primary shadow-sm'
+                : 'bg-card/50 border-transparent hover:bg-card hover:border-primary/20'
             }`}
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
-                <div className="font-semibold text-slate-900 mb-0.5">
+                <div className="font-semibold text-foreground mb-0.5">
                   {option.name}
                 </div>
-                <p className="text-xs text-slate-600">{option.description}</p>
+                <p className="text-xs text-muted-foreground">{option.description}</p>
               </div>
               <div className="text-right shrink-0">
-                <div className="font-bold text-pink-600">
+                <div className="font-bold text-primary">
                   +${option.price.toFixed(2)}
                 </div>
               </div>
@@ -127,7 +127,7 @@ export function GiftOptions({
 
       {/* Gift Message Section */}
       {localSelectedId !== 'no-gift' && (
-        <div className="space-y-3 pt-3 border-t border-pink-200">
+        <div className="space-y-3 pt-3 border-t border-primary/20">
           <div className="flex items-center gap-2">
             <Checkbox
               className=""
@@ -137,7 +137,7 @@ export function GiftOptions({
             />
             <Label
               htmlFor="include-message"
-              className="text-sm font-medium text-slate-900 cursor-pointer"
+              className="text-sm font-medium text-foreground cursor-pointer"
             >
               Include a gift message
             </Label>
@@ -154,7 +154,7 @@ export function GiftOptions({
                 className="resize-none text-sm"
               />
               <div className="flex justify-between items-center">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   {giftMessage.length}/150 characters
                 </p>
               </div>
@@ -164,9 +164,9 @@ export function GiftOptions({
       )}
 
       {/* Info */}
-      <div className="flex gap-2 p-2.5 rounded bg-white/50 border border-pink-100">
-        <AlertCircle className="h-4 w-4 text-pink-600 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-slate-700">
+      <div className="flex gap-2 p-2.5 rounded bg-card/50 border border-primary/20">
+        <AlertCircle className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-foreground/80">
           Gift options are added at checkout
         </p>
       </div>

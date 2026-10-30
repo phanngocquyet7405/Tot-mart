@@ -236,7 +236,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
     )
       e.products =
         "Cấu phần thiếu hoặc khác merchant. Đối chiếu dữ liệu trước khi lưu.";
-    if (!(form.name ?? "").trim()) e.name = "Tên box là bắt buộc";
+    if (!(form.name ?? "").trim()) e.name = "Tên combo là bắt buộc";
     if (form.stock < 1) e.stock = "Tồn kho phải ≥ 1";
     if (!(form.descriptions ?? "").trim()) e.descriptions = "Mô tả là bắt buộc";
     if (!form.validFrom) e.validFrom = "Ngày bắt đầu là bắt buộc";
@@ -301,10 +301,10 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
       if (isEdit) {
         formData.append("existingImages", JSON.stringify(existingImages));
         await updateBoxApi(box._id, formData);
-        toast.success("Cập nhật box thành công!");
+        toast.success("Cập nhật combo thành công!");
       } else {
         await createBoxApi(formData);
-        toast.success("Tạo box thành công!");
+        toast.success("Tạo combo thành công!");
       }
 
       onSuccess?.();
@@ -348,10 +348,10 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b shrink-0">
           <DialogTitle className="text-lg font-semibold flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
-              <Package size={16} className="text-indigo-600" />
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Package size={16} className="text-primary" />
             </div>
-            {isEdit ? `Chỉnh sửa: ${box?.name}` : "Tạo Box mới"}
+            {isEdit ? `Chỉnh sửa: ${box?.name}` : "Tạo Combo mới"}
           </DialogTitle>
         </DialogHeader>
 
@@ -399,13 +399,13 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
           {/* ── Sản phẩm ── */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                Sản phẩm trong box
+              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                Sản phẩm trong combo
               </h3>
               <button
                 type="button"
                 onClick={addProduct}
-                className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
               >
                 <Plus size={13} />
                 Thêm sản phẩm
@@ -431,7 +431,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
               ))}
             </div>
             {errors.products && (
-              <p className="text-xs text-red-500 mt-1">{errors.products}</p>
+              <p className="text-xs text-destructive-text mt-1">{errors.products}</p>
             )}
 
             {/* Summary */}
@@ -444,7 +444,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
         </div>
 
         {/* Footer */}
-        <DialogFooter className="mx-0 mb-0 px-6 py-4 border-t shrink-0 bg-gray-50/50">
+        <DialogFooter className="mx-0 mb-0 px-6 py-4 border-t shrink-0 bg-muted/30/50">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
@@ -455,7 +455,7 @@ export function BoxFormDialog({ open, onOpenChange, box, onSuccess }) {
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="bg-indigo-600 hover:bg-indigo-700 min-w-28"
+            className="min-w-28 min-h-11"
           >
             {isSaving ? (
               <>

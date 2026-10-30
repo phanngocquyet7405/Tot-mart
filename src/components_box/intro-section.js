@@ -62,15 +62,15 @@ export function IntroSection() {
             </ul>
 
             {/* Button: màu gốc = primary, hover sweep sang màu thứ 2 */}
-            {/* Màu 1 (nền): #C85C3C | Màu 2 (hover sweep): #2C1810 */}
+            
             <button
               onClick={handleSubscribeClick}
-              className="relative inline-flex items-center gap-2 px-8 py-3 rounded-md text-white font-semibold text-base overflow-hidden group"
-              style={{ background: "#C85C3C" }}
+              className="relative inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base shadow-sm transition-all active:scale-[0.97]"
+              
             >
               <span
                 className="absolute inset-0 transition-transform duration-500 ease-out -translate-x-full group-hover:translate-x-0"
-                style={{ background: "#2C1810" }}
+                
               />
               <span className="relative z-10">Subscribe Now</span>
               <ArrowRight className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />

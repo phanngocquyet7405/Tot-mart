@@ -13,10 +13,10 @@ export function BoxImageSection({
 }) {
   return (
     <section>
-      <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
+      <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
         Hình ảnh{" "}
         {!isEdit && (
-          <span className="text-red-500 normal-case font-normal">*</span>
+          <span className="text-destructive-text normal-case font-normal">*</span>
         )}
       </h3>
 
@@ -25,14 +25,14 @@ export function BoxImageSection({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className={`w-full border-2 border-dashed rounded-xl p-4 flex flex-col items-center gap-2 hover:bg-gray-50 transition-colors ${
-            errors?.images ? "border-red-300" : "border-gray-200"
+          className={`w-full border-2 border-dashed rounded-xl p-4 flex flex-col items-center gap-2 hover:bg-muted/50 transition-colors ${
+            errors?.images ? "border-destructive/50" : "border-border"
           }`}
         >
-          <ImagePlus size={20} className="text-gray-400" />
-          <p className="text-sm text-gray-500">
+          <ImagePlus size={20} className="text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">
             Click để chọn ảnh{" "}
-            <span className="text-gray-400">(tối đa 5MB / ảnh)</span>
+            <span className="text-muted-foreground">(tối đa 5MB / ảnh)</span>
           </p>
         </button>
         <input
@@ -44,7 +44,7 @@ export function BoxImageSection({
           onChange={handleImageSelect}
         />
         {errors?.images && (
-          <p className="text-xs text-red-500">{errors.images}</p>
+          <p className="text-xs text-destructive-text">{errors.images}</p>
         )}
 
         {/* Preview grid */}
@@ -53,7 +53,7 @@ export function BoxImageSection({
             {imagePreviews.map((src, i) => (
               <div
                 key={i}
-                className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group"
+                className="relative aspect-square rounded-lg overflow-hidden border border-border group"
               >
                 <Image
                   src={src}
@@ -63,7 +63,7 @@ export function BoxImageSection({
                   unoptimized={src.startsWith("blob:")}
                 />
                 {i === 0 && (
-                  <span className="absolute bottom-1 left-1 text-[11px] font-bold bg-indigo-600 text-white px-1.5 py-0.5 rounded">
+                  <span className="absolute bottom-1 left-1 text-[11px] font-bold bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
                     Đại diện
                   </span>
                 )}

@@ -115,7 +115,7 @@ export default function ProductsGrid({
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="animate-pulse motion-reduce:animate-none bg-gray-100 rounded-lg aspect-square border border-gray-200"
+              className="animate-pulse motion-reduce:animate-none bg-muted/70 rounded-xl aspect-square border border-border"
             />
           ))}
         </div>
@@ -124,15 +124,15 @@ export default function ProductsGrid({
   if (error)
     return (
       <div role="alert" className="py-20 text-center space-y-4">
-        <p className="text-red-600 font-semibold text-base">{error.message}</p>
+        <p className="text-destructive-text font-semibold text-base">{error.message}</p>
         {error.requestId && (
-          <p className="text-xs text-gray-500 font-mono">Mã yêu cầu (Request ID): {error.requestId}</p>
+          <p className="text-xs text-muted-foreground font-mono">Mã yêu cầu (Request ID): {error.requestId}</p>
         )}
         <div>
           <button
             type="button"
             onClick={() => setReloadToken((n) => n + 1)}
-            className="px-4 py-2 bg-green-700 text-white text-sm font-semibold rounded-md hover:bg-green-800 transition-colors"
+            className="px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-xl hover:bg-primary/90 shadow-xs transition-colors"
           >
             Thử lại
           </button>
@@ -143,12 +143,12 @@ export default function ProductsGrid({
   return (
     <div className="w-full">
       {/* Header with sorting */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-200 pb-6 mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-6 mb-8">
         <div>
-          <h2 className="text-2xl font-serif font-bold text-gray-900">
+          <h2 className="text-2xl font-serif font-bold text-foreground">
             {categoryId ? "Category Products" : "All Products"}
           </h2>
-          <p className="text-gray-600 text-sm mt-1">
+          <p className="text-muted-foreground text-sm mt-1">
             Showing {products.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, pagination.total)} of {pagination.total} results
           </p>
         </div>
@@ -156,14 +156,14 @@ export default function ProductsGrid({
         <div className="flex items-center gap-4 w-full md:w-auto">
           {/* Sort Dropdown */}
           <div className="flex items-center gap-2">
-            <label htmlFor="sort" className="text-sm font-semibold text-gray-700">
+            <label htmlFor="sort" className="text-sm font-semibold text-foreground">
               Sort:
             </label>
             <select
               id="sort"
               value={sortBy}
               onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+              className="border border-border bg-card text-foreground rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="newest">Newest</option>
               <option value="price-asc">Price: Low to High</option>
@@ -177,8 +177,8 @@ export default function ProductsGrid({
               onClick={() => setViewMode("grid")}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === "grid"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-primary/15 text-primary"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
               title="Grid View"
             >
@@ -195,8 +195,8 @@ export default function ProductsGrid({
               onClick={() => setViewMode("list")}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === "list"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-primary/15 text-primary"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
               title="List View"
             >
@@ -249,7 +249,7 @@ export default function ProductsGrid({
             />
           ))
         ) : (
-          <div className="col-span-full text-center py-20 bg-gray-50 rounded-lg border border-dashed border-gray-300 text-gray-500">
+          <div className="col-span-full text-center py-20 bg-card rounded-xl border border-dashed border-border text-muted-foreground">
             Không tìm thấy sản phẩm phù hợp.
           </div>
         )}
@@ -265,7 +265,7 @@ export default function ProductsGrid({
               isInitialMount.current = false;
               setCurrentPage((page) => page - 1);
             }}
-            className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-2 border border-border rounded-md text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
             aria-label="Previous page"
           >
             Previous
@@ -279,7 +279,7 @@ export default function ProductsGrid({
                 isInitialMount.current = false;
                 setCurrentPage(page);
               }}
-              className={`min-w-10 px-3 py-2 rounded-md ${page === currentPage ? "bg-green-700 text-white" : "border border-gray-300 text-gray-700 hover:bg-gray-50"}`}
+              className={`min-w-10 px-3 py-2 rounded-md ${page === currentPage ? "bg-primary text-primary-foreground font-bold" : "border border-border text-foreground hover:bg-muted"}`}
             >
               {page}
             </button>
@@ -291,7 +291,7 @@ export default function ProductsGrid({
               isInitialMount.current = false;
               setCurrentPage((page) => page + 1);
             }}
-            className="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-2 border border-border rounded-md text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
             aria-label="Next page"
           >
             Next

@@ -34,33 +34,33 @@ export default function BrandsGrid() {
 
   if (loading)
     return (
-      <div className="py-20 text-center text-gray-500">
+      <div className="py-20 text-center text-muted-foreground">
         Đang tải gian hàng...
       </div>
     );
   if (error)
-    return <div className="py-20 text-center text-red-500">{error}</div>;
+    return <div className="py-20 text-center text-destructive-text font-semibold">{error}</div>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
       {/* Breadcrumb */}
-      <div className="text-sm text-gray-500 mb-8">
-        <Link href="/" className="hover:text-black">
+      <div className="text-sm text-muted-foreground mb-8">
+        <Link href="/" className="hover:text-foreground">
           Trang chủ
         </Link>{" "}
-        / <span className="text-black">Gian hàng</span>
+        / <span className="text-foreground font-medium">Gian hàng</span>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Sidebar Bên Trái */}
         <aside className="w-full lg:w-1/4 space-y-6">
           {/* Block 1: Tác động xã hội */}
-          <div className="border border-gray-200 p-5 rounded-sm">
-            <h2 className="text-xl font-medium mb-4 text-gray-800">
+          <div className="border border-border p-5 rounded-xl bg-card">
+            <h2 className="text-xl font-medium mb-4 text-foreground">
               Tác động xã hội
             </h2>
-            <ul className="space-y-3 text-sm text-gray-600">
-              <li className="hover:text-orange-600 cursor-pointer">
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li className="hover:text-primary cursor-pointer">
                 Sức khỏe cộng đồng
               </li>
               {/* Thêm các mục khác nếu cần */}
@@ -68,16 +68,16 @@ export default function BrandsGrid() {
           </div>
 
           {/* Block 2: Danh sách Tên gian hàng */}
-          <div className="border border-gray-200 p-5 rounded-sm">
-            <h2 className="text-xl font-medium mb-4 text-gray-800">
+          <div className="border border-border p-5 rounded-xl bg-card">
+            <h2 className="text-xl font-medium mb-4 text-foreground">
               Tên gian hàng
             </h2>
-            <ul className="space-y-3 text-sm text-gray-600 max-h-150 overflow-y-auto custom-scrollbar">
+            <ul className="space-y-3 text-sm text-muted-foreground max-h-150 overflow-y-auto custom-scrollbar">
               {brands.map((brand) => (
                 <li key={brand._id || brand.id}>
                   <Link
                     href={`/brands/${brand.slug || brand._id}`}
-                    className="hover:text-orange-600 transition-colors block"
+                    className="hover:text-primary transition-colors block"
                   >
                     {brand.name}
                   </Link>
@@ -95,7 +95,7 @@ export default function BrandsGrid() {
                 <BrandCard key={brand._id || brand.id} brand={brand} />
               ))
             ) : (
-              <div className="col-span-full text-center py-10 text-gray-500">
+              <div className="col-span-full text-center py-10 text-muted-foreground">
                 Không tìm thấy gian hàng nào.
               </div>
             )}

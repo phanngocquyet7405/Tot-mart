@@ -1,15 +1,9 @@
 "use client";
 
-import Head from "next/head";
 import { useState } from "react";
 import Link from "next/link";
 import Layout from "../layout-page";
-import AnnouncementBarBox from "@/components_box/announcement-bar";
-import { Navigation } from "@/components_box/nav_box";
-import { Newsletter } from "@/components_box/newsletter";
-import Footer from "../../components/ui/footer";
-import CartDrawer from "../../components/Cart_component/cart_drawer";
-import { Clock, ArrowRight, Tag, Search, BookOpen } from "lucide-react";
+import { Clock, ArrowRight, Tag, Search, RotateCcw, BookOpen } from "lucide-react";
 
 const CATEGORIES_BLOG = [
   "Tất cả",
@@ -32,7 +26,6 @@ const POSTS = [
     readTime: "6 phút",
     featured: true,
     emoji: "🏺",
-    color: "from-amber-100 to-stone-200",
     tags: ["Gốm", "Bát Tràng", "Nghệ nhân"],
   },
   {
@@ -46,7 +39,6 @@ const POSTS = [
     readTime: "4 phút",
     featured: false,
     emoji: "🎁",
-    color: "from-rose-100 to-pink-200",
     tags: ["Quà tặng", "Tips", "Ý nghĩa"],
   },
   {
@@ -60,7 +52,6 @@ const POSTS = [
     readTime: "8 phút",
     featured: false,
     emoji: "🌸",
-    color: "from-pink-100 to-purple-200",
     tags: ["Trà sen", "Hồ Tây", "Hà Nội"],
   },
   {
@@ -74,7 +65,6 @@ const POSTS = [
     readTime: "5 phút",
     featured: false,
     emoji: "🎋",
-    color: "from-green-100 to-teal-200",
     tags: ["Minimalism", "Wabi-sabi", "Phong cách sống"],
   },
   {
@@ -88,7 +78,6 @@ const POSTS = [
     readTime: "7 phút",
     featured: false,
     emoji: "🧼",
-    color: "from-amber-50 to-orange-200",
     tags: ["Khởi nghiệp", "Hội An", "Thành công"],
   },
   {
@@ -102,101 +91,95 @@ const POSTS = [
     readTime: "5 phút",
     featured: false,
     emoji: "♻️",
-    color: "from-lime-100 to-green-200",
     tags: ["Bền vững", "Môi trường", "Bao bì"],
   },
 ];
 
-const COLOR_MAP = {
-  "Câu chuyện nghề": "bg-amber-100 text-amber-800",
-  "Hướng dẫn chọn quà": "bg-rose-100 text-rose-800",
-  "Lối sống": "bg-purple-100 text-purple-800",
-  "Sau ánh đèn sân khấu": "bg-orange-100 text-orange-800",
-  "Bền vững": "bg-green-100 text-green-800",
-};
-
 function FeaturedPost({ post }) {
   return (
-    <Link
-      href={`/pages/our-blog/${post.slug}`}
-      className="group grid md:grid-cols-2 gap-0 bg-white rounded-3xl border border-stone-100 overflow-hidden hover:shadow-lg transition-all"
-    >
-      <div
-        className={`h-56 md:h-auto bg-linear-to-br ${post.color} flex items-center justify-center`}
-      >
-        <span className="text-8xl">{post.emoji}</span>
+    <article className="group grid md:grid-cols-2 gap-0 bg-card rounded-3xl border border-border overflow-hidden hover:border-primary/40 transition-all shadow-xs">
+      <div className="h-56 md:h-auto bg-muted/50 flex items-center justify-center p-8 border-b md:border-b-0 md:border-r border-border">
+        <span className="text-7xl sm:text-8xl select-none" role="img" aria-label={post.title}>
+          {post.emoji}
+        </span>
       </div>
-      <div className="p-8 flex flex-col justify-center">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-xs font-bold text-amber-700 bg-amber-100 px-3 py-1 rounded-full uppercase tracking-wider">
+      <div className="p-6 sm:p-8 flex flex-col justify-center">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-full uppercase tracking-wider">
             Featured
           </span>
-          <span
-            className={`text-xs font-medium px-2.5 py-1 rounded-full ${COLOR_MAP[post.category] || "bg-stone-100 text-stone-600"}`}
-          >
+          <span className="text-xs font-medium text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
             {post.category}
           </span>
         </div>
-        <h2 className="font-serif text-2xl text-stone-900 leading-snug mb-3 group-hover:text-amber-800 transition-colors">
+        <h2 className="font-serif text-2xl sm:text-3xl text-foreground leading-snug mb-3 group-hover:text-primary transition-colors">
           {post.title}
         </h2>
-        <p className="text-stone-500 text-sm leading-relaxed mb-5 line-clamp-3">
+        <p className="text-muted-foreground text-sm leading-relaxed mb-5 line-clamp-3 max-w-[65ch]">
           {post.excerpt}
         </p>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 text-xs text-stone-400">
+        <div className="flex items-center justify-between pt-4 border-t border-border/60">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>{post.author}</span>
             <span>·</span>
             <span>{post.date}</span>
-            <span>·</span>
-            <Clock size={11} />
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Clock size={13} />
             <span>{post.readTime}</span>
           </div>
-          <ArrowRight
-            size={16}
-            className="text-amber-700 group-hover:translate-x-1 transition-transform"
-          />
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
 
 function PostCard({ post }) {
   return (
-    <Link
-      href={`/pages/our-blog/${post.slug}`}
-      className="group bg-white rounded-2xl border border-stone-100 overflow-hidden hover:border-amber-200 hover:shadow-md transition-all flex flex-col"
-    >
-      <div
-        className={`h-40 bg-linear-to-br ${post.color} flex items-center justify-center`}
-      >
-        <span className="text-6xl">{post.emoji}</span>
-      </div>
-      <div className="p-5 flex flex-col flex-1">
-        <span
-          className={`self-start text-xs font-medium px-2.5 py-1 rounded-full mb-3 ${COLOR_MAP[post.category] || "bg-stone-100 text-stone-600"}`}
-        >
-          {post.category}
-        </span>
-        <h3 className="font-semibold text-stone-900 text-base leading-snug mb-2 group-hover:text-amber-800 transition-colors flex-1">
-          {post.title}
-        </h3>
-        <p className="text-stone-500 text-xs leading-relaxed mb-4 line-clamp-2">
-          {post.excerpt}
-        </p>
-        <div className="flex items-center gap-2 text-xs text-stone-400 pt-3 border-t border-stone-100">
-          <Clock size={11} />
-          <span>{post.readTime}</span>
-          <span>·</span>
-          <span>{post.author}</span>
+    <article className="group bg-card rounded-2xl border border-border overflow-hidden hover:border-primary/40 transition-all flex flex-col justify-between shadow-xs">
+      <div>
+        <div className="h-44 bg-muted/40 flex items-center justify-center border-b border-border">
+          <span className="text-5xl select-none" role="img" aria-label={post.title}>
+            {post.emoji}
+          </span>
+        </div>
+        <div className="p-5 sm:p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xs font-medium text-muted-foreground bg-muted px-2.5 py-0.5 rounded-full">
+              {post.category}
+            </span>
+          </div>
+          <h3 className="font-serif text-lg text-foreground font-semibold leading-snug mb-2 group-hover:text-primary transition-colors">
+            {post.title}
+          </h3>
+          <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2 mb-4 max-w-[65ch]">
+            {post.excerpt}
+          </p>
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {post.tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md"
+              >
+                <Tag size={10} />
+                <span>{tag}</span>
+              </span>
+            ))}
+          </div>
         </div>
       </div>
-    </Link>
+      <div className="px-5 sm:px-6 pb-5 pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+        <span>{post.date}</span>
+        <div className="flex items-center gap-1 text-primary font-medium group-hover:translate-x-0.5 transition-transform">
+          <span>{post.readTime}</span>
+          <ArrowRight size={13} />
+        </div>
+      </div>
+    </article>
   );
 }
 
-export default function OurBlogPage() {
+export default function NewsPage() {
   const [category, setCategory] = useState("Tất cả");
   const [search, setSearch] = useState("");
 
@@ -213,111 +196,147 @@ export default function OurBlogPage() {
 
   return (
     <Layout>
-      <Head>
-        <title>Blog – TotMart</title>
-        <meta
-          name="description"
-          content="Câu chuyện nghề, hướng dẫn chọn quà và góc nhìn về lối sống tối giản từ đội ngũ TotMart."
-        />
-      </Head>
+      <title>Blog – TotMart</title>
+      <meta
+        name="description"
+        content="Câu chuyện nghề, hướng dẫn chọn quà và góc nhìn về lối sống tối giản từ đội ngũ TotMart."
+      />
 
       {/* Hero */}
-      <section className="bg-[#f5f0e8] pt-20 pb-16">
+      <section className="bg-card/60 border-b border-border py-16 sm:py-20">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <span className="inline-block text-xs font-semibold tracking-[0.18em] uppercase text-amber-700 bg-amber-100 px-4 py-1.5 rounded-full mb-6">
+          <span className="inline-block text-xs font-semibold tracking-wider uppercase text-primary bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full mb-6">
             TotMart Blog
           </span>
-          <h1 className="font-serif text-5xl text-stone-900 mb-5 leading-tight">
+          <h1 className="font-serif text-4xl sm:text-5xl text-foreground mb-5 leading-tight tracking-tight">
             Những câu chuyện
             <br />
-            <em className="text-amber-800">đáng kể</em>
+            <em className="text-primary italic">đáng kể</em>
           </h1>
-          <p className="text-stone-600 text-base leading-relaxed max-w-xl mx-auto">
+          <p className="text-muted-foreground text-base leading-relaxed max-w-xl mx-auto">
             Từ xưởng thợ đến bàn ăn, từ bàn tay nghệ nhân đến trái tim người
             nhận — chúng tôi kể những câu chuyện thật.
           </p>
-        </div>
-      </section>
 
-      <section className="max-w-6xl mx-auto px-6 py-12">
-        {/* Featured */}
-        {featured && category === "Tất cả" && !search && (
-          <div className="mb-10">
-            <FeaturedPost post={featured} />
-          </div>
-        )}
-
-        {/* Search + Category filter */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-8">
-          <div className="relative flex-1 max-w-xs">
+          {/* Search */}
+          <div className="relative max-w-md mx-auto mt-8">
             <Search
-              size={15}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
             />
             <input
               type="text"
               placeholder="Tìm bài viết..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-stone-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              aria-label="Tìm kiếm bài viết"
+              className="w-full min-h-11 pl-12 pr-4 py-2.5 rounded-2xl border border-input bg-background text-sm text-foreground
+                placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors shadow-xs"
             />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {CATEGORIES_BLOG.map((c) => (
+            {search && (
               <button
-                key={c}
-                onClick={() => setCategory(c)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all
-                  ${category === c ? "bg-stone-900 text-white border-stone-900" : "bg-white border-stone-200 text-stone-600 hover:border-stone-400"}`}
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded"
               >
-                {c}
+                Xóa
               </button>
-            ))}
+            )}
           </div>
         </div>
+      </section>
 
-        {/* Posts grid */}
+      {/* Categories Bar */}
+      <section className="max-w-6xl mx-auto px-6 py-8 border-b border-border">
+        <div className="flex flex-wrap gap-2 justify-center">
+          {CATEGORIES_BLOG.map((cat) => {
+            const isSelected = category === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setCategory(cat)}
+                className={`min-h-11 px-4 py-2 rounded-xl text-xs font-medium transition-colors ${
+                  isSelected
+                    ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                    : "bg-card border border-border text-muted-foreground hover:border-primary hover:text-foreground"
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="max-w-6xl mx-auto px-6 py-12 pb-24">
         {filtered.length === 0 ? (
-          <div className="text-center py-20 text-stone-400">
-            <BookOpen size={32} className="mx-auto mb-3 opacity-40" />
-            <p className="text-sm">Không tìm thấy bài viết phù hợp.</p>
+          /* Empty state */
+          <div className="text-center py-20 px-6 bg-card border border-border rounded-3xl max-w-lg mx-auto">
+            <BookOpen size={40} className="mx-auto mb-3 text-muted-foreground/40" />
+            <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+              Không tìm thấy bài viết phù hợp.
+            </p>
             <button
+              type="button"
               onClick={() => {
                 setSearch("");
                 setCategory("Tất cả");
               }}
-              className="mt-3 text-amber-700 text-sm font-semibold hover:underline"
+              className="min-h-11 inline-flex items-center gap-2 px-5 py-2.5 bg-muted hover:bg-muted/80 text-foreground text-sm font-semibold rounded-xl transition-colors hover:underline"
             >
-              Xóa bộ lọc
+              <RotateCcw size={14} />
+              <span>Xóa bộ lọc</span>
             </button>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((p) => (
-              <PostCard key={p.slug} post={p} />
-            ))}
+          <div className="space-y-12">
+            {/* Featured Post */}
+            {featured && (
+              <div>
+                <FeaturedPost post={featured} />
+              </div>
+            )}
+
+            {/* Grid Posts */}
+            {rest.length > 0 && (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {rest.map((p) => (
+                  <PostCard key={p.slug} post={p} />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {/* Newsletter */}
-        <div className="mt-16 bg-stone-900 rounded-3xl p-10 text-center">
-          <p className="font-serif text-2xl text-white mb-3">
+        <div className="mt-16 bg-card border border-border rounded-3xl p-8 sm:p-10 text-center shadow-xs">
+          <p className="font-serif text-2xl text-foreground mb-3">
             Không bỏ lỡ câu chuyện mới
           </p>
-          <p className="text-stone-400 text-sm mb-7">
+          <p className="text-muted-foreground text-sm mb-7 max-w-md mx-auto leading-relaxed">
             Mỗi tuần một bài — câu chuyện nghề thủ công, lối sống và quà tặng có
             ý nghĩa.
           </p>
-          <div className="flex max-w-sm mx-auto gap-3">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+            }}
+            className="flex flex-col sm:flex-row max-w-sm mx-auto gap-3"
+          >
             <input
               type="email"
               placeholder="Email của bạn..."
-              className="flex-1 px-4 py-3 rounded-xl bg-stone-800 border border-stone-700 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:border-amber-500"
+              className="flex-1 px-4 py-2.5 rounded-xl bg-background border border-input text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary min-h-11"
             />
-            <button className="px-5 py-3 bg-amber-600 text-white rounded-xl text-sm font-semibold hover:bg-amber-700 transition-colors whitespace-nowrap">
+            <button
+              type="submit"
+              className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary-hover transition-colors whitespace-nowrap min-h-11"
+            >
               Theo dõi
             </button>
-          </div>
+          </form>
         </div>
       </section>
     </Layout>

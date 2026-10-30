@@ -73,14 +73,14 @@ export function ProductDetails({
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="flex-1">
             {category && (
-              <p className="text-sm text-slate-500 mb-1">{category}</p>
+              <p className="text-sm text-muted-foreground mb-1">{category}</p>
             )}
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 leading-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground leading-tight">
               {name}
             </h1>
           </div>
           {sku && (
-            <p className="text-sm text-slate-500 shrink-0">SKU: {sku}</p>
+            <p className="text-sm text-muted-foreground shrink-0">SKU: {sku}</p>
           )}
         </div>
 
@@ -92,17 +92,17 @@ export function ProductDetails({
                 key={i}
                 className={`h-4 w-4 ${
                   i < ratingStars
-                    ? 'fill-amber-400 stroke-amber-400'
-                    : 'stroke-slate-300'
+                    ? 'fill-warning stroke-warning'
+                    : 'stroke-muted-foreground/30'
                 }`}
               />
             ))}
           </div>
-          <span className="text-sm text-slate-600">
+          <span className="text-sm text-muted-foreground">
             {rating.toFixed(1)} ({reviewCount.toLocaleString()} reviews)
           </span>
           {inStock && (
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge variant="outline" className="bg-success/15 text-success-text border-success/30">
               <Check className="h-3 w-3 mr-1" />
               In Stock
             </Badge>
@@ -111,30 +111,30 @@ export function ProductDetails({
       </div>
 
       {/* Price Section */}
-      <div className="space-y-3 p-4 rounded-lg bg-slate-50 border border-slate-200">
+      <div className="space-y-3 p-4 rounded-lg bg-card border border-border">
         <div className="flex items-baseline gap-3 flex-wrap">
-          <span className="text-4xl font-bold text-slate-900">
+          <span className="text-4xl font-bold text-foreground">
             ${price.toFixed(2)}
           </span>
           {displayPrice && displayPrice > price && (
             <>
-              <span className="text-lg text-slate-400 line-through">
+              <span className="text-lg text-muted-foreground line-through">
                 ${displayPrice.toFixed(2)}
               </span>
-              <Badge className="bg-red-100 text-red-700 border-red-200">
+              <Badge className="bg-destructive/15 text-destructive-text border-destructive/30">
                 {effectiveDiscount}% OFF
               </Badge>
             </>
           )}
         </div>
         {description && (
-          <p className="text-sm text-slate-600">{description}</p>
+          <p className="text-sm text-muted-foreground">{description}</p>
         )}
       </div>
 
       {/* Quantity Selector */}
       <div className="space-y-3">
-        <Label htmlFor="quantity" className="text-sm font-semibold text-slate-700">
+        <Label htmlFor="quantity" className="text-sm font-semibold text-foreground/80">
           Quantity
         </Label>
         <div className="flex items-center gap-3">
@@ -167,7 +167,7 @@ export function ProductDetails({
             +
           </Button>
           {stock !== undefined && stock > 0 && stock < 5 && (
-            <span className="text-xs text-amber-600 font-medium">
+            <span className="text-xs text-warning-text font-medium">
               Only {stock} left
             </span>
           )}
@@ -176,9 +176,9 @@ export function ProductDetails({
 
       {/* Add to Cart Button */}
       {error && (
-        <div className="p-3 rounded-lg bg-red-50 border border-red-200 flex gap-2">
-          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex gap-2">
+          <AlertCircle className="h-5 w-5 text-destructive-text flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-destructive-text">{error}</p>
         </div>
       )}
 
@@ -186,7 +186,7 @@ export function ProductDetails({
         onClick={handleAddToCart}
         disabled={!inStock || isAdding}
         size="lg"
-        className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold gap-2 transition-colors disabled:opacity-50"
+        className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2 transition-colors disabled:opacity-50"
       >
         {isAdding ? (
           <>
@@ -202,7 +202,7 @@ export function ProductDetails({
       </Button>
 
       {!inStock && (
-        <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-700">
+        <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-sm text-warning-text">
           This product is currently out of stock
         </div>
       )}
@@ -210,33 +210,33 @@ export function ProductDetails({
       {/* Trust Section */}
       <div className="space-y-3 border-t border-b py-4">
         <div className="flex gap-3">
-          <Truck className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+          <Truck className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="font-semibold text-slate-900">Free shipping over $100</p>
-            <p className="text-slate-600">On orders $100 and above</p>
+            <p className="font-semibold text-foreground">Free shipping over $100</p>
+            <p className="text-muted-foreground">On orders $100 and above</p>
           </div>
         </div>
         <div className="flex gap-3">
-          <Package className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+          <Package className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="font-semibold text-slate-900">Satisfaction guaranteed</p>
-            <p className="text-slate-600">30-day return policy</p>
+            <p className="font-semibold text-foreground">Satisfaction guaranteed</p>
+            <p className="text-muted-foreground">30-day return policy</p>
           </div>
         </div>
       </div>
 
       {/* Additional Info */}
-      <div className="space-y-2 text-sm text-slate-600">
+      <div className="space-y-2 text-sm text-muted-foreground">
         <p className="flex items-start gap-2">
-          <Check className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+          <Check className="h-4 w-4 text-success-text flex-shrink-0 mt-0.5" />
           <span>Fast delivery within 2-3 business days</span>
         </p>
         <p className="flex items-start gap-2">
-          <Check className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+          <Check className="h-4 w-4 text-success-text flex-shrink-0 mt-0.5" />
           <span>Secure checkout with encrypted payment</span>
         </p>
         <p className="flex items-start gap-2">
-          <Check className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+          <Check className="h-4 w-4 text-success-text flex-shrink-0 mt-0.5" />
           <span>24/7 customer support available</span>
         </p>
       </div>

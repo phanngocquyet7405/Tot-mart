@@ -28,37 +28,37 @@ export default function TotMartSupport() {
   return (
     <>
       {/* FAQ Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           <div className="text-center mb-16">
-            <p className="text-xs tracking-widest text-yellow-600 mb-4 uppercase font-bold">
+            <p className="text-xs tracking-widest text-primary mb-4 uppercase font-bold">
               Hỗ Trợ
             </p>
-            <h2 className="text-4xl md:text-5xl text-gray-900 font-serif font-bold">
+            <h2 className="text-4xl md:text-5xl text-foreground font-serif font-bold">
               Câu Hỏi Thường Gặp
             </h2>
           </div>
 
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-border">
             {faqs.map((faq, index) => (
               <div key={index} className="py-2">
                 <button
                   onClick={() =>
                     setOpenFaqIndex(openFaqIndex === index ? null : index)
                   }
-                  className="w-full py-6 flex items-center justify-between text-left transition-all hover:text-green-700"
+                  className="w-full py-6 flex items-center justify-between text-left transition-all hover:text-primary"
                 >
-                  <span className="text-lg font-medium text-gray-800 font-serif">
+                  <span className="text-lg font-medium text-foreground font-serif">
                     {faq.question}
                   </span>
                   <ChevronDown
-                    className={`w-5 h-5 text-green-600 flex-shrink-0 ml-4 transition-transform ${openFaqIndex === index ? "rotate-180" : ""}`}
+                    className={`w-5 h-5 text-primary flex-shrink-0 ml-4 transition-transform ${openFaqIndex === index ? "rotate-180" : ""}`}
                   />
                 </button>
                 <div
                   className={`overflow-hidden transition-all duration-300 ${openFaqIndex === index ? "max-h-40 pb-6" : "max-h-0"}`}
                 >
-                  <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                  <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
                 </div>
               </div>
             ))}
@@ -67,11 +67,11 @@ export default function TotMartSupport() {
       </section>
 
       {/* Newsletter Section */}
-      <section className="bg-gradient-to-r from-green-900 to-green-800 text-white">
+      <section className="bg-card border-t border-border text-foreground">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="max-w-2xl mx-auto text-center">
             {/* Badge */}
-            <p className="text-sm font-semibold text-yellow-300 uppercase tracking-widest mb-4">
+            <p className="text-sm font-semibold text-primary font-bold uppercase tracking-widest mb-4">
               Tham Gia Cộng Đồng
             </p>
 
@@ -81,7 +81,7 @@ export default function TotMartSupport() {
             </h3>
 
             {/* Description */}
-            <p className="text-green-100 mb-8 text-lg leading-relaxed">
+            <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
               Nhận bản tin độc quyền với các công thức nấu ăn theo mùa và ưu đãi giảm giá cho đơn hàng đầu tiên.
             </p>
 
@@ -92,12 +92,12 @@ export default function TotMartSupport() {
                 placeholder="Địa chỉ email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 px-6 py-3.5 bg-white/20 text-white placeholder-white/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 border border-white/30 backdrop-blur-sm"
+                className="flex-1 px-6 py-3.5 bg-background text-foreground placeholder:text-muted-foreground rounded-xl focus:outline-none focus:ring-2 focus:ring-ring border border-border"
                 required
               />
               <button
                 type="submit"
-                className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-8 py-3.5 rounded-lg transition-colors duration-300 whitespace-nowrap uppercase tracking-wider text-sm"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 py-3.5 rounded-xl transition-colors duration-300 whitespace-nowrap uppercase tracking-wider text-sm"
               >
                 Tham Gia
               </button>

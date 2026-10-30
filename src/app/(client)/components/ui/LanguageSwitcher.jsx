@@ -30,7 +30,7 @@ export default function LanguageSwitcher() {
           type="button"
           disabled={isPending}
           aria-label="Change language"
-          className="flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-[#4a7c44] transition-colors uppercase tracking-wide disabled:opacity-50"
+          className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-wide disabled:opacity-50"
         >
           {isPending ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -45,7 +45,7 @@ export default function LanguageSwitcher() {
           <DropdownMenuItem
             key={code}
             onClick={() => handleSelect(code)}
-            className={`cursor-pointer ${code === locale ? "font-bold text-[#4a7c44]" : ""}`}
+            className={`cursor-pointer ${code === locale ? "font-bold text-primary" : ""}`}
           >
             {LOCALE_LABELS[code]?.full ?? code}
           </DropdownMenuItem>

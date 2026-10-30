@@ -1,13 +1,18 @@
-
-export default function AuthButton({children, onClick, type = "button", disabled = false}) {
-    return (
-        <button
-        type={type}
-        onClick={onClick}
-        disabled={disabled}
-        className="w-full py-3 px-4 bg-green-700 text-white font-semibold rounded-lg transition-all duration-200 hover:bg-green-800 active:scale-[0.98] shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+export default function AuthButton({
+  children,
+  onClick,
+  type = "button",
+  disabled = false,
+  className = "",
+}) {
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`w-full min-h-11 py-3 px-4 bg-primary text-primary-foreground font-semibold text-sm rounded-xl transition-all duration-200 hover:bg-primary/90 active:scale-[0.98] shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${className}`}
     >
-        {children}
+      {children}
     </button>
-    );
+  );
 }

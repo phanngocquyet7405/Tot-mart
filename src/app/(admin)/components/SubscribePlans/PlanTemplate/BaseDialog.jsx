@@ -58,12 +58,12 @@ export function BaseDialog({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
     >
       <div
-        className={`relative w-full ${maxWidth} ${maxHeight} flex flex-col rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200 overflow-hidden`}
+        className={`relative w-full ${maxWidth} ${maxHeight} flex flex-col rounded-2xl bg-card shadow-2xl ring-1 ring-border overflow-hidden`}
       >
         {showClose && (
           <button
             onClick={() => onOpenChange(false)}
-            className="absolute top-3.5 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+            className="absolute top-3.5 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             <X size={16} />
           </button>
@@ -79,20 +79,20 @@ export function BaseDialog({
  */
 export function BaseDialogHeader({ icon: Icon, iconClass, title, subtitle }) {
   return (
-    <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 shrink-0 pr-14">
+    <div className="flex items-center gap-3 px-6 py-4 border-b border-border shrink-0 pr-14">
       {Icon && (
         <div
-          className={`flex h-9 w-9 items-center justify-center rounded-xl ${iconClass ?? "bg-indigo-50"}`}
+          className={`flex h-9 w-9 items-center justify-center rounded-xl ${iconClass ?? "bg-primary/10"}`}
         >
           <Icon size={16} className="text-current" />
         </div>
       )}
       <div>
-        <h2 className="text-sm font-bold text-slate-800 leading-tight">
+        <h2 className="text-sm font-bold text-foreground leading-tight">
           {title}
         </h2>
         {subtitle && (
-          <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
         )}
       </div>
     </div>
@@ -116,7 +116,7 @@ export function BaseDialogBody({ children, className = "" }) {
 export function BaseDialogFooter({ children, className = "" }) {
   return (
     <div
-      className={`flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-100 shrink-0 ${className}`}
+      className={`flex items-center justify-end gap-2 px-6 py-4 border-t border-border shrink-0 ${className}`}
     >
       {children}
     </div>

@@ -14,16 +14,16 @@ export default function CategoryBaseLayout({ children, categoryId }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Tái cấu trúc Header giống ProductPage */}
-      <div className="sticky top-0 bg-white shadow-sm z-1000">
+      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border shadow-xs z-50">
         <AnnouncementBar />
         <MainHeader
           onMenuClick={() => setIsSidebarOpen(true)}
           cartItemCount={0}
           cartTotal={0}
         />
-        <div className="border-b border-gray-100">
+        <div className="border-b border-border">
           <NavMenu />
         </div>
       </div>

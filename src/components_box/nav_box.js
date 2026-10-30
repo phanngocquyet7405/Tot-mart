@@ -85,22 +85,22 @@ export const HEADER_H = BAR_H + NAV_H; // 100px
 function ShopDropdown({ onClose }) {
   return (
     <div className="absolute top-full left-0 pt-1 w-60 z-50">
-      <div className="bg-[#faf8f4] border border-stone-200 shadow-xl rounded-xl overflow-hidden">
-        <div className="h-0.5 bg-linear-to-r from-amber-300 to-amber-500" />
+      <div className="bg-background border border-border shadow-xl rounded-xl overflow-hidden">
+        <div className="h-0.5 bg-linear-to-r from-primary/60 to-primary" />
         <div className="py-1.5">
           {shopLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
               onClick={onClose}
-              className="group flex items-start gap-2.5 px-4 py-2.5 hover:bg-amber-50 transition-colors"
+              className="group flex items-start gap-2.5 px-4 py-2.5 hover:bg-muted transition-colors"
             >
-              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 group-hover:scale-125 transition-transform" />
+              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0 group-hover:scale-125 transition-transform" />
               <div>
-                <span className="text-[13px] font-bold text-stone-800 group-hover:text-amber-800 uppercase tracking-wide block leading-snug">
+                <span className="text-[13px] font-bold text-foreground group-hover:text-primary uppercase tracking-wide block leading-snug">
                   {link.name}
                 </span>
-                <span className="text-[11px] text-stone-400 group-hover:text-amber-600 transition-colors">
+                <span className="text-[11px] text-muted-foreground group-hover:text-primary transition-colors">
                   {link.desc}
                 </span>
               </div>
@@ -115,19 +115,19 @@ function ShopDropdown({ onClose }) {
 function AboutMegaMenu({ onClose }) {
   return (
     <div className="absolute top-full left-1/2 -translate-x-1/2 pt-1 w-150 z-50">
-      <div className="bg-[#faf8f4] border border-stone-200 shadow-xl rounded-xl overflow-hidden">
-        <div className="h-0.5 bg-linear-to-r from-amber-300 via-amber-500 to-amber-300" />
+      <div className="bg-background border border-border shadow-xl rounded-xl overflow-hidden">
+        <div className="h-0.5 bg-linear-to-r from-primary/40 via-primary to-primary/40" />
         <div className="grid grid-cols-3 gap-0 py-6 px-5">
           {Object.entries(aboutMega).map(([heading, links], colIdx, arr) => (
             <div
               key={heading}
               className={cn(
                 "pr-5",
-                colIdx < arr.length - 1 && "border-r border-stone-200 mr-5",
+                colIdx < arr.length - 1 && "border-r border-border mr-5",
               )}
             >
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-700 mb-3 flex items-center gap-1.5">
-                <span className="inline-block w-3 h-px bg-amber-400" />
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-primary mb-3 flex items-center gap-1.5">
+                <span className="inline-block w-3 h-px bg-primary" />
                 {heading}
               </p>
               <ul className="space-y-0.5">
@@ -136,12 +136,12 @@ function AboutMegaMenu({ onClose }) {
                     <Link
                       href={l.href}
                       onClick={onClose}
-                      className="group block px-2 py-1.5 rounded-lg hover:bg-amber-50 transition-colors"
+                      className="group block px-2 py-1.5 rounded-lg hover:bg-muted transition-colors"
                     >
-                      <span className="text-[13px] font-semibold text-stone-800 group-hover:text-amber-800 transition-colors block">
+                      <span className="text-[13px] font-semibold text-foreground group-hover:text-primary transition-colors block">
                         {l.label}
                       </span>
-                      <span className="text-[11px] text-stone-400 group-hover:text-amber-600 transition-colors">
+                      <span className="text-[11px] text-muted-foreground group-hover:text-primary transition-colors">
                         {l.desc}
                       </span>
                     </Link>
@@ -151,14 +151,14 @@ function AboutMegaMenu({ onClose }) {
             </div>
           ))}
         </div>
-        <div className="bg-stone-900 px-5 py-2.5 flex items-center justify-between">
-          <span className="text-[11px] text-stone-400">
+        <div className="bg-foreground px-5 py-2.5 flex items-center justify-between">
+          <span className="text-[11px] text-muted-foreground">
             Kết nối với nhiều Doanh nghiệp trong Việt Nam
           </span>
           <Link
             href="/pages/our-makers"
             onClick={onClose}
-            className="text-[11px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
+            className="text-[11px] font-bold text-primary hover:text-primary/90 flex items-center gap-1 transition-colors"
           >
             Xem tất cả <ChevronRight size={12} />
           </Link>
@@ -251,16 +251,16 @@ export function Navigation() {
 
   // ── Màu sắc ────────────────────────────────────────────────────────────────
   const textCls = isPastThreshold
-    ? "text-stone-800 hover:text-amber-600"
+    ? "text-foreground hover:text-primary"
     : isLightPage
-      ? "text-stone-100 hover:text-white drop-shadow-sm"
-      : "text-stone-500 hover:text-stone-800";
+      ? "text-background hover:text-background drop-shadow-sm"
+      : "text-muted-foreground hover:text-foreground";
 
   const iconCls = isPastThreshold
-    ? "text-stone-800"
+    ? "text-foreground"
     : isLightPage
-      ? "text-stone-100 hover:text-white"
-      : "text-stone-500";
+      ? "text-background hover:text-background"
+      : "text-muted-foreground";
 
   // ── Vị trí top của nav ─────────────────────────────────────────────────────
   // - Luôn nằm ngay bên dưới ann bar (top = annH)
@@ -279,7 +279,7 @@ export function Navigation() {
           "fixed left-0 right-0 z-40 transition-all duration-500 border-b",
           // z-40 thấp hơn ann bar (z-50) để ann bar luôn nằm trên
           scrolled
-            ? "bg-[#faf8f4]/95 backdrop-blur-md border-stone-200 shadow-sm"
+            ? "bg-background/95 backdrop-blur-md border-border shadow-sm"
             : "bg-transparent border-transparent",
         )}
         style={{ top: navTop, height: NAV_H }}
@@ -291,10 +291,10 @@ export function Navigation() {
                 className={cn(
                   "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300",
                   isPastThreshold
-                    ? "bg-amber-800 text-white"
+                    ? "bg-primary text-white"
                     : isLightPage
                       ? "bg-white/20 text-white backdrop-blur-xs"
-                      : "bg-stone-200 text-stone-500 group-hover:bg-amber-100",
+                      : "bg-muted text-muted-foreground group-hover:bg-muted",
                 )}
               >
                 <Package size={16} />
@@ -304,10 +304,10 @@ export function Navigation() {
                   className={cn(
                     "text-[16px] font-black tracking-tight transition-colors duration-300",
                     isPastThreshold
-                      ? "text-stone-900"
+                      ? "text-foreground"
                       : isLightPage
                         ? "text-white"
-                        : "text-stone-500",
+                        : "text-muted-foreground",
                   )}
                 >
                   TotMart
@@ -316,10 +316,10 @@ export function Navigation() {
                   className={cn(
                     "text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors",
                     isPastThreshold
-                      ? "text-amber-700"
+                      ? "text-primary"
                       : isLightPage
-                        ? "text-amber-200/90"
-                        : "text-amber-600/60",
+                        ? "text-primary-foreground/90"
+                        : "text-primary/60",
                   )}
                 >
                   Craft & Gift
@@ -396,22 +396,22 @@ export function Navigation() {
                 </button>
                 {open === "blog" && (
                   <div className="absolute top-full left-0 pt-1 w-60 z-50">
-                    <div className="bg-[#faf8f4] border border-stone-200 shadow-xl rounded-xl overflow-hidden">
-                      <div className="h-0.5 bg-linear-to-r from-amber-300 to-amber-500" />
+                    <div className="bg-background border border-border shadow-xl rounded-xl overflow-hidden">
+                      <div className="h-0.5 bg-linear-to-r from-primary/60 to-primary" />
                       <div className="py-1.5">
                         {blogLinks.map((link) => (
                           <Link
                             key={link.name}
                             href={link.href}
                             onClick={close}
-                            className="group flex items-start gap-2.5 px-4 py-2.5 hover:bg-amber-50 transition-colors"
+                            className="group flex items-start gap-2.5 px-4 py-2.5 hover:bg-muted transition-colors"
                           >
-                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 group-hover:scale-125 transition-transform" />
+                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0 group-hover:scale-125 transition-transform" />
                             <div>
-                              <span className="text-[13px] font-bold text-stone-800 group-hover:text-amber-800 uppercase tracking-wide block leading-snug">
+                              <span className="text-[13px] font-bold text-foreground group-hover:text-primary uppercase tracking-wide block leading-snug">
                                 {link.name}
                               </span>
-                              <span className="text-[11px] text-stone-400 group-hover:text-amber-600 transition-colors">
+                              <span className="text-[11px] text-muted-foreground group-hover:text-primary transition-colors">
                                 {link.desc}
                               </span>
                             </div>
@@ -441,10 +441,10 @@ export function Navigation() {
               className={cn(
                 "hidden md:inline-flex h-9 px-4 text-[11px] font-black uppercase tracking-[0.15em] rounded-full transition-all duration-300 border",
                 isPastThreshold
-                  ? "bg-amber-800 text-white border-transparent hover:bg-amber-900"
+                  ? "bg-primary text-white border-transparent hover:bg-primary/90"
                   : isLightPage
-                    ? "bg-white text-stone-900 border-transparent hover:bg-stone-100"
-                    : "bg-stone-100 text-stone-500 border-stone-200 hover:bg-amber-50",
+                    ? "bg-card text-foreground border-border hover:bg-muted"
+                    : "bg-muted text-muted-foreground border-border hover:bg-muted",
               )}
             >
               Subscribe
@@ -472,7 +472,7 @@ export function Navigation() {
                 <span
                   className={cn(
                     "absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full flex items-center justify-center text-[11px] font-black text-white",
-                    cartCount > 0 ? "bg-amber-600" : "bg-stone-400 opacity-60",
+                    cartCount > 0 ? "bg-primary text-primary-foreground" : "bg-muted-foreground text-background opacity-60",
                   )}
                 >
                   {cartCount > 99 ? "99+" : cartCount}
@@ -494,43 +494,43 @@ export function Navigation() {
 
         {/* ── Mobile drawer ── */}
         {mobileOpen && (
-          <div className="lg:hidden bg-[#faf8f4] border-t border-stone-200 shadow-2xl overflow-y-auto max-h-[75vh]">
-            <div className="h-0.5 bg-linear-to-r from-amber-300 via-amber-500 to-amber-300" />
+          <div className="lg:hidden bg-background border-t border-border shadow-2xl overflow-y-auto max-h-[75vh]">
+            <div className="h-0.5 bg-linear-to-r from-primary/40 via-primary to-primary/40" />
             <div className="p-4 space-y-2">
-              <div className="rounded-xl border border-stone-200 overflow-hidden">
+              <div className="rounded-xl border border-border overflow-hidden">
                 <button
                   onClick={() => setMobileShopOpen((v) => !v)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-stone-800 uppercase tracking-wider bg-white hover:bg-amber-50 transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-foreground uppercase tracking-wider bg-card hover:bg-muted transition-colors"
                 >
                   Shop
                   <ChevronRight
                     size={16}
                     className={cn(
-                      "text-stone-400 transition-transform",
+                      "text-muted-foreground transition-transform",
                       mobileShopOpen && "rotate-90",
                     )}
                   />
                 </button>
                 {mobileShopOpen && (
-                  <div className="bg-stone-50 border-t border-stone-100 divide-y divide-stone-100">
+                  <div className="bg-muted border-t border-border divide-y divide-border">
                     {shopLinks.map((l) => (
                       <Link
                         key={l.name}
                         href={l.href}
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center justify-between px-4 py-3 hover:bg-amber-50 transition-colors group"
+                        className="flex items-center justify-between px-4 py-3 hover:bg-muted transition-colors group"
                       >
                         <div>
-                          <span className="text-sm font-bold text-stone-800 uppercase tracking-wide block group-hover:text-amber-800 transition-colors">
+                          <span className="text-sm font-bold text-foreground uppercase tracking-wide block group-hover:text-primary transition-colors">
                             {l.name}
                           </span>
-                          <span className="text-xs text-stone-400">
+                          <span className="text-xs text-muted-foreground">
                             {l.desc}
                           </span>
                         </div>
                         <ChevronRight
                           size={14}
-                          className="text-stone-300 group-hover:text-amber-500 transition-colors"
+                          className="text-muted-foreground/60 group-hover:text-primary transition-colors"
                         />
                       </Link>
                     ))}
@@ -538,25 +538,25 @@ export function Navigation() {
                 )}
               </div>
 
-              <div className="rounded-xl border border-stone-200 overflow-hidden">
+              <div className="rounded-xl border border-border overflow-hidden">
                 <button
                   onClick={() => setMobileAboutOpen((v) => !v)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-stone-800 uppercase tracking-wider bg-white hover:bg-amber-50 transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-foreground uppercase tracking-wider bg-card hover:bg-muted transition-colors"
                 >
                   Về chúng tôi
                   <ChevronRight
                     size={16}
                     className={cn(
-                      "text-stone-400 transition-transform",
+                      "text-muted-foreground transition-transform",
                       mobileAboutOpen && "rotate-90",
                     )}
                   />
                 </button>
                 {mobileAboutOpen && (
-                  <div className="bg-stone-50 border-t border-stone-100 p-4 space-y-4">
+                  <div className="bg-muted border-t border-border p-4 space-y-4">
                     {Object.entries(aboutMega).map(([heading, links]) => (
                       <div key={heading}>
-                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-700 mb-2">
+                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-primary mb-2">
                           {heading}
                         </p>
                         {links.map((l) => (
@@ -564,19 +564,19 @@ export function Navigation() {
                             key={l.label}
                             href={l.href}
                             onClick={() => setMobileOpen(false)}
-                            className="flex items-center justify-between px-2 py-2 rounded-lg hover:bg-amber-50 group transition-colors"
+                            className="flex items-center justify-between px-2 py-2 rounded-lg hover:bg-muted group transition-colors"
                           >
                             <div>
-                              <span className="text-sm font-semibold text-stone-800 group-hover:text-amber-800 block transition-colors">
+                              <span className="text-sm font-semibold text-foreground group-hover:text-primary block transition-colors">
                                 {l.label}
                               </span>
-                              <span className="text-xs text-stone-400">
+                              <span className="text-xs text-muted-foreground">
                                 {l.desc}
                               </span>
                             </div>
                             <ChevronRight
                               size={13}
-                              className="text-stone-300 group-hover:text-amber-500 transition-colors"
+                              className="text-muted-foreground/60 group-hover:text-primary transition-colors"
                             />
                           </Link>
                         ))}
@@ -586,38 +586,38 @@ export function Navigation() {
                 )}
               </div>
 
-              <div className="rounded-xl border border-stone-200 overflow-hidden">
+              <div className="rounded-xl border border-border overflow-hidden">
                 <button
                   onClick={() => setMobileBlogOpen((v) => !v)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-stone-800 uppercase tracking-wider bg-white hover:bg-amber-50 transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-foreground uppercase tracking-wider bg-card hover:bg-muted transition-colors"
                 >
                   Blog
                   <ChevronRight
                     size={16}
                     className={cn(
-                      "text-stone-400 transition-transform",
+                      "text-muted-foreground transition-transform",
                       mobileBlogOpen && "rotate-90",
                     )}
                   />
                 </button>
                 {mobileBlogOpen && (
-                  <div className="bg-stone-50 border-t border-stone-100 divide-y divide-stone-100">
+                  <div className="bg-muted border-t border-border divide-y divide-border">
                     {blogLinks.map((link) => (
                       <Link
                         key={link.name}
                         href={link.href}
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center justify-between px-4 py-3 hover:bg-amber-50 transition-colors group"
+                        className="flex items-center justify-between px-4 py-3 hover:bg-muted transition-colors group"
                       >
                         <div>
-                          <span className="text-sm font-bold text-stone-800 uppercase tracking-wide block group-hover:text-amber-800 transition-colors">
+                          <span className="text-sm font-bold text-foreground uppercase tracking-wide block group-hover:text-primary transition-colors">
                             {link.name}
                           </span>
-                          <span className="text-xs text-stone-400">{link.desc}</span>
+                          <span className="text-xs text-muted-foreground">{link.desc}</span>
                         </div>
                         <ChevronRight
                           size={14}
-                          className="text-stone-300 group-hover:text-amber-500 transition-colors"
+                          className="text-muted-foreground/60 group-hover:text-primary transition-colors"
                         />
                       </Link>
                     ))}
@@ -628,19 +628,19 @@ export function Navigation() {
               <Link
                 href="/brands"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-between px-4 py-3 bg-white border border-stone-200 rounded-xl text-sm font-black text-stone-800 uppercase tracking-wider hover:bg-amber-50 hover:text-amber-800 transition-colors"
+                className="flex items-center justify-between px-4 py-3 bg-card border border-border rounded-xl text-sm font-black text-foreground uppercase tracking-wider hover:bg-muted hover:text-primary transition-colors"
               >
                 Thương hiệu
-                <ChevronRight size={16} className="text-stone-300" />
+                <ChevronRight size={16} className="text-muted-foreground/60" />
               </Link>
 
-              <div className="space-y-2 pt-1 border-t border-stone-200">
+              <div className="space-y-2 pt-1 border-t border-border">
                 <Button
                   onClick={() => {
                     router.push("/subscription");
                     setMobileOpen(false);
                   }}
-                  className="w-full bg-amber-800 text-white py-6 rounded-xl font-black uppercase tracking-widest hover:bg-amber-900 transition-colors"
+                  className="w-full bg-primary text-white py-6 rounded-xl font-black uppercase tracking-widest hover:bg-primary/90 transition-colors"
                 >
                   Subscribe Now
                 </Button>
@@ -650,7 +650,7 @@ export function Navigation() {
                     router.push("/login");
                     setMobileOpen(false);
                   }}
-                  className="w-full border-2 border-stone-800 text-stone-900 py-6 rounded-xl font-black uppercase tracking-widest"
+                  className="w-full border-2 border-border text-foreground py-6 rounded-xl font-black uppercase tracking-widest"
                 >
                   Đăng nhập / Tài khoản
                 </Button>

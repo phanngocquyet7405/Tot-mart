@@ -44,7 +44,7 @@ export default function AddCategoryPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-800">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Thêm Danh Mục
             </h1>
             <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -59,7 +59,7 @@ export default function AddCategoryPage() {
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="bg-orange-600 hover:bg-orange-700 text-white min-w-35 shadow-lg shadow-orange-200"
+            className="bg-warning-text hover:bg-warning-text text-white min-w-35 shadow-sm"
           >
             {isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -71,48 +71,48 @@ export default function AddCategoryPage() {
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2 space-y-4">
-          <Card className="border-orange-100 shadow-sm">
-            <CardHeader className="bg-orange-50/30 border-b">
-              <CardTitle className="text-lg flex items-center gap-2 text-orange-800">
-                <LayoutGrid className="h-5 w-5 text-orange-600" />
+          <Card className="border-warning/20 shadow-sm">
+            <CardHeader className="bg-warning/10/30 border-b">
+              <CardTitle className="text-lg flex items-center gap-2 text-warning-text">
+                <LayoutGrid className="h-5 w-5 text-warning-text" />
                 Cấu hình thuộc tính
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-5">
               <div className="space-y-2">
-                <Label className="font-bold text-zinc-700">
-                  Tên danh mục <span className="text-red-500">*</span>
+                <Label className="font-bold text-foreground">
+                  Tên danh mục <span className="text-destructive-text">*</span>
                 </Label>
                 <Input
                   placeholder="Ví dụ: Đồ gia dụng, Điện tử..."
                   value={form.name}
                   onChange={(e) => updateField("name", e.target.value)}
-                  className="h-11 focus-visible:ring-orange-500 border-zinc-200"
+                  className="h-11 focus-visible:ring-primary border-border"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="font-bold text-zinc-700">Mô tả</Label>
+                <Label className="font-bold text-foreground">Mô tả</Label>
                 <Input
                   placeholder="Mô tả ngắn gọn..."
                   value={form.description}
                   onChange={(e) => updateField("description", e.target.value)}
-                  className="h-11 border-zinc-200"
+                  className="h-11 border-border"
                 />
               </div>
 
               <div className="space-y-3">
-                <Label className="font-bold text-zinc-700">
+                <Label className="font-bold text-foreground">
                   Vị trí trong cây danh mục
                 </Label>
-                <div className="border rounded-xl overflow-hidden divide-y bg-white shadow-inner max-h-72 overflow-y-auto">
+                <div className="border border-border rounded-xl overflow-hidden divide-y divide-border bg-card shadow-inner max-h-72 overflow-y-auto">
                   <div
                     onClick={() => updateField("parentId", null)}
                     className={cn(
                       "flex items-center gap-4 p-4 cursor-pointer transition-all",
                       form.parentId === null
-                        ? "bg-orange-50 border-l-4 border-l-orange-500"
-                        : "hover:bg-zinc-50",
+                        ? "bg-warning/10 border-l-4 border-l-primary"
+                        : "hover:bg-muted/30",
                     )}
                   >
                     <RadioDot selected={form.parentId === null} />
@@ -121,8 +121,8 @@ export default function AddCategoryPage() {
                         className={cn(
                           "text-sm font-bold",
                           form.parentId === null
-                            ? "text-orange-700"
-                            : "text-zinc-700",
+                            ? "text-warning-text"
+                            : "text-foreground",
                         )}
                       >
                         Danh mục gốc (Root)
@@ -137,20 +137,20 @@ export default function AddCategoryPage() {
                       className={cn(
                         "flex items-center gap-4 p-4 cursor-pointer transition-all",
                         form.parentId === cat._id
-                          ? "bg-orange-50 border-l-4 border-l-orange-500"
-                          : "hover:bg-zinc-50",
+                          ? "bg-warning/10 border-l-4 border-l-primary"
+                          : "hover:bg-muted/30",
                       )}
                     >
                       <RadioDot selected={form.parentId === cat._id} />
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-zinc-700">
+                        <p className="text-sm font-semibold text-foreground">
                           {cat.name}
                         </p>
-                        <p className="text-[11px] text-zinc-400 font-mono italic">
+                        <p className="text-[11px] text-muted-foreground font-mono italic">
                           {cat._id}
                         </p>
                       </div>
-                      <span className="text-[11px] font-bold px-2 py-1 rounded bg-zinc-100 text-zinc-500 uppercase">
+                      <span className="text-[11px] font-bold px-2 py-1 rounded bg-muted text-muted-foreground uppercase">
                         {cat.childrenIds?.length || 0} Children
                       </span>
                     </div>
@@ -160,9 +160,9 @@ export default function AddCategoryPage() {
             </CardContent>
           </Card>
 
-          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex gap-3">
-            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
-            <div className="text-sm text-amber-900">
+          <div className="bg-warning/10 border border-warning/20 p-4 rounded-xl flex gap-3">
+            <AlertTriangle className="h-5 w-5 text-warning-text shrink-0" />
+            <div className="text-sm text-warning-text">
               <p className="font-bold">Lưu ý về đồng bộ dữ liệu:</p>
               <p className="opacity-80">
                 Hệ thống thực hiện cập nhật mảng <code>childrenIds</code> dạng
@@ -188,24 +188,24 @@ export default function AddCategoryPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-900 text-white border-none shadow-xl">
-            <CardHeader className="pb-2 border-b border-zinc-800">
-              <CardTitle className="text-[11px] uppercase tracking-widest text-zinc-500">
+          <Card className="bg-card text-white border-none shadow-xl">
+            <CardHeader className="pb-2 border-b border-border">
+              <CardTitle className="text-[11px] uppercase tracking-widest text-muted-foreground">
                 Cấu trúc hiển thị
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5 space-y-4">
               <div className="space-y-1">
-                <div className="flex items-center gap-2 text-zinc-400">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <FolderTree className="h-4 w-4" />
                   <span className="text-xs">
                     {selectedParent?.name || "Root System"}
                   </span>
                 </div>
-                <div className="ml-6 border-l border-orange-500/50 pl-4 py-1">
-                  <div className="bg-orange-500/10 border border-orange-500/30 rounded p-2 flex items-center gap-2">
-                    <CheckCircle2 className="h-3 w-3 text-orange-500" />
-                    <span className="text-sm font-medium text-orange-100">
+                <div className="ml-6 border-l border-primary/50 pl-4 py-1">
+                  <div className="bg-warning-text/10 border border-primary/30 rounded p-2 flex items-center gap-2">
+                    <CheckCircle2 className="h-3 w-3 text-warning-text" />
+                    <span className="text-sm font-medium text-primary">
                       {form.name || "Tên danh mục..."}
                     </span>
                   </div>
@@ -225,11 +225,11 @@ function RadioDot({ selected }) {
       className={cn(
         "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
         selected
-          ? "border-orange-500 bg-orange-500"
-          : "border-zinc-300 bg-white",
+          ? "border-primary bg-primary"
+          : "border-border bg-card",
       )}
     >
-      {selected && <div className="w-2 h-2 rounded-full bg-white" />}
+      {selected && <div className="w-2 h-2 rounded-full bg-primary-foreground" />}
     </div>
   );
 }

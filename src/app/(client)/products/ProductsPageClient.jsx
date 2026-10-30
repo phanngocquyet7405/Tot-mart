@@ -17,7 +17,7 @@ function ProductPageContent() {
 
   return (
     <div className="page-canvas min-h-screen">
-      <div className="sticky top-0 bg-white shadow-sm z-1000">
+      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border shadow-xs z-50">
         <AnnouncementBar />
 
         <MainHeader
@@ -26,25 +26,25 @@ function ProductPageContent() {
           cartTotal={0}
         />
 
-        <div className="border-b border-gray-100">
+        <div className="border-b border-border">
           <NavMenu />
         </div>
       </div>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-900 via-green-800 to-green-900 text-white py-12 md:py-16 relative overflow-hidden">
+      <div className="bg-card border-b border-border py-12 md:py-16 relative overflow-hidden text-foreground">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-white blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-white blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-primary/20 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-primary/20 blur-3xl"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <p className="text-sm font-semibold uppercase tracking-wider mb-3 text-green-200">
+          <p className="text-sm font-semibold uppercase tracking-wider mb-3 text-primary font-semibold">
             {searchQuery ? "Kết quả tìm kiếm" : "Premium Organic Curations"}
           </p>
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">
             {searchQuery ? `"${searchQuery}"` : "Premium Organic Snacks"}
           </h1>
-          <p className="text-lg text-green-100 max-w-2xl">
+          <p className="text-lg text-muted-foreground max-w-2xl">
             {searchQuery
               ? "Đây là các sản phẩm phù hợp với từ khoá bạn tìm."
               : "Discover our curated selection of hand-picked organic snacks that nourish the soul and respect the planet."}
@@ -77,7 +77,7 @@ function ProductPageContent() {
 
 export default function ProductPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
       <ProductPageContent />
     </Suspense>
   );

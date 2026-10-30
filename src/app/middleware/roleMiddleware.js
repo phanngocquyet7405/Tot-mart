@@ -39,8 +39,8 @@ export function withAdmin(WrappedComponent) {
     // Đang load → spinner (hợp lý vì chưa biết role)
     if (isLoading) {
       return (
-        <div className="flex h-screen items-center justify-center bg-white">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <div className="flex h-screen items-center justify-center bg-background">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       );
     }
@@ -85,8 +85,8 @@ export function withRole(WrappedComponent, allowedRoles = [], options = {}) {
 
     if (isLoading) {
       return (
-        <div className="flex h-screen items-center justify-center bg-white">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <div className="flex h-screen items-center justify-center bg-background">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       );
     }

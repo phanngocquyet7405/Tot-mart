@@ -44,10 +44,10 @@ export default function BrandForm({
   return (
     <form onSubmit={onSubmit} className="grid gap-6 md:grid-cols-3">
       <div className="md:col-span-2 space-y-4">
-        <Card className="border-orange-100 shadow-sm">
-          <CardHeader className="bg-orange-50/30 border-b">
-            <CardTitle className="text-lg flex items-center gap-2 text-orange-800">
-              <Tag className="h-5 w-5 text-orange-600" />
+        <Card className="border-warning/20 shadow-sm">
+          <CardHeader className="bg-warning/10/30 border-b">
+            <CardTitle className="text-lg flex items-center gap-2 text-warning-text">
+              <Tag className="h-5 w-5 text-warning-text" />
               Thông tin thương hiệu
             </CardTitle>
           </CardHeader>
@@ -81,7 +81,7 @@ export default function BrandForm({
                 {form.ownerId && !merchants.some(m => m._id === form.ownerId) && <option value={form.ownerId}>Chủ hiện tại</option>}
                 {merchants.map(m => <option key={m._id} value={m._id}>{m.name}</option>)}
               </select>
-              {merchantError && <p role="alert" className="text-sm text-red-700">{merchantError}</p>}
+              {merchantError && <p role="alert" className="text-sm text-destructive-text">{merchantError}</p>}
               <p className="text-xs text-muted-foreground">Chỉ chọn merchant khi tạo thương hiệu. Đổi chủ thương hiệu hiện có cần quy trình chuyển quyền và đối chiếu dữ liệu riêng.</p>
             </div>
             <div className="space-y-1.5">
@@ -113,16 +113,16 @@ export default function BrandForm({
       </div>
 
       <div className="space-y-4">
-        <Card className="border-orange-100 shadow-sm">
-          <CardHeader className="bg-orange-50/30 border-b">
-            <CardTitle className="text-lg flex items-center gap-2 text-orange-800">
-              <ImageIcon className="h-5 w-5 text-orange-600" />
+        <Card className="border-warning/20 shadow-sm">
+          <CardHeader className="bg-warning/10/30 border-b">
+            <CardTitle className="text-lg flex items-center gap-2 text-warning-text">
+              <ImageIcon className="h-5 w-5 text-warning-text" />
               Logo
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 pt-5">
             <div
-              className="relative flex h-36 w-full items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/30 overflow-hidden cursor-pointer"
+              className="relative flex h-36 w-full items-center justify-center rounded-xl border border-dashed border-warning/20 bg-warning/10/30 overflow-hidden cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             >
               {displayedLogo ? (
@@ -141,7 +141,7 @@ export default function BrandForm({
                         e.stopPropagation();
                         onClearLogo();
                       }}
-                      className="absolute right-2 top-2 rounded-full bg-white/90 p-1 shadow hover:bg-white"
+                      className="absolute right-2 top-2 rounded-full bg-background/90 p-1 shadow hover:bg-background border border-border"
                     >
                       <X size={14} />
                     </button>
@@ -182,7 +182,7 @@ export default function BrandForm({
           </Button>
           <Button
             type="submit"
-            className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
+            className="flex-1 bg-warning-text hover:bg-warning-text text-white"
             disabled={isSubmitting}
           >
             {isSubmitting ? (

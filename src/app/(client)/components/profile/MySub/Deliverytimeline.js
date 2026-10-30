@@ -4,7 +4,6 @@
  * Hiển thị tiến trình giao hàng dạng timeline dots
  */
 
-
 import { Check, Truck, Clock } from "lucide-react";
 import { getDeliveryProgress } from "@/app/services/api/MySubscriptionService";
 
@@ -18,7 +17,6 @@ export function DeliveryTimeline({ totalDeliveries, remainDeliveries }) {
   const displayCount = Math.min(totalDeliveries, 12);
   const dots = Array.from({ length: displayCount }, (_, i) => {
     const deliveryIndex = i + 1;
-    // Scale nếu totalDeliveries > 12
     const scaledDone = Math.round((done / totalDeliveries) * displayCount);
     return deliveryIndex <= scaledDone
       ? "done"
@@ -31,58 +29,54 @@ export function DeliveryTimeline({ totalDeliveries, remainDeliveries }) {
     <div className="space-y-2">
       {/* Progress bar */}
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[11px] font-black uppercase tracking-widest text-stone-400">
-          Tiến độ giao hàng
+        <span className="text-xs font-medium text-muted-foreground">
+          Tiến độ giao nhận
         </span>
-        <span className="text-[11px] font-bold text-stone-500">
-          {done}/{totalDeliveries} lần
+        <span className="text-[11px] font-bold text-foreground tabular-nums">
+          Đã giao {done}/{totalDeliveries} đợt
         </span>
       </div>
 
       <div className="relative">
         {/* Track */}
-        <div className="h-1 bg-stone-100 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
           <div
-            className="h-full bg-linear-to-r from-[#C85C3C] to-[#E8835E] rounded-full transition-all duration-700"
+            className="h-full bg-primary rounded-full transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
 
         {/* Dot markers */}
-        <div className="flex items-center justify-between mt-2 gap-0.5">
+        <div className="flex items-center justify-between mt-2.5 gap-1">
           {dots.map((status, i) => (
             <div
               key={i}
               className="flex-1 flex justify-center"
-              title={`Lần ${i + 1}: ${status === "done" ? "Đã giao" : status === "next" ? "Tiếp theo" : "Chờ giao"}`}
+              title={`Đợt ${i + 1}: ${
+                status === "done"
+                  ? "Đã hoàn thành"
+                  : status === "next"
+                    ? "Đợt giao tiếp theo"
+                    : "Chờ giao"
+              }`}
             >
               {status === "done" ? (
-                <div className="w-4 h-4 rounded-full bg-[#C85C3C] flex items-center justify-center">
-                  <Check size={8} className="text-white" strokeWidth={3} />
+                <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shadow-2xs">
+                  <Check size={9} className="text-primary-foreground stroke-[3]" />
                 </div>
               ) : status === "next" ? (
-                <div className="w-4 h-4 rounded-full bg-[#FFF0EB] border-2 border-[#C85C3C] flex items-center justify-center">
-                  <Truck size={7} className="text-[#C85C3C]" />
+                <div className="w-4 h-4 rounded-full border-2 border-primary bg-card flex items-center justify-center animate-pulse">
+                  <Truck size={8} className="text-primary" />
                 </div>
               ) : (
-                <div className="w-3 h-3 rounded-full bg-stone-100 border border-stone-200 mt-0.5" />
+                <div className="w-3.5 h-3.5 rounded-full bg-muted border border-border flex items-center justify-center">
+                  <Clock size={7} className="text-muted-foreground" />
+                </div>
               )}
             </div>
           ))}
         </div>
       </div>
-
-      {/* Next delivery hint */}
-      {remainDeliveries > 0 && (
-        <div className="flex items-center gap-1.5 mt-1">
-          <Clock size={10} className="text-stone-400" />
-          <span className="text-[11px] text-stone-400">
-            Còn{" "}
-            <span className="font-bold text-stone-600">{remainDeliveries}</span>{" "}
-            lần giao hàng
-          </span>
-        </div>
-      )}
     </div>
   );
 }

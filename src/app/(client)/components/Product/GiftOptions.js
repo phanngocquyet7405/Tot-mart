@@ -71,23 +71,23 @@ export function GiftOptions({ onChange, ownerConfirmed = false, policy = null })
   };
 
   return (
-    <div className="bg-amber-50/60 rounded-2xl p-6 space-y-4 border border-amber-100">
+    <div className="bg-card rounded-2xl p-6 space-y-4 border border-border shadow-xs">
       <div className="flex items-center gap-2">
-        <Gift className="w-4 h-4 text-amber-800" />
-        <h3 className="text-xs font-black uppercase tracking-widest text-stone-800">
+        <Gift className="w-4 h-4 text-primary" />
+        <h3 className="text-xs font-black uppercase tracking-widest text-foreground">
           Đóng gói quà tặng
         </h3>
       </div>
 
-      <label className="flex items-center justify-between p-4 bg-white rounded-xl border border-stone-200 cursor-pointer">
-        <span className="text-sm font-bold text-stone-800">
+      <label className="flex items-center justify-between p-4 bg-card rounded-xl border border-border cursor-pointer">
+        <span className="text-sm font-bold text-foreground">
           Đây là quà tặng — thêm gói quà
         </span>
         <input
           type="checkbox"
           checked={enabled}
           onChange={handleToggle}
-          className="w-5 h-5 accent-amber-800"
+          className="w-5 h-5 accent-primary"
         />
       </label>
 
@@ -97,10 +97,10 @@ export function GiftOptions({ onChange, ownerConfirmed = false, policy = null })
             {wrapOptions.map((option) => (
               <label
                 key={option.id}
-                className={`flex items-center justify-between gap-3 p-3 bg-white rounded-xl border-2 cursor-pointer transition-all ${
+                className={`flex items-center justify-between gap-3 p-3 bg-card rounded-xl border-2 cursor-pointer transition-all ${
                   selectedId === option.id
-                    ? "border-amber-700 ring-2 ring-amber-100"
-                    : "border-stone-200 hover:border-amber-300"
+                    ? "border-primary ring-2 ring-primary/20"
+                    : "border-border hover:border-primary/40"
                 }`}
               >
                 <span className="flex items-center gap-3">
@@ -109,11 +109,11 @@ export function GiftOptions({ onChange, ownerConfirmed = false, policy = null })
                     name="gift-wrap"
                     checked={selectedId === option.id}
                     onChange={() => handleSelect(option)}
-                    className="w-4 h-4 accent-amber-800"
+                    className="w-4 h-4 accent-primary"
                   />
-                  <span className="text-sm text-stone-700">{option.label}</span>
+                  <span className="text-sm text-foreground">{option.label}</span>
                 </span>
-                <span className="text-sm font-black text-amber-800 shrink-0">
+                <span className="text-sm font-black text-primary shrink-0">
                   +{formatPrice(option.price)}
                 </span>
               </label>
@@ -121,7 +121,7 @@ export function GiftOptions({ onChange, ownerConfirmed = false, policy = null })
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-stone-500 uppercase tracking-wide">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
               Lời nhắn kèm quà (tuỳ chọn)
             </label>
             <textarea
@@ -130,9 +130,9 @@ export function GiftOptions({ onChange, ownerConfirmed = false, policy = null })
               rows={3}
               maxLength={MESSAGE_LIMIT}
               placeholder="Viết vài dòng gửi gắm yêu thương..."
-              className="w-full text-sm p-3 rounded-xl border border-stone-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 outline-none resize-none bg-white"
+              className="w-full text-sm p-3 rounded-xl border border-border bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
             />
-            <p className="text-[11px] text-stone-400 text-right">
+            <p className="text-[11px] text-muted-foreground text-right">
               {message.length}/{MESSAGE_LIMIT} ký tự
             </p>
           </div>

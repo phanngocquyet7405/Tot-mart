@@ -1,6 +1,6 @@
 // components/SubscribePlans/PlanTable.jsx
 // Bảng danh sách Subscription Templates (mẫu gói).
-// Thao tác: Xem chi tiết, Chỉnh sửa, Xoá.
+// Hỗ trợ mobile card layout (< 768px).
 
 import {
   Table,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   CalendarClock,
   ChevronUp,
@@ -72,193 +73,283 @@ export function PlanTable({
     );
   }
 
+  if (filtered.length === 0) {
+    return (
+      <div className="text-center py-12 px-4 text-muted-foreground">
+        <CalendarClock size={36} className="mx-auto mb-2 opacity-30 text-muted-foreground" />
+        <p className="text-sm">Không tìm thấy mẫu gói nào.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-b-xl overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/40 hover:bg-muted/40">
-            <TableHead
-              className="cursor-pointer"
-              onClick={() => onSort("name")}
-            >
-              Tên mẫu gói{" "}
-              <SortIcon col="name" sortKey={sortKey} sortDir={sortDir} />
-            </TableHead>
-            <TableHead
-              className="cursor-pointer"
-              onClick={() => onSort("planType")}
-            >
-              Chu kỳ{" "}
-              <SortIcon col="planType" sortKey={sortKey} sortDir={sortDir} />
-            </TableHead>
-            <TableHead>Box chính</TableHead>
-            <TableHead
-              className="cursor-pointer"
-              onClick={() => onSort("basePrice")}
-            >
-              Giá gốc{" "}
-              <SortIcon col="basePrice" sortKey={sortKey} sortDir={sortDir} />
-            </TableHead>
-            <TableHead
-              className="cursor-pointer"
-              onClick={() => onSort("discountPrice")}
-            >
-              Giá KM{" "}
-              <SortIcon
-                col="discountPrice"
-                sortKey={sortKey}
-                sortDir={sortDir}
-              />
-            </TableHead>
-            <TableHead>Quà kèm</TableHead>
-            <TableHead>Trạng thái</TableHead>
-            <TableHead className="text-right">Thao tác</TableHead>
-          </TableRow>
-        </TableHeader>
+      {/* Mobile Card Layout (< 768px) */}
+      <div className="md:hidden divide-y divide-border">
+        {filtered.map((template) => (
+          <Card key={template._id} className="rounded-none border-x-0 border-t-0 shadow-none">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-foreground truncate">
+                    {template.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground tabular-nums">
+                    ID: {template._id?.slice(-6)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  {template.isActive ? (
+                    <Badge className="bg-success/15 text-success-text border-success/20 gap-1 text-[11px] font-medium">
+                      <CheckCircle2 size={11} /> Hiển thị
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-muted text-muted-foreground border-border gap-1 text-[11px] font-medium">
+                      <EyeOff size={11} /> Đã ẩn
+                    </Badge>
+                  )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="min-h-11 min-w-11 -mr-2 text-muted-foreground"
+                      >
+                        <MoreHorizontal size={18} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        className="cursor-pointer pointer-coarse:min-h-11 flex items-center"
+                        onClick={() => onViewDetail(template)}
+                      >
+                        <Eye size={14} className="mr-2" />
+                        Xem chi tiết
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer pointer-coarse:min-h-11 flex items-center"
+                        onClick={() => onEditClick(template)}
+                      >
+                        <Pencil size={14} className="mr-2" />
+                        Chỉnh sửa
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="text-destructive-text cursor-pointer pointer-coarse:min-h-11 flex items-center"
+                        onClick={() => onDeleteClick(template)}
+                      >
+                        <Trash2 size={14} className="mr-2" />
+                        Xóa mẫu gói
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
 
-        <TableBody>
-          {filtered.length === 0 ? (
-            <TableRow>
-              <TableCell
-                colSpan={8}
-                className="text-center h-32 text-muted-foreground"
+              <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-border/60">
+                <div>
+                  <span className="text-muted-foreground">Chu kỳ: </span>
+                  <Badge
+                    variant="outline"
+                    className="text-primary border-primary/20 bg-primary/10 text-[11px]"
+                  >
+                    {PLAN_TYPE_LABELS[template.planType] || template.planType}
+                  </Badge>
+                </div>
+                <div className="text-right">
+                  <span className="text-muted-foreground">Combo chính: </span>
+                  <span className="font-medium text-foreground">
+                    {template.boxId?.name || "—"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Giá KM: </span>
+                  <span className="font-bold text-primary tabular-nums">
+                    {formatCurrency(template.discountPrice)}
+                  </span>
+                  {template.discountPercent > 0 && (
+                    <Badge className="ml-1 bg-destructive/15 text-destructive-text border-destructive/20 text-[10px] tabular-nums">
+                      -{template.discountPercent}%
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-right">
+                  <span className="text-muted-foreground">Giá gốc: </span>
+                  <span className="line-through text-muted-foreground tabular-nums">
+                    {formatCurrency(template.basePrice)}
+                  </span>
+                </div>
+                {template.gift?.length > 0 && (
+                  <div className="col-span-2 flex items-center gap-1 text-primary">
+                    <Gift size={12} />
+                    <span>Quà kèm: {template.gift.length} combo</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Desktop Table View (>= 768px) */}
+      <div className="hidden md:block">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead
+                className="cursor-pointer font-semibold"
+                onClick={() => onSort("name")}
               >
-                <CalendarClock size={32} className="mx-auto mb-2 opacity-20" />
-                Không tìm thấy mẫu gói nào.
-              </TableCell>
+                Tên mẫu gói{" "}
+                <SortIcon col="name" sortKey={sortKey} sortDir={sortDir} />
+              </TableHead>
+              <TableHead
+                className="cursor-pointer font-semibold"
+                onClick={() => onSort("planType")}
+              >
+                Chu kỳ{" "}
+                <SortIcon col="planType" sortKey={sortKey} sortDir={sortDir} />
+              </TableHead>
+              <TableHead className="font-semibold">Combo chính</TableHead>
+              <TableHead
+                className="cursor-pointer font-semibold"
+                onClick={() => onSort("basePrice")}
+              >
+                Giá gốc{" "}
+                <SortIcon col="basePrice" sortKey={sortKey} sortDir={sortDir} />
+              </TableHead>
+              <TableHead
+                className="cursor-pointer font-semibold"
+                onClick={() => onSort("discountPrice")}
+              >
+                Giá KM{" "}
+                <SortIcon
+                  col="discountPrice"
+                  sortKey={sortKey}
+                  sortDir={sortDir}
+                />
+              </TableHead>
+              <TableHead className="font-semibold">Quà kèm</TableHead>
+              <TableHead className="font-semibold">Trạng thái</TableHead>
+              <TableHead className="text-right font-semibold">Thao tác</TableHead>
             </TableRow>
-          ) : (
-            filtered.map((template) => (
+          </TableHeader>
+
+          <TableBody>
+            {filtered.map((template) => (
               <TableRow key={template._id} className="group hover:bg-muted/20">
-                {/* Tên */}
                 <TableCell>
-                  <p className="font-medium">{template.name}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="font-medium text-foreground">{template.name}</p>
+                  <p className="text-xs text-muted-foreground tabular-nums">
                     ID: {template._id?.slice(-6)}
                   </p>
                 </TableCell>
 
-                {/* Chu kỳ */}
                 <TableCell>
                   <Badge
                     variant="outline"
-                    className="text-violet-700 border-violet-200 bg-violet-50"
+                    className="text-primary border-primary/20 bg-primary/10"
                   >
                     {PLAN_TYPE_LABELS[template.planType] || template.planType}
                   </Badge>
                 </TableCell>
 
-                {/* Box chính */}
                 <TableCell>
-                  <p className="text-sm">{template.boxId?.name || "—"}</p>
+                  <p className="text-sm text-foreground">{template.boxId?.name || "—"}</p>
                 </TableCell>
 
-                {/* Giá gốc */}
                 <TableCell>
-                  <p className="text-sm text-muted-foreground line-through">
+                  <p className="text-sm text-muted-foreground line-through tabular-nums">
                     {formatCurrency(template.basePrice)}
                   </p>
                 </TableCell>
 
-                {/* Giá KM */}
                 <TableCell>
-                  <p className="font-medium text-indigo-600">
+                  <p className="font-medium text-primary tabular-nums">
                     {formatCurrency(template.discountPrice)}
                   </p>
                   {template.discountPercent > 0 && (
-                    <Badge className="mt-0.5 bg-red-50 text-red-600 border-red-100 text-[11px] py-0">
+                    <Badge className="mt-0.5 bg-destructive/15 text-destructive-text border-destructive/20 text-[11px] py-0 tabular-nums">
                       −{template.discountPercent}%
                     </Badge>
                   )}
                 </TableCell>
 
-                {/* Quà kèm */}
                 <TableCell>
                   {template.gift?.length > 0 ? (
-                    <div className="flex items-center gap-1 text-xs text-pink-600">
+                    <div className="flex items-center gap-1 text-xs text-primary">
                       <Gift size={12} />
-                      {template.gift.length} box
+                      <span className="tabular-nums">{template.gift.length} combo</span>
                     </div>
                   ) : (
                     <span className="text-muted-foreground text-xs">—</span>
                   )}
                 </TableCell>
 
-                {/* Trạng thái isActive */}
                 <TableCell>
                   {template.isActive ? (
-                    <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 gap-1">
+                    <Badge className="bg-success/15 text-success-text border-success/20 gap-1 font-medium">
                       <CheckCircle2 size={11} /> Hiển thị
                     </Badge>
                   ) : (
-                    <Badge className="bg-slate-100 text-slate-500 border-slate-200 gap-1">
+                    <Badge className="bg-muted text-muted-foreground border-border gap-1 font-medium">
                       <EyeOff size={11} /> Đã ẩn
                     </Badge>
                   )}
                 </TableCell>
 
-                {/* Thao tác */}
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-8 w-8 pointer-coarse:min-h-11 pointer-coarse:min-w-11 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <MoreHorizontal size={15} />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        className="cursor-pointer"
+                        className="cursor-pointer pointer-coarse:min-h-11 flex items-center"
                         onClick={() => onViewDetail(template)}
                       >
-                        <Eye size={14} className="mr-2 text-blue-500" />
+                        <Eye size={14} className="mr-2" />
                         Xem chi tiết
                       </DropdownMenuItem>
-
-                      {onEditClick && (
-                        <DropdownMenuItem
-                          className="cursor-pointer"
-                          onClick={() => onEditClick(template)}
-                        >
-                          <Pencil size={14} className="mr-2 text-indigo-500" />
-                          Chỉnh sửa
-                        </DropdownMenuItem>
-                      )}
-
-                      {onDeleteClick && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive cursor-pointer focus:text-destructive focus:bg-red-50"
-                            onClick={() => onDeleteClick(template)}
-                          >
-                            <Trash2 size={14} className="mr-2" />
-                            Xoá mẫu gói
-                          </DropdownMenuItem>
-                        </>
-                      )}
+                      <DropdownMenuItem
+                        className="cursor-pointer pointer-coarse:min-h-11 flex items-center"
+                        onClick={() => onEditClick(template)}
+                      >
+                        <Pencil size={14} className="mr-2" />
+                        Chỉnh sửa
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="text-destructive-text cursor-pointer pointer-coarse:min-h-11 flex items-center"
+                        onClick={() => onDeleteClick(template)}
+                      >
+                        <Trash2 size={14} className="mr-2" />
+                        Xoá mẫu gói
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       {filtered.length > 0 && (
-        <div className="border-t px-4 py-2.5 bg-muted/20 text-xs text-muted-foreground flex justify-between">
+        <div className="border-t border-border px-4 py-2.5 bg-muted/20 text-xs text-muted-foreground flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <span>
-            Hiển thị{" "}
-            <strong className="text-foreground">{filtered.length}</strong> /{" "}
-            {totalPlans} mẫu gói
+            Hiển thị <strong className="text-foreground tabular-nums">{filtered.length}</strong>{" "}
+            / <span className="tabular-nums">{totalPlans}</span> mẫu gói
           </span>
-          <span>
-            {filtered.filter((t) => t.isActive).length} hiển thị ·{" "}
-            {filtered.filter((t) => !t.isActive).length} đã ẩn
+          <span className="tabular-nums">
+            {filtered.filter((p) => p.isActive).length} hiển thị ·{" "}
+            {filtered.filter((p) => !p.isActive).length} ẩn
           </span>
         </div>
       )}

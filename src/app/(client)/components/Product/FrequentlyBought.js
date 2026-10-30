@@ -59,7 +59,7 @@ export function FrequentlyBought({ products = [] }) {
 
   return (
     <section className="tm-section space-y-6" aria-label="Gợi ý mua thêm">
-      <h2 className="text-2xl font-bold text-stone-900">
+      <h2 className="text-2xl font-bold text-foreground">
         Gợi ý mua thêm
       </h2>
 
@@ -72,8 +72,8 @@ export function FrequentlyBought({ products = [] }) {
               key={p._id}
               className={`flex flex-col gap-3 p-3 border rounded-xl ${
                 isChecked
-                  ? "border-green-700"
-                  : "border-stone-100 hover:border-stone-300"
+                  ? "border-primary"
+                  : "border-border hover:border-border/80 bg-card"
               }`}
             >
               <label className="flex min-h-11 items-center gap-3 text-sm"><input
@@ -81,9 +81,9 @@ export function FrequentlyBought({ products = [] }) {
                 checked={isChecked}
                 disabled={!(p.stock > 0) || !Number.isFinite(finalPrice)}
                 onChange={() => toggleItem(p._id)}
-                className="w-4 h-4 accent-green-800"
+                className="w-4 h-4 accent-primary"
               /><span>{p.stock > 0 ? "Chọn mua thêm" : "Tạm hết hàng"}</span></label>
-              <Link href={buildProductHref(p)} className="block relative aspect-square rounded-lg overflow-hidden bg-[#faf8f4]">
+              <Link href={buildProductHref(p)} className="block relative aspect-square rounded-lg overflow-hidden bg-muted">
                 <Image
                   src={p.images?.[0]?.url || PLACEHOLDER_IMAGE}
                   alt={p.name}
@@ -96,10 +96,10 @@ export function FrequentlyBought({ products = [] }) {
                 />
               </Link>
               <div className="space-y-1">
-                <p className="text-sm font-bold text-stone-800">
+                <p className="text-sm font-bold text-foreground font-semibold">
                   <Link className="underline-offset-4 hover:underline" href={buildProductHref(p)}>{p.name}</Link>
                 </p>
-                <p className="text-base font-bold text-green-800">
+                <p className="text-base font-bold text-primary font-bold tabular-nums">
                   {Number.isFinite(finalPrice) ? formatPrice(finalPrice) : 'Chưa có giá'}
                 </p>
               </div>
@@ -108,10 +108,10 @@ export function FrequentlyBought({ products = [] }) {
         })}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-stone-100">
-        <p className="text-sm text-stone-600">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
+        <p className="text-sm text-muted-foreground">
           Tạm tính ({selectedProducts.length} sản phẩm):{" "}
-          <span className="text-lg font-black text-stone-900">
+          <span className="text-lg font-black text-foreground">
             {formatPrice(total)}
           </span>
         </p>
@@ -124,7 +124,7 @@ export function FrequentlyBought({ products = [] }) {
           Thêm sản phẩm đã chọn
         </button>
       </div>
-      <p className="text-sm text-stone-600">Giá cuối cùng được xác nhận khi thanh toán. Phí giao hàng trả riêng cho đơn vị vận chuyển.</p>
+      <p className="text-sm text-muted-foreground">Giá cuối cùng được xác nhận khi thanh toán. Phí giao hàng trả riêng cho đơn vị vận chuyển.</p>
     </section>
   );
 }

@@ -61,7 +61,7 @@ export default function UpdateCategory({ category, onSuccess }) {
         <Button
           variant="ghost"
           size="icon"
-          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+          className="text-primary hover:text-primary hover:bg-primary/10"
         >
           <Pencil className="h-4 w-4" />
         </Button>

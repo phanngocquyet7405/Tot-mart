@@ -28,7 +28,7 @@ import {
 
 // ── Atoms ─────────────────────────────────────────────────────────────────────
 
-function SectionLabel({ icon: Icon, color = "text-slate-400", label }) {
+function SectionLabel({ icon: Icon, color = "text-muted-foreground", label }) {
   return (
     <p
       className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${color} mb-2`}
@@ -45,10 +45,10 @@ function InfoGrid({ items }) {
       {items.map((r) => (
         <div
           key={r.label}
-          className="rounded-lg border border-slate-100 bg-slate-50/60 p-2.5"
+          className="rounded-lg border border-border bg-muted/30 p-2.5"
         >
-          <p className="text-[11px] text-slate-400 mb-1">{r.label}</p>
-          <div className="font-semibold text-sm text-slate-700">
+          <p className="text-[11px] text-muted-foreground mb-1">{r.label}</p>
+          <div className="font-semibold text-sm text-foreground">
             {r.value ?? "—"}
           </div>
         </div>
@@ -88,7 +88,7 @@ export function PlanDetailDialog({
       {/* Header */}
       <BaseDialogHeader
         icon={CalendarClock}
-        iconClass="bg-indigo-50 text-indigo-500"
+        iconClass="bg-primary/10 text-primary"
         title={item.name}
         subtitle={`ID: ${item._id} · Mẫu gói đăng ký`}
       />
@@ -98,8 +98,8 @@ export function PlanDetailDialog({
         <div
           className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium ${
             item.isActive
-              ? "bg-emerald-50 border border-emerald-100 text-emerald-700"
-              : "bg-slate-100 border border-slate-200 text-slate-500"
+              ? "bg-success/15 border border-success/20 text-success-text"
+              : "bg-muted border border-border text-muted-foreground"
           }`}
         >
           {item.isActive ? (
@@ -115,13 +115,13 @@ export function PlanDetailDialog({
 
         {/* Mô tả */}
         {item.description && (
-          <div className="rounded-xl bg-slate-50 border border-slate-100 p-3.5">
+          <div className="rounded-xl bg-muted/30 border border-border p-3.5">
             <SectionLabel
               icon={AlignLeft}
-              color="text-slate-400"
+              color="text-muted-foreground"
               label="Mô tả"
             />
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <p className="text-sm text-foreground leading-relaxed">
               {item.description}
             </p>
           </div>
@@ -131,7 +131,7 @@ export function PlanDetailDialog({
         <div>
           <SectionLabel
             icon={Package}
-            color="text-violet-400"
+            color="text-primary"
             label="Thông tin mẫu gói"
           />
           <InfoGrid
@@ -141,7 +141,7 @@ export function PlanDetailDialog({
                 value: PLAN_TYPE_LABELS[item.planType] || item.planType,
               },
               {
-                label: "Box chính",
+                label: "Combo chính",
                 value: item.boxId?.name || item.boxId,
               },
               {
@@ -157,8 +157,8 @@ export function PlanDetailDialog({
               {
                 label: "Giá sau giảm",
                 value: (
-                  <span className="text-indigo-600">
-                    {formatCurrency(item.discountPrice)}
+                  <span className="text-primary">
+                    <span className="tabular-nums">{formatCurrency(item.discountPrice)}</span>
                   </span>
                 ),
               },
@@ -172,21 +172,20 @@ export function PlanDetailDialog({
 
         {/* Thanh tiết kiệm */}
         {item.discountPercent > 0 && item.basePrice > 0 && (
-          <div className="rounded-xl bg-indigo-50 border border-indigo-100 px-4 py-3">
+          <div className="rounded-xl bg-primary/10 border border-primary/20 px-4 py-3">
             <div className="flex justify-between text-xs mb-2">
-              <span className="text-indigo-500 font-medium">Mức tiết kiệm</span>
-              <span className="font-bold text-indigo-700">
-                −{formatCurrency(item.basePrice - item.discountPrice)}
-              </span>
+              <span className="text-primary font-medium">Mức tiết kiệm</span>
+              <span className="font-bold text-primary">
+                −<span className="tabular-nums">{formatCurrency(item.basePrice - item.discountPrice)}</span></span>
             </div>
-            <div className="h-2 bg-indigo-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-primary/20 rounded-full overflow-hidden">
               <div
-                className="h-full bg-indigo-500 rounded-full"
+                className="h-full bg-primary rounded-full"
                 style={{ width: `${100 - item.discountPercent}%` }}
               />
             </div>
-            <div className="flex justify-between text-[11px] text-indigo-300 mt-1">
-              <span>{formatCurrency(item.discountPrice)} / khách trả</span>
+            <div className="flex justify-between text-[11px] text-muted-foreground mt-1">
+              <span><span className="tabular-nums">{formatCurrency(item.discountPrice)}</span> / khách trả</span>
               <span>{item.discountPercent}% off</span>
             </div>
           </div>
@@ -194,10 +193,10 @@ export function PlanDetailDialog({
 
         {/* Quà tặng kèm */}
         {item.gift?.length > 0 ? (
-          <div className="rounded-xl bg-pink-50 border border-pink-100 p-3.5">
+          <div className="rounded-xl bg-primary/5 border border-primary/20 p-3.5">
             <SectionLabel
               icon={Gift}
-              color="text-pink-500"
+              color="text-primary"
               label="Box quà tặng kèm gói"
             />
             <div className="space-y-1.5">
@@ -206,10 +205,10 @@ export function PlanDetailDialog({
                   key={i}
                   className="flex items-center justify-between text-sm"
                 >
-                  <span className="text-slate-700">
+                  <span className="text-foreground">
                     {g.boxId?.name || g.boxId}
                   </span>
-                  <span className="rounded-full bg-pink-100 text-pink-700 text-xs px-2 py-0.5 font-medium">
+                  <span className="rounded-full bg-primary/10 text-primary text-xs px-2 py-0.5 font-medium">
                     x{g.quantity}
                   </span>
                 </div>
@@ -217,8 +216,8 @@ export function PlanDetailDialog({
             </div>
           </div>
         ) : (
-          <div className="rounded-xl bg-slate-50 border border-slate-100 p-3 text-center">
-            <p className="text-xs text-slate-400">
+          <div className="rounded-xl bg-muted/30 border border-border p-3 text-center">
+            <p className="text-xs text-muted-foreground">
               Không có quà tặng kèm gói này
             </p>
           </div>
@@ -232,7 +231,7 @@ export function PlanDetailDialog({
             <Button
               size="sm"
               variant="outline"
-              className="border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600"
+              className="border-destructive/20 text-destructive-text hover:bg-destructive/10 hover:text-destructive-text"
               onClick={() => {
                 onOpenChange(false);
                 onDeleteClick(item);
@@ -245,7 +244,7 @@ export function PlanDetailDialog({
           {onEditClick && (
             <Button
               size="sm"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white ml-auto"
+              className="min-h-11 ml-auto"
               onClick={() => {
                 onOpenChange(false);
                 onEditClick(item);

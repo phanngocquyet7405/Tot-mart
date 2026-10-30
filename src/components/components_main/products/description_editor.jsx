@@ -49,8 +49,8 @@ const QUICK_INSERT = [
 
 function QuickInsertBar({ onInsert }) {
   return (
-    <div className="flex flex-wrap gap-1.5 pb-2 border-b border-[#F0DDD5]">
-      <span className="text-[10px] text-stone-400 uppercase tracking-widest font-bold self-center mr-1">
+    <div className="flex flex-wrap gap-1.5 pb-2 border-b border-border">
+      <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold self-center mr-1">
         Chèn nhanh:
       </span>
       {QUICK_INSERT.map((btn) => (
@@ -58,7 +58,7 @@ function QuickInsertBar({ onInsert }) {
           key={btn.label}
           type="button"
           onClick={() => onInsert(btn.snippet)}
-          className="text-[11px] px-2.5 py-1 rounded-lg border border-[#F0DDD5] bg-[#FFFAF8] text-stone-500 hover:border-[#C85C3C]/40 hover:text-[#C85C3C] font-bold transition-all"
+          className="text-[11px] px-2.5 py-1 rounded-lg border border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-primary font-bold transition-all"
         >
           {btn.label}
         </button>
@@ -71,7 +71,7 @@ function QuickInsertBar({ onInsert }) {
 
 function TabSwitcher({ tab, setTab }) {
   return (
-    <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl">
+    <div className="flex items-center gap-1 bg-muted p-1 rounded-xl">
       {[
         { key: "edit", label: "Nhập", Icon: PenLine },
         { key: "preview", label: "Xem trước", Icon: Eye },
@@ -82,8 +82,8 @@ function TabSwitcher({ tab, setTab }) {
           onClick={() => setTab(key)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
             tab === key
-              ? "bg-white text-[#C85C3C] shadow-sm"
-              : "text-stone-500 hover:text-stone-700"
+              ? "bg-card text-primary shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <Icon size={11} />
@@ -105,10 +105,10 @@ export function DescriptionEditor({ value = "", onChange }) {
   };
 
   return (
-    <Card className="border-[#F0DDD5]">
+    <Card className="border-border">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <CardTitle className="text-sm font-black text-[#2C1810] uppercase tracking-widest">
+          <CardTitle className="text-sm font-black text-foreground uppercase tracking-widest">
             Mô tả sản phẩm
           </CardTitle>
           <TabSwitcher tab={tab} setTab={setTab} />
@@ -133,21 +133,21 @@ Hộp quà được tuyển chọn kỹ lưỡng từ các làng nghề truyền
 - **Kẹo dừa Bến Tre x 3:** Vị ngọt tự nhiên, không chất bảo quản, đóng gói thủ công.
 
 **Lưu ý:** Bảo quản nơi khô ráo, tránh ánh nắng trực tiếp.`}
-              className="w-full bg-[#FFFAF8] border border-[#F0DDD5] rounded-xl px-3.5 py-3 text-sm text-[#2C1810] placeholder-stone-300 focus:outline-none focus:border-[#C85C3C] focus:ring-2 focus:ring-[#C85C3C]/10 transition-all resize-none font-mono leading-relaxed"
+              className="w-full bg-background border border-border rounded-xl px-3.5 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring transition-all resize-none font-mono leading-relaxed"
             />
-            <p className="text-[10px] text-stone-400">
+            <p className="text-[10px] text-muted-foreground">
               Hỗ trợ Markdown:{" "}
-              <code className="bg-stone-100 px-1 rounded">**đậm**</code> ·{" "}
-              <code className="bg-stone-100 px-1 rounded">## tiêu đề</code> ·{" "}
-              <code className="bg-stone-100 px-1 rounded">- danh sách</code>
+              <code className="bg-muted px-1 rounded">**đậm**</code> ·{" "}
+              <code className="bg-muted px-1 rounded">## tiêu đề</code> ·{" "}
+              <code className="bg-muted px-1 rounded">- danh sách</code>
             </p>
           </>
         ) : (
-          <div className="min-h-60 border border-[#F0DDD5] rounded-xl bg-[#FFFAF8] p-5">
+          <div className="min-h-60 border border-border rounded-xl bg-background p-5">
             {value?.trim() ? (
               <ProductDescription markdown={value} />
             ) : (
-              <p className="text-sm text-stone-300 italic text-center mt-10">
+              <p className="text-sm text-muted-foreground italic text-center mt-10">
                 Chưa có nội dung để xem trước
               </p>
             )}

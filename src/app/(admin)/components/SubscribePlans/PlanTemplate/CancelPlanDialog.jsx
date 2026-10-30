@@ -36,14 +36,14 @@ export function CancelPlanDialog({
 
   const accentCls = isImmediate
     ? {
-        ring: "bg-red-100 text-red-600",
-        btn: "bg-red-600 hover:bg-red-700 text-white",
-        title: "text-red-600",
+        ring: "bg-destructive/15 text-destructive-text",
+        btn: "bg-destructive hover:bg-destructive/90 text-destructive-foreground min-h-11",
+        title: "text-destructive-text",
       }
     : {
-        ring: "bg-orange-100 text-orange-600",
-        btn: "bg-orange-600 hover:bg-orange-700 text-white",
-        title: "text-orange-600",
+        ring: "bg-warning/15 text-warning-text",
+        btn: "bg-warning-text hover:bg-warning-text/90 text-white min-h-11",
+        title: "text-warning-text",
       };
 
   const handleConfirm = async () => {
@@ -94,18 +94,18 @@ export function CancelPlanDialog({
         </h2>
 
         {/* Description */}
-        <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
+        <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
           {isImmediate ? (
             <>
               Gói{" "}
-              <span className="font-semibold text-slate-700">{planName}</span>{" "}
+              <span className="font-semibold text-foreground">{planName}</span>{" "}
               sẽ bị hủy ngay. Người dùng sẽ không nhận được các lần giao hàng
               còn lại.
             </>
           ) : (
             <>
               Gói{" "}
-              <span className="font-semibold text-slate-700">{planName}</span>{" "}
+              <span className="font-semibold text-foreground">{planName}</span>{" "}
               sẽ tiếp tục đến hết kỳ hiện tại rồi tự động hủy. Giao hàng đã lên
               lịch vẫn được thực hiện.
             </>
@@ -116,8 +116,8 @@ export function CancelPlanDialog({
         <div
           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
             isImmediate
-              ? "bg-red-50 text-red-600 border border-red-100"
-              : "bg-orange-50 text-orange-600 border border-orange-100"
+              ? "bg-destructive/10 text-destructive-text border border-destructive/20"
+              : "bg-warning/10 text-warning-text border border-warning/20"
           }`}
         >
           {isImmediate ? <Zap size={11} /> : <XCircle size={11} />}

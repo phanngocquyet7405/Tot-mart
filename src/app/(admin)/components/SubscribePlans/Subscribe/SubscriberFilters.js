@@ -4,8 +4,8 @@
  * Thanh tìm kiếm + bộ lọc trạng thái, gói, sắp xếp cho Admin
  */
 
-
 import { Search, SlidersHorizontal, ArrowUpDown, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { PLAN_TYPE_LABELS } from "@/app/util/formatter";
 
 const STATUS_OPTIONS = [
@@ -59,43 +59,46 @@ export function SubscriberFilters({
   return (
     <div className="space-y-3">
       {/* Search + Result count */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="relative flex-1">
           <Search
-            size={14}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+            size={16}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
           />
           <input
             type="text"
             placeholder="Tìm theo tên, email, mã đăng ký..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-stone-200 bg-white focus:outline-none focus:border-[#C85C3C] focus:ring-2 focus:ring-[#C85C3C]/10 transition-all placeholder:text-stone-400"
+            className="w-full pl-9 pr-4 min-h-11 text-sm rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-h-9 min-w-9 flex items-center justify-center"
             >
-              <X size={13} />
+              <X size={15} />
             </button>
           )}
         </div>
 
-        <span className="text-xs text-stone-500 whitespace-nowrap shrink-0">
-          <span className="font-bold text-stone-700">{filteredCount}</span>
-          {filteredCount !== totalCount && <> / {totalCount}</>} kết quả
+        <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0 self-center">
+          <strong className="text-foreground tabular-nums">{filteredCount}</strong>
+          {filteredCount !== totalCount && (
+            <> / <span className="tabular-nums">{totalCount}</span></>
+          )}{" "}
+          kết quả
         </span>
       </div>
 
       {/* Filter row */}
       <div className="flex flex-wrap items-center gap-2">
-        <SlidersHorizontal size={13} className="text-stone-400 shrink-0" />
+        <SlidersHorizontal size={14} className="text-muted-foreground shrink-0" />
 
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="text-xs px-3 py-2 rounded-lg border border-stone-200 bg-white focus:outline-none focus:border-[#C85C3C] transition-colors cursor-pointer"
+          className="text-xs px-3 min-h-11 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors cursor-pointer"
         >
           {STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -107,7 +110,7 @@ export function SubscriberFilters({
         <select
           value={planFilter}
           onChange={(e) => setPlanFilter(e.target.value)}
-          className="text-xs px-3 py-2 rounded-lg border border-stone-200 bg-white focus:outline-none focus:border-[#C85C3C] transition-colors cursor-pointer"
+          className="text-xs px-3 min-h-11 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors cursor-pointer"
         >
           {PLAN_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -117,11 +120,11 @@ export function SubscriberFilters({
         </select>
 
         <div className="flex items-center gap-1.5 ml-auto">
-          <ArrowUpDown size={12} className="text-stone-400" />
+          <ArrowUpDown size={13} className="text-muted-foreground" />
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="text-xs px-3 py-2 rounded-lg border border-stone-200 bg-white focus:outline-none focus:border-[#C85C3C] transition-colors cursor-pointer"
+            className="text-xs px-3 min-h-11 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors cursor-pointer"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -132,13 +135,15 @@ export function SubscriberFilters({
         </div>
 
         {hasActiveFilter && (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={clearAll}
-            className="flex items-center gap-1 text-xs text-[#C85C3C] hover:text-[#B14B2D] font-semibold transition-colors px-2 py-2 rounded-lg hover:bg-[#C85C3C]/5"
+            className="min-h-11 gap-1 text-xs text-primary hover:text-primary/80 hover:bg-primary/10"
           >
-            <X size={12} />
+            <X size={13} />
             Xóa lọc
-          </button>
+          </Button>
         )}
       </div>
     </div>

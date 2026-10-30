@@ -2,12 +2,8 @@
 /**
  * page.js — Trang Danh sách yêu thích
  * Route: /wishlist
- *
- * Icon trái tim ở MainHeader đã trỏ sẵn tới route này (href="/wishlist")
- * từ trước, nhưng route chưa từng được tạo — bấm vào sẽ ra 404. Trang này
- * đọc từ WishlistContext (localStorage), cùng phong cách với /cart.
+ * Chuẩn hóa màu sắc token: warm cream, terracotta, đầy đủ 5 trạng thái.
  */
-
 
 import Link from "next/link";
 import Image from "next/image";
@@ -29,29 +25,43 @@ const fmtPrice = (price) => {
     currency: "VND",
   })
     .format(price)
-    .replace("₫", "đ");
+    .replace("₫", "₫");
 };
 
 function EmptyWishlistState() {
   return (
-    <div className="flex flex-col items-center justify-center text-center py-24 px-4 bg-white rounded-2xl border border-stone-100 shadow-sm">
-      <div className="w-20 h-20 bg-[#faf8f4] border border-stone-200 rounded-full flex items-center justify-center mb-5">
-        <Heart className="h-8 w-8 text-stone-300" />
+    <div className="flex flex-col items-center justify-center text-center py-20 px-4 bg-card rounded-2xl border border-border shadow-xs">
+      <div className="w-20 h-20 bg-background border border-border rounded-full flex items-center justify-center mb-5">
+        <Heart className="h-8 w-8 text-muted-foreground/60" />
       </div>
-      <p className="text-[16px] font-black text-stone-800 mb-2 uppercase tracking-wide">
+      <h2 className="text-base font-bold text-foreground mb-2 uppercase tracking-wide">
         Chưa có sản phẩm yêu thích
-      </p>
-      <p className="text-[13px] text-stone-500 leading-relaxed max-w-72 mb-6">
-        Bấm biểu tượng trái tim trên sản phẩm bạn thích để lưu lại đây, tiện
-        mua sau nhé.
+      </h2>
+      <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mb-6">
+        Bấm biểu tượng trái tim trên sản phẩm bạn thích để lưu lại đây, tiện mua sau nhé.
       </p>
       <Link
         href="/products"
-        className="inline-flex items-center gap-2 bg-amber-800 hover:bg-amber-900 text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[12px] transition-colors"
+        className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 min-h-11 rounded-xl font-bold uppercase tracking-widest text-xs transition-colors shadow-xs active:scale-[0.98]"
       >
         Khám phá sản phẩm
         <ArrowRight size={16} />
       </Link>
+    </div>
+  );
+}
+
+function WishlistSkeleton() {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="bg-card rounded-2xl border border-border overflow-hidden p-4 space-y-3 animate-pulse">
+          <div className="aspect-square bg-muted rounded-xl w-full" />
+          <div className="h-4 bg-muted rounded w-3/4" />
+          <div className="h-4 bg-muted rounded w-1/2" />
+          <div className="h-10 bg-muted rounded-lg w-full" />
+        </div>
+      ))}
     </div>
   );
 }
@@ -61,37 +71,39 @@ function WishlistItemCard({ item, onRemove, onAddToCart }) {
   const productHref = `/products/${productSlug}-${item._id || item.id}`;
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden group flex flex-col">
-      <Link href={productHref} className="block relative aspect-square bg-stone-50 overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden group flex flex-col hover:border-primary/40 transition-colors">
+      <Link href={productHref} className="block relative aspect-square bg-muted overflow-hidden">
         <Image
           src={item.image || "/assets/placeholder.png"}
           alt={item.name}
           fill
           sizes="(max-width: 768px) 50vw, 25vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
         />
       </Link>
       <div className="p-4 flex flex-col grow gap-3">
         <Link href={productHref}>
-          <h3 className="text-sm font-bold text-stone-900 line-clamp-2 min-h-10 hover:text-amber-800 transition-colors">
+          <h3 className="text-sm font-semibold text-foreground line-clamp-2 min-h-10 hover:text-primary transition-colors">
             {item.name}
           </h3>
         </Link>
-        <p className="text-base font-black text-amber-800">
+        <p className="text-base font-bold text-foreground tabular-nums">
           {fmtPrice(item.price)}
         </p>
         <div className="mt-auto flex gap-2">
           <button
+            type="button"
             onClick={() => onAddToCart(item)}
-            className="flex-1 bg-amber-800 hover:bg-amber-900 text-white py-2.5 rounded-lg text-xs font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-2.5 px-3 min-h-11 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors shadow-xs active:scale-[0.98]"
           >
-            <ShoppingCart size={14} />
-            Thêm vào giỏ
+            <ShoppingCart size={15} />
+            Thêm giỏ
           </button>
           <button
+            type="button"
             onClick={() => onRemove(item._id || item.id)}
             aria-label="Xoá khỏi yêu thích"
-            className="w-10 h-10 shrink-0 flex items-center justify-center rounded-lg border border-stone-200 text-stone-500 hover:text-red-500 hover:border-red-200 transition-colors"
+            className="w-11 h-11 shrink-0 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/10 transition-colors"
           >
             <Trash2 size={16} />
           </button>
@@ -119,23 +131,23 @@ export default function WishlistPage() {
       <MainHeader />
       <NavMenu />
 
-      <div className="min-h-screen bg-[#faf8f4]">
-        <div className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+      <main className="min-h-screen bg-background">
+        <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
           {/* Header */}
-          <div className="flex items-center gap-4 mb-10">
+          <div className="flex items-center gap-4 mb-8">
             <button
               onClick={() => router.back()}
-              className="w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center text-stone-600 hover:border-amber-600/50 hover:text-amber-800 transition-all bg-white shrink-0"
-              aria-label="Quay lại"
+              className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors bg-card shrink-0 pointer-coarse:min-h-11 pointer-coarse:min-w-11"
+              aria-label="Quay lại trang trước"
             >
               <ArrowLeft size={16} />
             </button>
             <div>
-              <h1 className="text-xl md:text-2xl font-black text-stone-900 tracking-tight">
+              <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
                 Danh sách yêu thích
               </h1>
               {isMounted && (
-                <p className="text-xs text-stone-500 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {wishlistItems.length > 0
                     ? `${wishlistItems.length} sản phẩm đã lưu`
                     : "Chưa có sản phẩm nào"}
@@ -145,13 +157,11 @@ export default function WishlistPage() {
           </div>
 
           {!isMounted ? (
-            <div className="py-24 text-center text-stone-400 text-sm">
-              Đang tải danh sách yêu thích...
-            </div>
+            <WishlistSkeleton />
           ) : !hasItems ? (
             <EmptyWishlistState />
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
               {wishlistItems.map((item, i) => (
                 <WishlistItemCard
                   key={item._id || item.id || i}
@@ -163,7 +173,7 @@ export default function WishlistPage() {
             </div>
           )}
         </div>
-      </div>
+      </main>
 
       <Footer />
     </>

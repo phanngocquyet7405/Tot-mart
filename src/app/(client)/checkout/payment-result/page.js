@@ -1,69 +1,92 @@
 "use client";
 /**
- * payment-result/page.jsx
+ * payment-result/page.js
  * Route: /checkout/payment-result
  *
- * VNPay redirect user về đây sau khi thanh toán xong (đây là "returnUrl"
- * khai báo lúc tạo payment URL ở BE).
- *
- * QUAN TRỌNG: trang này CHỈ đọc kết quả để hiển thị cho user ngay lúc đó.
- * Trạng thái đơn hàng thật sự đã được BE chốt qua IPN (VNPay gọi
- * server-to-server, độc lập với trình duyệt) — nên kể cả khi user tắt tab
- * ở bước này, đơn hàng vẫn được xử lý đúng.
+ * VNPay redirect user về đây sau khi thanh toán.
+ * 3 trạng thái rõ ràng: Đang kiểm tra (checking) / Thành công (success) / Thất bại (failed).
+ * Không hiển thị mã lỗi nội bộ gây rối; cung cấp các hành động kế tiếp rõ ràng.
  */
-
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Loader2, XCircle } from "lucide-react";
+import { Loader2, XCircle, ArrowRight, ShoppingBag, RefreshCw } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 import { paymentGatewayService } from "@/app/services/api/paymentGatewayService";
 import { OrderSuccessScreen } from "../../components/Checkout_component/OrderSuccessScreen";
 import logger from "@/app/util/Logger";
 
-// ─── Loading ────────────────────────────────────────────────────────────────
+// ─── 1. Checking Screen (Đang xác nhận) ──────────────────────────────────────
 function CheckingScreen() {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
-      <div className="flex flex-col items-center gap-4 text-center">
-        <Loader2 className="animate-spin text-indigo-600" size={32} />
-        <p className="text-sm text-slate-600 font-medium">
-          Đang xác nhận kết quả thanh toán...
-        </p>
-      </div>
-    </div>
-  );
-}
-
-// ─── Failed ───────────────────────────────────────────────────────────────────
-function FailedScreen({ onRetry }) {
-  return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
-      <div className="flex flex-col items-center gap-4 text-center max-w-sm">
-        <div className="w-20 h-20 rounded-3xl bg-rose-50 border-2 border-rose-600/20 flex items-center justify-center">
-          <XCircle size={36} className="text-rose-600" />
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="flex flex-col items-center gap-4 text-center max-w-sm py-12">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <Loader2 className="animate-spin text-primary" size={32} />
         </div>
         <div>
-          <h1 className="text-xl font-black text-slate-900 mb-2">
-            Thanh toán không thành công
+          <h1 className="text-xl font-bold text-foreground mb-2">
+            Đang xác nhận kết quả thanh toán
           </h1>
-          <p className="text-sm text-slate-600 leading-relaxed">
-            Giao dịch bị huỷ hoặc thất bại. Đơn hàng của bạn vẫn được giữ lại,
-            bạn có thể thử thanh toán lại.
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Hệ thống đang đối chiếu trạng thái giao dịch từ cổng thanh toán. Vui lòng không đóng hoặc tải lại trang trong giây lát.
           </p>
         </div>
-        <button
-          onClick={onRetry}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-[12px] transition-all duration-200 active:scale-[0.98] shadow-lg shadow-indigo-600/20"
-        >
-          Quay lại thanh toán
-        </button>
       </div>
     </div>
   );
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// ─── 2. Failed Screen (Thanh toán chưa thành công) ───────────────────────────
+function FailedScreen({ onRetry }) {
+  const router = useRouter();
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="flex flex-col items-center gap-5 text-center max-w-md py-12">
+        <div className="w-20 h-20 rounded-3xl bg-destructive/10 border-2 border-destructive/25 flex items-center justify-center">
+          <XCircle size={40} className="text-destructive" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            Thanh toán chưa hoàn tất
+          </h1>
+          <p className="text-sm text-muted-foreground leading-relaxed px-4">
+            Giao dịch bị huỷ hoặc chưa ghi nhận thành công từ phía ngân hàng. Đơn hàng của bạn vẫn được lưu giữ an toàn, bạn có thể thử thanh toán lại hoặc chọn phương thức khác.
+          </p>
+        </div>
+        <div className="w-full flex flex-col gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onRetry}
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3.5 min-h-11 rounded-xl font-bold uppercase tracking-widest text-xs transition-colors active:scale-[0.98] shadow-xs flex items-center justify-center gap-2"
+          >
+            <RefreshCw size={15} />
+            Thử thanh toán lại
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/profile/orders")}
+            className="w-full border border-border bg-card text-foreground py-3 min-h-11 rounded-xl font-bold hover:bg-muted transition-colors text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+          >
+            <ShoppingBag size={15} />
+            Xem đơn hàng của tôi
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="w-full border border-border bg-card/60 text-muted-foreground hover:text-foreground py-3 min-h-11 rounded-xl font-semibold uppercase tracking-wider text-xs hover:bg-muted transition-colors flex items-center justify-center gap-1.5"
+          >
+            Về trang chủ
+            <ArrowRight size={14} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── 3. Main Orchestrator ─────────────────────────────────────────────────────
 export default function PaymentResultPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -100,6 +123,6 @@ export default function PaymentResultPage() {
   }, []);
 
   if (status === "checking") return <CheckingScreen />;
-  if (status === "success") return <OrderSuccessScreen />;
+  if (status === "success") return <OrderSuccessScreen onNew={() => router.push("/products")} />;
   return <FailedScreen onRetry={() => router.push("/checkout")} />;
 }

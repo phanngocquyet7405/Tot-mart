@@ -15,7 +15,7 @@ export function RelatedProducts({ products = [], fmtPrice }) {
 
   return (
     <div className="mt-16">
-      <h2 className="text-xl md:text-2xl font-black text-stone-900 mb-8 uppercase tracking-wide">
+      <h2 className="text-xl md:text-2xl font-serif font-bold text-foreground mb-8">
         Sản phẩm liên quan
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -25,9 +25,9 @@ export function RelatedProducts({ products = [], fmtPrice }) {
             <div
               key={p._id}
               onClick={() => router.push(buildProductHref(p))}
-              className="border border-stone-100 hover:border-amber-200 bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group"
+              className="border border-border hover:border-primary/40 bg-card rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer group"
             >
-              <div className="relative w-full aspect-square overflow-hidden bg-[#faf8f4]">
+              <div className="relative w-full aspect-square overflow-hidden bg-muted/40">
                 <Image
                   src={p.images?.[0]?.url || PLACEHOLDER_IMAGE}
                   alt={p.name}
@@ -38,21 +38,21 @@ export function RelatedProducts({ products = [], fmtPrice }) {
                   }}
                 />
                 {p.salePercent > 0 && (
-                  <span className="absolute top-3 right-3 bg-red-600 text-white px-2 py-1 rounded-full text-[11px] font-black">
+                  <span className="absolute top-3 right-3 bg-destructive text-destructive-foreground px-2 py-0.5 rounded-full text-[11px] font-bold">
                     -{p.salePercent}%
                   </span>
                 )}
               </div>
               <div className="p-4 space-y-2">
-                <h3 className="font-bold text-stone-800 text-sm line-clamp-2 group-hover:text-amber-800 transition-colors">
+                <h3 className="font-semibold text-foreground text-sm line-clamp-2 group-hover:text-primary transition-colors">
                   {p.name}
                 </h3>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-base font-black text-red-600">
+                  <span className="text-base font-bold text-primary">
                     {fmtPrice(finalPrice)}
                   </span>
                   {p.salePercent > 0 && (
-                    <span className="text-xs text-stone-400 line-through">
+                    <span className="text-xs text-muted-foreground line-through">
                       {fmtPrice(p.price)}
                     </span>
                   )}

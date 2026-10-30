@@ -215,13 +215,13 @@ export const calculatePlanPrice = (basePrice, planId) => {
 ============================= */
 
 export const STATUS_COLORS = {
-  active: "bg-green-100 text-green-700",
+  active: "bg-success/15 text-success-text",
 
-  cancelled: "bg-red-100 text-red-700",
+  cancelled: "bg-destructive/10 text-destructive-text",
 
-  pending: "bg-yellow-100 text-yellow-700",
+  pending: "bg-warning/15 text-warning-text",
 
-  expired: "bg-gray-100 text-gray-700",
+  expired: "bg-muted text-muted-foreground",
 };
 
 export const STATUS_LABELS = {

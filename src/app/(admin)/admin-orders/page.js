@@ -50,7 +50,7 @@ function AdminOrdersPage() {
         description="Xem, xác nhận và cập nhật trạng thái đơn hàng"
         icon={ShoppingBag}
         actions={
-          <Button variant="outline" onClick={refresh} disabled={isLoading}>
+          <Button variant="outline" className="min-h-11" onClick={refresh} disabled={isLoading}>
             <RefreshCw className={isLoading ? "mr-2 h-4 w-4 animate-spin" : "mr-2 h-4 w-4"} />
             Làm mới
           </Button>
@@ -66,18 +66,18 @@ function AdminOrdersPage() {
             />
             <Input
               placeholder="Tìm theo mã đơn, tên hoặc SĐT khách hàng..."
-              className="pl-9"
+              className="pl-9 min-h-11 text-base sm:text-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
           <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-            <TabsList className="flex-wrap h-auto justify-start">
+            <TabsList className="flex-wrap h-auto justify-start gap-1 p-1">
               {STATUS_TABS.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value} className="gap-1.5">
+                <TabsTrigger key={tab.value} value={tab.value} className="gap-1.5 min-h-11 px-3.5 py-2">
                   {tab.label}
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-[11px] text-muted-foreground tabular-nums">
                     ({statusCounts[tab.value] ?? 0})
                   </span>
                 </TabsTrigger>
