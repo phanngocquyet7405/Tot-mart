@@ -32,6 +32,7 @@ export default function ProductDetailInteractive({ initialProduct, slug }) {
     handleWishlist,
     finalPrice,
     fmtPrice,
+    relatedProducts,
   } = useProductDetail(slug, initialProduct);
 
   if (loading && !product) {
@@ -77,7 +78,7 @@ export default function ProductDetailInteractive({ initialProduct, slug }) {
         onTabChange={setActiveTab}
       />
 
-      <FrequentlyBought currentProductId={product._id} />
+      <FrequentlyBought products={relatedProducts} currentProductId={product._id} />
     </>
   );
 }
