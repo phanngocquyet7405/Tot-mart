@@ -116,7 +116,7 @@ export default async function ProductDetailPage({ params: paramsPromise, searchP
       <MainHeader />
       <NavMenu />
 
-      <main className="tm-commerce max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:py-10">
+      <main className="tm-commerce max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:py-10 pt-[100px]">
         <nav className="tm-breadcrumb" aria-label="Đường dẫn">
           <Link href="/homepage">Cửa hàng</Link>
           <ChevronRight size={14} aria-hidden="true" />

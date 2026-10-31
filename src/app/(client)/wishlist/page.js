@@ -131,7 +131,7 @@ export default function WishlistPage() {
       <MainHeader />
       <NavMenu />
 
-      <main className="min-h-screen bg-background">
+      <main className="min-h-screen bg-background pt-[100px]">
         <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
