@@ -77,5 +77,23 @@
     "orderSuccess": "Order Placed Successfully",
     "cod": "Cash on Delivery (COD)",
     "online": "Bank Transfer QR (SePay)"
+  },
+  "cartDrawer": {
+    "title": "Shopping Cart",
+    "emptyTitle": "Your cart is empty",
+    "emptyDesc": "No items yet. Explore our curated gift boxes!",
+    "continueShopping": "Continue shopping",
+    "suggestionsTitle": "You May Also Like",
+    "suggestionsCollapsed": "Suggested items",
+    "loadingSuggestions": "Loading suggestions...",
+    "noSuggestions": "No suggestions available.",
+    "addSuccess": "Added {name} to cart 🛒",
+    "subtotalConfirmed": "Items & options total",
+    "subtotalEstimated": "Listed item prices",
+    "shippingNoteConfirmed": "Shipping fees are settled directly with the courier.",
+    "shippingNoteEstimated": "Quantity discounts and service options confirmed at checkout.",
+    "checkoutNow": "Checkout Now",
+    "viewCartDetails": "View Full Cart",
+    "close": "Close cart"
   }
 }

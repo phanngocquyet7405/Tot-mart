@@ -77,5 +77,23 @@
     "orderSuccess": "Đặt hàng thành công",
     "cod": "Thanh toán khi nhận hàng (COD)",
     "online": "Chuyển khoản QR (SePay)"
+  },
+  "cartDrawer": {
+    "title": "Giỏ hàng",
+    "emptyTitle": "Giỏ hàng trống",
+    "emptyDesc": "Chưa có sản phẩm nào. Hãy khám phá các hộp quà của chúng tôi nhé!",
+    "continueShopping": "Tiếp tục mua sắm",
+    "suggestionsTitle": "Có thể bạn sẽ thích",
+    "suggestionsCollapsed": "Sản phẩm gợi ý",
+    "loadingSuggestions": "Đang tải gợi ý...",
+    "noSuggestions": "Không có sản phẩm gợi ý.",
+    "addSuccess": "Đã thêm {name} vào giỏ hàng 🛒",
+    "subtotalConfirmed": "Tiền hàng và tiện ích",
+    "subtotalEstimated": "Giá hàng niêm yết",
+    "shippingNoteConfirmed": "Phí giao hàng do khách trả trực tiếp cho bên giao hàng.",
+    "shippingNoteEstimated": "Giảm theo số lượng và phí tiện ích được xác nhận khi thanh toán.",
+    "checkoutNow": "Thanh toán ngay",
+    "viewCartDetails": "Xem chi tiết giỏ hàng",
+    "close": "Đóng giỏ hàng"
   }
 }
