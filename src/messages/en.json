@@ -57,5 +57,25 @@
       "shippingPolicy": "Shipping Policy",
       "accessibility": "Accessibility Statement"
     }
+  },
+  "checkout": {
+    "title": "Checkout",
+    "loading": "Loading checkout process...",
+    "stepAddress": "Address",
+    "stepReview": "Review",
+    "stepPayment": "Payment",
+    "cartTypes": "{types} kinds · {count} items",
+    "back": "Back",
+    "changePaymentMethod": "Change payment method",
+    "recreateQr": "Regenerate QR Code",
+    "recheckPayment": "I have transferred, check again",
+    "qrCountdown": "Payment QR expires in",
+    "qrExpiredTitle": "Payment session expired",
+    "qrExpiredDesc": "This payment session has expired. Please regenerate a new QR code or change your payment method.",
+    "quoteChanged": "Product prices or inventory have changed. Please review your cart.",
+    "viewCart": "Review cart",
+    "orderSuccess": "Order Placed Successfully",
+    "cod": "Cash on Delivery (COD)",
+    "online": "Bank Transfer QR (SePay)"
   }
 }
