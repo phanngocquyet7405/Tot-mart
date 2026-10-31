@@ -10,9 +10,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ShoppingBag, ArrowRight, ArrowLeft } from "lucide-react";
 
-import AnnouncementBar from "@/app/(client)/components/ui/AnnouncementBar";
-import MainHeader from "@/app/(client)/components/ui/main_header";
-import NavMenu from "@/app/(client)/components/ui/nav_menu";
+import AnnouncementBarBox from "@/components_box/announcement-bar";
+import { Navigation, HEADER_H } from "@/components_box/nav_box";
 import Footer from "@/app/(client)/components/ui/footer";
 import CartItem from "@/app/(client)/components/Cart_component/cart_item";
 import { useCart } from "@/app/context/CartContext";
@@ -72,11 +71,10 @@ export default function CartPage() {
 
   return (
     <>
-      <AnnouncementBar />
-      <MainHeader />
-      <NavMenu />
+      <AnnouncementBarBox />
+      <Navigation />
 
-      <main className="min-h-screen bg-background">
+      <main className="min-h-screen bg-background" style={{ paddingTop: HEADER_H }}>
         <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">

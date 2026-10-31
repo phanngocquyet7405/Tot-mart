@@ -38,7 +38,7 @@ export function PlanStats({ plans }) {
       bg: "bg-muted border-border",
     },
     {
-      label: "Doanh thu active",
+      label: "Doanh thu hiệu lực",
       value: formatCurrency(totalRevenue),
       color: "text-primary",
       bg: "bg-primary/10 border-primary/20",

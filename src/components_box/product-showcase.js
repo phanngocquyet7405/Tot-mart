@@ -163,7 +163,7 @@ export function SubscriptionShowcase() {
                   .getElementById("plan-grid")
                   ?.scrollIntoView({ behavior: "smooth" })
               }
-              className="w-full rounded-2xl bg-primary hover:bg-primary/90 px-8 py-4 text-center text-xs font-black text-white uppercase tracking-widest transition-all duration-300 shadow-xs hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full rounded-2xl bg-primary hover:bg-primary/90 px-8 py-4 text-center text-xs font-black text-primary-foreground uppercase tracking-widest transition-all duration-300 shadow-xs hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Sparkles size={14} />
               ĐĂNG KÝ NGAY HÔM NAY

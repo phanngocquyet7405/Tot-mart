@@ -15,7 +15,7 @@ function AdminLayout({ children }) {
   const pathname = usePathname();
   const session = useWorkspaceLogout(logout);
   const account = { name: user?.fullName || user?.name || user?.username || user?.email || 'Admin', email: user?.email, roleLabel: 'Quản trị viên' };
-  return <AdminNotificationProvider><WorkspaceShell brand={{ name: 'TotBoxAdmin', label: 'Management', href: '/dashboard' }}
+  return <AdminNotificationProvider><WorkspaceShell brand={{ name: 'TotBoxAdmin', label: 'Quản trị', href: '/dashboard' }}
     navigation={adminNavigation} pathname={pathname} account={account} onLogout={session.signOut}
     logoutPending={session.pending} logoutError={session.error} headerActions={<NotificationBell />}>
     {children}

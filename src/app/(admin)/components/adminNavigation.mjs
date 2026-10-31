@@ -2,7 +2,7 @@ import { Gift, LayoutDashboard, Truck, ShoppingCart, ClipboardList, Users, Tags,
 
 export const adminNavigation = [
   { label: "Tổng quan", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "Gift", icon: Gift, href: "/admin-gifts" },
+  { label: "Gói quà", icon: Gift, href: "/admin-gifts" },
   {
     label: "Sản phẩm",
     icon: ShoppingCart,

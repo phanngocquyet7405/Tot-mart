@@ -106,7 +106,7 @@ export default async function BoxDetailPage({ params: paramsPromise, searchParam
       <MainHeader />
       <NavMenu />
 
-      <main className="tm-commerce tm-commerce--atelier mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-10">
+      <main className="tm-commerce tm-commerce--atelier mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-10 pt-[100px]">
         <nav className="tm-breadcrumb" aria-label="Đường dẫn">
           <Link href="/homepage">Cửa hàng</Link>
           <ChevronRight size={14} aria-hidden="true" />

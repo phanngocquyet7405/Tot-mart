@@ -57,5 +57,43 @@
       "shippingPolicy": "Chính sách vận chuyển",
       "accessibility": "Hỗ trợ tiếp cận"
     }
+  },
+  "checkout": {
+    "title": "Thanh toán",
+    "loading": "Đang tải tiến trình thanh toán...",
+    "stepAddress": "Địa chỉ",
+    "stepReview": "Kiểm tra",
+    "stepPayment": "Thanh toán",
+    "cartTypes": "{types} loại · {count} sản phẩm",
+    "back": "Quay lại",
+    "changePaymentMethod": "Đổi phương thức thanh toán",
+    "recreateQr": "Tạo lại mã QR",
+    "recheckPayment": "Tôi đã chuyển khoản, kiểm tra lại",
+    "qrCountdown": "Mã thanh toán hết hạn sau",
+    "qrExpiredTitle": "Mã thanh toán đã hết hạn",
+    "qrExpiredDesc": "Phiên thanh toán đã hết thời gian hiệu lực. Vui lòng tạo lại mã QR mới hoặc đổi phương thức thanh toán.",
+    "quoteChanged": "Giá hoặc tồn kho sản phẩm đã thay đổi. Vui lòng kiểm tra lại giỏ hàng.",
+    "viewCart": "Xem lại giỏ hàng",
+    "orderSuccess": "Đặt hàng thành công",
+    "cod": "Thanh toán khi nhận hàng (COD)",
+    "online": "Chuyển khoản QR (SePay)"
+  },
+  "cartDrawer": {
+    "title": "Giỏ hàng",
+    "emptyTitle": "Giỏ hàng trống",
+    "emptyDesc": "Chưa có sản phẩm nào. Hãy khám phá các hộp quà của chúng tôi nhé!",
+    "continueShopping": "Tiếp tục mua sắm",
+    "suggestionsTitle": "Có thể bạn sẽ thích",
+    "suggestionsCollapsed": "Sản phẩm gợi ý",
+    "loadingSuggestions": "Đang tải gợi ý...",
+    "noSuggestions": "Không có sản phẩm gợi ý.",
+    "addSuccess": "Đã thêm {name} vào giỏ hàng 🛒",
+    "subtotalConfirmed": "Tiền hàng và tiện ích",
+    "subtotalEstimated": "Giá hàng niêm yết",
+    "shippingNoteConfirmed": "Phí giao hàng do khách trả trực tiếp cho bên giao hàng.",
+    "shippingNoteEstimated": "Giảm theo số lượng và phí tiện ích được xác nhận khi thanh toán.",
+    "checkoutNow": "Thanh toán ngay",
+    "viewCartDetails": "Xem chi tiết giỏ hàng",
+    "close": "Đóng giỏ hàng"
   }
 }

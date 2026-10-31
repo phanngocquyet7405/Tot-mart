@@ -57,5 +57,43 @@
       "shippingPolicy": "Shipping Policy",
       "accessibility": "Accessibility Statement"
     }
+  },
+  "checkout": {
+    "title": "Checkout",
+    "loading": "Loading checkout process...",
+    "stepAddress": "Address",
+    "stepReview": "Review",
+    "stepPayment": "Payment",
+    "cartTypes": "{types} kinds · {count} items",
+    "back": "Back",
+    "changePaymentMethod": "Change payment method",
+    "recreateQr": "Regenerate QR Code",
+    "recheckPayment": "I have transferred, check again",
+    "qrCountdown": "Payment QR expires in",
+    "qrExpiredTitle": "Payment session expired",
+    "qrExpiredDesc": "This payment session has expired. Please regenerate a new QR code or change your payment method.",
+    "quoteChanged": "Product prices or inventory have changed. Please review your cart.",
+    "viewCart": "Review cart",
+    "orderSuccess": "Order Placed Successfully",
+    "cod": "Cash on Delivery (COD)",
+    "online": "Bank Transfer QR (SePay)"
+  },
+  "cartDrawer": {
+    "title": "Shopping Cart",
+    "emptyTitle": "Your cart is empty",
+    "emptyDesc": "No items yet. Explore our curated gift boxes!",
+    "continueShopping": "Continue shopping",
+    "suggestionsTitle": "You May Also Like",
+    "suggestionsCollapsed": "Suggested items",
+    "loadingSuggestions": "Loading suggestions...",
+    "noSuggestions": "No suggestions available.",
+    "addSuccess": "Added {name} to cart 🛒",
+    "subtotalConfirmed": "Items & options total",
+    "subtotalEstimated": "Listed item prices",
+    "shippingNoteConfirmed": "Shipping fees are settled directly with the courier.",
+    "shippingNoteEstimated": "Quantity discounts and service options confirmed at checkout.",
+    "checkoutNow": "Checkout Now",
+    "viewCartDetails": "View Full Cart",
+    "close": "Close cart"
   }
 }
