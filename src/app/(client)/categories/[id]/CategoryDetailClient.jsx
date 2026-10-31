@@ -92,13 +92,17 @@ export default function CategoryDetailPage({ initialCategory = null }) {
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-black/40"></div>
+        {category?.image && <div className="absolute inset-0 bg-black/50" />}
         <div className="absolute inset-0 flex flex-col justify-center">
           <div className="container mx-auto px-4">
-            <p className="text-sm font-semibold text-primary font-semibold uppercase tracking-wider mb-3">
+            <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">
               Category
             </p>
-            <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
+            <h1
+              className={`text-4xl md:text-5xl font-serif font-bold mb-4 ${
+                category?.image ? "text-white drop-shadow-md" : "text-foreground"
+              }`}
+            >
               {category?.name || "Category"}
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl">

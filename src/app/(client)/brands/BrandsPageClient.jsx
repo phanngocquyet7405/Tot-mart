@@ -74,12 +74,12 @@ export default function BrandPage() {
       </div>
 
       {/* Hero */}
-      <div className="border-b border-border bg-card py-14 text-white md:py-20">
+      <div className="border-b border-border bg-card py-14 text-foreground md:py-20">
         <div className="container mx-auto px-4">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-primary">
             Chợ phiên TotMart
           </p>
-          <h1 className="mb-3 font-serif text-4xl font-bold md:text-5xl">Gian hàng đối tác</h1>
+          <h1 className="mb-3 font-serif text-4xl font-bold md:text-5xl text-foreground">Gian hàng đối tác</h1>
           <p className="max-w-2xl text-muted-foreground">
             {brands.length} gian hàng đến từ các doanh nghiệp xã hội, hợp tác xã và làng nghề
             khắp Việt Nam — mỗi thương hiệu một câu chuyện.
