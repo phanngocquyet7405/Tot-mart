@@ -2,7 +2,7 @@
 
 ## 1. Snapshot Môi Trường & Mã Nguồn
 - **Nhánh Git**: `redesign/cream`
-- **Commit HEAD**: `c94fb2d` (`fix(product): fix broken product detail layout and align with artisan boutique aesthetic`)
+- **Commit HEAD**: `7695df2` (`style(product): normalize prettier formatting on product detail route`)
 - **Node.js**: `v24.14.1`
 - **npm**: `11.11.0`
 - **OS**: Windows (PowerShell)
