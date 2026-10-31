@@ -59,7 +59,7 @@ export default function AdminGifts() {
         }
       })
       .catch((e) => {
-        if (active) setError(e.response?.data?.message || "Không tải được danh sách Gift.");
+        if (active) setError(e.response?.data?.message || "Không tải được danh sách gói quà.");
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -136,7 +136,7 @@ export default function AdminGifts() {
       setDraft(null);
       setRevision((n) => n + 1);
     } catch (e) {
-      setFormError(e.response?.data?.message || "Chưa lưu được Gift.");
+      setFormError(e.response?.data?.message || "Chưa lưu được gói quà.");
     } finally {
       lock.current = false;
       setBusy(false);
@@ -153,7 +153,7 @@ export default function AdminGifts() {
       setDeleting(null);
       setRevision((n) => n + 1);
     } catch (e) {
-      setFormError(e.response?.data?.message || "Chưa ngừng bán được Gift.");
+      setFormError(e.response?.data?.message || "Chưa ngừng bán được gói quà.");
     } finally {
       lock.current = false;
       setBusy(false);
@@ -163,8 +163,8 @@ export default function AdminGifts() {
   return (
     <section className="p-6 space-y-6">
       <AdminPageHeader
-        title="Quản lý Gift"
-        description="Gift giữ chủ sở hữu và cấu phần của combo nguồn. Combo chưa xác minh chủ sẽ không thể dùng để tạo Gift."
+        title="Quản lý gói quà"
+        description="Gói quà giữ chủ sở hữu và cấu phần của combo nguồn. Combo chưa xác minh chủ sẽ không thể dùng để tạo gói quà."
         icon={Gift}
         actions={
           <Button
@@ -175,7 +175,7 @@ export default function AdminGifts() {
               setFormError("");
             }}
           >
-            <Plus size={16} /> Tạo Gift từ combo
+            <Plus size={16} /> Tạo gói quà từ combo
           </Button>
         }
       />
@@ -207,8 +207,8 @@ export default function AdminGifts() {
         </div>
       ) : !rows.length ? (
         <AdminEmptyState
-          title="Chưa có Gift nào"
-          description="Bắt đầu tạo Gift từ combo đã xác minh chủ để mở rộng chính sách quà tặng."
+          title="Chưa có gói quà nào"
+          description="Bắt đầu tạo gói quà từ combo đã xác minh chủ để mở rộng chính sách quà tặng."
           action={
             <Button
               className="gap-2 min-h-11"
@@ -218,7 +218,7 @@ export default function AdminGifts() {
                 setFormError("");
               }}
             >
-              <Plus size={16} /> Tạo Gift từ combo
+              <Plus size={16} /> Tạo gói quà từ combo
             </Button>
           }
         />
@@ -239,7 +239,7 @@ export default function AdminGifts() {
                       variant="outline"
                       className="text-[11px] bg-primary/10 text-primary border-primary/20"
                     >
-                      {row.sourceComboId ? "Gift từ combo" : "Quà tặng legacy"}
+                      {row.sourceComboId ? "Gói quà từ combo" : "Quà tặng legacy"}
                     </Badge>
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground">
@@ -282,7 +282,7 @@ export default function AdminGifts() {
           </div>
 
           <nav
-            aria-label="Phân trang Gift"
+            aria-label="Phân trang gói quà"
             className="flex items-center justify-between pt-2 text-sm text-muted-foreground"
           >
             <span>
@@ -311,7 +311,7 @@ export default function AdminGifts() {
         </div>
       )}
 
-      {/* Dialog Sửa / Tạo Gift */}
+      {/* Dialog Sửa / Tạo gói quà */}
       <Dialog
         open={Boolean(draft)}
         onOpenChange={(open) => {
@@ -319,14 +319,14 @@ export default function AdminGifts() {
         }}
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
-          <DialogTitle>{editing ? "Sửa Gift" : "Tạo Gift"}</DialogTitle>
+          <DialogTitle>{editing ? "Sửa gói quà" : "Tạo gói quà"}</DialogTitle>
           <DialogDescription>
             Giá và quyền sở hữu được backend xác minh từ combo nguồn.
           </DialogDescription>
           {draft && (
             <form onSubmit={save} className="grid gap-4 sm:grid-cols-2">
               <fieldset disabled={busy} className="contents">
-                {field("name", "Tên Gift")}
+                {field("name", "Tên gói quà")}
                 <GiftForm
                   field={field}
                   select={select}
@@ -352,7 +352,7 @@ export default function AdminGifts() {
                   Hủy
                 </Button>
                 <Button disabled={busy} type="submit" className="min-h-11">
-                  {busy ? "Đang lưu…" : "Lưu Gift"}
+                  {busy ? "Đang lưu…" : "Lưu gói quà"}
                 </Button>
               </div>
             </form>
@@ -370,7 +370,7 @@ export default function AdminGifts() {
         <DialogContent className="sm:max-w-md">
           <DialogTitle>Ngừng bán {deleting?.name}?</DialogTitle>
           <DialogDescription>
-            Đơn và hợp đồng đã tạo được giữ lại. Hệ thống sẽ chặn nếu Gift còn nghĩa vụ chưa xử lý.
+            Đơn và hợp đồng đã tạo được giữ lại. Hệ thống sẽ chặn nếu gói quà còn nghĩa vụ chưa xử lý.
           </DialogDescription>
           {formError && (
             <p role="alert" className="text-destructive-text text-sm">

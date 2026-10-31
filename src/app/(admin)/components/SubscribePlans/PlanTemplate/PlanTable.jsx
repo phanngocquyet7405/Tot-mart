@@ -34,7 +34,6 @@ import {
 } from "lucide-react";
 import {
   formatCurrency,
-  formatDate,
   PLAN_TYPE_LABELS,
 } from "@/app/util/formatter";
 
@@ -58,6 +57,7 @@ export function PlanTable({
   onViewDetail,
   onEditClick,
   onDeleteClick,
+  onToggleActive,
 }) {
   if (isLoading) {
     return (
@@ -113,7 +113,8 @@ export function PlanTable({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="min-h-11 min-w-11 -mr-2 text-muted-foreground"
+                        className="min-h-11 min-w-11 -mr-2 text-muted-foreground hover:text-foreground"
+                        aria-label="Thao tác"
                       >
                         <MoreHorizontal size={18} />
                       </Button>
@@ -132,6 +133,22 @@ export function PlanTable({
                       >
                         <Pencil size={14} className="mr-2" />
                         Chỉnh sửa
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer pointer-coarse:min-h-11 flex items-center"
+                        onClick={() => onToggleActive?.(template)}
+                      >
+                        {template.isActive ? (
+                          <>
+                            <EyeOff size={14} className="mr-2" />
+                            Ẩn mẫu gói
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 size={14} className="mr-2" />
+                            Hiển thị mẫu gói
+                          </>
+                        )}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -231,7 +248,7 @@ export function PlanTable({
               </TableHead>
               <TableHead className="font-semibold">Quà kèm</TableHead>
               <TableHead className="font-semibold">Trạng thái</TableHead>
-              <TableHead className="text-right font-semibold">Thao tác</TableHead>
+              <TableHead className="text-right font-semibold pr-4">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -298,42 +315,87 @@ export function PlanTable({
                   )}
                 </TableCell>
 
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 pointer-coarse:min-h-11 pointer-coarse:min-w-11 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <MoreHorizontal size={15} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        className="cursor-pointer pointer-coarse:min-h-11 flex items-center"
-                        onClick={() => onViewDetail(template)}
-                      >
-                        <Eye size={14} className="mr-2" />
-                        Xem chi tiết
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer pointer-coarse:min-h-11 flex items-center"
-                        onClick={() => onEditClick(template)}
-                      >
-                        <Pencil size={14} className="mr-2" />
-                        Chỉnh sửa
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-destructive-text cursor-pointer pointer-coarse:min-h-11 flex items-center"
-                        onClick={() => onDeleteClick(template)}
-                      >
-                        <Trash2 size={14} className="mr-2" />
-                        Xoá mẫu gói
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <TableCell className="text-right pr-4">
+                  <div className="flex items-center justify-end gap-1">
+                    {/* Nút toggle Ẩn/Hiện nhanh */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 hover:bg-muted text-muted-foreground hover:text-foreground pointer-coarse:min-h-11 pointer-coarse:min-w-11"
+                      title={template.isActive ? "Ẩn mẫu gói" : "Hiển thị mẫu gói"}
+                      aria-label={template.isActive ? "Ẩn mẫu gói" : "Hiển thị mẫu gói"}
+                      onClick={() => onToggleActive?.(template)}
+                    >
+                      {template.isActive ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </Button>
+
+                    {/* Nút sửa nhanh */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 hover:bg-muted text-muted-foreground hover:text-foreground pointer-coarse:min-h-11 pointer-coarse:min-w-11"
+                      title="Chỉnh sửa mẫu gói"
+                      aria-label="Chỉnh sửa mẫu gói"
+                      onClick={() => onEditClick(template)}
+                    >
+                      <Pencil size={15} />
+                    </Button>
+
+                    {/* Menu thao tác mở rộng */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted pointer-coarse:min-h-11 pointer-coarse:min-w-11"
+                          title="Thao tác khác"
+                          aria-label="Thao tác khác"
+                        >
+                          <MoreHorizontal size={15} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          className="cursor-pointer pointer-coarse:min-h-11 flex items-center"
+                          onClick={() => onViewDetail(template)}
+                        >
+                          <Eye size={14} className="mr-2" />
+                          Xem chi tiết
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer pointer-coarse:min-h-11 flex items-center"
+                          onClick={() => onEditClick(template)}
+                        >
+                          <Pencil size={14} className="mr-2" />
+                          Chỉnh sửa
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer pointer-coarse:min-h-11 flex items-center"
+                          onClick={() => onToggleActive?.(template)}
+                        >
+                          {template.isActive ? (
+                            <>
+                              <EyeOff size={14} className="mr-2" />
+                              Ẩn mẫu gói
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 size={14} className="mr-2" />
+                              Hiển thị mẫu gói
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-destructive-text cursor-pointer pointer-coarse:min-h-11 flex items-center"
+                          onClick={() => onDeleteClick(template)}
+                        >
+                          <Trash2 size={14} className="mr-2" />
+                          Xoá mẫu gói
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -356,3 +418,5 @@ export function PlanTable({
     </div>
   );
 }
+
+export default PlanTable;

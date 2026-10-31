@@ -17,7 +17,9 @@
 
 import { useState, useCallback } from "react";
 import { Plus, RefreshCw, Search, Filter, ChevronDown, CreditCard } from "lucide-react";
+import { toast } from "sonner";
 import { AdminPageHeader } from "../components/shared";
+import { updateTemplateApi } from "@/app/services/api/subscribePlanService";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,6 +105,28 @@ export default function AdminSubscribePlanPage() {
     await handleDeleteConfirm();
     setDeleteOpen(false);
   }, [handleDeleteConfirm]);
+
+  const handleToggleActive = useCallback(
+    async (template) => {
+      try {
+        const nextActive = !template.isActive;
+        await updateTemplateApi(template._id, { isActive: nextActive });
+        toast.success(
+          nextActive
+            ? `Đã hiển thị mẫu gói "${template.name}"`
+            : `Đã ẩn mẫu gói "${template.name}"`,
+        );
+        fetchPlans();
+      } catch (err) {
+        const msg =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Không thể cập nhật trạng thái";
+        toast.error(msg);
+      }
+    },
+    [fetchPlans],
+  );
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -256,6 +280,7 @@ export default function AdminSubscribePlanPage() {
           onViewDetail={handleViewDetail}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}
+          onToggleActive={handleToggleActive}
         />
       </Card>
 

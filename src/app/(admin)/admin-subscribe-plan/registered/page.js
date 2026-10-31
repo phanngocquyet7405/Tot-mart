@@ -191,7 +191,7 @@ export default function RegisteredSubscriptionsPage() {
         />
         <StatCard
           icon={DollarSign}
-          label="Doanh thu active"
+          label="Doanh thu hiệu lực"
           value={formatCurrency(stats.totalRevenue)}
           color="orange"
           sub="Doanh thu từ các gói đang chạy"
