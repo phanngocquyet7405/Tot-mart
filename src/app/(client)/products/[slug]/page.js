@@ -16,7 +16,10 @@ import ProductDetailInteractive from "./ProductDetailInteractive";
 
 export const revalidate = 60;
 
-export async function generateMetadata({ params: paramsPromise, searchParams: searchParamsPromise }) {
+export async function generateMetadata({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}) {
   const params = await paramsPromise;
   const searchParams = searchParamsPromise ? await searchParamsPromise : {};
   const slug = params?.slug || "";
@@ -35,7 +38,10 @@ export async function generateMetadata({ params: paramsPromise, searchParams: se
   const siteUrl = getPublicSiteUrl();
   const canonicalUrl = `${siteUrl}/products/${canonicalSlug}`;
   const title = `${product.name} | TotMart`;
-  const description = (product.descriptions || product.name || "").slice(0, 160);
+  const description = (product.descriptions || product.name || "").slice(
+    0,
+    160,
+  );
   const images = (product.images || [])
     .map((img) => (typeof img === "string" ? img : img.url))
     .filter(Boolean);
@@ -57,7 +63,10 @@ export async function generateMetadata({ params: paramsPromise, searchParams: se
   };
 }
 
-export default async function ProductDetailPage({ params: paramsPromise, searchParams: searchParamsPromise }) {
+export default async function ProductDetailPage({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}) {
   const params = await paramsPromise;
   const searchParams = searchParamsPromise ? await searchParamsPromise : {};
   const slug = params?.slug || "";
@@ -81,7 +90,8 @@ export default async function ProductDetailPage({ params: paramsPromise, searchP
       ? Math.round(product.price * (1 - salePercent / 100))
       : product.price;
   const brandName =
-    product.brand?.name || (typeof product.brand === "string" ? product.brand : "");
+    product.brand?.name ||
+    (typeof product.brand === "string" ? product.brand : "");
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -116,7 +126,7 @@ export default async function ProductDetailPage({ params: paramsPromise, searchP
       <MainHeader />
       <NavMenu />
 
-      <main className="tm-commerce tm-commerce--atelier max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:py-10 pt-[100px]">
+      <main className="tm-commerce tm-commerce--atelier max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:py-10 pt-25">
         <nav className="tm-breadcrumb" aria-label="Đường dẫn">
           <Link href="/homepage">Cửa hàng</Link>
           <ChevronRight size={14} aria-hidden="true" />
@@ -134,7 +144,11 @@ export default async function ProductDetailPage({ params: paramsPromise, searchP
         </section>
 
         {/* Client Interactive Island (Gallery, Purchase panel, Info Tabs, Frequently Bought) */}
-        <ProductDetailInteractive initialProduct={product} slug={slug} discountPercent={product.salePercent || 0} />
+        <ProductDetailInteractive
+          initialProduct={product}
+          slug={slug}
+          discountPercent={product.salePercent || 0}
+        />
       </main>
 
       <Footer />
