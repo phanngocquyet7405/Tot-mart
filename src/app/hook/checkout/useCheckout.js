@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { AppContext } from "@/app/context/AppContext";
 import { useCart } from "@/app/context/CartContext";
 import logger from "@/app/util/Logger";
+import { syncCartApi } from "@/app/services/api/productServices";
 import {
   loadCheckoutUser,
   saveCheckoutAddress,
@@ -197,6 +198,7 @@ export function useCheckout() {
     if (!isMounted || !user || !cartItems.length || currentSession) return;
     let active = true;
     setQuoteWarning("");
+    if (user?._id) syncCartApi(toCartPayload(cartItems), undefined, user._id).catch(() => {});
 
     quoteCart(cartItems, couponApplied ? coupon : undefined)
       .then((data) => {
@@ -293,6 +295,7 @@ export function useCheckout() {
             note,
             couponCode: couponApplied ? coupon : undefined,
             quoteFingerprint: quote?.fingerprint,
+            cartItems,
           });
 
           if (mountedRef.current) {
@@ -308,6 +311,7 @@ export function useCheckout() {
             note,
             couponCode: couponApplied ? coupon : undefined,
             quoteFingerprint: quote?.fingerprint,
+            cartItems,
           });
 
           const data = res?.data || res;

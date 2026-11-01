@@ -135,7 +135,15 @@ export function calcShippingFee() {
 /**
  * Tạo CheckoutSession mới cho thanh toán QR Online
  */
-export async function createCheckoutSession({ addressId, note, couponCode, quoteFingerprint }) {
+export async function createCheckoutSession({ addressId, note, couponCode, quoteFingerprint, cartItems = [] }) {
+  const userId = getTokenUserId();
+  if (cartItems && cartItems.length > 0 && userId) {
+    try {
+      await syncCartApi(toCartPayload(cartItems), undefined, userId);
+    } catch (e) {
+      logger.warn('[Checkout] Failed to sync cart before online session:', e);
+    }
+  }
   const payload = {
     addressId,
     paymentMethod: 'online',
@@ -166,7 +174,15 @@ export async function cancelCheckoutSession(id, reason = 'Khách đổi phương
 /**
  * Đặt hàng COD
  */
-export async function placeCodOrder({ addressId, note, couponCode, quoteFingerprint }) {
+export async function placeCodOrder({ addressId, note, couponCode, quoteFingerprint, cartItems = [] }) {
+  const userId = getTokenUserId();
+  if (cartItems && cartItems.length > 0 && userId) {
+    try {
+      await syncCartApi(toCartPayload(cartItems), undefined, userId);
+    } catch (e) {
+      logger.warn('[Checkout] Failed to sync cart before COD order:', e);
+    }
+  }
   const payload = {
     addressId,
     paymentMethod: 'cod',
