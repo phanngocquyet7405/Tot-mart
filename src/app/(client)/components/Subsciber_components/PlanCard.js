@@ -48,7 +48,7 @@ export default function PlanCard({ box, onOpenPlan }) {
           onClick={() => onOpenPlan(box)}
         >
           <Gift size={16} />
-          <span>Chọn gói & Nhận quà ngay</span>
+          <span>Chọn gói & địa chỉ</span>
           <ArrowUpRight size={16} />
         </button>
       </div>
