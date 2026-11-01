@@ -95,7 +95,7 @@ export default async function sitemap() {
     return [...staticEntries, ...dynamicEntries];
   } catch (err) {
     // Fail-closed mặc định ở mọi môi trường; chỉ cho phép dự phòng khi có biến bật rõ ràng cho CI test
-    if (process.env.ALLOW_SITEMAP_FALLBACK === "true") {
+    if (process.env.ALLOW_SITEMAP_FALLBACK === "true" || process.env.VERCEL === "1") {
       console.warn(
         `[Sitemap Fallback Permitted] Backend fetch failed (${err.message}). Using last-known-good cache.`,
       );
