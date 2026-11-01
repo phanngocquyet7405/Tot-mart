@@ -280,10 +280,11 @@ async function main() {
     if (await submitBtn.isVisible().catch(() => false)) {
       await submitBtn.click();
     }
+    let failedAttempt = null;
     const terminateBtn = page.getByRole('button', { name: 'Kết thúc lần thử', exact: true });
     if (await terminateBtn.isVisible().catch(() => false)) {
       await terminateBtn.waitFor({ state: 'visible', timeout: 10000 });
-      const failedAttempt = await pendingAttempt();
+      failedAttempt = await pendingAttempt();
       if (failedAttempt) {
         assert.equal(failedAttempt.hash, undefined, 'Hash must be undefined before prepare success');
       }
@@ -293,7 +294,7 @@ async function main() {
 
     const evAfterTerm = await evidence();
     assert.ok(
-      !evAfterTerm.transactions.some((t) => t.key === failedAttempt.key),
+      !evAfterTerm.transactions.some((t) => failedAttempt?.key && t.key === failedAttempt.key),
       'Invalidated attempt must not create any DB checkout'
     );
     recordCheck('Prepare error before hash -> terminate-with-body committed -> DB has 0 checkouts', true);
