@@ -64,14 +64,14 @@ export default function AnnouncementBarBox() {
       className="fixed left-0 right-0 top-0 z-50 w-full bg-foreground text-background overflow-hidden"
       style={{ height: BAR_H }}
     >
-      <div className="h-full max-w-7xl mx-auto px-3 sm:px-6 flex items-center gap-2">
+      <div className="h-full max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between gap-3">
         {/* Prev */}
         <button
           onClick={() => {
             clearInterval(timerRef.current);
             goto(idx - 1);
           }}
-          className="shrink-0 w-6 h-6 flex items-center justify-center text-background/60 hover:text-background rounded-full hover:bg-background/10 transition-colors"
+          className="shrink-0 w-6 h-6 flex items-center justify-center text-background/60 hover:text-background rounded-full hover:bg-background/10 transition-colors pointer-coarse:min-h-8 pointer-coarse:min-w-8"
           aria-label="Trước"
         >
           <ChevronLeft size={14} />
@@ -94,7 +94,7 @@ export default function AnnouncementBarBox() {
         </div>
 
         {/* Dot indicators */}
-        <div className="hidden sm:flex items-center gap-1 shrink-0">
+        <div className="hidden items-center gap-1 shrink-0">
           {ANNOUNCEMENTS.map((_, i) => (
             <button
               key={i}
@@ -123,7 +123,7 @@ export default function AnnouncementBarBox() {
             clearInterval(timerRef.current);
             goto(idx + 1);
           }}
-          className="shrink-0 w-6 h-6 flex items-center justify-center text-background/60 hover:text-background rounded-full hover:bg-background/10 transition-colors"
+          className="shrink-0 w-6 h-6 flex items-center justify-center text-background/60 hover:text-background rounded-full hover:bg-background/10 transition-colors pointer-coarse:min-h-8 pointer-coarse:min-w-8"
           aria-label="Tiếp theo"
         >
           <ChevronRight size={14} />
@@ -132,7 +132,7 @@ export default function AnnouncementBarBox() {
         {/* Dismiss */}
         <button
           onClick={() => setDismissed(true)}
-          className="shrink-0 w-6 h-6 flex items-center justify-center text-background/60 hover:text-background rounded-full hover:bg-background/10 transition-colors"
+          className="shrink-0 w-6 h-6 flex items-center justify-center text-background/60 hover:text-background rounded-full hover:bg-background/10 transition-colors pointer-coarse:min-h-8 pointer-coarse:min-w-8"
           aria-label="Đóng"
         >
           <X size={12} />

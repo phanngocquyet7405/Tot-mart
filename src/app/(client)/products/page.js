@@ -95,7 +95,7 @@ export default async function ProductsPage({ searchParams: searchParamsPromise }
 
   return (
     <div className="page-canvas min-h-screen">
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border shadow-xs z-50">
+      <div>
         <AnnouncementBar />
         <MainHeader cartItemCount={0} cartTotal={0} />
         <div className="border-b border-border">
@@ -104,22 +104,22 @@ export default async function ProductsPage({ searchParams: searchParamsPromise }
       </div>
 
       {/* Hero Section */}
-      <div className="bg-card border-b border-border py-12 md:py-16 relative overflow-hidden text-foreground">
+      <div className="bg-card border-b border-border pt-[124px] pb-12 md:pb-16 relative overflow-hidden text-foreground">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-primary/20 blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-primary/20 blur-3xl"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <p className="text-sm font-semibold uppercase tracking-wider mb-3 text-primary font-semibold">
-            {searchQuery ? "Kết quả tìm kiếm" : "Premium Organic Curations"}
+            {searchQuery ? "Kết quả tìm kiếm" : "Nông sản sạch & Quà tặng thủ công"}
           </p>
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">
-            {searchQuery ? `"${searchQuery}"` : "Premium Organic Snacks"}
+            {searchQuery ? `"${searchQuery}"` : "Bách Hóa Đặc Sản TotMart"}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
             {searchQuery
               ? "Đây là các sản phẩm phù hợp với từ khoá bạn tìm."
-              : "Discover our curated selection of hand-picked organic snacks that nourish the soul and respect the planet."}
+              : "Khám phá danh mục nông sản hữu cơ chọn lọc, trà hoa đặc sản và thức quà thủ công truyền thống từ các nghệ nhân bản địa khắp Việt Nam."}
           </p>
         </div>
       </div>
