@@ -55,3 +55,4 @@ audit-*.json
 AGENTS.md
 .claude/
 .claude/settings.local.json
+.cursor/
