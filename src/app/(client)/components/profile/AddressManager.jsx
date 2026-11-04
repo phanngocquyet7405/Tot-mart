@@ -18,12 +18,12 @@ import { Input } from "@/components/ui/input";
 import logger from "@/app/util/Logger";
 
 const emptyAddress = {
-  country: "",
+  fullName: "",
+  country: "Việt Nam",
   city: "",
   district: "",
   address: "",
   phone: "",
-  zipCode: "",
 };
 
 export function AddressManager({
@@ -37,6 +37,7 @@ export function AddressManager({
 
   const canCreate = useMemo(
     () =>
+      newAddress.fullName.trim().length >= 2 &&
       ["country", "city", "district", "address", "phone"].every(
         (key) => newAddress[key].trim().length > 0,
       ),
@@ -64,6 +65,36 @@ export function AddressManager({
             Thêm địa chỉ giao nhận mới
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <label htmlFor="new-fullname" className="text-xs font-medium text-foreground">
+                Họ và tên người nhận *
+              </label>
+              <Input
+                id="new-fullname"
+                placeholder="Nguyễn Văn A"
+                value={newAddress.fullName}
+                onChange={(e) =>
+                  setNewAddress((p) => ({ ...p, fullName: e.target.value }))
+                }
+                className="min-h-11 rounded-xl border-border bg-card text-foreground"
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="new-phone" className="text-xs font-medium text-foreground">
+                Số điện thoại liên hệ *
+              </label>
+              <Input
+                id="new-phone"
+                type="tel"
+                autoComplete="tel"
+                placeholder="0912345678"
+                value={newAddress.phone}
+                onChange={(e) =>
+                  setNewAddress((p) => ({ ...p, phone: e.target.value }))
+                }
+                className="min-h-11 rounded-xl border-border bg-card text-foreground"
+              />
+            </div>
             <div className="space-y-1">
               <label htmlFor="new-country" className="text-xs font-medium text-foreground">
                 Quốc gia *
@@ -116,36 +147,6 @@ export function AddressManager({
                 value={newAddress.address}
                 onChange={(e) =>
                   setNewAddress((p) => ({ ...p, address: e.target.value }))
-                }
-                className="min-h-11 rounded-xl border-border bg-card text-foreground"
-              />
-            </div>
-            <div className="space-y-1">
-              <label htmlFor="new-phone" className="text-xs font-medium text-foreground">
-                Số điện thoại liên hệ *
-              </label>
-              <Input
-                id="new-phone"
-                type="tel"
-                autoComplete="tel"
-                placeholder="0912345678"
-                value={newAddress.phone}
-                onChange={(e) =>
-                  setNewAddress((p) => ({ ...p, phone: e.target.value }))
-                }
-                className="min-h-11 rounded-xl border-border bg-card text-foreground"
-              />
-            </div>
-            <div className="space-y-1">
-              <label htmlFor="new-zip" className="text-xs font-medium text-foreground">
-                Mã bưu điện (Zip code)
-              </label>
-              <Input
-                id="new-zip"
-                placeholder="100000"
-                value={newAddress.zipCode}
-                onChange={(e) =>
-                  setNewAddress((p) => ({ ...p, zipCode: e.target.value }))
                 }
                 className="min-h-11 rounded-xl border-border bg-card text-foreground"
               />
@@ -210,6 +211,26 @@ export function AddressManager({
                         </DialogHeader>
                         <div className="grid gap-3 py-2">
                           <Input
+                            placeholder="Họ và tên người nhận"
+                            value={editing?.fullName ?? ""}
+                            onChange={(e) =>
+                              setEditing((p) =>
+                                p ? { ...p, fullName: e.target.value } : p,
+                              )
+                            }
+                            className="min-h-11 rounded-xl border-border bg-card text-foreground"
+                          />
+                          <Input
+                            placeholder="Số điện thoại"
+                            value={editing?.phone ?? ""}
+                            onChange={(e) =>
+                              setEditing((p) =>
+                                p ? { ...p, phone: e.target.value } : p,
+                              )
+                            }
+                            className="min-h-11 rounded-xl border-border bg-card text-foreground"
+                          />
+                          <Input
                             placeholder="Quốc gia"
                             value={editing?.country ?? ""}
                             onChange={(e) =>
@@ -249,26 +270,6 @@ export function AddressManager({
                             }
                             className="min-h-11 rounded-xl border-border bg-card text-foreground"
                           />
-                          <Input
-                            placeholder="Số điện thoại"
-                            value={editing?.phone ?? ""}
-                            onChange={(e) =>
-                              setEditing((p) =>
-                                p ? { ...p, phone: e.target.value } : p,
-                              )
-                            }
-                            className="min-h-11 rounded-xl border-border bg-card text-foreground"
-                          />
-                          <Input
-                            placeholder="Mã bưu chính (Zip code)"
-                            value={editing?.zipCode ?? ""}
-                            onChange={(e) =>
-                              setEditing((p) =>
-                                p ? { ...p, zipCode: e.target.value } : p,
-                              )
-                            }
-                            className="min-h-11 rounded-xl border-border bg-card text-foreground"
-                          />
                         </div>
                         <DialogFooter>
                           <Button
@@ -301,9 +302,13 @@ export function AddressManager({
                 </div>
 
                 {/* ── DISPLAY ──────────────────────────────────────────── */}
+                {item.fullName && (
+                  <p className="text-sm font-bold text-foreground">
+                    {item.fullName}
+                  </p>
+                )}
                 <p className="text-xs sm:text-sm text-foreground font-medium">
                   {item.address}, {item.district}, {item.city}, {item.country}
-                  {item.zipCode ? ` (Zip: ${item.zipCode})` : ""}
                 </p>
                 <p className="text-xs text-muted-foreground font-mono">
                   SĐT: {item.phone}

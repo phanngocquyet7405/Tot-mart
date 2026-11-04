@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cartLineKey } from '@/app/util/cartLine.mjs';
-import { Plus, Minus, Trash2 } from "lucide-react";
+import { Plus, Minus, Trash2, Gift } from "lucide-react";
 import Image from "next/image";
 import { useCart } from "@/app/context/CartContext";
 
@@ -41,6 +41,17 @@ export default function CartItem({ product, lineTotal }) {
               </span>
             )}
           </div>
+          {product.gift?.wrap && product.gift.wrap !== "none" && (
+            <p className="text-[11px] text-primary font-medium mt-1 flex items-center gap-1">
+              <Gift size={11} className="shrink-0" />
+              <span>Gói quà ({product.gift.wrap})</span>
+              {product.gift.message ? (
+                <span className="text-muted-foreground truncate max-w-[140px]">
+                  — &ldquo;{product.gift.message}&rdquo;
+                </span>
+              ) : null}
+            </p>
+          )}
         </div>
 
         {/* Nút xóa khỏi giỏ hàng */}

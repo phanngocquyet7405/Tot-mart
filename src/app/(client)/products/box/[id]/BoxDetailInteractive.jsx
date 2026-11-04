@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Minus, Plus, ShoppingCart, Truck } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Truck, CalendarClock } from "lucide-react";
 import { useAddToCart } from "@/app/hook/useAddToCart";
 import { ProductGallery } from "../../../components/Product/ProductGallery";
 import { boxSalePrice, boxOriginalPrice, toBoxCartItem } from "./boxPricing";
@@ -27,7 +27,43 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
   const amenityFee = (box?.giftPolicy?.amenities || []).reduce((sum, a) => sum + a.fee, 0);
   const giftTotal = Math.round(salePrice * quantity * (1 - giftPercent / 100)) + amenityFee * quantity;
   const stock = box?.stock ?? 0;
-  const canBuy = stock > 0 && Number.isInteger(quantity) && quantity > 0 && quantity <= Math.min(999, stock);
+
+  // Validity checks per BE Box schema (validFrom, validTo)
+  const now = new Date();
+  const validFrom = box?.validFrom ? new Date(box.validFrom) : null;
+  const validTo = box?.validTo ? new Date(box.validTo) : null;
+
+  const isNotYetOpen = Boolean(validFrom && now < validFrom);
+  const isExpired = Boolean(validTo && now > validTo);
+  const isSaleActive = !isNotYetOpen && !isExpired;
+
+  const daysRemaining =
+    validTo && isSaleActive
+      ? Math.max(0, Math.ceil((validTo.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+      : null;
+
+  const canBuy =
+    isSaleActive &&
+    stock > 0 &&
+    Number.isInteger(quantity) &&
+    quantity > 0 &&
+    quantity <= Math.min(999, stock);
+
+  const buyButtonText = isExpired
+    ? "Đã hết hạn mở bán"
+    : isNotYetOpen
+    ? "Chưa mở bán"
+    : stock > 0
+    ? "Thêm vào giỏ hàng"
+    : "Tạm hết hàng";
+
+  const mobileBuyButtonText = isExpired
+    ? "Hết hạn"
+    : isNotYetOpen
+    ? "Chưa mở"
+    : stock > 0
+    ? "Thêm vào giỏ"
+    : "Hết hàng";
 
   const handleAddToCart = () => {
     if (!box || !canBuy) return;
@@ -60,9 +96,66 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
             </div>
             <p className="mt-2 text-sm text-muted-foreground">Giá cuối cùng được xác nhận tại thanh toán.</p>
           </div>
-          <p className={stock > 0 ? "font-semibold text-success-text" : "font-semibold text-destructive-text"}>
-            {stock > 0 ? `Còn ${stock} hộp` : "Tạm hết hàng"}
+
+          {/* Validity Notice */}
+          {(validFrom || validTo) && (
+            <div
+              className={`rounded-xl border p-3 text-xs font-medium flex items-start gap-2.5 ${
+                isExpired
+                  ? "bg-destructive/10 border-destructive/25 text-destructive-text"
+                  : isNotYetOpen
+                  ? "bg-amber-500/10 border-amber-500/25 text-amber-700 dark:text-amber-400"
+                  : "bg-primary/10 border-primary/20 text-primary"
+              }`}
+            >
+              <CalendarClock size={16} className="shrink-0 mt-0.5" />
+              <div className="flex-1">
+                {isExpired ? (
+                  <span>
+                    Hộp sản phẩm này đã ngừng bán vào ngày{" "}
+                    <strong>{validTo.toLocaleDateString("vi-VN")}</strong>.
+                  </span>
+                ) : isNotYetOpen ? (
+                  <span>
+                    Hộp sản phẩm sẽ bắt đầu mở bán từ ngày{" "}
+                    <strong>{validFrom.toLocaleDateString("vi-VN")}</strong>.
+                  </span>
+                ) : (
+                  <div className="flex flex-wrap items-center justify-between gap-1.5">
+                    <span>
+                      Thời gian mở bán:{" "}
+                      <strong>
+                        {validFrom ? validFrom.toLocaleDateString("vi-VN") : "Hiện tại"} –{" "}
+                        {validTo ? validTo.toLocaleDateString("vi-VN") : "Không giới hạn"}
+                      </strong>
+                    </span>
+                    {daysRemaining !== null && daysRemaining <= 14 && (
+                      <span className="font-bold text-amber-600 dark:text-amber-400">
+                        (Còn {daysRemaining} ngày)
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <p
+            className={
+              stock > 0 && isSaleActive
+                ? "font-semibold text-success-text"
+                : "font-semibold text-destructive-text"
+            }
+          >
+            {!isSaleActive
+              ? isExpired
+                ? "Đã kết thúc thời gian mở bán"
+                : "Chưa tới thời gian mở bán"
+              : stock > 0
+              ? `Còn ${stock} hộp`
+              : "Tạm hết hàng"}
           </p>
+
           <div className="tm-quantity-row">
             <span id="box-quantity-label">Số lượng</span>
             <div className="tm-quantity" role="group" aria-labelledby="box-quantity-label">
@@ -70,7 +163,7 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
                 type="button"
                 aria-label="Giảm số lượng hộp"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                disabled={quantity <= 1 || stock <= 0}
+                disabled={quantity <= 1 || stock <= 0 || !isSaleActive}
                 className="transition-colors motion-reduce:transition-none"
               >
                 <Minus size={18} />
@@ -80,7 +173,7 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
                 type="button"
                 aria-label="Tăng số lượng hộp"
                 onClick={() => setQuantity((q) => Math.min(Math.min(999, stock), q + 1))}
-                disabled={stock <= 0 || quantity >= Math.min(999, stock)}
+                disabled={stock <= 0 || quantity >= Math.min(999, stock) || !isSaleActive}
                 className="transition-colors motion-reduce:transition-none"
               >
                 <Plus size={18} />
@@ -113,7 +206,7 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
             onClick={handleAddToCart}
           >
             <ShoppingCart size={20} />
-            {stock > 0 ? "Thêm vào giỏ hàng" : "Tạm hết hàng"}
+            {buyButtonText}
           </button>
           <div className="tm-delivery-note">
             <Truck size={20} className="shrink-0" />
@@ -164,7 +257,7 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
           {box.descriptions || "Chưa có mô tả chi tiết cho hộp này."}
         </p>
       </section>
-          {/* Mobile Sticky Purchase Bar with Safe Area */}
+      {/* Mobile Sticky Purchase Bar with Safe Area */}
       <div className="fixed bottom-0 left-0 right-0 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] bg-background/95 backdrop-blur-sm border-t border-border z-30 md:hidden flex items-center justify-between gap-3 shadow-lg pointer-events-auto">
         <div className="min-w-0 flex-1">
           <p className="text-xs text-muted-foreground truncate">{box.name || "Combo TotMart"}</p>
@@ -179,7 +272,7 @@ export default function BoxDetailInteractive({ initialBox, initialProducts = [] 
           onClick={handleAddToCart}
         >
           <ShoppingCart size={16} />
-          <span>{stock > 0 ? "Thêm vào giỏ" : "Hết hàng"}</span>
+          <span>{mobileBuyButtonText}</span>
         </button>
       </div>
       {/* Khoảng đệm cuối trang tránh che nội dung */}

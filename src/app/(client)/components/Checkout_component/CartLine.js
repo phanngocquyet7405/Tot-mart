@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Package } from "lucide-react";
+import { Package, Gift } from "lucide-react";
 import { getCartItemImage } from "@/app/util/cartItem";
 import { formatCurrency } from "@/app/util/formatter";
 
@@ -71,6 +71,17 @@ export function CartLine({ item, compact = false }) {
             ? formatCurrency(unitPrice)
             : `${formatCurrency(unitPrice)} × ${quantity}`}
         </p>
+        {item.gift?.wrap && item.gift.wrap !== "none" && (
+          <p className="text-[11px] text-primary font-medium mt-1 flex items-center gap-1">
+            <Gift size={11} className="shrink-0" />
+            <span>Gói quà ({item.gift.wrap})</span>
+            {item.gift.message ? (
+              <span className="text-muted-foreground truncate max-w-[160px]">
+                — &ldquo;{item.gift.message}&rdquo;
+              </span>
+            ) : null}
+          </p>
+        )}
       </div>
       <p className="text-sm font-bold text-foreground shrink-0 tabular-nums text-right">
         {formatCurrency(item.lineTotal ?? unitPrice * quantity)}

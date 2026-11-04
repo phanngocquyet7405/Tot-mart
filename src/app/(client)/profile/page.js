@@ -110,28 +110,34 @@ export default function ProfilePage() {
     const optimistic = {
       ...user,
       name: payload.name,
-      email: payload.email,
-      avatar: {
-        url: payload.avatarUrl,
-        public_id: user.avatar?.public_id || "local-preview",
-      },
+      phone: payload.phone || user.phone,
+      avatar: payload.avatarUrl
+        ? {
+            url: payload.avatarUrl,
+            public_id: user.avatar?.public_id || "local-preview",
+          }
+        : user.avatar,
     };
     setUser(optimistic);
     setSavingProfile(true);
 
     try {
-      const res = await userService.updateUser(userId, {
-        name: payload.name,
-        email: payload.email,
-        avatar: optimistic.avatar,
-      });
+      const updatePayload = {
+        name: payload.name.trim(),
+        ...(payload.phone?.trim() ? { phone: payload.phone.trim() } : {}),
+      };
+      const res = await userService.updateUser(userId, updatePayload);
       const updated = res.data?.data || res.data;
-      setUser((prev) => ({ ...prev, ...updated }));
+      setUser((prev) => ({
+        ...prev,
+        ...updated,
+        avatar: optimistic.avatar,
+      }));
       toast.success("Cập nhật hồ sơ thành công!");
     } catch (err) {
       logger.error("Lỗi cập nhật hồ sơ:", err?.response || err);
       setUser(previous);
-      toast.error("Không thể cập nhật hồ sơ");
+      toast.error(err?.response?.data?.message || "Không thể cập nhật hồ sơ");
     } finally {
       setSavingProfile(false);
     }
@@ -297,6 +303,7 @@ export default function ProfilePage() {
             <ProfileInfo
               name={user.name || ""}
               email={user.email || ""}
+              phone={user.phone || ""}
               avatarUrl={user.avatar?.url || ""}
               onSave={handleProfileSave}
               saving={savingProfile}

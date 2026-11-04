@@ -24,6 +24,8 @@ export default function ProductDetailInteractive({ initialProduct, slug }) {
     isWishlisted,
     isAddingToCart,
     isBuyingNow,
+    giftOption,
+    setGiftOption,
     increaseQty,
     decreaseQty,
     handleAddToCart,
@@ -69,6 +71,7 @@ export default function ProductDetailInteractive({ initialProduct, slug }) {
           finalPrice={finalPrice}
           fmtPrice={fmtPrice}
           isReady={Boolean(isCartMounted)}
+          onGiftChange={setGiftOption}
         />
       </div>
 

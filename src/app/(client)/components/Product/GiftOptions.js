@@ -15,14 +15,14 @@ const MESSAGE_LIMIT = 150;
 
 /**
  * @param {(giftData: {enabled:boolean, option:object|null, message:string}) => void=} onChange
- * @param {boolean} [ownerConfirmed=false] Chỉ bật khi owner/merchant đã xác nhận cho phép gói quà
+ * @param {boolean} [ownerConfirmed=true] Cho phép chọn gói quà theo chính sách thương mại
  * @param {object} [policy] Chính sách commerce-policy từ BE nếu có sẵn
  */
-export function GiftOptions({ onChange, ownerConfirmed = false, policy = null }) {
+export function GiftOptions({ onChange, ownerConfirmed = true, policy = null }) {
   const [fetchedFees, setFetchedFees] = useState(null);
-  const wrappingFees = policy?.wrappingFees || fetchedFees;
+  const wrappingFees = policy?.wrappingFees || fetchedFees || { none: 0, classic: 15000, eco: 15000, premium: 35000 };
   const [enabled, setEnabled] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useState("classic");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -46,22 +46,22 @@ export function GiftOptions({ onChange, ownerConfirmed = false, policy = null })
   }
 
   const wrapOptions = [
-    { id: "classic", label: WRAP_LABELS.classic, price: wrappingFees?.classic ?? 0 },
-    { id: "premium", label: WRAP_LABELS.premium, price: wrappingFees?.premium ?? 0 },
-    { id: "eco", label: WRAP_LABELS.eco, price: wrappingFees?.eco ?? 0 },
+    { id: "classic", label: WRAP_LABELS.classic, price: wrappingFees?.classic ?? 15000 },
+    { id: "premium", label: WRAP_LABELS.premium, price: wrappingFees?.premium ?? 35000 },
+    { id: "eco", label: WRAP_LABELS.eco, price: wrappingFees?.eco ?? 15000 },
   ];
 
-  const selectedOption = wrapOptions.find((o) => o.id === selectedId) || null;
+  const selectedOption = wrapOptions.find((o) => o.id === selectedId) || wrapOptions[0];
 
   const handleToggle = () => {
     const next = !enabled;
     setEnabled(next);
-    onChange?.({ enabled: next, option: selectedOption, message });
+    onChange?.({ enabled: next, option: next ? selectedOption : null, message });
   };
 
   const handleSelect = (option) => {
     setSelectedId(option.id);
-    onChange?.({ enabled, option, message });
+    onChange?.({ enabled: true, option, message });
   };
 
   const handleMessage = (value) => {
@@ -71,7 +71,7 @@ export function GiftOptions({ onChange, ownerConfirmed = false, policy = null })
   };
 
   return (
-    <div className="bg-card rounded-2xl p-6 space-y-4 border border-border shadow-xs">
+    <div className="bg-card rounded-2xl p-5 space-y-4 border border-border shadow-xs">
       <div className="flex items-center gap-2">
         <Gift className="w-4 h-4 text-primary" />
         <h3 className="text-xs font-black uppercase tracking-widest text-foreground">
@@ -79,7 +79,7 @@ export function GiftOptions({ onChange, ownerConfirmed = false, policy = null })
         </h3>
       </div>
 
-      <label className="flex items-center justify-between p-4 bg-card rounded-xl border border-border cursor-pointer">
+      <label className="flex items-center justify-between p-3.5 bg-muted/40 rounded-xl border border-border cursor-pointer hover:border-primary/40 transition-colors">
         <span className="text-sm font-bold text-foreground">
           Đây là quà tặng — thêm gói quà
         </span>
@@ -87,7 +87,7 @@ export function GiftOptions({ onChange, ownerConfirmed = false, policy = null })
           type="checkbox"
           checked={enabled}
           onChange={handleToggle}
-          className="w-5 h-5 accent-primary"
+          className="w-5 h-5 accent-primary cursor-pointer"
         />
       </label>
 
@@ -99,7 +99,7 @@ export function GiftOptions({ onChange, ownerConfirmed = false, policy = null })
                 key={option.id}
                 className={`flex items-center justify-between gap-3 p-3 bg-card rounded-xl border-2 cursor-pointer transition-all ${
                   selectedId === option.id
-                    ? "border-primary ring-2 ring-primary/20"
+                    ? "border-primary ring-2 ring-primary/20 bg-primary/5"
                     : "border-border hover:border-primary/40"
                 }`}
               >
@@ -111,9 +111,9 @@ export function GiftOptions({ onChange, ownerConfirmed = false, policy = null })
                     onChange={() => handleSelect(option)}
                     className="w-4 h-4 accent-primary"
                   />
-                  <span className="text-sm text-foreground">{option.label}</span>
+                  <span className="text-sm text-foreground font-medium">{option.label}</span>
                 </span>
-                <span className="text-sm font-black text-primary shrink-0">
+                <span className="text-sm font-black text-primary shrink-0 tabular-nums">
                   +{formatPrice(option.price)}
                 </span>
               </label>
@@ -132,7 +132,7 @@ export function GiftOptions({ onChange, ownerConfirmed = false, policy = null })
               placeholder="Viết vài dòng gửi gắm yêu thương..."
               className="w-full text-sm p-3 rounded-xl border border-border bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
             />
-            <p className="text-[11px] text-muted-foreground text-right">
+            <p className="text-[11px] text-muted-foreground text-right tabular-nums">
               {message.length}/{MESSAGE_LIMIT} ký tự
             </p>
           </div>

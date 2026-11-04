@@ -18,6 +18,9 @@ export const getProductsInBoxApi = (id) =>
 export const getBoxOffersApi = () =>
   axiosConfig.get(API_ENDPOINTS.BOXES.GET_OFFERS);
 
+export const getAllCouponsApi = (params = {}) =>
+  axiosConfig.get(API_ENDPOINTS.COUPONS.GET_ALL, { params });
+
 export const createBoxApi = (formData) =>
   axiosConfig.post(API_ENDPOINTS.BOXES.CREATE, formData, {
     headers: { "Content-Type": "multipart/form-data" },

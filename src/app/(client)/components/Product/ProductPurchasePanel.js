@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Award,
 } from "lucide-react";
+import { GiftOptions } from "./GiftOptions";
 
 export function ProductPurchasePanel({
   product,
@@ -30,6 +31,7 @@ export function ProductPurchasePanel({
   onWishlist,
   onShare,
   fmtPrice,
+  onGiftChange,
 }) {
   const discount = product.salePercent || 0;
   const stock = product.stock ?? 0;
@@ -60,7 +62,7 @@ export function ProductPurchasePanel({
             </span>
             {product.category?.name && (
               <span className="text-xs text-muted-foreground font-medium">
-                · {product.category.name}
+                • {product.category.name}
               </span>
             )}
           </div>
@@ -170,6 +172,9 @@ export function ProductPurchasePanel({
           </button>
         </div>
       </div>
+
+      {/* 4.5. Gift Wrapping Options */}
+      <GiftOptions onChange={onGiftChange} ownerConfirmed={true} />
 
       {/* 5. Primary CTAs - Thêm giỏ & Mua ngay với feedback mượt mà */}
       <div className="space-y-3 pt-1" aria-busy={Boolean(busy)}>

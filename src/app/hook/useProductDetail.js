@@ -39,6 +39,7 @@ export function useProductDetail(slug, initialProduct = null) {
   const [activeTab, setActiveTab] = useState("details");
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
+  const [giftOption, setGiftOption] = useState({ enabled: false, option: null, message: "" });
 
   const isWishlisted = product ? isInWishlist(product._id) : false;
 
@@ -141,14 +142,19 @@ export function useProductDetail(slug, initialProduct = null) {
   const buildCartItem = useCallback(() => {
     if (!product) return null;
     const finalPrice = getFinalPrice(product);
+    const gift = giftOption.enabled && giftOption.option?.id
+      ? { wrap: giftOption.option.id, message: giftOption.message || "" }
+      : { wrap: "none", message: "" };
+
     return {
       _id: product._id,
       id: product._id,
       name: product.name,
       image: product.images?.[0]?.url || PLACEHOLDER_IMAGE,
       price: finalPrice,
+      gift,
     };
-  }, [product]);
+  }, [product, giftOption]);
 
   const handleAddToCart = useCallback(async () => {
     const itemToAdd = buildCartItem();
@@ -227,6 +233,8 @@ export function useProductDetail(slug, initialProduct = null) {
     isWishlisted,
     isAddingToCart,
     isBuyingNow,
+    giftOption,
+    setGiftOption,
     selectQuantity,
     increaseQty,
     decreaseQty,

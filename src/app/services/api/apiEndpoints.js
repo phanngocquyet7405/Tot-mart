@@ -100,6 +100,10 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/boxes/delete-box/${id}`,
   },
 
+  COUPONS: {
+    GET_ALL: "/coupons/get-all-coupons",
+  },
+
   SUBSCRIBE_PLANS: {
     TEMPLATES: {
       CREATE: "/subcribe-plans/create-subscription-template",

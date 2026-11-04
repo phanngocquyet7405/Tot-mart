@@ -15,8 +15,17 @@ import {
   ShoppingBag,
   Truck,
   AlertCircle,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { axiosConfig } from "@/app/services/api/axiosConfig";
+import { orderService } from "@/app/services/api/orderService";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const money = (value) =>
   new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
@@ -54,11 +63,21 @@ const statusTone = {
   on_hold: "text-muted-foreground bg-muted border-border",
 };
 
-function OrderCard({ order, onConfirmReceipt, confirming }) {
+const CANCEL_REASONS = [
+  "Muốn thay đổi địa chỉ nhận hàng",
+  "Muốn thay đổi sản phẩm hoặc số lượng",
+  "Tìm thấy giá tốt hơn ở nơi khác",
+  "Thời gian giao hàng không phù hợp",
+  "Không còn nhu cầu mua nữa",
+  "Lý do khác",
+];
+
+function OrderCard({ order, onConfirmReceipt, confirming, onOpenCancel }) {
   const canConfirm =
     order.status === "shipped" &&
     order.paymentMethod === "online" &&
     order.paymentStatus === "paid";
+  const canCancel = ["pending", "processing", "on_hold"].includes(order.status);
 
   return (
     <article className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
@@ -80,6 +99,14 @@ function OrderCard({ order, onConfirmReceipt, confirming }) {
           {new Date(order.createdAt).toLocaleDateString("vi-VN")}
         </span>
       </header>
+
+      {order.status === "cancelled" && order.cancelReason && (
+        <div className="mx-4 mt-3 sm:mx-5 rounded-xl border border-destructive/20 bg-destructive/5 px-3.5 py-2 text-xs text-destructive-text flex items-center gap-2">
+          <AlertCircle size={14} className="shrink-0" />
+          <span className="font-semibold shrink-0">Lý do hủy:</span>
+          <span className="truncate">{order.cancelReason}</span>
+        </div>
+      )}
 
       <div className="divide-y divide-border/60">
         {(order.products || []).map((item, index) => (
@@ -146,6 +173,17 @@ function OrderCard({ order, onConfirmReceipt, confirming }) {
               </p>
             </div>
           </details>
+
+          {canCancel && (
+            <button
+              type="button"
+              onClick={() => onOpenCancel(order)}
+              className="rounded-xl border border-destructive/30 bg-destructive/10 px-3.5 py-2 min-h-10 text-xs font-bold text-destructive-text hover:bg-destructive/20 transition-colors select-none"
+            >
+              Hủy đơn
+            </button>
+          )}
+
           {canConfirm && (
             <button
               type="button"
@@ -169,6 +207,12 @@ export default function MyOrdersPage() {
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [confirming, setConfirming] = useState(null);
+
+  // Cancellation State
+  const [cancelingOrder, setCancelingOrder] = useState(null);
+  const [cancelReasonPreset, setCancelReasonPreset] = useState(CANCEL_REASONS[0]);
+  const [customCancelReason, setCustomCancelReason] = useState("");
+  const [canceling, setCanceling] = useState(false);
 
   const loadOrders = async () => {
     setRefreshing(true);
@@ -241,6 +285,43 @@ export default function MyOrdersPage() {
       toast.error("Chưa thể xác nhận nhận hàng. Vui lòng thử lại.");
     } finally {
       setConfirming(null);
+    }
+  };
+
+  const handleOpenCancel = (order) => {
+    setCancelingOrder(order);
+    setCancelReasonPreset(CANCEL_REASONS[0]);
+    setCustomCancelReason("");
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!cancelingOrder) return;
+    const finalReason =
+      cancelReasonPreset === "Lý do khác"
+        ? customCancelReason.trim()
+        : cancelReasonPreset;
+
+    if (!finalReason) {
+      toast.error("Vui lòng nhập lý do hủy đơn.");
+      return;
+    }
+
+    setCanceling(true);
+    try {
+      await orderService.cancelOrder(cancelingOrder._id, finalReason);
+      toast.success("Đã hủy đơn hàng thành công.");
+      setCancelingOrder(null);
+      setCustomCancelReason("");
+      setCancelReasonPreset(CANCEL_REASONS[0]);
+      await loadOrders();
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        err.message ||
+        "Không thể hủy đơn hàng lúc này.";
+      toast.error(msg);
+    } finally {
+      setCanceling(false);
     }
   };
 
@@ -369,6 +450,7 @@ export default function MyOrdersPage() {
                 order={order}
                 onConfirmReceipt={confirmReceipt}
                 confirming={confirming}
+                onOpenCancel={handleOpenCancel}
               />
             ))}
           </div>
@@ -395,6 +477,106 @@ export default function MyOrdersPage() {
           </div>
         )}
       </div>
+
+      {/* Dialog Hủy Đơn Hàng */}
+      <Dialog
+        open={Boolean(cancelingOrder)}
+        onOpenChange={(isOpen) => {
+          if (!isOpen && !canceling) {
+            setCancelingOrder(null);
+            setCustomCancelReason("");
+            setCancelReasonPreset(CANCEL_REASONS[0]);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-foreground">
+              Hủy đơn hàng {cancelingOrder?.orderId || `#${cancelingOrder?._id?.slice(-8)}`}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2 text-sm text-foreground">
+            {cancelingOrder?.paymentStatus === "paid" && (
+              <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-3.5 text-xs text-amber-700 dark:text-amber-400 flex items-start gap-2.5">
+                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                <p>
+                  Đơn hàng này đã thanh toán trực tuyến. Khi hủy, hệ thống TotMart sẽ tự động tạo yêu cầu hoàn lại{" "}
+                  <strong>{money(cancelingOrder.totalAmount)}</strong> theo quy trình hoàn tiền tự động.
+                </p>
+              </div>
+            )}
+
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground block mb-2">
+                Vui lòng chọn lý do hủy đơn:
+              </label>
+              <div className="space-y-2">
+                {CANCEL_REASONS.map((r) => (
+                  <label
+                    key={r}
+                    className="flex items-center gap-2.5 text-xs font-medium cursor-pointer rounded-lg border border-border p-2.5 hover:bg-muted transition-colors"
+                  >
+                    <input
+                      type="radio"
+                      name="cancelReason"
+                      value={r}
+                      checked={cancelReasonPreset === r}
+                      onChange={(e) => setCancelReasonPreset(e.target.value)}
+                      className="accent-primary"
+                    />
+                    <span>{r}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {cancelReasonPreset === "Lý do khác" && (
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
+                  Nhập lý do cụ thể:
+                </label>
+                <textarea
+                  rows={3}
+                  value={customCancelReason}
+                  onChange={(e) => setCustomCancelReason(e.target.value)}
+                  placeholder="Vui lòng chia sẻ thêm lý do bạn muốn hủy đơn..."
+                  className="w-full rounded-xl border border-border bg-background p-3 text-xs outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+            <button
+              type="button"
+              onClick={() => setCancelingOrder(null)}
+              disabled={canceling}
+              className="rounded-xl border border-border bg-card px-4 py-2 min-h-10 text-xs font-bold text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+            >
+              Đóng
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmCancel}
+              disabled={
+                canceling ||
+                (cancelReasonPreset === "Lý do khác" && !customCancelReason.trim())
+              }
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-destructive px-4 py-2 min-h-10 text-xs font-bold text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:opacity-50"
+            >
+              {canceling ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" />
+                  <span>Đang hủy...</span>
+                </>
+              ) : (
+                <span>Xác nhận hủy đơn</span>
+              )}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
