@@ -6,8 +6,6 @@ import { HeroSection } from "@/components_box/hero-sections";
 import { IntroSection } from "@/components_box/intro-section";
 import { BrandMarquee } from "@/components_box/brand-marquee";
 import { HowItWorks } from "@/components_box/how-it-work";
-import { SubscriptionShowcase } from "@/components_box/product-showcase";
-import { Testimonials } from "@/components_box/testimonials";
 import TotBoxProductChoosePlan from "@/components_box/ChoosePlan";
 import { Newsletter } from "@/components_box/newsletter";
 import Footer from "./(client)/components/ui/footer";
@@ -28,8 +26,8 @@ export default function Home() {
         <IntroSection />
         <BrandMarquee />
         <HowItWorks />
-        <SubscriptionShowcase />
-        <Testimonials />
+
+
         <TotBoxProductChoosePlan />
         <Newsletter />
       </div>

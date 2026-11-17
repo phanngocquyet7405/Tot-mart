@@ -1,4 +1,5 @@
-export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+// One browser origin for login, refresh, cookies and catalog requests.
+export const BASE_URL = "/api";
 
 export const API_ENDPOINTS = {
   AUTH: {
@@ -97,6 +98,10 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/boxes/update-box/${id}`,
     ADJUST_STOCK: (id) => `/boxes/adjust-stock/${id}`,
     DELETE: (id) => `/boxes/delete-box/${id}`,
+  },
+
+  COUPONS: {
+    GET_ALL: "/coupons/get-all-coupons",
   },
 
   SUBSCRIBE_PLANS: {

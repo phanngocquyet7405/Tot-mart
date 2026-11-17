@@ -1,13 +1,20 @@
 import axios from 'axios';
-import { getAccessToken, saveToken, clearSession } from './tokenMiddleware';
+import { jwtDecode } from 'jwt-decode';
+import { getAccessToken, getTokenUserId, saveToken, clearSession } from './tokenMiddleware.js';
 let refreshing = null;
 export function setupAxiosMiddleware(instance) {
   instance.interceptors.request.use(config => {
+    const userId = getTokenUserId();
+    if (config._requestUserId && config._requestUserId !== userId) throw new Error('Tài khoản đã thay đổi. Đăng nhập lại đúng tài khoản của yêu cầu cũ.');
+    config._requestUserId ||= userId;
     config.withCredentials = true;
     config.headers['X-TotMart-Request'] = '1';
     const token = getAccessToken();
     if (token) config.headers.Authorization = `Bearer ${token}`;
     else delete config.headers.Authorization;
+    if (/\/checkout\/(attempts|check-out)|\/subcribe-plans\/user-subscribe/.test(config.url || '')) {
+      config.timeout ||= 35000;
+    }
     return config;
   });
   instance.interceptors.response.use(response => response.data, async error => {
@@ -15,12 +22,27 @@ export function setupAxiosMiddleware(instance) {
     if (error.response?.status === 401 && config && !config._retried && !/\/home\/(login|refresh|forgot-password|reset-password)/.test(config.url || '')) {
       config._retried = true;
       try {
-        if (!refreshing) refreshing = axios.post(`${instance.defaults.baseURL.replace(/\/$/, '')}/home/refresh`, {}, { withCredentials: true, headers: { 'X-TotMart-Request': '1' } })
-          .then(response => { saveToken(response.data.token); return response.data.token; }).finally(() => { refreshing = null; });
+        if (!refreshing) refreshing = axios.post(`${instance.defaults.baseURL.replace(/\/$/, '')}/home/refresh`, {}, { timeout: 10000, withCredentials: true, headers: { 'X-TotMart-Request': '1' } })
+          .then(response => {
+            const token = response.data.token;
+            const subject = jwtDecode(token).userId;
+            if (config._requestUserId && (subject !== config._requestUserId || getTokenUserId() !== config._requestUserId)) throw new Error('Tài khoản refresh không khớp yêu cầu cũ.');
+            saveToken(token); return token;
+          }).finally(() => { refreshing = null; });
         const token = await refreshing;
+        if (config._requestUserId && (jwtDecode(token).userId !== config._requestUserId || getTokenUserId() !== config._requestUserId)) throw new Error('Tài khoản đã thay đổi trong lúc refresh.');
         config.headers.Authorization = `Bearer ${token}`;
         return instance(config);
-      } catch { clearSession(); }
+      } catch (failure) {
+        const failureStatus = failure.response?.status;
+        if ([401, 403].includes(failureStatus)) {
+          if (getTokenUserId() === config._requestUserId) {
+            clearSession();
+            if (typeof window !== 'undefined') window.dispatchEvent(new Event('totmart:session-expired'));
+          }
+        }
+        return Promise.reject(failure);
+      }
     }
     return Promise.reject(error);
   });

@@ -17,10 +17,10 @@ export function BoxSection({
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
       {/* Label section */}
       <div>
-        <h3 className="text-sm font-medium text-[#2C1810]">
+        <h3 className="text-sm font-medium text-[var(--foreground)]">
           Sản phẩm trong box
         </h3>
-        <p className="text-xs text-[#2C1810]/50 mt-1">
+        <p className="text-xs text-[var(--foreground)]/50 mt-1">
           Thêm các sản phẩm sẽ được đóng gói trong box này
         </p>
       </div>
@@ -28,7 +28,7 @@ export function BoxSection({
       {/* Product list + summary */}
       <div className="md:col-span-2">
         {errors.products && (
-          <p className="text-xs text-red-500 mb-2">{errors.products}</p>
+          <p className="text-xs text-destructive-text mb-2">{errors.products}</p>
         )}
 
         <ProductList
@@ -41,12 +41,12 @@ export function BoxSection({
         />
 
         {computedValue > 0 && (
-          <div className="flex items-center justify-between px-3 py-2 bg-[#C85C3C]/10 rounded-lg mt-3 border border-[#C85C3C]/20">
-            <span className="text-xs text-[#C85C3C]">
+          <div className="flex items-center justify-between px-3 py-2 bg-primary/10 rounded-lg mt-3 border border-primary/20">
+            <span className="text-xs text-primary">
               Giá trị box{" "}
               {discountPercent > 0 ? `(sau giảm ${discountPercent}%)` : ""}
             </span>
-            <span className="text-sm font-semibold text-[#C85C3C]">
+            <span className="text-sm font-semibold text-primary">
               {fmtPrice(computedValue)}
             </span>
           </div>

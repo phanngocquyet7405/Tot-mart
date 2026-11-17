@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import {
@@ -20,7 +21,7 @@ export function useAdminCategoriesList() {
       const data = await fetchAdminCategories();
       setCategories(data);
     } catch (err) {
-      console.error("Lỗi khi tải danh mục:", err);
+      logger.error("Lỗi khi tải danh mục:", err);
       setCategories([]);
     } finally {
       setIsLoading(false);

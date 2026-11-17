@@ -1,6 +1,5 @@
-"use client";
-
-import { use } from "react";
+import { notFound, permanentRedirect } from "next/navigation";
+import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 // UI Components
@@ -9,131 +8,148 @@ import AnnouncementBar from "@/app/(client)/components/ui/AnnouncementBar";
 import MainHeader from "@/app/(client)/components/ui/main_header";
 import Footer from "@/app/(client)/components/ui/footer";
 
-import { useProductDetail } from "@/app/hook/useProductDetail";
-import { ProductGallery } from "../../components/Product/ProductGallery";
-import { ProductPurchasePanel } from "../../components/Product/ProductPurchasePanel";
-import { ProductInfoTabs } from "../../components/Product/ProductInfoTabs";
-import { RelatedProducts } from "../../components/Product/RelatedProducts";
-import { ProductLoadingState } from "../../components/Product/ProductLoadingState";
-import { ProductNotFoundState } from "../../components/Product/ProductNotFoundState";
-import { FrequentlyBought } from "../../components/Product/FrequentlyBought";
+import {
+  getServerProductDetail,
+  getPublicSiteUrl,
+} from "@/app/services/server/serverCatalog";
+import ProductDetailInteractive from "./ProductDetailInteractive";
 
-export default function ProductDetailPage({ params: paramsPromise }) {
-  const params = use(paramsPromise);
+export const revalidate = 60;
+
+export async function generateMetadata({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}) {
+  const params = await paramsPromise;
+  const searchParams = searchParamsPromise ? await searchParamsPromise : {};
   const slug = params?.slug || "";
-
-  const {
-    product,
-    relatedProducts,
-    loading,
-    selectedImage,
-    setSelectedImage,
-    quantity,
-    activeTab,
-    setActiveTab,
-    isWishlisted,
-    isAddingToCart,
-    isBuyingNow,
-    increaseQty,
-    decreaseQty,
-    handleAddToCart,
-    handleBuyNow,
-    handleShare,
-    handleWishlist,
-    finalPrice,
-    fmtPrice,
-  } = useProductDetail(slug);
-
-  // Thứ tự header đúng chuẩn dùng xuyên suốt toàn site (products/page.js,
-  // categories, brands, homepage...): AnnouncementBar → MainHeader → NavMenu.
-  // (Riêng box/[id]/page.js hiện đang đảo NavMenu/MainHeader — lệch so với
-  // phần còn lại của app, không lặp lại chỗ lệch đó ở đây.)
-  if (loading) {
-    return (
-      <>
-        <AnnouncementBar />
-        <MainHeader />
-        <NavMenu />
-        <ProductLoadingState />
-        <Footer />
-      </>
-    );
-  }
+  const product = await getServerProductDetail(slug);
 
   if (!product) {
-    return (
-      <>
-        <AnnouncementBar />
-        <MainHeader />
-        <NavMenu />
-        <ProductNotFoundState />
-        <Footer />
-      </>
-    );
+    notFound();
   }
+
+  const canonicalSlug = `${product.slug || "san-pham"}-${product._id}`;
+  if (slug !== canonicalSlug) {
+    const qs = new URLSearchParams(searchParams).toString();
+    permanentRedirect(`/products/${canonicalSlug}${qs ? `?${qs}` : ""}`);
+  }
+
+  const siteUrl = getPublicSiteUrl();
+  const canonicalUrl = `${siteUrl}/products/${canonicalSlug}`;
+  const title = `${product.name} | TotMart`;
+  const description = (product.descriptions || product.name || "").slice(
+    0,
+    160,
+  );
+  const images = (product.images || [])
+    .map((img) => (typeof img === "string" ? img : img.url))
+    .filter(Boolean);
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+      siteName: "TotMart",
+      images: images.length ? images.map((url) => ({ url })) : undefined,
+      type: "website",
+    },
+  };
+}
+
+export default async function ProductDetailPage({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}) {
+  const params = await paramsPromise;
+  const searchParams = searchParamsPromise ? await searchParamsPromise : {};
+  const slug = params?.slug || "";
+  const product = await getServerProductDetail(slug);
+
+  if (!product) {
+    notFound();
+  }
+
+  const canonicalSlug = `${product.slug || "san-pham"}-${product._id}`;
+  if (slug !== canonicalSlug) {
+    const qs = new URLSearchParams(searchParams).toString();
+    permanentRedirect(`/products/${canonicalSlug}${qs ? `?${qs}` : ""}`);
+  }
+
+  const siteUrl = getPublicSiteUrl();
+  const canonicalUrl = `${siteUrl}/products/${canonicalSlug}`;
+  const salePercent = product.salePercent || 0;
+  const finalPrice =
+    salePercent > 0
+      ? Math.round(product.price * (1 - salePercent / 100))
+      : product.price;
+  const brandName =
+    product.brand?.name ||
+    (typeof product.brand === "string" ? product.brand : "");
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.descriptions || product.name,
+    image: (product.images || [])
+      .map((img) => (typeof img === "string" ? img : img.url))
+      .filter(Boolean),
+    offers: {
+      "@type": "Offer",
+      price: finalPrice,
+      priceCurrency: "VND",
+      availability:
+        product.stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      url: canonicalUrl,
+    },
+    ...(brandName ? { brand: { "@type": "Brand", name: brandName } } : {}),
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <AnnouncementBar />
       <MainHeader />
       <NavMenu />
 
-      {/* Cart Drawer giờ dùng chung 1 instance duy nhất (mount trong
-          MainHeader ở trên), điều khiển qua CartContext.isCartOpen — không
-          còn mount riêng ở đây nữa để tránh 2 Drawer tồn tại song song. */}
+      <main className="tm-commerce tm-commerce--atelier max-w-7xl mx-auto px-4 sm:px-6 pb-12 pt-[112px] lg:pt-[124px]">
+        <nav className="tm-breadcrumb" aria-label="Đường dẫn">
+          <Link href="/homepage">Cửa hàng</Link>
+          <ChevronRight size={14} aria-hidden="true" />
+          <Link href="/products">Sản phẩm</Link>
+          <ChevronRight size={14} aria-hidden="true" />
+          <span aria-current="page">{product.name}</span>
+        </nav>
 
-      <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-stone-400 mb-8 uppercase tracking-widest font-semibold">
-          <span>Cửa hàng</span>
-          <ChevronRight size={12} />
-          <span>Sản phẩm</span>
-          <ChevronRight size={12} />
-          <span className="text-stone-800 truncate max-w-xs">
-            {product.name}
-          </span>
-        </div>
+        {/* Server-rendered static semantic shell for no-JS environments and crawlers */}
+        <section className="sr-only" aria-label="Thông tin sản phẩm">
+          <h1>{product.name}</h1>
+          {brandName && <p>Thương hiệu: {brandName}</p>}
+          <p>Giá: {finalPrice.toLocaleString("vi-VN")} ₫</p>
+          <p>{product.descriptions}</p>
+        </section>
 
-        <div className="grid lg:grid-cols-12 gap-12 items-start">
-          <ProductGallery
-            images={product.images || []}
-            productName={product.name}
-            selectedImage={selectedImage}
-            onSelectImage={setSelectedImage}
-            discountPercent={product.salePercent || 0}
-          />
-
-          <div className="lg:col-span-5 space-y-6">
-            <ProductPurchasePanel
-              product={product}
-              finalPrice={finalPrice}
-              quantity={quantity}
-              onIncrease={increaseQty}
-              onDecrease={decreaseQty}
-              isAddingToCart={isAddingToCart}
-              onAddToCart={handleAddToCart}
-              isBuyingNow={isBuyingNow}
-              onBuyNow={handleBuyNow}
-              isWishlisted={isWishlisted}
-              onWishlist={handleWishlist}
-              onShare={handleShare}
-              fmtPrice={fmtPrice}
-            />
-          </div>
-        </div>
-
-        <ProductInfoTabs
-          product={product}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
+        {/* Client Interactive Island (Gallery, Purchase panel, Info Tabs, Frequently Bought) */}
+        <ProductDetailInteractive
+          initialProduct={product}
+          slug={slug}
+          discountPercent={product.salePercent || 0}
         />
-
-        <div className="mt-16">
-          <FrequentlyBought products={relatedProducts} />
-        </div>
-
-        <RelatedProducts products={relatedProducts} fmtPrice={fmtPrice} />
-      </div>
+      </main>
 
       <Footer />
     </>

@@ -1,6 +1,22 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+import { getPublicSiteUrl } from "@/app/services/server/serverCatalog";
 
 export default function robots() {
+  const isStaging =
+    process.env.APP_ENV === "staging" ||
+    process.env.VERCEL_ENV === "preview" ||
+    process.env.TOTMART_ENV === "staging";
+
+  if (isStaging) {
+    return {
+      rules: {
+        userAgent: "*",
+        disallow: "/",
+      },
+    };
+  }
+
+  const siteUrl = getPublicSiteUrl();
+
   return {
     rules: {
       userAgent: "*",
@@ -17,6 +33,6 @@ export default function robots() {
         "/register",
       ],
     },
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

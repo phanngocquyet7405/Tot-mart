@@ -118,8 +118,8 @@ export const addToCartApi = (data) =>
 
 // Thay thế toàn bộ giỏ sản phẩm trên BE bằng giỏ localStorage — gọi trước checkout.
 // items: [{ productId, quantity }]
-export const syncCartApi = (items, version) =>
-  axiosConfig.put(API_ENDPOINTS.CART.SYNC, { items, ...(version !== undefined ? { version } : {}) });
+export const syncCartApi = (items, version, userId) =>
+  axiosConfig.put(API_ENDPOINTS.CART.SYNC, { items, ...(version !== undefined ? { version } : {}) }, { _requestUserId: userId });
 
 export const updateCartItemApi = (cartId, data) =>
   axiosConfig.put(API_ENDPOINTS.CART.UPDATE(cartId), data);
@@ -127,15 +127,21 @@ export const updateCartItemApi = (cartId, data) =>
 export const deleteFromCartApi = (cartId, data) =>
   axiosConfig.delete(API_ENDPOINTS.CART.DELETE(cartId), { data });
 
-// --- GIỎ HÀNG ĐĂNG KÝ (SUBSCRIBE CART) ---
+// --- GIỎ HÀNG ĐĂNG KÝ (SUBSCRIBE CART - DEPRECATED) ---
+// Hệ thống TotMart thương mại thống nhất hiện đã chuyển sang đăng ký trực tiếp
+// qua POST /api/subcribe-plans/user-subscribe và phiên checkout độc lập.
+/** @deprecated TotMart subscriptions use direct checkout via /subcribe-plans/user-subscribe */
 export const getSubscribeCartByUserApi = (userId) =>
   axiosConfig.get(API_ENDPOINTS.CART.SUBSCRIBE.GET_BY_USER(userId));
 
+/** @deprecated TotMart subscriptions use direct checkout via /subcribe-plans/user-subscribe */
 export const addSubscribePlanToCartApi = (data) =>
   axiosConfig.post(API_ENDPOINTS.CART.SUBSCRIBE.ADD, data);
 
+/** @deprecated TotMart subscriptions use direct checkout via /subcribe-plans/user-subscribe */
 export const updateSubscribeCartApi = (data) =>
   axiosConfig.put(API_ENDPOINTS.CART.SUBSCRIBE.UPDATE, data);
 
+/** @deprecated TotMart subscriptions use direct checkout via /subcribe-plans/user-subscribe */
 export const deleteFromSubscribeCartApi = (id, data) =>
   axiosConfig.delete(API_ENDPOINTS.CART.SUBSCRIBE.DELETE(id), { data });

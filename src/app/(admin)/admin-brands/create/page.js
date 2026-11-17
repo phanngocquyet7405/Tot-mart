@@ -31,7 +31,7 @@ export default function CreateBrandPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-800">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Thêm thương hiệu
           </h1>
           <p className="text-sm text-muted-foreground flex items-center gap-1">

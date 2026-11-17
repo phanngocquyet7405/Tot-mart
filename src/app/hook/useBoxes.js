@@ -1,3 +1,4 @@
+"use client";
 /**
  * useBoxes.js
  * ─────────────────────────────────────────────────────────────────
@@ -6,7 +7,6 @@
  * không cần tự xử lý các kiểu shape khác nhau từ API.
  * ─────────────────────────────────────────────────────────────────
  */
-"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { getAllBoxesApi } from "@/app/services/api/boxService";

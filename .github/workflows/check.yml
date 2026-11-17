@@ -16,3 +16,5 @@ jobs:
       - run: npm run build -- --webpack
         env:
           API_URL: http://localhost:3001/api
+          # Bật fallback sitemap chỉ cho CI test build (môi trường không có service BE chạy kèm)
+          ALLOW_SITEMAP_FALLBACK: "true"

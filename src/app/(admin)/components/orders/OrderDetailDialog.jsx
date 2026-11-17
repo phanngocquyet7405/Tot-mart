@@ -122,11 +122,11 @@ export function OrderDetailDialog({
                     <p className="text-xs text-muted-foreground">
                       Thương hiệu: {item.brandName}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground tabular-nums">
                       SL: {item.quantity} × {formatCurrency(item.price)}
                     </p>
                   </div>
-                  <p className="font-semibold">
+                  <p className="font-semibold tabular-nums">
                     {formatCurrency(item.lineTotal)}
                   </p>
                 </div>
@@ -140,19 +140,19 @@ export function OrderDetailDialog({
           <div className="space-y-1.5 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>Phí vận chuyển</span>
-              <span>{order.shippingMode === "separate" ? "Xác nhận riêng" : formatCurrency(order.shippingFee)}</span>
+              <span className="tabular-nums">{order.shippingMode === "separate" ? "Xác nhận riêng" : formatCurrency(order.shippingFee)}</span>
             </div>
-            {order.giftFee > 0 && <div className="flex justify-between text-muted-foreground"><span>Gói quà</span><span>{formatCurrency(order.giftFee)}</span></div>}
-            {order.bulkDiscountAmount > 0 && <p className="text-xs text-muted-foreground">Đã giảm số lượng {formatCurrency(order.bulkDiscountAmount)} trong tiền hàng.</p>}
+            {order.giftFee > 0 && <div className="flex justify-between text-muted-foreground"><span>Gói quà</span><span className="tabular-nums">{formatCurrency(order.giftFee)}</span></div>}
+            {order.bulkDiscountAmount > 0 && <p className="text-xs text-muted-foreground">Đã giảm số lượng <span className="tabular-nums">{formatCurrency(order.bulkDiscountAmount)}</span> trong tiền hàng.</p>}
             {order.discount > 0 && (
               <div className="flex justify-between text-muted-foreground">
                 <span>Giảm giá</span>
-                <span>-{formatCurrency(order.discount)}</span>
+                <span className="tabular-nums">-{formatCurrency(order.discount)}</span>
               </div>
             )}
             <div className="flex justify-between text-base font-bold pt-1">
               <span>Tổng cộng</span>
-              <span>{formatCurrency(order.totalPrice)}</span>
+              <span className="tabular-nums">{formatCurrency(order.totalPrice)}</span>
             </div>
           </div>
 
@@ -166,8 +166,8 @@ export function OrderDetailDialog({
                   {nextOptions.map((opt) => (
                     <Button
                       key={opt.value}
-                      size="sm"
                       variant="outline"
+                      className="min-h-11"
                       disabled={isUpdatingStatus}
                       onClick={() => onChangeStatus(order, opt)}
                     >

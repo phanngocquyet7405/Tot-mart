@@ -6,6 +6,9 @@ import { AppContext } from "@/app/context/AppContext";
 import { checkTokenValid, getTokenRole } from "./tokenMiddleware";
 
 // Helper để kiểm tra quyền nhanh (dùng trong logic render)
+// LƯU Ý BẢO MẬT: Role Guard phía FE chỉ là cơ chế điều hướng giao diện (UX).
+// Tuyệt đối không dùng thông tin role/JWT giải mã tại FE để bảo vệ dữ liệu.
+// Mọi hành động nhạy cảm và bảo mật dữ liệu thực sự bắt buộc do Backend thẩm định trên từng endpoint.
 export function canAccess(allowedRoles) {
   const role = getTokenRole();
   const isValid = checkTokenValid();
@@ -29,15 +32,15 @@ export function withAdmin(WrappedComponent) {
       }
 
       if (user && user.role !== "admin") {
-        router.replace("/homepage?error=forbidden");
+        router.replace(user.role === "merchant" ? "/manager" : "/homepage?error=forbidden");
       }
     }, [user, isLoading, router]);
 
     // Đang load → spinner (hợp lý vì chưa biết role)
     if (isLoading) {
       return (
-        <div className="flex h-screen items-center justify-center bg-white">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <div className="flex h-screen items-center justify-center bg-background">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       );
     }
@@ -80,12 +83,15 @@ export function withRole(WrappedComponent, allowedRoles = [], options = {}) {
       // giá trị cố định từ factory function, không thay đổi theo lifecycle
     }, [user, isLoading, router]);
 
-    if (
-      isLoading ||
-      !user ||
-      !checkTokenValid() ||
-      !allowedRoles.includes(user.role)
-    ) {
+    if (isLoading) {
+      return (
+        <div className="flex h-screen items-center justify-center bg-background">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      );
+    }
+
+    if (!user || !checkTokenValid() || !allowedRoles.includes(user.role)) {
       return null;
     }
 

@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { formatCurrency } from "@/app/util/formatter";
 import { useState, useEffect, useRef } from "react";
@@ -115,7 +116,7 @@ export default function UpdateProductPage() {
           if (product) fillForm(product);
         }
       } catch (error) {
-        console.error(error);
+        logger.error(error);
         toast.error("Lỗi khi tải dữ liệu");
       } finally {
         setLoading(false);
@@ -256,7 +257,7 @@ export default function UpdateProductPage() {
               <div
                 key={p.id || p._id}
                 onClick={() => handleSelectProduct(p.id || p._id)}
-                className="flex items-center justify-between p-3 bg-white border rounded-2xl hover:border-primary hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]"
+                className="flex items-center justify-between p-3 bg-card border border-border rounded-2xl hover:border-primary hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]"
               >
                 <div className="flex items-center gap-4">
                   {/* Áp dụng chuẩn hiển thị từ ProductList */}
@@ -428,7 +429,7 @@ export default function UpdateProductPage() {
               {/* Preview Card đồng bộ style */}
               <Card className="bg-muted/30 border-dashed">
                 <CardContent className="pt-6 space-y-4">
-                  <div className="aspect-square relative rounded-xl overflow-hidden border bg-white">
+                  <div className="aspect-square relative rounded-xl overflow-hidden border border-border bg-card">
                     <Image
                       src={
                         newImages[0]?.preview ||
@@ -486,7 +487,7 @@ export default function UpdateProductPage() {
                     />
                     <button
                       onClick={() => removeExistingImage(url)}
-                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-lg hover:bg-red-600"
+                      className="absolute top-1 right-1 bg-destructive text-white p-1 rounded-full shadow-lg hover:bg-destructive"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -508,7 +509,7 @@ export default function UpdateProductPage() {
                       onClick={() =>
                         setNewImages((prev) => prev.filter((_, i) => i !== idx))
                       }
-                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                      className="absolute top-1 right-1 bg-destructive text-white p-1 rounded-full"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -528,7 +529,7 @@ export default function UpdateProductPage() {
               <Input type="number" step="1" value={stockDelta} onChange={(e) => setStockDelta(e.target.value)} placeholder="Ví dụ: 10 hoặc -3" required />
             </label>
             <p
-              className={`text-sm ${stockWouldBeNegative ? "text-red-600" : "text-gray-600 dark:text-gray-300"}`}
+              className={`text-sm ${stockWouldBeNegative ? "text-destructive-text" : "text-muted-foreground dark:text-muted-foreground"}`}
             >
               {!stockDeltaValid
                 ? "Nhập số nguyên khác 0 (số âm để giảm tồn kho)"

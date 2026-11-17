@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { axiosConfig } from "@/app/services/api/axiosConfig";
 import Image from "next/image";
 import { Tag, FileText, MapPin, ImageIcon, Upload, X, Loader2 } from "lucide-react";
 
@@ -17,6 +18,7 @@ import RichTextEditor from "../../components/ui/RichTextEditor";
  */
 export default function BrandForm({
   form,
+  ownershipLocked = false,
   errors,
   updateField,
   logoPreview,
@@ -30,15 +32,22 @@ export default function BrandForm({
   onCancel,
 }) {
   const fileInputRef = useRef(null);
+  const [merchants, setMerchants] = useState([]);
+  const [merchantError, setMerchantError] = useState('');
+  useEffect(() => {
+    let active = true;
+    axiosConfig.get('/brands/merchant-options').then(result => { if (active) setMerchants(result.data); }).catch(() => { if (active) setMerchantError('Không tải được danh sách merchant. Tải lại trang để thử lại.'); });
+    return () => { active = false; };
+  }, []);
   const displayedLogo = logoPreview || existingLogoUrl;
 
   return (
     <form onSubmit={onSubmit} className="grid gap-6 md:grid-cols-3">
       <div className="md:col-span-2 space-y-4">
-        <Card className="border-orange-100 shadow-sm">
-          <CardHeader className="bg-orange-50/30 border-b">
-            <CardTitle className="text-lg flex items-center gap-2 text-orange-800">
-              <Tag className="h-5 w-5 text-orange-600" />
+        <Card className="border-warning/20 shadow-sm">
+          <CardHeader className="bg-warning/10/30 border-b">
+            <CardTitle className="text-lg flex items-center gap-2 text-warning-text">
+              <Tag className="h-5 w-5 text-warning-text" />
               Thông tin thương hiệu
             </CardTitle>
           </CardHeader>
@@ -65,6 +74,16 @@ export default function BrandForm({
               )}
             </div>
 
+            <div className="space-y-1.5">
+              <Label htmlFor="brand-owner">Merchant quản lý</Label>
+              <select disabled={ownershipLocked || isSubmitting} id="brand-owner" className="w-full rounded border p-2" value={form.ownerId || ''} onChange={updateField('ownerId')}>
+                <option value="">Admin quản lý / giữ chủ hiện tại</option>
+                {form.ownerId && !merchants.some(m => m._id === form.ownerId) && <option value={form.ownerId}>Chủ hiện tại</option>}
+                {merchants.map(m => <option key={m._id} value={m._id}>{m.name}</option>)}
+              </select>
+              {merchantError && <p role="alert" className="text-sm text-destructive-text">{merchantError}</p>}
+              <p className="text-xs text-muted-foreground">Chỉ chọn merchant khi tạo thương hiệu. Đổi chủ thương hiệu hiện có cần quy trình chuyển quyền và đối chiếu dữ liệu riêng.</p>
+            </div>
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5">
                 <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
@@ -94,16 +113,16 @@ export default function BrandForm({
       </div>
 
       <div className="space-y-4">
-        <Card className="border-orange-100 shadow-sm">
-          <CardHeader className="bg-orange-50/30 border-b">
-            <CardTitle className="text-lg flex items-center gap-2 text-orange-800">
-              <ImageIcon className="h-5 w-5 text-orange-600" />
+        <Card className="border-warning/20 shadow-sm">
+          <CardHeader className="bg-warning/10/30 border-b">
+            <CardTitle className="text-lg flex items-center gap-2 text-warning-text">
+              <ImageIcon className="h-5 w-5 text-warning-text" />
               Logo
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 pt-5">
             <div
-              className="relative flex h-36 w-full items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/30 overflow-hidden cursor-pointer"
+              className="relative flex h-36 w-full items-center justify-center rounded-xl border border-dashed border-warning/20 bg-warning/10/30 overflow-hidden cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             >
               {displayedLogo ? (
@@ -122,7 +141,7 @@ export default function BrandForm({
                         e.stopPropagation();
                         onClearLogo();
                       }}
-                      className="absolute right-2 top-2 rounded-full bg-white/90 p-1 shadow hover:bg-white"
+                      className="absolute right-2 top-2 rounded-full bg-background/90 p-1 shadow hover:bg-background border border-border"
                     >
                       <X size={14} />
                     </button>
@@ -163,7 +182,7 @@ export default function BrandForm({
           </Button>
           <Button
             type="submit"
-            className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
+            className="flex-1 bg-warning-text hover:bg-warning-text text-white"
             disabled={isSubmitting}
           >
             {isSubmitting ? (

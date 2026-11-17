@@ -1,3 +1,4 @@
+"use client";
 /**
  * page.js — Trang hồ sơ cá nhân
  * Route: /profile
@@ -6,11 +7,10 @@
  * Page này chỉ chịu trách nhiệm load data + render tab content.
  */
 
-"use client";
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { ArrowRight, ShoppingBag } from "lucide-react";
 
 import { AddressManager } from "../components/profile/AddressManager";
 import { CartManager } from "../components/profile/CartManager";
@@ -32,14 +32,14 @@ import logger from "@/app/util/Logger";
 
 function ProfileSkeleton() {
   return (
-    <Card className="border-[#F0DDD5]">
+    <Card className="border-border bg-card shadow-xs rounded-2xl">
       <CardHeader>
-        <div className="h-6 w-48 animate-pulse rounded bg-[#F0DDD5]" />
+        <div className="h-6 w-48 animate-pulse rounded-lg bg-muted" />
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="h-12 w-full animate-pulse rounded bg-[#F0DDD5]" />
-        <div className="h-12 w-full animate-pulse rounded bg-[#F0DDD5]" />
-        <div className="h-10 w-36 animate-pulse rounded bg-[#F0DDD5]" />
+        <div className="h-12 w-full animate-pulse rounded-xl bg-muted" />
+        <div className="h-12 w-full animate-pulse rounded-xl bg-muted" />
+        <div className="h-10 w-36 animate-pulse rounded-xl bg-muted" />
       </CardContent>
     </Card>
   );
@@ -89,7 +89,7 @@ export default function ProfilePage() {
           userData.cart = [];
         }
 
-        userData.addreses = userData.addreses || [];
+        userData.addresses = userData.addresses || [];
         setUser(userData);
       } catch (err) {
         logger.error("Lỗi loadProfileAndCart:", err);
@@ -110,28 +110,34 @@ export default function ProfilePage() {
     const optimistic = {
       ...user,
       name: payload.name,
-      email: payload.email,
-      avatar: {
-        url: payload.avatarUrl,
-        public_id: user.avatar?.public_id || "local-preview",
-      },
+      phone: payload.phone || user.phone,
+      avatar: payload.avatarUrl
+        ? {
+            url: payload.avatarUrl,
+            public_id: user.avatar?.public_id || "local-preview",
+          }
+        : user.avatar,
     };
     setUser(optimistic);
     setSavingProfile(true);
 
     try {
-      const res = await userService.updateUser(userId, {
-        name: payload.name,
-        email: payload.email,
-        avatar: optimistic.avatar,
-      });
+      const updatePayload = {
+        name: payload.name.trim(),
+        ...(payload.phone?.trim() ? { phone: payload.phone.trim() } : {}),
+      };
+      const res = await userService.updateUser(userId, updatePayload);
       const updated = res.data?.data || res.data;
-      setUser((prev) => ({ ...prev, ...updated }));
+      setUser((prev) => ({
+        ...prev,
+        ...updated,
+        avatar: optimistic.avatar,
+      }));
       toast.success("Cập nhật hồ sơ thành công!");
     } catch (err) {
       logger.error("Lỗi cập nhật hồ sơ:", err?.response || err);
       setUser(previous);
-      toast.error("Không thể cập nhật hồ sơ");
+      toast.error(err?.response?.data?.message || "Không thể cập nhật hồ sơ");
     } finally {
       setSavingProfile(false);
     }
@@ -144,17 +150,17 @@ export default function ProfilePage() {
     const userId = user._id || user.id;
     const addressId = address._id || address.id;
 
-    const index = user.addreses.findIndex(
+    const index = user.addresses.findIndex(
       (item) => (item._id || item.id) === addressId,
     );
     const nextAddresses =
       index >= 0
-        ? user.addreses.map((item) =>
+        ? user.addresses.map((item) =>
             (item._id || item.id) === addressId ? address : item,
           )
-        : [address, ...user.addreses];
+        : [address, ...user.addresses];
 
-    setUser({ ...user, addreses: nextAddresses });
+    setUser({ ...user, addresses: nextAddresses });
     setUpdatingAddress(true);
 
     try {
@@ -169,7 +175,7 @@ export default function ProfilePage() {
       const updatedUser = res.data?.data || res.data;
       setUser((prev) => ({
         ...prev,
-        addreses: updatedUser?.addreses || nextAddresses,
+        addresses: updatedUser?.addresses || nextAddresses,
       }));
       toast.success("Đã lưu địa chỉ");
     } catch (err) {
@@ -186,11 +192,11 @@ export default function ProfilePage() {
     if (!user) return;
     const previous = user;
     const userId = user._id || user.id;
-    const nextAddresses = user.addreses.filter(
+    const nextAddresses = user.addresses.filter(
       (item) => (item._id || item.id) !== addressId,
     );
 
-    setUser({ ...user, addreses: nextAddresses });
+    setUser({ ...user, addresses: nextAddresses });
     setUpdatingAddress(true);
 
     try {
@@ -198,7 +204,7 @@ export default function ProfilePage() {
       const updatedUser = res.data?.data || res.data;
       setUser((prev) => ({
         ...prev,
-        addreses: updatedUser?.addreses || nextAddresses,
+        addresses: updatedUser?.addresses || nextAddresses,
       }));
       toast.success("Đã xóa địa chỉ");
     } catch (err) {
@@ -269,14 +275,23 @@ export default function ProfilePage() {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 space-y-6">
       {/* Header */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-black text-[#2C1810] md:text-3xl tracking-tight">
-          Hồ sơ cá nhân
-        </h1>
-        <p className="text-sm text-stone-500">
-          Quản lý thông tin cá nhân, địa chỉ giao hàng và giỏ hàng.
-        </p>
-        <Link href="/profile/orders" className="inline-block text-green-700 underline">Xem đơn hàng của tôi</Link>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-border pb-5">
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground font-serif">
+            Hồ sơ cá nhân
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Quản lý thông tin cá nhân, sổ địa chỉ giao hàng và giỏ hàng của bạn.
+          </p>
+        </div>
+        <Link
+          href="/profile/orders"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-xs font-semibold text-foreground transition-colors shadow-2xs self-start sm:self-auto"
+        >
+          <ShoppingBag size={14} className="text-primary" />
+          <span>Đơn hàng của tôi</span>
+          <ArrowRight size={13} className="text-muted-foreground" />
+        </Link>
       </div>
 
       {/* Content */}
@@ -288,6 +303,7 @@ export default function ProfilePage() {
             <ProfileInfo
               name={user.name || ""}
               email={user.email || ""}
+              phone={user.phone || ""}
               avatarUrl={user.avatar?.url || ""}
               onSave={handleProfileSave}
               saving={savingProfile}
@@ -295,7 +311,7 @@ export default function ProfilePage() {
           }
           addressContent={
             <AddressManager
-              addresses={user.addreses}
+              addresses={user.addresses}
               onUpsertAddress={handleUpsertAddress}
               onDeleteAddress={handleDeleteAddress}
               loading={updatingAddress}

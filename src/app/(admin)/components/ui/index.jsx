@@ -12,13 +12,13 @@ export function Button({
     "inline-flex items-center gap-2 font-medium rounded-lg border transition-all duration-150 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed";
   const variants = {
     default:
-      "bg-white border-gray-200 text-gray-800 hover:bg-gray-50 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800",
-    primary: "bg-blue-700 border-blue-700 text-white hover:bg-blue-800",
-    danger: "bg-red-700 border-red-700 text-white hover:bg-red-800",
+      "bg-card border-border text-foreground hover:bg-muted/30 dark:border-border dark:text-foreground dark:hover:bg-muted",
+    primary: "bg-primary border-primary text-primary-foreground hover:bg-primary/90",
+    danger: "bg-destructive/90 border-destructive text-destructive-foreground hover:bg-destructive/90",
     ghost:
-      "border-transparent bg-transparent text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800",
+      "border-transparent bg-transparent text-muted-foreground hover:bg-muted dark:text-muted-foreground dark:hover:bg-muted",
     outline:
-      "bg-transparent border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300",
+      "bg-transparent border-border text-foreground hover:bg-muted/30 border-border dark:text-muted-foreground",
   };
   const sizes = {
     sm: "px-3 py-1.5 text-xs",
@@ -39,13 +39,13 @@ export function Button({
 
 export function Badge({ children, color = "gray" }) {
   const colors = {
-    gray: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+    gray: "bg-muted text-foreground dark:bg-muted dark:text-muted-foreground",
     green:
-      "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-    red: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+      "bg-success/15 text-success-text bg-success/15 dark:text-success-text",
+    red: "bg-destructive/15 text-destructive-text bg-destructive/15 dark:text-destructive-text",
     amber:
-      "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-    blue: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+      "bg-warning/15 text-warning-text bg-warning/15 dark:text-warning-text",
+    blue: "bg-primary/15 text-primary bg-primary/10 text-primary",
   };
   return (
     <span
@@ -60,20 +60,20 @@ export function Input({ label, error, className = "", ...props }) {
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">
+        <label className="text-xs font-medium text-muted-foreground dark:text-muted-foreground">
           {label}
         </label>
       )}
       <input
-        className={`w-full px-3 py-2 text-sm rounded-lg border bg-white text-gray-900 placeholder:text-gray-400
-          focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors
-          dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100
+        className={`w-full px-3 py-2 text-sm rounded-lg border bg-card text-foreground placeholder:text-muted-foreground
+          focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors
+          dark:bg-card dark:border-border dark:text-foreground
           disabled:opacity-50 disabled:cursor-not-allowed
-          ${error ? "border-red-400 focus:ring-red-500/20 focus:border-red-500" : "border-gray-200"}
+          ${error ? "border-destructive/50 focus:ring-destructive/20 focus:border-destructive" : "border-border"}
           ${className}`}
         {...props}
       />
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-destructive-text">{error}</p>}
     </div>
   );
 }
@@ -82,18 +82,18 @@ export function Textarea({ label, error, className = "", ...props }) {
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">
+        <label className="text-xs font-medium text-muted-foreground dark:text-muted-foreground">
           {label}
         </label>
       )}
       <textarea
-        className={`w-full px-3 py-2 text-sm rounded-lg border bg-white text-gray-900 placeholder:text-gray-400
-          focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors resize-none
-          dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100
-          ${error ? "border-red-400" : "border-gray-200"} ${className}`}
+        className={`w-full px-3 py-2 text-sm rounded-lg border bg-card text-foreground placeholder:text-muted-foreground
+          focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none
+          dark:bg-card dark:border-border dark:text-foreground
+          ${error ? "border-destructive/50" : "border-border"} ${className}`}
         {...props}
       />
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-destructive-text">{error}</p>}
     </div>
   );
 }
@@ -102,20 +102,20 @@ export function Select({ label, error, children, className = "", ...props }) {
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">
+        <label className="text-xs font-medium text-muted-foreground dark:text-muted-foreground">
           {label}
         </label>
       )}
       <select
-        className={`w-full px-3 py-2 text-sm rounded-lg border bg-white text-gray-900
-          focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors
-          dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100
-          ${error ? "border-red-400" : "border-gray-200"} ${className}`}
+        className={`w-full px-3 py-2 text-sm rounded-lg border bg-card text-foreground
+          focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors
+          dark:bg-card dark:border-border dark:text-foreground
+          ${error ? "border-destructive/50" : "border-border"} ${className}`}
         {...props}
       >
         {children}
       </select>
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-destructive-text">{error}</p>}
     </div>
   );
 }
@@ -123,7 +123,7 @@ export function Select({ label, error, children, className = "", ...props }) {
 export function Card({ children, className = "" }) {
   return (
     <div
-      className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl ${className}`}
+      className={`bg-card border border-border dark:border-border rounded-xl ${className}`}
     >
       {children}
     </div>
@@ -133,7 +133,7 @@ export function Card({ children, className = "" }) {
 export function CardHeader({ children, className = "" }) {
   return (
     <div
-      className={`px-6 py-4 border-b border-gray-100 dark:border-gray-800 ${className}`}
+      className={`px-6 py-4 border-b border-border dark:border-border ${className}`}
     >
       {children}
     </div>
@@ -147,11 +147,11 @@ export function CardBody({ children, className = "" }) {
 export function Alert({ children, type = "error" }) {
   const styles = {
     error:
-      "bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300",
+      "bg-destructive/10 border-destructive/20 text-destructive-text bg-destructive/10 dark:border-destructive/30 dark:text-destructive-text",
     success:
-      "bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300",
+      "bg-success/10 border-success/20 text-success-text bg-success/15 dark:border-success/30 text-success-text",
     warning:
-      "bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300",
+      "bg-warning/10 border-warning/20 text-warning-text bg-warning/15 dark:border-warning/30 text-warning-text",
   };
   return (
     <div
@@ -193,11 +193,11 @@ export function PageHeader({ title, description, actions }) {
   return (
     <div className="flex items-start justify-between gap-4 mb-6">
       <div>
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+        <h1 className="text-xl font-semibold text-foreground dark:text-foreground">
           {title}
         </h1>
         {description && (
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-muted-foreground dark:text-muted-foreground">
             {description}
           </p>
         )}
@@ -211,19 +211,19 @@ export function PageHeader({ title, description, actions }) {
 
 export function Breadcrumb({ items }) {
   return (
-    <nav className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 mb-5">
+    <nav className="flex items-center gap-1.5 text-sm text-muted-foreground dark:text-muted-foreground mb-5">
       {items.map((item, i) => (
         <span key={i} className="flex items-center gap-1.5">
-          {i > 0 && <span className="text-gray-300 dark:text-gray-600">/</span>}
+          {i > 0 && <span className="text-muted-foreground dark:text-muted-foreground">/</span>}
           {item.href ? (
             <a
               href={item.href}
-              className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              className="hover:text-foreground dark:hover:text-foreground transition-colors"
             >
               {item.label}
             </a>
           ) : (
-            <span className="text-gray-900 dark:text-gray-100 font-medium">
+            <span className="text-foreground dark:text-foreground font-medium">
               {item.label}
             </span>
           )}
@@ -235,13 +235,13 @@ export function Breadcrumb({ items }) {
 
 export function FormSection({ title, description, children }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 border-b border-border dark:border-border last:border-0 last:pb-0">
       <div>
-        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        <h3 className="text-sm font-medium text-foreground dark:text-foreground">
           {title}
         </h3>
         {description && (
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+          <p className="mt-1 text-xs text-muted-foreground dark:text-muted-foreground leading-relaxed">
             {description}
           </p>
         )}

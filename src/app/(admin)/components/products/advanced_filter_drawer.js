@@ -173,7 +173,7 @@ export function AdvancedFilterDrawer({
             <Label className="text-sm font-semibold">Thời gian nhập hàng</Label>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <p className="text-[10px] uppercase text-muted-foreground font-bold">
+                <p className="text-[11px] uppercase text-muted-foreground font-bold">
                   Từ ngày
                 </p>
                 <Input
@@ -184,7 +184,7 @@ export function AdvancedFilterDrawer({
                 />
               </div>
               <div className="space-y-1.5">
-                <p className="text-[10px] uppercase text-muted-foreground font-bold">
+                <p className="text-[11px] uppercase text-muted-foreground font-bold">
                   Đến ngày
                 </p>
                 <Input

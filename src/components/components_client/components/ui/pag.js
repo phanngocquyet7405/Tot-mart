@@ -1,3 +1,0 @@
-{/*
-    Phần phân trang
-    */}

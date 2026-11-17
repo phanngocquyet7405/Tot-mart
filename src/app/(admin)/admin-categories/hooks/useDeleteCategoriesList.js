@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { toast } from "sonner";
@@ -15,7 +16,7 @@ export function useDeleteCategoriesList() {
       const data = await fetchAdminCategories();
       setCategories(data);
     } catch (error) {
-      console.error("Lỗi khi tải danh mục:", error);
+      logger.error("Lỗi khi tải danh mục:", error);
       toast.error("Không thể tải danh sách danh mục");
     } finally {
       setIsLoading(false);

@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
@@ -16,7 +17,7 @@ export function useDashboard() {
       const data = await fetchDashboardStats();
       setStats(data);
     } catch (err) {
-      console.error("Dashboard fetch error:", err);
+      logger.error("Dashboard fetch error:", err);
       setError("Không thể tải thống kê. Vui lòng thử lại.");
       toast.error("Không thể tải thống kê dashboard");
     } finally {

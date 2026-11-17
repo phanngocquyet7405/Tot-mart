@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import React, { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
@@ -35,7 +36,7 @@ export default function CreateCategory({ onSuccess }) {
       setFormData({ name: "", description: "", icon: "" });
       onSuccess();
     } catch (error) {
-      console.error(error);
+      logger.error(error);
     } finally {
       setIsSubmitting(false);
     }

@@ -64,8 +64,8 @@ export function SuggestedProducts({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-2xl font-bold text-slate-900 mb-1">{title}</h3>
-        <p className="text-slate-600">Explore more items you might love</p>
+        <h3 className="text-2xl font-bold text-foreground mb-1">{title}</h3>
+        <p className="text-muted-foreground">Explore more items you might love</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -82,11 +82,11 @@ export function SuggestedProducts({
           return (
             <div
               key={product.id}
-              className="group rounded-lg border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all bg-white overflow-hidden flex flex-col"
+              className="group rounded-lg border border-border hover:border-primary/50 hover:shadow-lg transition-all bg-card overflow-hidden flex flex-col"
             >
               {/* Image Container */}
               <Link href={product.href || `/products/${product.id}`}>
-                <div className="relative w-full aspect-square bg-slate-100 overflow-hidden">
+                <div className="relative w-full aspect-square bg-muted overflow-hidden">
                   <Image
                     src={product.image}
                     alt={product.name}
@@ -98,10 +98,10 @@ export function SuggestedProducts({
                   {/* Badges */}
                   <div className="absolute top-3 left-3 flex gap-2">
                     {product.isNew && (
-                      <Badge className="bg-blue-500 hover:bg-blue-600">New</Badge>
+                      <Badge className="bg-primary text-primary-foreground">New</Badge>
                     )}
                     {discountPercent && discountPercent > 0 && (
-                      <Badge className="bg-red-500 hover:bg-red-600">
+                      <Badge className="bg-destructive text-destructive-foreground">
                         -{discountPercent}%
                       </Badge>
                     )}
@@ -110,14 +110,14 @@ export function SuggestedProducts({
                   {/* Favorite Button */}
                   <button
                     onClick={() => toggleFavorite(product.id)}
-                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:shadow-lg"
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-card shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:shadow-lg"
                     aria-label="Add to favorites"
                   >
                     <Heart
                       className={`h-5 w-5 transition-colors ${
                         isFavorite
-                          ? 'fill-red-500 stroke-red-500'
-                          : 'stroke-slate-400 hover:stroke-red-500'
+                          ? 'fill-destructive stroke-destructive'
+                          : 'stroke-muted-foreground hover:stroke-destructive'
                       }`}
                     />
                   </button>
@@ -127,7 +127,7 @@ export function SuggestedProducts({
               {/* Content */}
               <div className="flex flex-col flex-1 p-4 space-y-3">
                 <Link href={product.href || `/products/${product.id}`}>
-                  <h4 className="font-medium text-slate-900 line-clamp-2 group-hover:text-indigo-600 transition-colors text-sm">
+                  <h4 className="font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors text-sm">
                     {product.name}
                   </h4>
                 </Link>
@@ -141,14 +141,14 @@ export function SuggestedProducts({
                           key={i}
                           className={`h-3.5 w-3.5 ${
                             i < Math.round(product.rating!)
-                              ? 'fill-amber-400 stroke-amber-400'
-                              : 'stroke-slate-300'
+                              ? 'fill-warning stroke-warning'
+                              : 'stroke-muted-foreground/30'
                           }`}
                         />
                       ))}
                     </div>
                     {product.reviewCount !== undefined && (
-                      <span className="text-xs text-slate-600">
+                      <span className="text-xs text-muted-foreground">
                         ({product.reviewCount})
                       </span>
                     )}
@@ -158,11 +158,11 @@ export function SuggestedProducts({
                 {/* Price */}
                 <div className="space-y-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-bold text-indigo-600">
+                    <span className="text-lg font-bold text-primary">
                       ${product.price.toFixed(2)}
                     </span>
                     {hasDiscount && (
-                      <span className="text-sm text-slate-400 line-through">
+                      <span className="text-sm text-muted-foreground line-through">
                         ${displayPrice.toFixed(2)}
                       </span>
                     )}
@@ -174,7 +174,7 @@ export function SuggestedProducts({
                   onClick={() => handleAddToCart(product.id)}
                   disabled={loadingId === product.id || isLoading}
                   size="sm"
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 mt-auto"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 mt-auto"
                 >
                   <ShoppingCart className="h-4 w-4" />
                   {loadingId === product.id ? 'Adding...' : 'Add to Cart'}

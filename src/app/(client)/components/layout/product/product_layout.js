@@ -2,20 +2,20 @@ import Link from "next/link";
 
 export default function CollectionLayout({ title, linkText, linkHref, children }) {
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 bg-white">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 bg-background">
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
         
         <div>
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-2">
+          <h2 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-2">
             {title}
           </h2>
-          <div className="h-1 w-16 bg-yellow-500 rounded-full"></div>
+          <div className="h-1 w-16 bg-primary rounded-full"></div>
         </div>
 
         <Link 
           href={linkHref} 
-          className="text-green-700 font-bold text-sm uppercase tracking-widest hover:text-green-800 transition-colors inline-flex items-center gap-2 group"
+          className="text-primary font-bold text-sm uppercase tracking-widest hover:text-primary/90 transition-colors inline-flex items-center gap-2 group"
         >
           {linkText}
           <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

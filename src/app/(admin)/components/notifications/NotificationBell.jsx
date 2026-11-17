@@ -31,21 +31,21 @@ import {
 const ICONS = { ShoppingCart, AlertTriangle, PackageX, UserPlus };
 
 const TONE_CLASSES = {
-  emerald: "bg-emerald-100 text-emerald-600",
-  amber: "bg-amber-100 text-amber-600",
-  destructive: "bg-destructive/10 text-destructive",
-  indigo: "bg-indigo-100 text-indigo-600",
+  emerald: "bg-success/15 text-success-text",
+  amber: "bg-warning/15 text-warning-text",
+  destructive: "bg-destructive/15 text-destructive-text",
+  indigo: "bg-primary/10 text-primary",
 };
 
 const STATUS_CONFIG = {
-  live: { label: "Trực tiếp", dot: "bg-emerald-500" },
-  connecting: { label: "Đang kết nối...", dot: "bg-amber-400 animate-pulse" },
+  live: { label: "Trực tiếp", dot: "bg-success" },
+  connecting: { label: "Đang kết nối...", dot: "bg-warning animate-pulse" },
   reconnecting: {
     label: "Đang kết nối lại...",
-    dot: "bg-amber-400 animate-pulse",
+    dot: "bg-warning animate-pulse",
   },
-  offline: { label: "Ngoại tuyến", dot: "bg-zinc-400" },
-  mock: { label: "Chế độ demo", dot: "bg-violet-500" },
+  offline: { label: "Ngoại tuyến", dot: "bg-muted-foreground" },
+  mock: { label: "Chế độ demo", dot: "bg-primary" },
 };
 
 function NotificationRow({ notification, onRead }) {
@@ -115,7 +115,7 @@ export function NotificationBell() {
         <Button variant="ghost" size="icon" className="relative h-9 w-9">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-medium text-primary-foreground">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}

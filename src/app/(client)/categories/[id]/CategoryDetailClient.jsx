@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import AnnouncementBar from "../../components/ui/AnnouncementBar";
@@ -10,16 +11,20 @@ import ProductsGrid from "../../components/layout/product/products_grid";
 import SideBar from "../../components/ui/SideBar";
 import { getAllCategoriesApi } from "@/app/services/api/productServices";
 
-export default function CategoryDetailPage() {
+export default function CategoryDetailPage({ initialCategory = null }) {
   const params = useParams();
   const slugOrId = params?.id;
 
-  const [actualId, setActualId] = useState(null);
-  const [category, setCategory] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [actualId, setActualId] = useState(initialCategory?._id || null);
+  const [category, setCategory] = useState(initialCategory);
+  const [loading, setLoading] = useState(!initialCategory);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
+    if (initialCategory) {
+      setLoading(false);
+      return;
+    }
     const resolveCategory = async () => {
       try {
         const res = await getAllCategoriesApi();
@@ -37,7 +42,7 @@ export default function CategoryDetailPage() {
           setCategory(null);
         }
       } catch (error) {
-        console.error("Error finding category:", error);
+        logger.error("Error finding category:", error);
       } finally {
         setLoading(false);
       }
@@ -46,39 +51,39 @@ export default function CategoryDetailPage() {
     if (slugOrId) {
       resolveCategory();
     }
-  }, [slugOrId]);
+  }, [slugOrId, initialCategory]);
 
   if (loading)
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
       </div>
     );
   if (!actualId)
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-500">Category not found</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Category not found</p>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 bg-white shadow-sm z-1000">
+      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border shadow-xs z-50">
         <AnnouncementBar />
         <MainHeader
           onMenuClick={() => setIsSidebarOpen(true)}
           cartItemCount={0}
           cartTotal={0}
         />
-        <div className="border-b border-gray-200">
+        <div className="border-b border-border">
           <NavMenu />
         </div>
       </div>
 
       {/* Hero Banner */}
       <div
-        className="relative h-64 md:h-96 bg-gradient-to-r from-green-900 to-green-800 overflow-hidden"
+        className="relative h-64 md:h-96 bg-card border-b border-border text-foreground overflow-hidden"
         style={{
           backgroundImage: category?.image
             ? `url('${category.image}')`
@@ -87,16 +92,20 @@ export default function CategoryDetailPage() {
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-black/40"></div>
+        {category?.image && <div className="absolute inset-0 bg-black/50" />}
         <div className="absolute inset-0 flex flex-col justify-center">
           <div className="container mx-auto px-4">
-            <p className="text-sm font-semibold text-green-200 uppercase tracking-wider mb-3">
+            <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">
               Category
             </p>
-            <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
+            <h1
+              className={`text-4xl md:text-5xl font-serif font-bold mb-4 ${
+                category?.image ? "text-white drop-shadow-md" : "text-foreground"
+              }`}
+            >
               {category?.name || "Category"}
             </h1>
-            <p className="text-lg text-green-100 max-w-2xl">
+            <p className="text-lg text-muted-foreground max-w-2xl">
               {category?.description ||
                 "Discover our curated selection of premium organic products"}
             </p>

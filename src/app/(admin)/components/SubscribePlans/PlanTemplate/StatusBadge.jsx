@@ -5,15 +5,15 @@ import { Clock, CheckCircle2, Ban, XCircle } from "lucide-react";
 export function StatusBadge({ status, cancelAtPeriodEnd }) {
   if (cancelAtPeriodEnd && status === "active") {
     return (
-      <Badge className="bg-orange-100 text-orange-700 border-orange-200 gap-1">
+      <Badge className="bg-warning/15 text-warning-text border-warning/20 gap-1 font-medium">
         <Clock size={11} /> Hủy cuối kỳ
       </Badge>
     );
   }
   const map = {
-    active: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    cancelled: "bg-red-100 text-red-700 border-red-200",
-    expired: "bg-gray-100 text-gray-600 border-gray-200",
+    active: "bg-success/15 text-success-text border-success/20",
+    cancelled: "bg-destructive/15 text-destructive-text border-destructive/20",
+    expired: "bg-muted text-muted-foreground border-border",
   };
   const icons = {
     active: <CheckCircle2 size={11} />,
@@ -26,7 +26,7 @@ export function StatusBadge({ status, cancelAtPeriodEnd }) {
     expired: "Hết hạn",
   };
   return (
-    <Badge className={`${map[status] || ""} gap-1`}>
+    <Badge className={`${map[status] || "bg-muted text-muted-foreground border-border"} gap-1 font-medium`}>
       {icons[status]} {labels[status] || status}
     </Badge>
   );

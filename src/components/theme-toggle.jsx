@@ -7,7 +7,7 @@ import { Sun, Moon } from "lucide-react";
 /**
  * Nút toggle sáng/tối. Dùng bg-accent/text-foreground (token trong
  * globals.css) nên tự đổi màu đúng theo theme ở bất kỳ đâu — kể cả
- * trong header client vốn chủ yếu dùng màu hardcode (bg-white, text-gray...).
+ * trong header client vốn chủ yếu dùng màu theme tokens.
  */
 export function ThemeToggle({ className = "" }) {
   const { resolvedTheme, setTheme } = useTheme();

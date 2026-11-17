@@ -1,8 +1,8 @@
 import { axiosConfig } from "./axiosConfig";
 import { API_ENDPOINTS } from "./apiEndpoints";
 
-export const getAllBoxesApi = () =>
-  axiosConfig.get(API_ENDPOINTS.BOXES.GET_ALL);
+export const getAllBoxesApi = (params) =>
+  axiosConfig.get(API_ENDPOINTS.BOXES.GET_ALL, { params });
 
 export const getBoxByIdApi = (id) =>
   axiosConfig.get(API_ENDPOINTS.BOXES.PUBLIC_BY_ID(id));
@@ -17,6 +17,9 @@ export const getProductsInBoxApi = (id) =>
 
 export const getBoxOffersApi = () =>
   axiosConfig.get(API_ENDPOINTS.BOXES.GET_OFFERS);
+
+export const getAllCouponsApi = (params = {}) =>
+  axiosConfig.get(API_ENDPOINTS.COUPONS.GET_ALL, { params });
 
 export const createBoxApi = (formData) =>
   axiosConfig.post(API_ENDPOINTS.BOXES.CREATE, formData, {

@@ -38,7 +38,7 @@ export function ProductRow({ item, onChange, onRemove }) {
         type="button"
         variant="ghost"
         size="icon"
-        className="col-span-1 h-8 w-8 text-destructive hover:bg-red-50"
+        className="col-span-1 h-8 w-8 text-destructive hover:bg-destructive/10"
         onClick={onRemove}
       >
         <X size={14} />

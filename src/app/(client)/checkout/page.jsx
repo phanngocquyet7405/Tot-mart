@@ -1,17 +1,17 @@
+"use client";
 /**
- * page.js — Trang Checkout
+ * page.jsx — Trang Checkout
  * Route: /checkout
  *
- * Pure orchestrator: không chứa logic, chỉ compose hook + components.
- * Palette: warm cream / terracotta (#C85C3C, #FFFAF8, #F0DDD5, #2C1810)
+ * Pure orchestrator: compose hook + components.
+ * Chuẩn hóa token thiết kế: warm cream (bg-background, bg-card), terracotta (bg-primary, text-primary), border-border, text-foreground.
  */
-
-"use client";
 
 import { Suspense } from "react";
 import { AnimatePresence } from "framer-motion";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { useCheckout } from "@/app/hook/checkout/useCheckout";
 import { CheckoutStepper } from "../components/Checkout_component/CheckoutStepper";
@@ -24,78 +24,108 @@ import { OrderSuccessScreen } from "../components/Checkout_component/OrderSucces
 // ─── Loading screen ────────────────────────────────────────────────────────────
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-[#FFFAF8] flex items-center justify-center">
+    <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="flex flex-col items-center gap-4" role="status">
-        <Loader2 className="animate-spin text-[#C85C3C]" size={32} />
-        <p className="text-sm text-stone-600 font-medium">Đang tải...</p>
+        <Loader2 className="animate-spin text-primary" size={32} />
+        <p className="text-sm text-muted-foreground font-medium">Đang tải tiến trình thanh toán...</p>
       </div>
     </div>
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-/**
- * page.jsx — Trang Checkout
- * Route: /checkout
- * Palette: quầy "atelier" của TotMart — cream #FFFAF8, terracotta #C85C3C,
- * clay #F0DDD5, espresso #2C1810 (xem DESIGN.md).
- *
- * useCheckout() gọi useSearchParams() bên trong (đọc ?code= để resume sau
- * refresh — xem Ngày 3) — Next.js App Router BẮT BUỘC phần dùng
- * useSearchParams() phải nằm trong <Suspense>, nếu không `next build` lỗi
- * ngay ("missing-suspense-with-csr-bailout"). Vì vậy tách hẳn phần thân
- * trang ra CheckoutPageInner, default export chỉ còn wrap Suspense.
- */
+// ─── Page Inner ────────────────────────────────────────────────────────────────
 function CheckoutPageInner() {
   const router = useRouter();
   const checkout = useCheckout();
 
-  // Success screen
-  if (checkout.orderSuccess) return <OrderSuccessScreen />;
+  // Màn hình hoàn tất đơn hàng
+  if (checkout.orderSuccess) {
+    return (
+      <OrderSuccessScreen
+        onNew={checkout.handleStartNew}
+        submitting={checkout.submitting}
+      />
+    );
+  }
 
-  // Loading screen
-  if (!checkout.isMounted || checkout.loading || checkout.resuming)
+  // Màn hình tải
+  if (!checkout.isMounted || checkout.loading) {
     return <LoadingScreen />;
+  }
 
   return (
-    <div className="min-h-screen bg-[#FFFAF8] text-[#2C1810]">
+    <div className="tm-commerce tm-commerce--atelier min-h-screen bg-background text-foreground">
       <div className="max-w-6xl mx-auto px-4 py-8 sm:py-10">
         {/* ── Header ── */}
         <div className="flex items-center gap-4 mb-8">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => {
+              if (checkout.step === "payment" && checkout.paymentCode) {
+                checkout.handleCancelSession();
+              } else if (checkout.step === "payment") {
+                checkout.setStep("review");
+              } else if (checkout.step === "review") {
+                checkout.setStep("address");
+              } else {
+                router.back();
+              }
+            }}
             aria-label="Quay lại"
-            className="grid place-items-center w-10 h-10 rounded-full border border-[#F0DDD5] bg-white text-[#2C1810] hover:border-[#C85C3C]/60 hover:text-[#B14B2D] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C85C3C]"
+            className="grid place-items-center w-11 h-11 rounded-full border border-border bg-card text-foreground hover:border-primary/60 hover:text-primary transition-colors duration-200 pointer-coarse:min-h-11 pointer-coarse:min-w-11"
           >
-            <ArrowLeft size={17} />
+            <ArrowLeft size={18} />
           </button>
           <div>
-            <h1 className="font-serif text-3xl font-semibold text-[#2C1810] leading-tight">
+            <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-foreground leading-tight">
               Thanh toán
             </h1>
             {checkout.hasProducts && (
-              <p className="text-sm text-stone-500 mt-0.5">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 tabular-nums">
                 {checkout.cartItems.length} loại · {checkout.cartCount} sản phẩm
               </p>
             )}
           </div>
         </div>
 
+        {/* ── Cảnh báo thay đổi giá/kho (dễ hiểu, thân thiện) ── */}
+        {checkout.quoteWarning && (
+          <div
+            role="alert"
+            className="mb-6 p-4 rounded-2xl border border-warning/30 bg-warning/10 text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+          >
+            <div className="flex items-center gap-2.5">
+              <AlertCircle size={18} className="text-warning-text shrink-0" />
+              <p className="text-sm font-medium">{checkout.quoteWarning}</p>
+            </div>
+            <Link
+              href="/cart"
+              className="text-xs font-bold text-primary underline underline-offset-4 hover:text-primary/80 transition-colors shrink-0"
+            >
+              Xem lại giỏ hàng
+            </Link>
+          </div>
+        )}
+
         {/* ── Stepper ── */}
         <CheckoutStepper
           currentStep={checkout.step}
-          onGoBack={(id) => checkout.setStep(id)}
+          onGoBack={(id) => {
+            // Không cho phép nhảy lùi khi đang hiển thị mã QR thanh toán chưa huỷ
+            if (checkout.paymentCode) return;
+            checkout.setStep(id);
+          }}
         />
 
         {/* ── Layout 2 cột ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-6 lg:gap-8 items-start">
           {/* Cột trái — Steps */}
           <div className="space-y-4">
             <AnimatePresence mode="wait">
               {/* BƯỚC 1: ĐỊA CHỈ */}
               {checkout.step === "address" && (
                 <AddressStep
+                  key="step-address"
                   user={checkout.user}
                   addresses={checkout.addresses}
                   displayedAddresses={checkout.displayedAddresses}
@@ -109,13 +139,15 @@ function CheckoutPageInner() {
                   onSelectAddress={checkout.handleSelectAddress}
                   onToggleAddNew={checkout.handleToggleAddNew}
                   onAddressFieldChange={checkout.handleNewAddressChange}
-                  onNext={() => checkout.setStep("review")}
+                  onNext={checkout.handleAddressNext}
+                  savingAddress={checkout.savingAddress}
                 />
               )}
 
-              {/* BƯỚC 2: KIỂM TRA */}
+              {/* BƯỚC 2: KIỂM TRA ĐƠN */}
               {checkout.step === "review" && (
                 <ReviewStep
+                  key="step-review"
                   cartItems={checkout.cartItems}
                   cartCount={checkout.cartCount}
                   hasProducts={checkout.hasProducts}
@@ -127,33 +159,36 @@ function CheckoutPageInner() {
                 />
               )}
 
-              {/* BƯỚC 3: THANH TOÁN */}
+              {/* BƯỚC 3: PHƯƠNG THỨC & MÃ QR */}
               {checkout.step === "payment" && (
                 <PaymentStep
+                  key="step-payment"
                   paymentMethod={checkout.paymentMethod}
                   setPaymentMethod={checkout.setPaymentMethod}
                   coupon={checkout.coupon}
                   setCoupon={checkout.setCoupon}
                   couponApplied={checkout.couponApplied}
-                  giftFee={checkout.giftFee}
-            bulkDiscountAmount={checkout.bulkDiscountAmount}
-            discount={checkout.discount}
+                  discount={checkout.discount}
                   finalTotal={checkout.finalTotal}
                   submitting={checkout.submitting}
                   paymentStatus={checkout.paymentStatus}
                   paymentCode={checkout.paymentCode}
                   qrUrl={checkout.qrUrl}
                   onlineAmount={checkout.onlineAmount}
+                  expiresAt={checkout.expiresAt}
+                  isExpired={checkout.isExpired}
                   onApplyCoupon={checkout.handleApplyCoupon}
                   onBack={() => checkout.setStep("review")}
                   onPlaceOrder={checkout.handlePlaceOrder}
+                  onCancelSession={checkout.handleCancelSession}
+                  onRecreateSession={checkout.handleRecreateSession}
                   onRecheckPayment={checkout.handleRecheckPayment}
                 />
               )}
             </AnimatePresence>
           </div>
 
-          {/* Cột phải — Summary */}
+          {/* Cột phải — Summary đơn hàng */}
           <OrderSummary
             cartItems={checkout.cartItems}
             hasProducts={checkout.hasProducts}

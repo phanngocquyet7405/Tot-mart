@@ -1,14 +1,16 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, PlusCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/app/context/CartContext";
 import {
   PLACEHOLDER_IMAGE,
   formatPrice,
   getFinalPrice,
+  buildProductHref,
 } from "./productDetailService";
 
 /**
@@ -18,9 +20,7 @@ import {
  */
 export function FrequentlyBought({ products = [] }) {
   const { addToCart } = useCart();
-  const [selectedIds, setSelectedIds] = useState(
-    () => new Set(products.map((p) => p._id)),
-  );
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
 
   if (products.length === 0) return null;
 
@@ -36,7 +36,12 @@ export function FrequentlyBought({ products = [] }) {
     });
   };
 
-  const selectedProducts = products.filter((p) => selectedIds.has(p._id));
+  const selectedProducts = products.filter(
+    (p) =>
+      selectedIds.has(p._id) &&
+      p.stock > 0 &&
+      Number.isFinite(getFinalPrice(p)),
+  );
   const total = selectedProducts.reduce((sum, p) => sum + getFinalPrice(p), 0);
 
   const handleAddAll = () => {
@@ -56,70 +61,103 @@ export function FrequentlyBought({ products = [] }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 md:p-8 border border-stone-100 shadow-sm space-y-6">
-      <h2 className="text-lg font-black uppercase tracking-widest text-stone-900">
-        Thường được mua cùng
-      </h2>
+    <section className="tm-section mt-14 pt-10 border-t border-border/80 space-y-6" aria-label="Gợi ý mua thêm">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
+            Gợi ý mua kèm phong vị Việt
+          </h2>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            Những thức quà được nhiều thực khách lựa chọn kết hợp cùng sản phẩm này
+          </p>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((p) => {
           const isChecked = selectedIds.has(p._id);
           const finalPrice = getFinalPrice(p);
           return (
-            <label
+            <article
               key={p._id}
-              className={`flex flex-col gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all ${
+              className={`flex flex-col gap-3 p-3.5 border rounded-2xl transition-all duration-200 ${
                 isChecked
-                  ? "border-amber-700"
-                  : "border-stone-100 hover:border-stone-300"
+                  ? "border-primary bg-primary/5 ring-2 ring-primary/20 shadow-xs"
+                  : "border-border/80 hover:border-primary/40 bg-card shadow-2xs"
               }`}
             >
-              <input
-                type="checkbox"
-                checked={isChecked}
-                onChange={() => toggleItem(p._id)}
-                className="w-4 h-4 accent-amber-800"
-              />
-              <div className="relative aspect-square rounded-lg overflow-hidden bg-[#faf8f4]">
+              <label className="flex min-h-11 items-center gap-2.5 text-xs font-semibold cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  disabled={!(p.stock > 0) || !Number.isFinite(finalPrice)}
+                  onChange={() => toggleItem(p._id)}
+                  className="w-4 h-4 accent-primary rounded cursor-pointer"
+                />
+                <span className={isChecked ? "text-primary font-bold" : "text-muted-foreground"}>
+                  {p.stock > 0 ? "Chọn mua thêm" : "Tạm hết hàng"}
+                </span>
+              </label>
+
+              <Link
+                href={buildProductHref(p)}
+                className="block relative aspect-square rounded-xl overflow-hidden bg-stone-50 dark:bg-stone-900 border border-border/60 group"
+              >
                 <Image
                   src={p.images?.[0]?.url || PLACEHOLDER_IMAGE}
                   alt={p.name}
                   fill
-                  className="object-cover p-1"
+                  sizes="(max-width: 640px) 45vw, 25vw"
+                  className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {
                     e.target.src = PLACEHOLDER_IMAGE;
                   }}
                 />
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-stone-800 line-clamp-2">
-                  {p.name}
+              </Link>
+
+              <div className="space-y-1.5 flex-1 flex flex-col justify-between">
+                <p className="text-sm font-semibold text-foreground line-clamp-2 leading-snug">
+                  <Link
+                    className="underline-offset-4 hover:underline hover:text-primary transition-colors"
+                    href={buildProductHref(p)}
+                  >
+                    {p.name}
+                  </Link>
                 </p>
-                <p className="text-sm font-black text-red-600">
-                  {formatPrice(finalPrice)}
+                <p className="text-base font-black text-primary tabular-nums">
+                  {Number.isFinite(finalPrice)
+                    ? formatPrice(finalPrice)
+                    : "Chưa có giá"}
                 </p>
               </div>
-            </label>
+            </article>
           );
         })}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-stone-100">
-        <p className="text-sm text-stone-600">
-          Tổng cộng ({selectedProducts.length} sản phẩm):{" "}
-          <span className="text-lg font-black text-stone-900">
-            {formatPrice(total)}
-          </span>
-        </p>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl bg-stone-50/80 dark:bg-stone-900/40 border border-border/80 shadow-2xs">
+        <div>
+          <p className="text-sm text-muted-foreground">
+            Tạm tính ({selectedProducts.length} sản phẩm mua kèm):{" "}
+            <span className="text-xl font-black text-primary tabular-nums ml-1">
+              {formatPrice(total)}
+            </span>
+          </p>
+          <p className="text-xs text-muted-foreground/80 mt-0.5">
+            Giá cuối cùng được xác nhận khi thanh toán. Phí giao hàng trả riêng cho đơn vị vận chuyển.
+          </p>
+        </div>
         <button
           onClick={handleAddAll}
           disabled={selectedProducts.length === 0}
-          className="w-full sm:w-auto bg-amber-800 hover:bg-amber-900 disabled:opacity-40 disabled:cursor-not-allowed text-white px-8 py-3 rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-colors"
+          className="tm-button tm-button--primary w-full sm:w-auto px-6 py-3 rounded-xl font-bold uppercase tracking-wider text-xs shadow-sm hover:shadow active:scale-95 disabled:opacity-40 transition-all cursor-pointer flex items-center justify-center gap-2"
         >
           <ShoppingCart className="w-4 h-4" />
-          Thêm tất cả vào giỏ
+          Thêm sản phẩm đã chọn
         </button>
       </div>
-    </div>
+    </section>
   );
 }
+
+export default FrequentlyBought;

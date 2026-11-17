@@ -5,34 +5,28 @@ import { cn } from "@/lib/utils";
 
 const COLOR_MAP = {
   indigo: {
-    iconBg: "bg-indigo-100",
-    icon: "text-indigo-600",
-    value: "text-indigo-700",
+    iconBg: "bg-primary/10",
+    icon: "text-primary",
   },
   emerald: {
-    iconBg: "bg-emerald-100",
-    icon: "text-emerald-600",
-    value: "text-emerald-700",
+    iconBg: "bg-success/15",
+    icon: "text-success-text",
   },
   amber: {
-    iconBg: "bg-amber-100",
-    icon: "text-amber-600",
-    value: "text-amber-700",
+    iconBg: "bg-warning/15",
+    icon: "text-warning-text",
   },
   pink: {
-    iconBg: "bg-pink-100",
-    icon: "text-pink-600",
-    value: "text-pink-700",
+    iconBg: "bg-destructive/15",
+    icon: "text-destructive-text",
   },
   blue: {
-    iconBg: "bg-blue-100",
-    icon: "text-blue-600",
-    value: "text-blue-700",
+    iconBg: "bg-primary/10",
+    icon: "text-primary",
   },
   orange: {
-    iconBg: "bg-orange-100",
-    icon: "text-orange-600",
-    value: "text-orange-700",
+    iconBg: "bg-warning/15",
+    icon: "text-warning-text",
   },
 };
 
@@ -52,16 +46,17 @@ export function AdminStatsCard({
     <Card
       onClick={onClick}
       className={cn(
-        onClick && "cursor-pointer transition-all hover:border-zinc-200",
-        isActive && "border-indigo-500 shadow-md scale-[1.01]",
+        "border-border bg-card transition-all",
+        onClick && "cursor-pointer hover:border-border/80 hover:bg-muted/30",
+        isActive && "border-primary shadow-sm scale-[1.01]",
         className,
       )}
     >
       <CardContent className="p-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm text-muted-foreground">{label}</p>
-            <p className={cn("text-2xl font-bold mt-0.5", c.value)}>{value}</p>
+            <p className="text-sm font-medium text-muted-foreground">{label}</p>
+            <p className="text-2xl font-bold tabular-nums text-foreground mt-0.5">{value}</p>
             {sub && (
               <p className="text-xs text-muted-foreground mt-1">{sub}</p>
             )}
@@ -69,11 +64,11 @@ export function AdminStatsCard({
           {Icon && (
             <div
               className={cn(
-                "p-3 rounded-xl shrink-0",
+                "p-3 rounded-xl shrink-0 border border-border/50",
                 c.iconBg,
               )}
             >
-              <Icon className={cn("h-5 w-5", c.icon)} />
+              <Icon className={cn("size-5", c.icon)} />
             </div>
           )}
         </div>

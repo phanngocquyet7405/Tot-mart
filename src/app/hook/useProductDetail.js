@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -20,20 +21,25 @@ import {
  * service → hooks → components → page orchestrator đang dùng trong dự án
  * (ví dụ Checkout, admin subscription plan).
  */
-export function useProductDetail(slug) {
+export function useProductDetail(slug, initialProduct = null) {
   const productId = extractProductId(slug);
   const router = useRouter();
   const { addToCart } = useAddToCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
 
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState(initialProduct);
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(PLACEHOLDER_IMAGE);
+  const [loading, setLoading] = useState(!initialProduct);
+  const [error, setError] = useState(null);
+  const [reload, setReload] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(
+    initialProduct?.images?.[0]?.url || PLACEHOLDER_IMAGE,
+  );
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("details");
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
+  const [giftOption, setGiftOption] = useState({ enabled: false, option: null, message: "" });
 
   const isWishlisted = product ? isInWishlist(product._id) : false;
 
@@ -45,9 +51,25 @@ export function useProductDetail(slug) {
 
     let cancelled = false;
 
+    if (initialProduct && reload === 0) {
+      const categoryId = initialProduct.category?._id || initialProduct.category;
+      if (categoryId) {
+        fetchRelatedProducts(categoryId, initialProduct._id)
+          .then((related) => {
+            if (!cancelled) setRelatedProducts(related);
+          })
+          .catch(() => {});
+      }
+      return () => {
+        cancelled = true;
+      };
+    }
+
     const load = async () => {
       try {
         setLoading(true);
+        setError(null);
+        setRelatedProducts([]);
         const productData = await fetchProductDetail(productId);
         if (cancelled) return;
 
@@ -66,13 +88,22 @@ export function useProductDetail(slug) {
           const related = await fetchRelatedProducts(
             categoryId,
             productData._id,
-          );
+          ).catch(() => []);
           if (!cancelled) setRelatedProducts(related);
         }
       } catch (err) {
         if (!cancelled) {
-          console.error("Lỗi tải sản phẩm:", err);
-          toast.error("Có lỗi xảy ra khi tải sản phẩm");
+          setProduct(null);
+          const status = err.response?.status;
+          const requestId = err.response?.data?.requestId || err.requestId || err.response?.headers?.['x-request-id'];
+          let errorMsg = null;
+          if (status !== 404) {
+            const safeBase = status >= 500 ? "Lỗi hệ thống. Vui lòng thử lại." : (err.response?.data?.message || "Không tải được thông tin sản phẩm. Hãy kiểm tra kết nối và thử lại.");
+            errorMsg = requestId ? `${safeBase} (Mã yêu cầu: ${requestId})` : safeBase;
+          }
+          setError(errorMsg);
+          logger.error("Lỗi tải sản phẩm:", err);
+          toast.error(errorMsg || "Có lỗi xảy ra khi tải sản phẩm");
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -83,7 +114,7 @@ export function useProductDetail(slug) {
     return () => {
       cancelled = true;
     };
-  }, [productId]);
+  }, [productId, reload, initialProduct]);
 
   const increaseQty = useCallback(() => {
     setQuantity((q) => {
@@ -111,14 +142,19 @@ export function useProductDetail(slug) {
   const buildCartItem = useCallback(() => {
     if (!product) return null;
     const finalPrice = getFinalPrice(product);
+    const gift = giftOption.enabled && giftOption.option?.id
+      ? { wrap: giftOption.option.id, message: giftOption.message || "" }
+      : { wrap: "none", message: "" };
+
     return {
       _id: product._id,
       id: product._id,
       name: product.name,
       image: product.images?.[0]?.url || PLACEHOLDER_IMAGE,
       price: finalPrice,
+      gift,
     };
-  }, [product]);
+  }, [product, giftOption]);
 
   const handleAddToCart = useCallback(async () => {
     const itemToAdd = buildCartItem();
@@ -155,7 +191,7 @@ export function useProductDetail(slug) {
           url,
         });
       } catch (err) {
-        if (err.name !== "AbortError") console.error(err);
+        if (err.name !== "AbortError") logger.error(err);
       }
     } else {
       try {
@@ -187,6 +223,8 @@ export function useProductDetail(slug) {
     product,
     relatedProducts,
     loading,
+    error,
+    retry: () => setReload(value => value + 1),
     selectedImage,
     setSelectedImage,
     quantity,
@@ -195,6 +233,8 @@ export function useProductDetail(slug) {
     isWishlisted,
     isAddingToCart,
     isBuyingNow,
+    giftOption,
+    setGiftOption,
     selectQuantity,
     increaseQty,
     decreaseQty,

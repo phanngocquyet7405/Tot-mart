@@ -1,3 +1,4 @@
+// @ts-check
 // utils/formatter.js
 
 import { format, formatDistanceToNow } from "date-fns";
@@ -7,6 +8,11 @@ import { vi } from "date-fns/locale";
    MONEY
 ============================= */
 
+/**
+ * Format number into Vietnamese currency (VND).
+ * @param {number|null|undefined} n
+ * @returns {string}
+ */
 export const formatCurrency = (n) =>
   new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -19,6 +25,11 @@ export const formatCurrency = (n) =>
    DATE
 ============================= */
 
+/**
+ * Format date to dd/MM/yyyy string.
+ * @param {Date|string|number|null|undefined} d
+ * @returns {string}
+ */
 export const formatDate = (d) => {
   if (!d) return "—";
 
@@ -31,6 +42,11 @@ export const formatDate = (d) => {
   }
 };
 
+/**
+ * Format date to HH:mm dd/MM/yyyy string.
+ * @param {Date|string|number|null|undefined} d
+ * @returns {string}
+ */
 export const formatDateTime = (d) => {
   if (!d) return "—";
 
@@ -41,6 +57,11 @@ export const formatDateTime = (d) => {
   }
 };
 
+/**
+ * Format date to relative distance string (e.g., '3 ngày trước').
+ * @param {Date|string|number|null|undefined} d
+ * @returns {string}
+ */
 export const formatRelative = (d) => {
   if (!d) return "—";
 
@@ -72,6 +93,9 @@ export const DEFAULT_DELIVERIES = {
   "12_month": 12,
 };
 
+/**
+ * @type {Record<string, { id: string, label: string, months: number, planType: string, totalDeliveries: number, discountPercent: number, badge: string|null, highlight?: boolean }>}
+ */
 export const PLAN_MAP = {
   "1m": {
     id: "1m",
@@ -148,6 +172,19 @@ export const SUBSCRIBE_PLANS = Object.values(PLAN_MAP);
    CALCULATOR
 ============================= */
 
+/**
+ * @typedef {Object} PlanPriceCalculation
+ * @property {number} monthlyPrice
+ * @property {number} total
+ * @property {number} save
+ */
+
+/**
+ * Calculate pricing for a subscription plan based on base price and plan ID.
+ * @param {number} basePrice
+ * @param {string} planId
+ * @returns {PlanPriceCalculation}
+ */
 export const calculatePlanPrice = (basePrice, planId) => {
   const plan = PLAN_MAP[planId];
 
@@ -178,13 +215,13 @@ export const calculatePlanPrice = (basePrice, planId) => {
 ============================= */
 
 export const STATUS_COLORS = {
-  active: "bg-green-100 text-green-700",
+  active: "bg-success/15 text-success-text",
 
-  cancelled: "bg-red-100 text-red-700",
+  cancelled: "bg-destructive/10 text-destructive-text",
 
-  pending: "bg-yellow-100 text-yellow-700",
+  pending: "bg-warning/15 text-warning-text",
 
-  expired: "bg-gray-100 text-gray-700",
+  expired: "bg-muted text-muted-foreground",
 };
 
 export const STATUS_LABELS = {
@@ -201,6 +238,12 @@ export const STATUS_LABELS = {
    TEXT
 ============================= */
 
+/**
+ * Truncate text with ellipsis if length exceeds maxLength.
+ * @param {string|null|undefined} text
+ * @param {number} [maxLength=100]
+ * @returns {string}
+ */
 export const getExcerpt = (text, maxLength = 100) => {
   if (!text) return "";
   if (text.length <= maxLength) return text;

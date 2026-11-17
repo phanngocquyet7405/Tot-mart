@@ -17,7 +17,7 @@ const NAV_H = 60; // keep in sync with nav_box.js
 
 export default function Layout({ children }) {
   return (
-    <div className="min-h-screen bg-[#faf8f4] font-sans">
+    <div className="min-h-screen bg-background font-sans text-foreground">
       {/* 1. Announcement bar — fixed at the very top */}
       <div className="fixed top-0 left-0 right-0 z-60">
         <AnnouncementBarBox />

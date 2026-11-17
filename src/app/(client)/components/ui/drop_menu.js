@@ -8,21 +8,21 @@ export default function DropMenu({ items, isVisible, onMouseEnter, onMouseLeave 
     <div
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className="absolute left-0 top-full z-50 w-full border-t border-[#F0DDD5] bg-white shadow-xl"
+      className="absolute left-0 top-full z-50 w-full border-t border-border bg-card shadow-xl"
     >
       <div className="mx-auto grid max-w-7xl grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-8 p-10">
         {items.map((col, idx) => (
           <div key={idx} className="space-y-4">
             <Link
               href={col.titleHref}
-              className="text-[11px] font-black uppercase text-[#C85C3C] hover:text-[#B14B2D]"
+              className="text-[11px] font-black uppercase text-primary hover:text-primary/90"
             >
               {col.title}
             </Link>
             <ul className="space-y-2">
               {col.links.map((link, lIdx) => (
                 <li key={lIdx}>
-                  <Link href={link.href} className="text-[13px] text-zinc-500 hover:text-[#2C1810]">
+                  <Link href={link.href} className="text-[13px] text-muted-foreground hover:text-foreground">
                     {link.label}
                   </Link>
                 </li>

@@ -1,13 +1,9 @@
+"use client";
 /**
  * PaymentStep.js
- * Bước 3 — Chọn phương thức thanh toán + mã giảm giá + đặt hàng.
- *
- * Khi paymentMethod = "online" (SePay) và đơn đã được tạo (paymentStatus
- * "awaiting_payment" | "timeout"), toàn bộ form được thay bằng SepayQrPanel —
- * đơn đã chốt ở BE nên không cho đổi phương thức hay quay lại ở bước này.
+ * Bước 3 — Chọn phương thức thanh toán + mã giảm giá + QR thanh toán SePay.
+ * Chuẩn hóa màu sắc token, bảo đảm trợ năng (vùng chạm >= 44px, label rõ ràng).
  */
-
-"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
@@ -23,7 +19,9 @@ import {
   Banknote,
   Smartphone,
   Copy,
-  ExternalLink,
+  Clock,
+  ArrowLeft,
+  RotateCcw,
 } from "lucide-react";
 import { SectionCard } from "./SectionCard";
 import { BTN_PRIMARY, BTN_SECONDARY, INPUT } from "./checkoutStyles";
@@ -34,56 +32,59 @@ import logger from "@/app/util/Logger";
 const METHOD_ICONS = { cod: Banknote, online: QrCode, momo: Smartphone };
 
 // ─── Payment method radio ─────────────────────────────────────────────────────
-function PaymentMethodCard({ method, selected, onSelect }) {
+function PaymentMethodCard({ method, selected, onSelect, disabled }) {
   const Icon = METHOD_ICONS[method.id] ?? CreditCard;
-  const disabled = method.available === false;
+  const isMethodDisabled = disabled || method.available === false;
+  const radioId = `pay-method-${method.id}`;
 
   return (
     <label
+      htmlFor={radioId}
       className={[
-        "flex items-center gap-4 p-4 rounded-xl border transition-colors duration-200",
-        "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[#C85C3C]",
-        disabled
-          ? "border-[#F0DDD5] bg-stone-50 opacity-60 cursor-not-allowed"
+        "flex items-center gap-4 p-4 rounded-xl border transition-colors duration-200 pointer-coarse:min-h-11",
+        "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary",
+        isMethodDisabled
+          ? "border-border bg-muted/40 opacity-60 cursor-not-allowed"
           : selected
-            ? "border-[#C85C3C] bg-[#FFF0EB] cursor-pointer"
-            : "border-[#F0DDD5] bg-white hover:border-[#C85C3C]/50 cursor-pointer",
+            ? "border-primary bg-primary/10 shadow-xs cursor-pointer"
+            : "border-border bg-card hover:border-primary/40 cursor-pointer",
       ].join(" ")}
     >
       <input
         type="radio"
+        id={radioId}
         name="payment"
         value={method.id}
         checked={selected}
-        disabled={disabled}
+        disabled={isMethodDisabled}
         onChange={onSelect}
         className="sr-only"
       />
       <span
         className={[
           "grid place-items-center w-11 h-11 rounded-full shrink-0",
-          selected && !disabled ? "bg-[#C85C3C] text-white" : "bg-[#FFF0EB] text-[#C85C3C]",
+          selected && !isMethodDisabled ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary",
         ].join(" ")}
       >
         <Icon size={19} aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold text-[#2C1810]">{method.label}</span>
-        <span className="block text-xs text-stone-500 mt-0.5">{method.desc}</span>
+        <span className="block text-sm font-semibold text-foreground">{method.label}</span>
+        <span className="block text-xs text-muted-foreground mt-0.5">{method.desc}</span>
       </span>
-      {disabled ? (
-        <span className="text-[11px] font-semibold text-stone-500 bg-stone-200/70 rounded-full px-2.5 py-1 shrink-0">
+      {isMethodDisabled ? (
+        <span className="text-[11px] font-semibold text-muted-foreground bg-muted rounded-full px-2.5 py-1 shrink-0">
           Sắp ra mắt
         </span>
       ) : (
         <span
           className={[
             "grid place-items-center w-5 h-5 rounded-full border-2 shrink-0 transition-colors duration-200",
-            selected ? "border-[#C85C3C] bg-[#C85C3C]" : "border-stone-300 bg-white",
+            selected ? "border-primary bg-primary" : "border-muted-foreground/40 bg-card",
           ].join(" ")}
           aria-hidden="true"
         >
-          {selected && <Check size={11} strokeWidth={3} className="text-white" />}
+          {selected && <Check size={11} strokeWidth={3} className="text-primary-foreground" />}
         </span>
       )}
     </label>
@@ -91,27 +92,31 @@ function PaymentMethodCard({ method, selected, onSelect }) {
 }
 
 // ─── Coupon input ─────────────────────────────────────────────────────────────
-function CouponInput({ coupon, setCoupon, couponApplied, discount, onApply }) {
+function CouponInput({ coupon, setCoupon, couponApplied, discount, onApply, disabled }) {
   return (
     <>
       <div className="flex gap-2">
+        <label htmlFor="checkout-coupon-code" className="sr-only">
+          Mã giảm giá
+        </label>
         <input
+          id="checkout-coupon-code"
           value={coupon}
           onChange={(e) => setCoupon(e.target.value.toUpperCase())}
           placeholder="Nhập mã giảm giá"
           aria-label="Mã giảm giá"
-          disabled={couponApplied}
+          disabled={couponApplied || disabled}
           className={`${INPUT} flex-1 uppercase`}
         />
         <button
           type="button"
           onClick={onApply}
-          disabled={!coupon.trim() || couponApplied}
+          disabled={!coupon.trim() || couponApplied || disabled}
           className={[
-            "rounded-xl px-5 text-xs font-extrabold uppercase tracking-[0.14em] transition-colors duration-200",
+            "rounded-xl px-5 text-xs font-bold uppercase tracking-[0.14em] min-h-11 transition-colors duration-200 shrink-0",
             couponApplied
-              ? "bg-[#15803d] text-white cursor-default"
-              : "bg-[#2C1810] text-white hover:bg-[#4a2c1f] disabled:bg-stone-200 disabled:text-stone-400",
+              ? "bg-success text-success-foreground cursor-default"
+              : "bg-foreground text-background hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground",
           ].join(" ")}
         >
           {couponApplied ? (
@@ -124,7 +129,7 @@ function CouponInput({ coupon, setCoupon, couponApplied, discount, onApply }) {
         </button>
       </div>
       {couponApplied && (
-        <p className="text-sm text-[#15803d] font-semibold mt-2.5 flex items-center gap-1.5">
+        <p className="text-sm text-success-text font-semibold mt-2.5 flex items-center gap-1.5 tabular-nums">
           <Check size={14} /> Giảm {formatCurrency(discount)}
         </p>
       )}
@@ -132,10 +137,6 @@ function CouponInput({ coupon, setCoupon, couponApplied, discount, onApply }) {
   );
 }
 
-// ─── SePay QR panel ──────────────────────────────────────────────────────────
-// BE dựng qrUrl dạng https://qr.sepay.vn/img?acc=…&bank=…&amount=…&des=… nên FE
-// đọc lại các tham số đó để hiện thông tin chuyển khoản thủ công (sao chép được)
-// — khách vẫn thanh toán được khi không quét được ảnh QR.
 function parseQr(qrUrl) {
   try {
     const params = new URL(qrUrl).searchParams;
@@ -173,10 +174,10 @@ function CopyRow({ label, value, display, strong }) {
   return (
     <div className="flex items-center gap-3 py-3">
       <div className="min-w-0 flex-1">
-        <p className="text-xs text-stone-500">{label}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
         <p
           className={[
-            "mt-0.5 break-all text-[#2C1810] tabular-nums",
+            "mt-0.5 break-all text-foreground tabular-nums",
             strong ? "font-mono text-base font-bold" : "text-sm font-semibold",
           ].join(" ")}
         >
@@ -187,95 +188,216 @@ function CopyRow({ label, value, display, strong }) {
         type="button"
         onClick={copy}
         aria-label={`Sao chép ${label.toLowerCase()}`}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-[#F0DDD5] px-2.5 py-1.5 text-xs font-semibold text-[#B14B2D] hover:bg-[#FFF0EB] transition-colors duration-200 shrink-0"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/10 transition-colors pointer-coarse:min-h-11 shrink-0"
       >
         {copied ? <Check size={13} /> : <Copy size={13} />}
-        {copied ? "Đã chép" : "Chép"}
+        {copied ? "Đã chép" : "Sao chép"}
       </button>
     </div>
   );
 }
 
-function SepayQrPanel({ qrUrl, onlineAmount, paymentCode, paymentStatus, onRecheck }) {
-  const isTimeout = paymentStatus === "timeout";
+// ─── Bộ đếm ngược thời gian hết hạn ──────────────────────────────────────────
+function CountdownTimer({ expiresAt, onExpire }) {
+  const [timeLeft, setTimeLeft] = useState(() => {
+    if (!expiresAt) return 0;
+    return Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+  });
+
+  useEffect(() => {
+    if (!expiresAt) return;
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        clearInterval(interval);
+        onExpire?.();
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [expiresAt, onExpire]);
+
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  const formatted = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+  const isUrgent = timeLeft < 120; // Dưới 2 phút
+
+  return (
+    <div
+      className={`flex items-center justify-between px-4 py-2.5 rounded-xl border text-xs font-semibold transition-colors ${
+        isUrgent
+          ? "bg-destructive/10 border-destructive/30 text-destructive"
+          : "bg-primary/10 border-primary/20 text-foreground"
+      }`}
+    >
+      <span className="flex items-center gap-1.5 text-muted-foreground">
+        <Clock size={15} className={isUrgent ? "text-destructive" : "text-primary"} />
+        Thời gian giữ đơn và mã QR:
+      </span>
+      <span className="font-mono text-sm font-bold tabular-nums">
+        {formatted}
+      </span>
+    </div>
+  );
+}
+
+// ─── Panel QR SePay ───────────────────────────────────────────────────────────
+function SepayQrPanel({
+  qrUrl,
+  onlineAmount,
+  paymentCode,
+  paymentStatus,
+  expiresAt,
+  isExpired,
+  submitting,
+  onRecheck,
+  onChangeMethod,
+  onRecreate,
+}) {
   const parsed = useMemo(() => parseQr(qrUrl), [qrUrl]);
   const [failedUrl, setFailedUrl] = useState(null);
 
-  // qrUrl thiếu/hỏng (vd. BE chưa cấu hình SEPAY_BANK_ACCOUNT / SEPAY_BANK_NAME
-  // → acc=undefined&bank=undefined): không vẽ ảnh vỡ, báo rõ cho khách.
+  const isTimeout = paymentStatus === "timeout";
+  const isUnderpaid = paymentStatus === "underpaid";
+  const isCancelled = paymentStatus === "cancelled";
+  const expiredState = isExpired || paymentStatus === "expired";
+
   const configBroken = !qrUrl || isBlank(parsed.acc) || isBlank(parsed.bank);
   const imageFailed = failedUrl === qrUrl;
   const showImage = !configBroken && !imageFailed;
 
-  useEffect(() => {
-    if (configBroken) {
-      logger.error("[PaymentStep] qrUrl thiếu tài khoản/ngân hàng:", qrUrl);
-    }
-  }, [configBroken, qrUrl]);
-
   const amount = onlineAmount || parsed.amount || 0;
   const content = paymentCode || parsed.des;
 
+  if (expiredState) {
+    return (
+      <SectionCard title="Mã thanh toán đã hết hạn" icon={<AlertTriangle size={16} />}>
+        <div role="alert" className="p-5 rounded-2xl border border-destructive/30 bg-destructive/10 text-destructive space-y-3">
+          <h3 className="font-bold text-base">Phiên thanh toán đã hết thời gian hiệu lực</h3>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Mã QR này chỉ có hiệu lực trong 15 phút để đảm bảo giữ tồn kho chính xác. Vui lòng tạo lại mã mới hoặc đổi phương thức thanh toán.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 pt-3">
+            <button
+              type="button"
+              onClick={onRecreate}
+              disabled={submitting}
+              className={`${BTN_PRIMARY} flex-1`}
+            >
+              {submitting ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" />
+                  Đang tạo lại...
+                </>
+              ) : (
+                <>
+                  <RotateCcw size={15} />
+                  Tạo lại mã QR
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={onChangeMethod}
+              disabled={submitting}
+              className={`${BTN_SECONDARY} flex-1`}
+            >
+              <ArrowLeft size={15} />
+              Đổi phương thức thanh toán
+            </button>
+          </div>
+        </div>
+      </SectionCard>
+    );
+  }
+
+  if (isCancelled) {
+    return (
+      <SectionCard title="Phiên thanh toán đã huỷ" icon={<AlertTriangle size={16} />}>
+        <div role="alert" className="p-5 rounded-2xl border border-border bg-card space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Bạn đã huỷ phiên thanh toán trực tuyến này. Bạn có thể chọn phương thức khác hoặc tạo lại mã mới.
+          </p>
+          <button
+            type="button"
+            onClick={onChangeMethod}
+            disabled={submitting}
+            className={`${BTN_PRIMARY} w-full`}
+          >
+            Chọn phương thức thanh toán khác
+          </button>
+        </div>
+      </SectionCard>
+    );
+  }
+
   return (
-    <SectionCard title="Quét mã để thanh toán" icon={<QrCode size={16} />}>
+    <SectionCard title="Quét mã QR để thanh toán" icon={<QrCode size={16} />}>
+      {/* Đồng hồ đếm ngược */}
+      {expiresAt && (
+        <div className="mb-4">
+          <CountdownTimer expiresAt={expiresAt} onExpire={onRecreate} />
+        </div>
+      )}
+
+      {isUnderpaid && (
+        <div role="status" className="mb-4 p-4 rounded-xl border border-warning/30 bg-warning/10 text-warning-text">
+          <p className="text-sm font-semibold">
+            Hệ thống đã nhận một phần tiền. Vui lòng chuyển tiếp số tiền còn lại ({formatCurrency(amount)}) để hoàn tất đơn hàng.
+          </p>
+        </div>
+      )}
+
       <div className="grid gap-6 md:grid-cols-[232px_1fr]">
-        {/* QR */}
+        {/* QR Code */}
         <div className="mx-auto md:mx-0 w-full max-w-[232px]">
-          <div className="rounded-2xl border border-[#F0DDD5] bg-white p-3">
-            <div className="relative aspect-square w-full grid place-items-center bg-white">
+          <div className="rounded-2xl border border-border bg-card p-3 shadow-xs">
+            <div className="relative aspect-square w-full grid place-items-center bg-card">
               {showImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={qrUrl}
-                  alt="Mã QR chuyển khoản SePay"
+                  alt="Mã QR thanh toán ngân hàng SePay"
                   className="w-full h-full object-contain"
                   onError={() => setFailedUrl(qrUrl)}
                 />
               ) : (
                 <div className="px-3 text-center">
-                  <AlertTriangle size={22} className="mx-auto text-amber-600" aria-hidden="true" />
-                  <p className="mt-2 text-xs text-stone-600 leading-relaxed">
+                  <AlertTriangle size={22} className="mx-auto text-warning-text" aria-hidden="true" />
+                  <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
                     {configBroken
-                      ? "Chưa tạo được mã QR. Hãy liên hệ hỗ trợ kèm mã đơn bên cạnh."
-                      : "Không tải được ảnh QR. Bạn có thể mở mã ở tab mới hoặc chuyển khoản theo thông tin bên cạnh."}
+                      ? "Chưa tạo được ảnh QR. Hãy chuyển khoản theo thông tin bên cạnh."
+                      : "Không tải được ảnh QR. Bạn hãy chuyển khoản theo thông tin bên cạnh."}
                   </p>
                 </div>
               )}
             </div>
           </div>
-          <p className="mt-2.5 text-center text-xs text-stone-500">
-            Mở app ngân hàng và quét mã
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Mở ứng dụng ngân hàng và quét mã
           </p>
-          {imageFailed && !configBroken && (
-            <a
-              href={qrUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#C85C3C] underline underline-offset-4"
-            >
-              <ExternalLink size={12} /> Mở mã QR
-            </a>
-          )}
         </div>
 
         {/* Thông tin chuyển khoản */}
         <div className="min-w-0">
-          <div className="rounded-xl bg-[#FFF5F2] border border-[#F0DDD5] px-4 py-3">
-            <p className="text-xs text-stone-500">Số tiền cần chuyển</p>
-            <p className="font-serif text-3xl font-semibold text-[#C85C3C] tabular-nums">
+          <div className="rounded-xl bg-primary/10 border border-primary/20 px-4 py-3">
+            <p className="text-xs text-muted-foreground">Số tiền cần chuyển</p>
+            <p className="font-serif text-2xl sm:text-3xl font-bold text-primary tabular-nums">
               {formatCurrency(amount)}
             </p>
           </div>
 
-          <div className="mt-2 divide-y divide-dashed divide-[#F0DDD5]">
+          <div className="mt-2 divide-y divide-dashed divide-border">
             {!isBlank(parsed.bank) && <CopyRow label="Ngân hàng" value={parsed.bank} />}
             {!isBlank(parsed.acc) && <CopyRow label="Số tài khoản" value={parsed.acc} />}
             {amount > 0 && <CopyRow label="Số tiền" value={amount} display={formatCurrency(amount)} />}
             {content && <CopyRow label="Nội dung chuyển khoản" value={content} strong />}
           </div>
 
-          <p className="mt-2 text-xs text-stone-500 leading-relaxed">
-            Nhập đúng nội dung chuyển khoản để đơn được xác nhận tự động.
+          <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+            Vui lòng nhập chính xác nội dung chuyển khoản để hệ thống xác nhận tự động tức thì.
           </p>
         </div>
       </div>
@@ -284,31 +406,50 @@ function SepayQrPanel({ qrUrl, onlineAmount, paymentCode, paymentStatus, onReche
         {isTimeout ? (
           <div
             role="alert"
-            className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3"
+            className="flex items-start gap-2.5 bg-warning/10 border border-warning/30 rounded-xl px-4 py-3"
           >
-            <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-sm text-amber-800 leading-relaxed">
-              Chưa nhận được thanh toán sau 10 phút. Nếu đã chuyển khoản, bấm kiểm tra lại;
-              nếu tiền đã bị trừ, hãy liên hệ hỗ trợ kèm mã đơn.
+            <AlertTriangle size={16} className="text-warning-text shrink-0 mt-0.5" />
+            <p className="text-sm text-warning-text leading-relaxed">
+              Hệ thống chưa nhận được thanh toán. Nếu bạn đã chuyển khoản, hãy bấm &quot;Tôi đã chuyển khoản&quot; để kiểm tra lại ngay.
             </p>
           </div>
         ) : (
-          <p role="status" className="flex items-center gap-2 text-sm text-stone-600">
-            <Loader2 size={15} className="animate-spin shrink-0 text-[#C85C3C]" />
-            Đang chờ thanh toán, hệ thống tự kiểm tra mỗi vài giây.
+          <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 size={15} className="animate-spin shrink-0 text-primary" />
+            Đang tự động kiểm tra thanh toán mỗi vài giây...
           </p>
         )}
 
-        <button type="button" onClick={onRecheck} className={`${BTN_SECONDARY} w-full`}>
-          <RefreshCw size={14} />
-          Tôi đã chuyển khoản, kiểm tra lại
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            type="button"
+            onClick={onRecheck}
+            disabled={submitting}
+            className={`${BTN_PRIMARY} flex-1`}
+          >
+            {submitting ? (
+              <Loader2 size={15} className="animate-spin" />
+            ) : (
+              <RefreshCw size={14} />
+            )}
+            Tôi đã chuyển khoản, kiểm tra lại
+          </button>
+
+          <button
+            type="button"
+            onClick={onChangeMethod}
+            disabled={submitting}
+            className={`${BTN_SECONDARY} flex-1`}
+          >
+            <ArrowLeft size={14} />
+            Đổi phương thức thanh toán
+          </button>
+        </div>
       </div>
     </SectionCard>
   );
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
 export function PaymentStep({
   paymentMethod,
   setPaymentMethod,
@@ -318,20 +459,27 @@ export function PaymentStep({
   discount,
   finalTotal,
   submitting,
-  paymentStatus, // "idle" | "awaiting_payment" | "paid" | "timeout"
+  paymentStatus,
   paymentCode,
   qrUrl,
   onlineAmount,
+  expiresAt,
+  isExpired,
   onApplyCoupon,
   onBack,
   onPlaceOrder,
+  onCancelSession,
+  onRecreateSession,
   onRecheckPayment,
 }) {
-  // "paid" không cần xử lý ở đây — page.jsx unmount cả bước checkout và
-  // chuyển thẳng sang OrderSuccessScreen khi orderSuccess = true.
   const isAwaitingPayment =
     paymentMethod === "online" &&
-    (paymentStatus === "awaiting_payment" || paymentStatus === "timeout");
+    (paymentStatus === "awaiting_payment" ||
+      paymentStatus === "underpaid" ||
+      paymentStatus === "timeout" ||
+      paymentStatus === "expired" ||
+      paymentStatus === "cancelled" ||
+      isExpired);
 
   return (
     <motion.div
@@ -347,7 +495,12 @@ export function PaymentStep({
           onlineAmount={onlineAmount}
           paymentCode={paymentCode}
           paymentStatus={paymentStatus}
+          expiresAt={expiresAt}
+          isExpired={isExpired}
+          submitting={submitting}
           onRecheck={onRecheckPayment}
+          onChangeMethod={onCancelSession}
+          onRecreate={onRecreateSession}
         />
       ) : (
         <>
@@ -359,6 +512,7 @@ export function PaymentStep({
                   method={pm}
                   selected={paymentMethod === pm.id}
                   onSelect={() => setPaymentMethod(pm.id)}
+                  disabled={submitting}
                 />
               ))}
             </div>
@@ -371,12 +525,13 @@ export function PaymentStep({
               couponApplied={couponApplied}
               discount={discount}
               onApply={onApplyCoupon}
+              disabled={submitting}
             />
           </SectionCard>
 
-          <p className="flex items-center gap-2 text-xs text-stone-600 px-1">
-            <ShieldCheck size={14} className="text-[#15803d] shrink-0" />
-            Thông tin thanh toán được mã hóa và bảo mật.
+          <p className="flex items-center gap-2 text-xs text-muted-foreground px-1">
+            <ShieldCheck size={14} className="text-success-text shrink-0" />
+            Thông tin thanh toán được bảo mật và mã hoá theo tiêu chuẩn an toàn.
           </p>
 
           <div className="flex gap-3">
@@ -397,12 +552,17 @@ export function PaymentStep({
               {submitting ? (
                 <>
                   <Loader2 size={15} className="animate-spin" />
-                  Đang xử lý
+                  Đang xử lý...
+                </>
+              ) : paymentMethod === "online" ? (
+                <>
+                  Tạo mã thanh toán QR ·{" "}
+                  <span className="tabular-nums">{formatCurrency(finalTotal)}</span>
                 </>
               ) : (
                 <>
-                  {paymentMethod === "online" ? "Tạo mã QR" : "Đặt hàng"} ·{" "}
-                  {formatCurrency(finalTotal)}
+                  Đặt hàng COD ·{" "}
+                  <span className="tabular-nums">{formatCurrency(finalTotal)}</span>
                 </>
               )}
             </button>

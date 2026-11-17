@@ -49,7 +49,7 @@ export function useAdminUsersTable({ search, refreshTrigger }) {
           const name = (user.name || "").toLowerCase();
           const email = (user.email || "").toLowerCase();
           const role = (user.role || "").toLowerCase();
-          const phone = user.addreses?.[0]?.phone || "";
+          const phone = user.addresses?.[0]?.phone || "";
           return (
             name.includes(q) ||
             email.includes(q) ||

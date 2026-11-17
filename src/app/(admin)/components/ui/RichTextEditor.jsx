@@ -2,19 +2,11 @@
 
 /**
  * RichTextEditor.jsx
- * Rich text editor dùng chung cho các form admin (mô tả sản phẩm, mô tả box, blog...).
+ * Rich text editor dùng chung cho các form admin (mô tả sản phẩm, mô tả combo, blog...).
  *
  * - Dựa trên Tiptap v3 (@tiptap/react + @tiptap/starter-kit)
- * - Output: HTML string (value/onChange) — thay thế hoàn toàn cho <Textarea> cũ.
- * - Tự chứa toolbar riêng (không phụ thuộc shadcn Toggle/Separator) để dùng được
- *   ở mọi trang admin dù trang đó đang dùng shadcn UI hay bộ ui/index.jsx tự chế.
- *
- * Cách dùng:
- *   <RichTextEditor
- *     value={form.description}
- *     onChange={(html) => setForm((p) => ({ ...p, description: html }))}
- *     placeholder="Mô tả chi tiết sản phẩm..."
- *   />
+ * - Output: HTML string (value/onChange)
+ * - Chuẩn hóa màu sắc với token design system TotMart.
  */
 
 import { useEffect } from "react";
@@ -49,11 +41,11 @@ function ToolbarButton({ onClick, active, disabled, title, children }) {
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center justify-center h-8 w-8 rounded-md text-gray-500 transition-colors",
-        "hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400",
+        "inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground transition-colors",
+        "hover:bg-muted hover:text-foreground",
         "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent",
         active &&
-          "bg-[#C85C3C]/10 text-[#C85C3C] hover:bg-[#C85C3C]/15 dark:bg-[#C85C3C]/20",
+          "bg-primary/10 text-primary hover:bg-primary/15",
       )}
     >
       {children}
@@ -63,7 +55,7 @@ function ToolbarButton({ onClick, active, disabled, title, children }) {
 
 function ToolbarDivider() {
   return (
-    <span className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1 shrink-0" />
+    <span className="w-px h-5 bg-border mx-1 shrink-0" />
   );
 }
 
@@ -76,8 +68,8 @@ export function RichTextEditor({
   className,
 }) {
   const editor = useEditor({
-    immediatelyRender: false, // bắt buộc với Next.js để tránh lệch hydration SSR/CSR
-    shouldRerenderOnTransaction: true, // để toolbar cập nhật trạng thái active theo con trỏ
+    immediatelyRender: false,
+    shouldRerenderOnTransaction: true,
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3] },
@@ -85,7 +77,7 @@ export function RichTextEditor({
           openOnClick: false,
           autolink: true,
           HTMLAttributes: {
-            class: "text-[#C85C3C] underline underline-offset-2",
+            class: "text-primary underline underline-offset-2",
           },
         },
       }),
@@ -95,7 +87,7 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "totmart-editor-content prose prose-sm max-w-none focus:outline-none min-h-[var(--min-h)] px-3.5 py-3 text-sm leading-relaxed",
+          "totmart-editor-content prose prose-sm max-w-none focus:outline-none min-h-[var(--min-h)] px-3.5 py-3 text-sm leading-relaxed text-foreground",
         style: `--min-h: ${minHeight}px`,
       },
     },
@@ -105,7 +97,7 @@ export function RichTextEditor({
     },
   });
 
-  // Đồng bộ khi value bị set từ bên ngoài (VD: load dữ liệu box/product khi vào trang update)
+  // Đồng bộ khi value bị set từ bên ngoài
   useEffect(() => {
     if (!editor) return;
     const current = editor.getHTML();
@@ -119,7 +111,7 @@ export function RichTextEditor({
     if (!editor) return;
     const previousUrl = editor.getAttributes("link").href;
     const url = window.prompt("Nhập URL liên kết:", previousUrl || "https://");
-    if (url === null) return; // bấm Cancel
+    if (url === null) return;
     if (url === "") {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
       return;
@@ -131,7 +123,7 @@ export function RichTextEditor({
     return (
       <div
         className={cn(
-          "w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 animate-pulse",
+          "w-full rounded-xl border border-border bg-muted/40 animate-pulse",
           className,
         )}
         style={{ minHeight: minHeight + 48 }}
@@ -142,15 +134,15 @@ export function RichTextEditor({
   return (
     <div
       className={cn(
-        "w-full rounded-xl border bg-white dark:bg-gray-900 overflow-hidden transition-colors",
+        "w-full rounded-xl border bg-card overflow-hidden transition-colors",
         error
-          ? "border-red-400"
-          : "border-gray-200 dark:border-gray-700 focus-within:border-[#C85C3C]/50 focus-within:ring-2 focus-within:ring-[#C85C3C]/10",
+          ? "border-destructive/50"
+          : "border-border focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10",
         className,
       )}
     >
       {/* ─── Toolbar ─── */}
-      <div className="flex items-center gap-0.5 flex-wrap px-2 py-1.5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-950/40">
+      <div className="flex items-center gap-0.5 flex-wrap px-2 py-1.5 border-b border-border bg-muted/40">
         <ToolbarButton
           title="Đoạn văn thường"
           active={editor.isActive("paragraph")}
@@ -271,7 +263,7 @@ export function RichTextEditor({
       <EditorContent editor={editor} />
 
       {error && (
-        <p className="text-xs text-red-500 px-3.5 pb-2.5 -mt-1">{error}</p>
+        <p className="text-xs text-destructive-text px-3.5 pb-2.5 -mt-1">{error}</p>
       )}
     </div>
   );

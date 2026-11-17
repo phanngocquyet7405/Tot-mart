@@ -28,60 +28,58 @@ const STAT_CARDS = [
     key: "products",
     label: "Sản phẩm",
     icon: Package,
-    color: "indigo",
+    color: "primary",
     href: "/admin-products",
   },
   {
     key: "categories",
     label: "Danh mục",
     icon: Layers,
-    color: "blue",
+    color: "primary",
     href: "/admin-categories",
   },
   {
     key: "brands",
     label: "Thương hiệu",
     icon: Tag,
-    color: "amber",
+    color: "primary",
     href: "/admin-brands",
   },
   {
     key: "boxes",
-    label: "Box",
+    label: "Combo",
     icon: Boxes,
-    color: "pink",
+    color: "primary",
     href: "/admin-box",
   },
   {
     key: "users",
     label: "Người dùng",
     icon: Users,
-    color: "emerald",
+    color: "primary",
     href: "/admin-users",
   },
   {
     key: "subscribePlans",
     label: "Gói đăng ký",
     icon: Repeat,
-    color: "orange",
+    color: "primary",
     href: "/admin-subscribe-plan",
   },
 ];
 
 const COLOR_CLASSES = {
-  indigo: { bg: "bg-indigo-100", text: "text-indigo-600", value: "text-indigo-700" },
-  blue: { bg: "bg-blue-100", text: "text-blue-600", value: "text-blue-700" },
-  amber: { bg: "bg-amber-100", text: "text-amber-600", value: "text-amber-700" },
-  pink: { bg: "bg-pink-100", text: "text-pink-600", value: "text-pink-700" },
-  emerald: { bg: "bg-emerald-100", text: "text-emerald-600", value: "text-emerald-700" },
-  orange: { bg: "bg-orange-100", text: "text-orange-600", value: "text-orange-700" },
+  primary: { bg: "bg-primary/10", text: "text-primary" },
+  success: { bg: "bg-success/15", text: "text-success-text" },
+  warning: { bg: "bg-warning/15", text: "text-warning-text" },
+  destructive: { bg: "bg-destructive/15", text: "text-destructive-text" },
 };
 
 const QUICK_LINKS = [
   { label: "Thêm sản phẩm", href: "/admin-products/create" },
   { label: "Thêm thương hiệu", href: "/admin-brands/create" },
   { label: "Thêm danh mục", href: "/admin-categories/create" },
-  { label: "Thêm box", href: "/admin-box/create" },
+  { label: "Thêm combo", href: "/admin-box/create" },
 ];
 
 function DashboardPage() {
@@ -94,7 +92,7 @@ function DashboardPage() {
         description="Tổng quan số liệu toàn hệ thống"
         icon={LayoutDashboard}
         actions={
-          <Button variant="outline" onClick={refresh} disabled={loading}>
+          <Button variant="outline" className="min-h-11" onClick={refresh} disabled={loading}>
             <RefreshCw className={cn("mr-2 h-4 w-4", loading && "animate-spin")} />
             Làm mới
           </Button>
@@ -104,9 +102,9 @@ function DashboardPage() {
       {loading && !stats ? (
         <AdminLoadingState message="Đang tải số liệu tổng quan..." />
       ) : error && !stats ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center border rounded-lg bg-destructive/5 border-destructive/20">
-          <p className="text-sm text-destructive mb-4">{error}</p>
-          <Button variant="outline" onClick={refresh}>
+        <div className="flex flex-col items-center justify-center py-20 text-center border rounded-xl bg-destructive/10 border-destructive/30">
+          <p className="text-sm font-medium text-destructive-text mb-4">{error}</p>
+          <Button variant="outline" className="min-h-11" onClick={refresh}>
             Thử lại
           </Button>
         </div>
@@ -115,16 +113,16 @@ function DashboardPage() {
           {/* Stats chính */}
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
             {STAT_CARDS.map(({ key, label, icon: Icon, color, href }) => {
-              const c = COLOR_CLASSES[color];
+              const c = COLOR_CLASSES[color] || COLOR_CLASSES.primary;
               return (
                 <Link key={key} href={href}>
-                  <Card className="cursor-pointer transition-all hover:border-zinc-300 hover:shadow-sm h-full">
+                  <Card className="cursor-pointer transition-all hover:border-border/80 hover:bg-muted/20 hover:shadow-sm h-full">
                     <CardContent className="p-4 flex flex-col gap-3">
-                      <div className={cn("w-fit p-2.5 rounded-xl", c.bg)}>
+                      <div className={cn("w-fit p-2.5 rounded-xl border border-border/40", c.bg)}>
                         <Icon className={cn("h-5 w-5", c.text)} />
                       </div>
                       <div>
-                        <p className={cn("text-2xl font-bold", c.value)}>
+                        <p className="text-2xl font-bold tabular-nums text-foreground">
                           {stats?.[key] ?? 0}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -143,23 +141,23 @@ function DashboardPage() {
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <AlertTriangle className="h-4 w-4 text-warning" />
                   Cảnh báo tồn kho
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Link
                   href="/admin-products"
-                  className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 hover:bg-amber-100/60 transition-colors"
+                  className="flex items-center gap-3 rounded-xl border border-warning/30 bg-warning/15 p-4 hover:bg-warning/20 transition-colors"
                 >
-                  <div className="p-2.5 rounded-xl bg-amber-100">
-                    <AlertTriangle className="h-5 w-5 text-amber-600" />
+                  <div className="p-2.5 rounded-xl bg-warning/20">
+                    <AlertTriangle className="h-5 w-5 text-warning-text" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-amber-700">
+                    <p className="text-2xl font-bold tabular-nums text-warning-text">
                       {stats?.lowStockProducts ?? 0}
                     </p>
-                    <p className="text-xs text-amber-700/80">
+                    <p className="text-xs text-warning-text/90">
                       Sản phẩm sắp hết hàng (≤ 10)
                     </p>
                   </div>
@@ -167,16 +165,16 @@ function DashboardPage() {
 
                 <Link
                   href="/admin-products"
-                  className="flex items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 hover:bg-destructive/10 transition-colors"
+                  className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/15 p-4 hover:bg-destructive/20 transition-colors"
                 >
-                  <div className="p-2.5 rounded-xl bg-destructive/10">
-                    <PackageX className="h-5 w-5 text-destructive" />
+                  <div className="p-2.5 rounded-xl bg-destructive/20">
+                    <PackageX className="h-5 w-5 text-destructive-text" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-destructive">
+                    <p className="text-2xl font-bold tabular-nums text-destructive-text">
                       {stats?.outOfStockProducts ?? 0}
                     </p>
-                    <p className="text-xs text-destructive/80">
+                    <p className="text-xs text-destructive-text/90">
                       Sản phẩm đã hết hàng
                     </p>
                   </div>
@@ -193,7 +191,7 @@ function DashboardPage() {
                   <Button
                     key={link.href}
                     variant="outline"
-                    className="justify-start"
+                    className="min-h-11 justify-start"
                     asChild
                   >
                     <Link href={link.href}>

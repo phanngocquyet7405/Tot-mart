@@ -1,4 +1,5 @@
 "use client";
+import logger from "@/app/util/Logger";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
@@ -25,7 +26,7 @@ export function useAdminBrandsList() {
       const data = await fetchAdminBrands();
       setBrands(data);
     } catch (err) {
-      console.error("Fetch error:", err);
+      logger.error("Fetch error:", err);
       setError("Không thể tải danh sách thương hiệu. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);

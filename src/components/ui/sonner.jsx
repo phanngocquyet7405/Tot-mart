@@ -15,32 +15,32 @@ const Toaster = ({
       className="toaster group"
       icons={{
         success: (
-          <CircleCheckIcon className="size-4" />
+          <CircleCheckIcon className="size-4 text-success-text" />
         ),
         info: (
-          <InfoIcon className="size-4" />
+          <InfoIcon className="size-4 text-primary" />
         ),
         warning: (
-          <TriangleAlertIcon className="size-4" />
+          <TriangleAlertIcon className="size-4 text-warning-text" />
         ),
         error: (
-          <OctagonXIcon className="size-4" />
+          <OctagonXIcon className="size-4 text-destructive-text" />
         ),
         loading: (
-          <Loader2Icon className="size-4 animate-spin" />
+          <Loader2Icon className="size-4 animate-spin text-primary" />
         ),
       }}
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
+          "--normal-bg": "var(--card)",
+          "--normal-text": "var(--foreground)",
           "--normal-border": "var(--border)",
           "--border-radius": "var(--radius)"
         }
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast",
+          toast: "cn-toast border-border bg-card text-foreground shadow-md",
         },
       }}
       {...props} />

@@ -2,11 +2,6 @@
 
 import { useState } from "react";
 import Layout from "../layout-page";
-import AnnouncementBarBox from "@/components_box/announcement-bar";
-import { Navigation } from "@/components_box/nav_box";
-import { Newsletter } from "@/components_box/newsletter";
-import Footer from "../../components/ui/footer";
-import CartDrawer from "../../components/Cart_component/cart_drawer";
 import {
   Mail,
   Phone,
@@ -91,7 +86,6 @@ export default function ContactPage() {
 
   return (
     <Layout>
-      {/* Replaced next/head with direct React 19 tags */}
       <title>Liên hệ – TotMart</title>
       <meta
         name="description"
@@ -99,17 +93,17 @@ export default function ContactPage() {
       />
 
       {/* Hero */}
-      <section className="bg-[#f5f0e8] pt-20 pb-20">
+      <section className="bg-card/60 border-b border-border py-16 sm:py-20">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <span className="inline-block text-xs font-semibold tracking-[0.18em] uppercase text-amber-700 bg-amber-100 px-4 py-1.5 rounded-full mb-6">
+          <span className="inline-block text-xs font-semibold tracking-wider uppercase text-primary bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full mb-6">
             Liên hệ
           </span>
-          <h1 className="font-serif text-5xl text-stone-900 mb-5 leading-tight">
+          <h1 className="font-serif text-4xl sm:text-5xl text-foreground mb-5 leading-tight tracking-tight">
             Chúng tôi luôn
             <br />
-            <em className="text-amber-800">lắng nghe bạn</em>
+            <em className="text-primary not-italic font-serif">lắng nghe bạn</em>
           </h1>
-          <p className="text-stone-600 text-base leading-relaxed max-w-xl mx-auto">
+          <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
             Dù bạn có câu hỏi về đơn hàng, muốn hợp tác hay chỉ muốn nói xin
             chào — đội ngũ của chúng tôi sẵn sàng giúp đỡ.
           </p>
@@ -117,14 +111,14 @@ export default function ContactPage() {
       </section>
 
       <section className="max-w-6xl mx-auto px-6 py-16">
-        <div className="grid md:grid-cols-5 gap-12">
+        <div className="grid md:grid-cols-5 gap-10 lg:gap-12">
           {/* Sidebar info */}
           <div className="md:col-span-2 space-y-6">
             <div>
-              <h2 className="font-serif text-2xl text-stone-900 mb-2">
+              <h2 className="font-serif text-2xl text-foreground mb-2">
                 Thông tin liên hệ
               </h2>
-              <p className="text-stone-500 text-sm leading-relaxed">
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 Nhiều cách để kết nối với chúng tôi.
               </p>
             </div>
@@ -132,25 +126,25 @@ export default function ContactPage() {
               {CONTACTS.map(({ icon: Icon, label, value, sub }) => (
                 <div
                   key={label}
-                  className="flex items-start gap-4 p-4 bg-white rounded-2xl border border-stone-100 hover:border-amber-200 transition-colors"
+                  className="flex items-start gap-4 p-4 bg-card rounded-2xl border border-border hover:border-primary/40 transition-colors shadow-xs"
                 >
-                  <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
-                    <Icon size={18} className="text-amber-800" />
+                  <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center shrink-0">
+                    <Icon size={18} />
                   </div>
                   <div>
-                    <p className="text-xs text-stone-400 mb-0.5">{label}</p>
-                    <p className="text-sm font-semibold text-stone-800">
+                    <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
+                    <p className="text-sm font-semibold text-foreground">
                       {value}
                     </p>
-                    <p className="text-xs text-stone-400 mt-0.5">{sub}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Social */}
-            <div className="pt-4">
-              <p className="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-3">
+            <div className="pt-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">
                 Mạng xã hội
               </p>
               <div className="flex gap-3">
@@ -159,10 +153,10 @@ export default function ContactPage() {
                     <a
                       key={label}
                       href={href}
-                      className="w-10 h-10 bg-stone-900 text-white rounded-xl flex items-center justify-center hover:bg-amber-800 transition-colors"
+                      className="min-h-11 min-w-11 bg-muted hover:bg-primary hover:text-primary-foreground text-foreground rounded-xl flex items-center justify-center transition-colors"
                       aria-label={label}
                     >
-                      <Icon size={16} />
+                      <Icon size={18} />
                     </a>
                   ),
                 )}
@@ -173,23 +167,23 @@ export default function ContactPage() {
           {/* Form */}
           <div className="md:col-span-3">
             {sent ? (
-              <div className="h-full flex flex-col items-center justify-center text-center py-16 bg-white rounded-3xl border border-stone-100">
-                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6">
-                  <CheckCircle size={32} className="text-green-600" />
+              <div className="h-full flex flex-col items-center justify-center text-center p-8 sm:p-12 bg-card rounded-3xl border border-border shadow-xs">
+                <div className="w-16 h-16 bg-success/15 rounded-2xl flex items-center justify-center mb-6 text-success-text">
+                  <CheckCircle size={32} />
                 </div>
-                <h3 className="font-serif text-2xl text-stone-900 mb-3">
+                <h3 className="font-serif text-2xl text-foreground mb-3">
                   Đã gửi thành công!
                 </h3>
-                <p className="text-stone-500 text-sm max-w-sm leading-relaxed">
-                  Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi trong vòng 24 giờ
-                  làm việc.
+                <p className="text-muted-foreground text-sm max-w-sm leading-relaxed">
+                  Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi trong vòng 24 giờ làm việc.
                 </p>
                 <button
+                  type="button"
                   onClick={() => {
                     setSent(false);
                     setForm({ name: "", email: "", topic: "", message: "" });
                   }}
-                  className="mt-8 text-amber-800 text-sm font-semibold hover:underline"
+                  className="mt-6 text-primary text-sm font-semibold hover:underline min-h-11 inline-flex items-center justify-center"
                 >
                   Gửi tin nhắn khác
                 </button>
@@ -197,37 +191,47 @@ export default function ContactPage() {
             ) : (
               <form
                 onSubmit={handleSubmit}
-                className="bg-white rounded-3xl border border-stone-100 p-8 space-y-5"
+                noValidate
+                className="bg-card rounded-3xl border border-border p-6 sm:p-8 space-y-5 shadow-xs"
               >
-                <h2 className="font-serif text-2xl text-stone-900">
+                <h2 className="font-serif text-2xl text-foreground">
                   Gửi tin nhắn
                 </h2>
 
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <Field label="Họ và tên *" error={errors.name}>
+                  <Field id="contact-name" label="Họ và tên *" error={errors.name}>
                     <input
+                      id="contact-name"
                       type="text"
                       placeholder="Nguyễn Văn A"
                       value={form.name}
                       onChange={(e) => set("name", e.target.value)}
+                      aria-invalid={!!errors.name}
+                      aria-describedby={errors.name ? "contact-name-error" : undefined}
                       className={inputCls(errors.name)}
                     />
                   </Field>
-                  <Field label="Email *" error={errors.email}>
+                  <Field id="contact-email" label="Email *" error={errors.email}>
                     <input
+                      id="contact-email"
                       type="email"
                       placeholder="ban@email.com"
                       value={form.email}
                       onChange={(e) => set("email", e.target.value)}
+                      aria-invalid={!!errors.email}
+                      aria-describedby={errors.email ? "contact-email-error" : undefined}
                       className={inputCls(errors.email)}
                     />
                   </Field>
                 </div>
 
-                <Field label="Chủ đề *" error={errors.topic}>
+                <Field id="contact-topic" label="Chủ đề *" error={errors.topic}>
                   <select
+                    id="contact-topic"
                     value={form.topic}
                     onChange={(e) => set("topic", e.target.value)}
+                    aria-invalid={!!errors.topic}
+                    aria-describedby={errors.topic ? "contact-topic-error" : undefined}
                     className={inputCls(errors.topic)}
                   >
                     <option value="">— Chọn chủ đề —</option>
@@ -239,28 +243,30 @@ export default function ContactPage() {
                   </select>
                 </Field>
 
-                <Field label="Nội dung *" error={errors.message}>
+                <Field id="contact-message" label="Nội dung *" error={errors.message}>
                   <textarea
+                    id="contact-message"
                     rows={5}
                     placeholder="Hãy cho chúng tôi biết bạn cần hỗ trợ gì..."
                     value={form.message}
                     onChange={(e) => set("message", e.target.value)}
+                    aria-invalid={!!errors.message}
+                    aria-describedby={errors.message ? "contact-message-error" : undefined}
                     className={`${inputCls(errors.message)} resize-none`}
                   />
                 </Field>
 
-                {/* Flattened className below */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 bg-stone-900 text-white py-3.5 rounded-xl font-semibold text-sm hover:bg-amber-800 transition-colors disabled:opacity-60"
+                  className="w-full min-h-11 flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary-hover py-3 rounded-xl font-semibold text-sm transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {loading ? (
-                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    <span className="w-4 h-4 border-2 border-primary-foreground/40 border-t-primary-foreground rounded-full animate-spin" />
                   ) : (
                     <Send size={15} />
                   )}
-                  {loading ? "Đang gửi..." : "Gửi tin nhắn"}
+                  <span>{loading ? "Đang gửi..." : "Gửi tin nhắn"}</span>
                 </button>
               </form>
             )}
@@ -271,19 +277,26 @@ export default function ContactPage() {
   );
 }
 
-function Field({ label, error, children }) {
+function Field({ id, label, error, children }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
+      <label htmlFor={id} className="text-sm font-medium text-foreground">
         {label}
       </label>
       {children}
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && (
+        <p id={`${id}-error`} className="text-xs text-destructive-text">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
 
-// Flattened the string template to avoid any white-space/newline mismatch
 function inputCls(err) {
-  return `w-full px-4 py-3 text-sm rounded-xl border bg-stone-50 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-colors ${err ? "border-red-300 bg-red-50/30" : "border-stone-200"}`;
+  return `w-full min-h-11 px-4 py-2.5 text-sm rounded-xl border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 transition-colors ${
+    err
+      ? "border-destructive focus:ring-destructive/20 focus:border-destructive"
+      : "border-input focus:ring-primary/20 focus:border-primary"
+  }`;
 }

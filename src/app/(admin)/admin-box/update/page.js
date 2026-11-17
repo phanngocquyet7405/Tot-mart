@@ -205,7 +205,7 @@ export default function UpdateBoxPage() {
         });
 
       await updateBoxApi(id, formData);
-      toast.success("Cập nhật box thành công!");
+      toast.success("Cập nhật combo thành công!");
       router.push("/admin-box");
     } catch (err) {
       const errorData = err.response?.data;
@@ -223,32 +223,32 @@ export default function UpdateBoxPage() {
 
   if (fetching) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <span className="text-sm text-gray-400">Đang tải thông tin box...</span>
+      <div className="min-h-screen bg-muted/30 dark:bg-background flex items-center justify-center">
+        <span className="text-sm text-muted-foreground">Đang tải thông tin box...</span>
       </div>
     );
   }
 
   if (!form) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <span className="text-sm text-red-500">Không tìm thấy box</span>
+      <div className="min-h-screen bg-muted/30 dark:bg-background flex items-center justify-center">
+        <span className="text-sm text-destructive-text">Không tìm thấy combo</span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6">
+    <div className="min-h-screen bg-muted/30 dark:bg-background p-6">
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+          <h1 className="text-2xl font-semibold text-foreground dark:text-foreground">
             Chỉnh sửa Box
           </h1>
-          <p className="text-sm text-gray-500 mt-1">Đang sửa: {form.name}</p>
+          <p className="text-sm text-muted-foreground mt-1">Đang sửa: {form.name}</p>
         </div>
 
         {apiError && (
-          <div className="mb-5 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 flex items-start gap-2 text-sm">
+          <div className="mb-5 p-3 rounded-lg border border-destructive/20 bg-destructive/10 text-destructive-text flex items-start gap-2 text-sm">
             <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
             <span className="whitespace-pre-wrap">{apiError}</span>
           </div>
@@ -258,27 +258,27 @@ export default function UpdateBoxPage() {
           <CardContent className="p-6 space-y-6">
             {/* Thông tin cơ bản */}
             <div className="space-y-4">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              <h3 className="text-sm font-medium text-foreground dark:text-foreground">
                 Thông tin cơ bản
               </h3>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-xs font-medium text-foreground dark:text-muted-foreground">
                   Tên box *
                 </label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => handleChange("name", e.target.value)}
-                  className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${errors.name ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
+                  className={`w-full px-3 py-2 text-sm rounded-md border bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary ${errors.name ? "border-destructive/50" : "border-border dark:border-border"}`}
                 />
                 {errors.name && (
-                  <span className="text-xs text-red-500">{errors.name}</span>
+                  <span className="text-xs text-destructive-text">{errors.name}</span>
                 )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-xs font-medium text-foreground dark:text-muted-foreground">
                     Tồn kho *
                   </label>
                   <div className="flex gap-2">
@@ -287,18 +287,18 @@ export default function UpdateBoxPage() {
                       value={form.stock}
                       readOnly
                       aria-label="Tồn kho hiện tại"
-                      className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 dark:text-gray-100"
+                      className="w-full px-3 py-2 text-sm rounded-md border border-border dark:border-border bg-muted dark:bg-muted dark:text-foreground"
                     />
-                    <button type="button" onClick={() => setStockDialogOpen(true)} className="shrink-0 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                    <button type="button" onClick={() => setStockDialogOpen(true)} className="shrink-0 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted/30 dark:border-border dark:text-muted-foreground dark:hover:bg-muted">
                       Điều chỉnh
                     </button>
                   </div>
                   {errors.stock && (
-                    <span className="text-xs text-red-500">{errors.stock}</span>
+                    <span className="text-xs text-destructive-text">{errors.stock}</span>
                   )}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-xs font-medium text-foreground dark:text-muted-foreground">
                     Giảm giá (%)
                   </label>
                   <input
@@ -309,13 +309,13 @@ export default function UpdateBoxPage() {
                     onChange={(e) =>
                       handleChange("discountPercent", +e.target.value)
                     }
-                    className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-3 py-2 text-sm rounded-md border border-border dark:border-border bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-xs font-medium text-foreground dark:text-muted-foreground">
                   Mô tả *
                 </label>
                 <RichTextEditor
@@ -331,48 +331,48 @@ export default function UpdateBoxPage() {
                   type="checkbox"
                   checked={form.isGift}
                   onChange={(e) => handleChange("isGift", e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300"
+                  className="w-4 h-4 rounded border-border"
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
+                <span className="text-sm text-foreground dark:text-muted-foreground">
                   Box quà tặng
                 </span>
               </label>
             </div>
 
             {/* Thời hạn */}
-            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <div className="space-y-4 pt-4 border-t border-border dark:border-border">
+              <h3 className="text-sm font-medium text-foreground dark:text-foreground">
                 Thời hạn hiệu lực
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-xs font-medium text-foreground dark:text-muted-foreground">
                     Ngày bắt đầu *
                   </label>
                   <input
                     type="date"
                     value={form.validFrom}
                     onChange={(e) => handleChange("validFrom", e.target.value)}
-                    className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${errors.validFrom ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
+                    className={`w-full px-3 py-2 text-sm rounded-md border bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary ${errors.validFrom ? "border-destructive/50" : "border-border dark:border-border"}`}
                   />
                   {errors.validFrom && (
-                    <span className="text-xs text-red-500">
+                    <span className="text-xs text-destructive-text">
                       {errors.validFrom}
                     </span>
                   )}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-xs font-medium text-foreground dark:text-muted-foreground">
                     Ngày kết thúc *
                   </label>
                   <input
                     type="date"
                     value={form.validTo}
                     onChange={(e) => handleChange("validTo", e.target.value)}
-                    className={`w-full px-3 py-2 text-sm rounded-md border bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 ${errors.validTo ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
+                    className={`w-full px-3 py-2 text-sm rounded-md border bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary ${errors.validTo ? "border-destructive/50" : "border-border dark:border-border"}`}
                   />
                   {errors.validTo && (
-                    <span className="text-xs text-red-500">
+                    <span className="text-xs text-destructive-text">
                       {errors.validTo}
                     </span>
                   )}
@@ -381,20 +381,20 @@ export default function UpdateBoxPage() {
             </div>
 
             {/* Sản phẩm */}
-            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <div className="space-y-4 pt-4 border-t border-border dark:border-border">
+              <h3 className="text-sm font-medium text-foreground dark:text-foreground">
                 Sản phẩm trong box
               </h3>
               {errors.products && (
-                <span className="text-xs text-red-500">{errors.products}</span>
+                <span className="text-xs text-destructive-text">{errors.products}</span>
               )}
-              <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                <div className="grid grid-cols-[1fr_80px_36px] gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 text-xs font-medium text-gray-500">
+              <div className="border border-border dark:border-border rounded-lg overflow-hidden">
+                <div className="grid grid-cols-[1fr_80px_36px] gap-2 px-3 py-2 bg-muted/30 dark:bg-muted/50 text-xs font-medium text-muted-foreground">
                   <span>Sản phẩm</span>
                   <span>Số lượng</span>
                   <span />
                 </div>
-                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                <div className="divide-y divide-border dark:divide-border">
                   {products.map((p, i) => (
                     <div
                       key={i}
@@ -403,7 +403,7 @@ export default function UpdateBoxPage() {
                       <select
                         value={p.productId}
                         onChange={(e) => handleSelectProduct(i, e.target.value)}
-                        className="px-2.5 py-1.5 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="px-2.5 py-1.5 text-sm rounded-md border border-border dark:border-border bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                       >
                         <option value="">— Chọn sản phẩm —</option>
                         {availableProducts.map((ap) => (
@@ -419,21 +419,21 @@ export default function UpdateBoxPage() {
                         onChange={(e) =>
                           handleChangeProduct(i, "quantity", +e.target.value)
                         }
-                        className="px-2.5 py-1.5 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="px-2.5 py-1.5 text-sm rounded-md border border-border dark:border-border bg-card dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                       <button
                         onClick={() => handleRemoveProduct(i)}
-                        className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive-text hover:bg-destructive/10 hover:bg-destructive/10 transition-colors"
                       >
                         ✕
                       </button>
                     </div>
                   ))}
                 </div>
-                <div className="px-3 py-2 border-t border-gray-100 dark:border-gray-800">
+                <div className="px-3 py-2 border-t border-border dark:border-border">
                   <button
                     onClick={handleAddProduct}
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-sm text-primary hover:text-primary font-medium"
                   >
                     + Thêm sản phẩm
                   </button>
@@ -442,17 +442,17 @@ export default function UpdateBoxPage() {
             </div>
           </CardContent>
 
-          <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex justify-between bg-gray-50/50 dark:bg-gray-800/20 rounded-b-xl">
+          <div className="px-6 py-4 border-t border-border dark:border-border flex justify-between bg-muted/30/50 dark:bg-muted/20 rounded-b-xl">
             <button
               onClick={() => router.push("/admin-box")}
-              className="px-4 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="px-4 py-2 text-sm rounded-md border border-border dark:border-border text-foreground dark:text-muted-foreground hover:bg-muted/30 dark:hover:bg-muted transition-colors"
             >
               Huỷ
             </button>
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary disabled:opacity-50 transition-colors"
             >
               {loading ? "Đang lưu..." : "Lưu thay đổi"}
             </button>
@@ -465,10 +465,10 @@ export default function UpdateBoxPage() {
         <form onSubmit={handleAdjustStock}>
           <BaseDialogBody className="flex flex-col gap-4">
             <label className="flex flex-col gap-2 text-sm font-medium">Thay đổi số lượng
-              <input type="number" step="1" value={stockDelta} onChange={(e) => setStockDelta(e.target.value)} placeholder="Ví dụ: 10 hoặc -3" required className="rounded-md border border-gray-200 px-3 py-2 dark:border-gray-700 dark:bg-gray-900" />
+              <input type="number" step="1" value={stockDelta} onChange={(e) => setStockDelta(e.target.value)} placeholder="Ví dụ: 10 hoặc -3" required className="rounded-md border border-border px-3 py-2 dark:border-border dark:bg-card" />
             </label>
             <p
-              className={`text-sm ${stockWouldBeNegative ? "text-red-600" : "text-gray-600 dark:text-gray-300"}`}
+              className={`text-sm ${stockWouldBeNegative ? "text-destructive-text" : "text-muted-foreground dark:text-muted-foreground"}`}
             >
               {!stockDeltaValid
                 ? "Nhập số nguyên khác 0 (số âm để giảm tồn kho)"
@@ -477,12 +477,12 @@ export default function UpdateBoxPage() {
                   : `Tồn kho sau điều chỉnh: ${stockNextPreview}`}
             </p>
             <label className="flex flex-col gap-2 text-sm font-medium">Lý do (không bắt buộc)
-              <input value={stockReason} onChange={(e) => setStockReason(e.target.value)} placeholder="Nhập lý do điều chỉnh" className="rounded-md border border-gray-200 px-3 py-2 dark:border-gray-700 dark:bg-gray-900" />
+              <input value={stockReason} onChange={(e) => setStockReason(e.target.value)} placeholder="Nhập lý do điều chỉnh" className="rounded-md border border-border px-3 py-2 dark:border-border dark:bg-card" />
             </label>
           </BaseDialogBody>
           <BaseDialogFooter>
-            <button type="button" onClick={() => setStockDialogOpen(false)} className="rounded-md border border-gray-200 px-4 py-2 text-sm dark:border-gray-700">Hủy</button>
-            <button type="submit" disabled={!canSubmitStockAdjust} className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white disabled:opacity-50">{isAdjustingStock ? "Đang lưu..." : "Xác nhận"}</button>
+            <button type="button" onClick={() => setStockDialogOpen(false)} className="rounded-md border border-border px-4 py-2 text-sm dark:border-border">Hủy</button>
+            <button type="submit" disabled={!canSubmitStockAdjust} className="rounded-md bg-primary px-4 py-2 text-sm text-white disabled:opacity-50">{isAdjustingStock ? "Đang lưu..." : "Xác nhận"}</button>
           </BaseDialogFooter>
         </form>
       </BaseDialog>
